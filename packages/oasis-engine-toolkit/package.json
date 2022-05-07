@@ -1,12 +1,12 @@
 {
-  "name": "@oasis-engine-toolkit/stats",
+  "name": "oasis-engine-toolkit",
   "version": "0.7.0-beta.3",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
   },
   "types": "types/index.d.ts",
-  "main": "dist/main.js",
+  "main": "dist/browser.min.js",
   "module": "dist/module.js",
   "browser": "dist/browser.min.js",
   "files": [
@@ -14,6 +14,8 @@
     "types/**/*"
   ],
   "dependencies": {
-    "oasis-engine": "0.7.0-beta.3"
+    "@oasis-engine-toolkit/controls": "0.7.0-beta.3",
+    "@oasis-engine-toolkit/framebuffer-picker": "0.7.0-beta.3",
+    "@oasis-engine-toolkit/stats": "0.7.0-beta.3"
   }
 }
