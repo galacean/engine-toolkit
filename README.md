@@ -7,6 +7,8 @@
 
 Some script-based out-of-the-box features.
 
+Some utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script`, out of the box, welcome to enjoy!
+
 ## Features
 
 - &nbsp;**Controls** - some camera controllers
