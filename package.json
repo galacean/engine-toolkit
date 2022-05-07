@@ -17,6 +17,7 @@
     "b:types": "lerna run b:types",
     "b:module": "cross-env BUILD_TYPE=MODULE rollup -c",
     "b:umd": "cross-env BUILD_TYPE=UMD rollup -c",
+    "b:miniprogram": "cross-env BUILD_TYPE=MINI rollup -c",
     "b:all": "npm run b:types && cross-env BUILD_TYPE=ALL rollup -c",
     "clean": "lerna exec -- rm -rf dist && lerna clean"
   },
