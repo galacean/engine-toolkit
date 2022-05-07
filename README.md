@@ -25,7 +25,7 @@ npm install oasis-engine-toolkit
 This will allow you to import engine entirely using:
 
 ```javascript
-import * as OASIS_TOOLKIT from "oasis-engine-toolkit";
+import * as TOOLKIT from "oasis-engine-toolkit";
 ```
 
 or individual classes using:
