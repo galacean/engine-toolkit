@@ -1,70 +1,37 @@
-# Ant Graphics Engine
+# Engine Toolkit
 
 <a href="https://www.npmjs.com/package/oasis-engine"><img src="https://img.shields.io/npm/v/oasis-engine"/></a>
 ![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine)
 ![npm-download](https://img.shields.io/npm/dm/oasis-engine)
 [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine)
 
-This is a **web-first** and **mobile-first** high-performance real-time development platform. Use **component system design** and pursue ease of use and light weight. Developers can independently use and write Typescript scripts to develop projects using pure code.
+Some script-based out-of-the-box features.
 
 ## Features
 
-- 🖥  &nbsp;**Platform** - Suppport HTML5 and Alipay miniprogram
-- 🔮  &nbsp;**Graphics** - Advanced 2D + 3D graphics engine
-- 🏃  &nbsp;**Animation** - Powerful animation system
-- 📑  &nbsp;**Scripts** - Use TypeScript to write logic efficiently
+- &nbsp;**Controls** - some camera controllers
+- &nbsp;**FrameBufferPicker** - Pixel-based object picking
+- &nbsp;**Stats** - Statistics rendering data
 
-## Usage
-
-```typescript
-// Create engine by passing in the HTMLCanvasElement id and adjust canvas size.
-const engine = new WebGLEngine("canvas-id");
-engine.canvas.resizeByClientSize();
-
-// Get scene and create root entity.
-const scene = engine.sceneManager.activeScene;
-const rootEntity = scene.createRootEntity("Root");
-
-// Create light.
-const lightEntity = rootEntity.createChild("Light");
-const directLight = lightEntity.addComponent(DirectLight);
-lightEntity.transform.setRotation(-45, -45, 0);
-directLight.intensity = 0.4;
-
-// Create camera.
-const cameraEntity = rootEntity.createChild("Camera");
-cameraEntity.addComponent(Camera);
-cameraEntity.transform.setPosition(0, 0, 12);
-
-// Create sphere.
-const meshEntity = rootEntity.createChild("Sphere");
-const meshRenderer = meshEntity.addComponent(MeshRenderer);
-const material = new BlinnPhongMaterial(engine);
-meshRenderer.setMaterial(material);
-meshRenderer.mesh = PrimitiveMesh.createSphere(engine, 1);
-
-// Run engine.
-engine.run();
-```
 
 ## npm
 
 The engine is published on npm with full typing support. To install, use:
 
 ```sh
-npm install oasis-engine
+npm install oasis-engine-toolkit
 ```
 
 This will allow you to import engine entirely using:
 
 ```javascript
-import * as OASIS from "oasis-engine";
+import * as OASIS_TOOLKIT from "oasis-engine-toolkit";
 ```
 
 or individual classes using:
 
 ```javascript
-import { Engine, Scene, Entity } from "oasis-engine";
+import { OrbitControl, FramebufferPicker, Stats } from "oasis-engine-toolkit";
 ```
 
 ## Contributing
