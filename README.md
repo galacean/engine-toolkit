@@ -9,7 +9,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 
 ## Features
 
-- &nbsp;**Controls** - some camera controllers
+- &nbsp;**Controls** - Some camera controllers
 - &nbsp;**FrameBufferPicker** - Pixel-based object picking
 - &nbsp;**Stats** - Statistics rendering data
 
