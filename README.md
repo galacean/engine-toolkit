@@ -9,20 +9,20 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 
 ## Features
 
-- &nbsp;**Controls** - Some camera controllers
-- &nbsp;**FrameBufferPicker** - Pixel-based object picking
-- &nbsp;**Stats** - Statistics rendering data
+- 🛸  &nbsp;**Controls** - Some camera controllers
+- 🫧  &nbsp;**FrameBufferPicker** - Pixel-based object picking
+- 📊  &nbsp;**Stats** - Statistics rendering data
 
 
 ## npm
 
-The engine is published on npm with full typing support. To install, use:
+The toolkit is published on npm with full typing support. To install, use:
 
 ```sh
 npm install oasis-engine-toolkit
 ```
 
-This will allow you to import engine entirely using:
+This will allow you to import toolkit entirely using:
 
 ```javascript
 import * as TOOLKIT from "oasis-engine-toolkit";
