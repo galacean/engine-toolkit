@@ -1,8 +1,8 @@
 # Engine Toolkit
 
-<a href="https://www.npmjs.com/package/oasis-engine"><img src="https://img.shields.io/npm/v/oasis-engine"/></a>
-![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine)
-![npm-download](https://img.shields.io/npm/dm/oasis-engine)
+<a href="https://www.npmjs.com/package/oasis-engine-toolkit"><img src="https://img.shields.io/npm/v/oasis-engine-toolkit"/></a>
+![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine-toolkit)
+![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit)
 [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine)
 
 Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script`, welcome to enjoy!
