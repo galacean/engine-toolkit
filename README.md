@@ -5,8 +5,6 @@
 ![npm-download](https://img.shields.io/npm/dm/oasis-engine)
 [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine)
 
-Some script-based out-of-the-box features.
-
 Some utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script`, out of the box, welcome to enjoy!
 
 ## Features
