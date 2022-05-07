@@ -7,7 +7,6 @@ import babel from "@rollup/plugin-babel";
 import glslify from "rollup-plugin-glslify";
 import { terser } from "rollup-plugin-terser";
 import serve from "rollup-plugin-serve";
-import miniProgramPlugin from "./rollup.miniprogram.plugin";
 import replace from "@rollup/plugin-replace";
 
 const camelCase = require("camelcase");
@@ -97,7 +96,7 @@ function config({ location, pkgJson }) {
       };
     },
     mini: () => {
-      const plugins = [...commonPlugins, ...miniProgramPlugin];
+      const plugins = [...commonPlugins];
       return {
         input,
         output: [
