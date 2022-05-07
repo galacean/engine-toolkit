@@ -22,7 +22,7 @@ The engine is published on npm with full typing support. To install, use:
 npm install oasis-engine-toolkit
 ```
 
-This will allow you to import engine entirely using:
+This will allow you to import toolkit entirely using:
 
 ```javascript
 import * as TOOLKIT from "oasis-engine-toolkit";
