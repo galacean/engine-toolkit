@@ -16,7 +16,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 
 ## npm
 
-The engine is published on npm with full typing support. To install, use:
+The toolkit is published on npm with full typing support. To install, use:
 
 ```sh
 npm install oasis-engine-toolkit
