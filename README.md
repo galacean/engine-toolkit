@@ -1,15 +1,15 @@
 # Engine Toolkit
 
-<a href="https://www.npmjs.com/package/oasis-engine"><img src="https://img.shields.io/npm/v/oasis-engine"/></a>
-![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine)
-![npm-download](https://img.shields.io/npm/dm/oasis-engine)
-[![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine)
+<a href="https://www.npmjs.com/package/oasis-engine-toolkit"><img src="https://img.shields.io/npm/v/oasis-engine-toolkit"/></a>
+![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine-toolkit)
+![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit)
+[![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine-toolkit)
 
-Some script-based out-of-the-box features.
+Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script`, welcome to enjoy!
 
 ## Features
 
-- &nbsp;**Controls** - some camera controllers
+- &nbsp;**Controls** - Some camera controllers
 - &nbsp;**FrameBufferPicker** - Pixel-based object picking
 - &nbsp;**Stats** - Statistics rendering data
 
@@ -25,7 +25,7 @@ npm install oasis-engine-toolkit
 This will allow you to import engine entirely using:
 
 ```javascript
-import * as OASIS_TOOLKIT from "oasis-engine-toolkit";
+import * as TOOLKIT from "oasis-engine-toolkit";
 ```
 
 or individual classes using:
