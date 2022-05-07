@@ -1,2 +1,2 @@
 # engine-tookit
-Toolkit with some utility functions.
+Toolkit with some utility features.
