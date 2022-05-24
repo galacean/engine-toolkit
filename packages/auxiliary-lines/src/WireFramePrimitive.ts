@@ -1,7 +1,14 @@
 import { Vector3 } from "oasis-engine";
 
 export class WireFramePrimitive {
-  static createCuboidWireFrame(width: number, height: number, depth: number, positions: Vector3[], indices: number[]) {
+  static createCuboidWireFrame(
+    width: number,
+    height: number,
+    depth: number,
+    vertexBegin: number,
+    positions: Vector3[],
+    indices: number[]
+  ) {
     const halfWidth: number = width / 2;
     const halfHeight: number = height / 2;
     const halfDepth: number = depth / 2;
@@ -43,62 +50,162 @@ export class WireFramePrimitive {
     positions.push(new Vector3(-halfWidth, -halfHeight, -halfDepth));
 
     // Up
-    indices.push(0, 1, 1, 2, 2, 3, 3, 0);
+    indices.push(
+      vertexBegin,
+      1 + vertexBegin,
+      1 + vertexBegin,
+      2 + vertexBegin,
+      2 + vertexBegin,
+      3 + vertexBegin,
+      3 + vertexBegin,
+      vertexBegin
+    );
     // Down
-    indices.push(4, 5, 5, 6, 6, 7, 7, 4);
+    indices.push(
+      4 + vertexBegin,
+      5 + vertexBegin,
+      5 + vertexBegin,
+      6 + vertexBegin,
+      6 + vertexBegin,
+      7 + vertexBegin,
+      7 + vertexBegin,
+      4 + vertexBegin
+    );
     // Left
-    indices.push(8, 9, 9, 10, 10, 11, 11, 8);
+    indices.push(
+      8 + vertexBegin,
+      9 + vertexBegin,
+      9 + vertexBegin,
+      10 + vertexBegin,
+      10 + vertexBegin,
+      11 + vertexBegin,
+      11 + vertexBegin,
+      8 + vertexBegin
+    );
     // Right
-    indices.push(12, 13, 13, 14, 14, 15, 15, 12);
+    indices.push(
+      12 + vertexBegin,
+      13 + vertexBegin,
+      13 + vertexBegin,
+      14 + vertexBegin,
+      14 + vertexBegin,
+      15 + vertexBegin,
+      15 + vertexBegin,
+      12 + vertexBegin
+    );
     // Front
-    indices.push(16, 17, 17, 18, 18, 19, 19, 16);
+    indices.push(
+      16 + vertexBegin,
+      17 + vertexBegin,
+      17 + vertexBegin,
+      18 + vertexBegin,
+      18 + vertexBegin,
+      19 + vertexBegin,
+      19 + vertexBegin,
+      16 + vertexBegin
+    );
     // Back
-    indices.push(20, 21, 21, 22, 22, 23, 23, 20);
+    indices.push(
+      20 + vertexBegin,
+      21 + vertexBegin,
+      21 + vertexBegin,
+      22 + vertexBegin,
+      22 + vertexBegin,
+      23 + vertexBegin,
+      23 + vertexBegin,
+      20 + vertexBegin
+    );
   }
 
-  static createSphereWireFrame(radius: number, positions: Vector3[], indices: number[]) {
+  static createSphereWireFrame(radius: number, vertexBegin: number, positions: Vector3[], indices: number[]) {
     const vertexCount = 40;
     const shift = new Vector3();
 
     // X
-    WireFramePrimitive.createCircleWireFrame(radius, 0, shift, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(radius, 0, shift, vertexBegin, vertexCount, positions, indices);
 
     // Y
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(
+      radius,
+      1,
+      shift,
+      vertexBegin + vertexCount,
+      vertexCount,
+      positions,
+      indices
+    );
 
     // Z
-    WireFramePrimitive.createCircleWireFrame(radius, 2, shift, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(
+      radius,
+      2,
+      shift,
+      vertexBegin + vertexCount * 2,
+      vertexCount,
+      positions,
+      indices
+    );
   }
 
-  static createCapsuleWireFrame(radius: number, height: number, positions: Vector3[], indices: number[]) {
+  static createCapsuleWireFrame(
+    radius: number,
+    height: number,
+    vertexBegin: number,
+    positions: Vector3[],
+    indices: number[]
+  ) {
     const vertexCount = 40;
     const shift = new Vector3();
     const halfHeight = height / 2;
 
     // Y-Top
     shift.y = halfHeight;
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
 
     // Y-Bottom
     shift.y = -halfHeight;
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(
+      radius,
+      1,
+      shift,
+      vertexBegin + vertexCount,
+      vertexCount,
+      positions,
+      indices
+    );
 
     // X-Elliptic
-    WireFramePrimitive.createEllipticWireFrame(radius, halfHeight, 2, vertexCount, positions, indices);
+    WireFramePrimitive.createEllipticWireFrame(
+      radius,
+      halfHeight,
+      2,
+      vertexBegin + vertexCount * 2,
+      vertexCount,
+      positions,
+      indices
+    );
 
     // Z-Elliptic
-    WireFramePrimitive.createEllipticWireFrame(radius, halfHeight, 0, vertexCount, positions, indices);
+    WireFramePrimitive.createEllipticWireFrame(
+      radius,
+      halfHeight,
+      0,
+      vertexBegin + vertexCount * 3,
+      vertexCount,
+      positions,
+      indices
+    );
   }
 
   static createCircleWireFrame(
     radius: number,
     axis: number,
     shift: Vector3,
+    vertexBegin: number,
     vertexCount: number,
     positions: Vector3[],
     indices: number[]
   ) {
-    const vertexBegin = positions.length;
     const countReciprocal = 1.0 / vertexCount;
     for (let i = 0; i < vertexCount; ++i) {
       const v = i * countReciprocal;
@@ -135,11 +242,11 @@ export class WireFramePrimitive {
     radius: number,
     height: number,
     axis: number,
+    vertexBegin: number,
     vertexCount: number,
     positions: Vector3[],
     indices: number[]
   ) {
-    const vertexBegin = positions.length;
     const countReciprocal = 1.0 / vertexCount;
     for (let i = 0; i < vertexCount; ++i) {
       const v = i * countReciprocal;

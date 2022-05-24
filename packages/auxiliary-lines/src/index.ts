@@ -1,2 +1,2 @@
-export { AuxiliaryRenderer } from "./AuxiliaryRenderer";
+export { AuxiliaryManager } from "./AuxiliaryManager";
 export { WireFramePrimitive } from "./WireFramePrimitive";
