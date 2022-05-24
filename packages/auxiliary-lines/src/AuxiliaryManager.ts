@@ -14,7 +14,8 @@ import {
   PointLight,
   Camera,
   Matrix,
-  SpotLight
+  SpotLight,
+  DirectLight
 } from "oasis-engine";
 import { WireFramePrimitive } from "./WireFramePrimitive";
 
@@ -199,7 +200,7 @@ export class AuxiliaryManager extends Script {
     const localPositions = this.localPositions_;
     const OldPositionsLength = localPositions.length;
     this.transformRanges_.push(OldPositionsLength);
-    WireFramePrimitive.createCylinderWireFrame(radius, height, OldPositionsLength, localPositions, this.indices_);
+    WireFramePrimitive.createConeWireFrame(radius, height, OldPositionsLength, localPositions, this.indices_);
     this.isLocalDirty_ = true;
     this.transformNoScaleFlag.push(true);
   }
@@ -213,6 +214,18 @@ export class AuxiliaryManager extends Script {
     const OldPositionsLength = localPositions.length;
     this.transformRanges_.push(OldPositionsLength);
     WireFramePrimitive.createSphereWireFrame(distance, OldPositionsLength, localPositions, this.indices_);
+    this.isLocalDirty_ = true;
+    this.transformNoScaleFlag.push(true);
+  }
+
+  addDirectLightAuxiliary(light: DirectLight) {
+    const transform = light.entity.transform;
+    this.transforms_.push(transform);
+
+    const localPositions = this.localPositions_;
+    const OldPositionsLength = localPositions.length;
+    this.transformRanges_.push(OldPositionsLength);
+    WireFramePrimitive.createUnboundCylinderWireFrame(1, OldPositionsLength, localPositions, this.indices_);
     this.isLocalDirty_ = true;
     this.transformNoScaleFlag.push(true);
   }

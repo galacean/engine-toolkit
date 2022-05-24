@@ -1,6 +1,8 @@
-import { Vector3 } from "oasis-engine";
+import { MathUtil, Vector3 } from "oasis-engine";
 
 export class WireFramePrimitive {
+  private static vertexCount = 40;
+
   static createCuboidWireFrame(
     width: number,
     height: number,
@@ -118,7 +120,7 @@ export class WireFramePrimitive {
   }
 
   static createSphereWireFrame(radius: number, vertexBegin: number, positions: Vector3[], indices: number[]) {
-    const vertexCount = 40;
+    const vertexCount = WireFramePrimitive.vertexCount;
     const shift = new Vector3();
 
     // X
@@ -147,26 +149,25 @@ export class WireFramePrimitive {
     );
   }
 
-  static createCylinderWireFrame(
+  static createConeWireFrame(
     radius: number,
     height: number,
     vertexBegin: number,
     positions: Vector3[],
     indices: number[]
   ) {
-    const vertexCount = 40;
+    const vertexCount = WireFramePrimitive.vertexCount;
     const shift = new Vector3();
-    const halfHeight = height / 2;
 
     // Y
-    shift.y = -halfHeight;
+    shift.y = -height;
     WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
 
-    positions.push(new Vector3(0, halfHeight, 0));
-    positions.push(new Vector3(-radius, -halfHeight, 0));
-    positions.push(new Vector3(radius, -halfHeight, 0));
-    positions.push(new Vector3(0, -halfHeight, radius));
-    positions.push(new Vector3(0, -halfHeight, -radius));
+    positions.push(new Vector3(0, height, 0));
+    positions.push(new Vector3(-radius, -height, 0));
+    positions.push(new Vector3(radius, -height, 0));
+    positions.push(new Vector3(0, -height, radius));
+    positions.push(new Vector3(0, -height, -radius));
     const indexBegin = vertexBegin + vertexCount;
     indices.push(
       indexBegin,
@@ -180,6 +181,24 @@ export class WireFramePrimitive {
     );
   }
 
+  static createUnboundCylinderWireFrame(radius: number, vertexBegin: number, positions: Vector3[], indices: number[]) {
+    const height = 5;
+    const vertexCount = WireFramePrimitive.vertexCount;
+    const shift = new Vector3();
+
+    // Y
+    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
+
+    const indexBegin = vertexBegin + vertexCount;
+    for (let i = 0; i < 8; i++) {
+      let radian = MathUtil.degreeToRadian(45 * i);
+      positions.push(new Vector3(radius * Math.cos(radian), 0, radius * Math.sin(radian)));
+      positions.push(new Vector3(radius * Math.cos(radian), -height, radius * Math.sin(radian)));
+
+      indices.push(indexBegin + 2 * i, indexBegin + 2 * i + 1);
+    }
+  }
+
   static createCapsuleWireFrame(
     radius: number,
     height: number,
@@ -187,7 +206,7 @@ export class WireFramePrimitive {
     positions: Vector3[],
     indices: number[]
   ) {
-    const vertexCount = 40;
+    const vertexCount = WireFramePrimitive.vertexCount;
     const shift = new Vector3();
     const halfHeight = height / 2;
 
