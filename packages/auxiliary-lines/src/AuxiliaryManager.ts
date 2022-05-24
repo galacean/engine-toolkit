@@ -19,6 +19,9 @@ import {
 } from "oasis-engine";
 import { WireFramePrimitive } from "./WireFramePrimitive";
 
+/**
+ * Auxiliary Manager to draw debug wireframe with automatic dynamic batching.
+ */
 export class AuxiliaryManager extends Script {
   private static positionPool_: Vector3[] = [];
   private static viewportPosition: Vector3[] = [];
@@ -39,80 +42,9 @@ export class AuxiliaryManager extends Script {
 
   public needUpdate: boolean = false;
 
-  onAwake() {
-    this.material_ = new UnlitMaterial(this.engine);
-    this.renderer_ = this.entity.addComponent(MeshRenderer);
-    this.renderer_.setMaterial(this.material_);
-  }
-
-  onEnable() {
-    this.renderer_._onEnable();
-  }
-
-  onDisable() {
-    this.renderer_._onDisable();
-  }
-
-  onUpdate(deltaTime: number) {
-    if (this.isLocalDirty_) {
-      const indices = this.indices_;
-      this.indicesArray_ = AuxiliaryManager._generateIndices(this.engine, this.localPositions_.length, indices.length);
-      const indicesArray = this.indicesArray_;
-      for (let i = 0; i < indices.length; i++) {
-        indicesArray[i] = indices[i];
-      }
-    }
-
-    if (this.isLocalDirty_ || this.needUpdate) {
-      this.mesh_ && this.mesh_.destroy();
-      this.mesh_ = new ModelMesh(this.engine);
-      const mesh = this.mesh_;
-
-      const localPositions = this.localPositions_;
-      this.globalPositions_.length = localPositions.length;
-      const globalPositions = this.globalPositions_;
-      const transforms = this.transforms_;
-      let positionIndex = 0;
-      for (let i = 0, n = transforms.length; i < n; i++) {
-        const transform = transforms[i];
-        let worldMatrix: Matrix;
-        if (this.transformNoScaleFlag[i]) {
-          worldMatrix = AuxiliaryManager.tempMatrix;
-          Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
-        } else {
-          worldMatrix = transform.worldMatrix;
-        }
-
-        const beginIndex = this.transformRanges_[i];
-        let endIndex = globalPositions.length;
-        if (i != n - 1) {
-          endIndex = this.transformRanges_[i + 1];
-        }
-
-        for (let j = beginIndex; j < endIndex; j++) {
-          const localPosition = localPositions[positionIndex];
-          let globalPosition: Vector3;
-          if (positionIndex < AuxiliaryManager.positionPool_.length) {
-            globalPosition = AuxiliaryManager.positionPool_[positionIndex];
-          } else {
-            globalPosition = new Vector3();
-            AuxiliaryManager.positionPool_.push(globalPosition);
-          }
-          Vector3.transformCoordinate(localPosition, worldMatrix, globalPosition);
-          globalPositions[positionIndex] = globalPosition;
-          positionIndex++;
-        }
-      }
-
-      mesh.setPositions(globalPositions);
-      mesh.setIndices(this.indicesArray_);
-      mesh.uploadData(true);
-      mesh.addSubMesh(0, this.indices_.length, MeshTopology.Lines);
-      this.renderer_.mesh = mesh;
-    }
-    this.isLocalDirty_ = false;
-  }
-
+  /**
+   * clear all cache info
+   */
   clear() {
     this.transforms_.length = 0;
     this.transformNoScaleFlag.length = 0;
@@ -125,6 +57,10 @@ export class AuxiliaryManager extends Script {
     this.isLocalDirty_ = true;
   }
 
+  /**
+   * Create auxiliary mesh for camera.
+   * @param camera - The Camera
+   */
   addCameraAuxiliary(camera: Camera) {
     const transform = camera.entity.transform;
     this.transforms_.push(transform);
@@ -191,6 +127,10 @@ export class AuxiliaryManager extends Script {
     );
   }
 
+  /**
+   * Create auxiliary mesh for spot light.
+   * @param light - The SpotLight
+   */
   addSpotLightAuxiliary(light: SpotLight) {
     const transform = light.entity.transform;
     this.transforms_.push(transform);
@@ -205,6 +145,10 @@ export class AuxiliaryManager extends Script {
     this.transformNoScaleFlag.push(true);
   }
 
+  /**
+   * Create auxiliary mesh for point light.
+   * @param light - The PointLight
+   */
   addPointLightAuxiliary(light: PointLight) {
     const transform = light.entity.transform;
     this.transforms_.push(transform);
@@ -218,6 +162,10 @@ export class AuxiliaryManager extends Script {
     this.transformNoScaleFlag.push(true);
   }
 
+  /**
+   * Create auxiliary mesh for directional light.
+   * @param light - The DirectLight
+   */
   addDirectLightAuxiliary(light: DirectLight) {
     const transform = light.entity.transform;
     this.transforms_.push(transform);
@@ -230,6 +178,10 @@ export class AuxiliaryManager extends Script {
     this.transformNoScaleFlag.push(true);
   }
 
+  /**
+   * Create auxiliary mesh for box collider shape.
+   * @param shape - The BoxColliderShape
+   */
   addBoxColliderShapeAuxiliary(shape: BoxColliderShape) {
     const transform = shape.collider.entity.transform;
     this.transforms_.push(transform);
@@ -251,6 +203,10 @@ export class AuxiliaryManager extends Script {
     this.transformNoScaleFlag.push(false);
   }
 
+  /**
+   * Create auxiliary mesh for sphere collider shape.
+   * @param shape - The SphereColliderShape
+   */
   addSphereColliderShapeAuxiliary(shape: SphereColliderShape) {
     const transform = shape.collider.entity.transform;
     this.transforms_.push(transform);
@@ -270,6 +226,10 @@ export class AuxiliaryManager extends Script {
     this.transformNoScaleFlag.push(false);
   }
 
+  /**
+   * Create auxiliary mesh for capsule collider shape.
+   * @param shape - The CapsuleColliderShape
+   */
   addCapsuleColliderShapeAuxiliary(shape: CapsuleColliderShape) {
     const transform = shape.collider.entity.transform;
     this.transforms_.push(transform);
@@ -304,5 +264,92 @@ export class AuxiliaryManager extends Script {
       indices = new Uint16Array(indexCount);
     }
     return indices;
+  }
+
+  /**
+   * @override
+   */
+  onAwake() {
+    this.material_ = new UnlitMaterial(this.engine);
+    this.renderer_ = this.entity.addComponent(MeshRenderer);
+    this.renderer_.setMaterial(this.material_);
+  }
+
+  /**
+   * @override
+   */
+  onEnable() {
+    this.renderer_._onEnable();
+  }
+
+  /**
+   * @override
+   */
+  onDisable() {
+    this.renderer_._onDisable();
+  }
+
+  /**
+   * @override
+   * @param deltaTime
+   */
+  onUpdate(deltaTime: number) {
+    if (this.isLocalDirty_) {
+      const indices = this.indices_;
+      this.indicesArray_ = AuxiliaryManager._generateIndices(this.engine, this.localPositions_.length, indices.length);
+      const indicesArray = this.indicesArray_;
+      for (let i = 0; i < indices.length; i++) {
+        indicesArray[i] = indices[i];
+      }
+    }
+
+    if (this.isLocalDirty_ || this.needUpdate) {
+      this.mesh_ && this.mesh_.destroy();
+      this.mesh_ = new ModelMesh(this.engine);
+      const mesh = this.mesh_;
+
+      const localPositions = this.localPositions_;
+      this.globalPositions_.length = localPositions.length;
+      const globalPositions = this.globalPositions_;
+      const transforms = this.transforms_;
+      let positionIndex = 0;
+      for (let i = 0, n = transforms.length; i < n; i++) {
+        const transform = transforms[i];
+        let worldMatrix: Matrix;
+        if (this.transformNoScaleFlag[i]) {
+          worldMatrix = AuxiliaryManager.tempMatrix;
+          Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
+        } else {
+          worldMatrix = transform.worldMatrix;
+        }
+
+        const beginIndex = this.transformRanges_[i];
+        let endIndex = globalPositions.length;
+        if (i != n - 1) {
+          endIndex = this.transformRanges_[i + 1];
+        }
+
+        for (let j = beginIndex; j < endIndex; j++) {
+          const localPosition = localPositions[positionIndex];
+          let globalPosition: Vector3;
+          if (positionIndex < AuxiliaryManager.positionPool_.length) {
+            globalPosition = AuxiliaryManager.positionPool_[positionIndex];
+          } else {
+            globalPosition = new Vector3();
+            AuxiliaryManager.positionPool_.push(globalPosition);
+          }
+          Vector3.transformCoordinate(localPosition, worldMatrix, globalPosition);
+          globalPositions[positionIndex] = globalPosition;
+          positionIndex++;
+        }
+      }
+
+      mesh.setPositions(globalPositions);
+      mesh.setIndices(this.indicesArray_);
+      mesh.uploadData(true);
+      mesh.addSubMesh(0, this.indices_.length, MeshTopology.Lines);
+      this.renderer_.mesh = mesh;
+    }
+    this.isLocalDirty_ = false;
   }
 }

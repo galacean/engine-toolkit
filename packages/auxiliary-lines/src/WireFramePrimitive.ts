@@ -1,8 +1,22 @@
 import { MathUtil, Vector3 } from "oasis-engine";
 
+/**
+ * Wireframe primitive.
+ */
 export class WireFramePrimitive {
-  private static vertexCount = 40;
+  /** global settings for vertex count */
+  static vertexCount = 40;
 
+  /**
+   * Store cuboid wireframe mesh data.
+   * The origin located in center of cuboid.
+   * @param width - Cuboid width
+   * @param height - Cuboid height
+   * @param depth - Cuboid depth
+   * @param vertexBegin - The min of index list
+   * @param positions - position array
+   * @param indices - index array
+   */
   static createCuboidWireFrame(
     width: number,
     height: number,
@@ -119,6 +133,14 @@ export class WireFramePrimitive {
     );
   }
 
+  /**
+   * Store sphere wireframe mesh data.
+   * The origin located in center of sphere.
+   * @param radius - Sphere radius
+   * @param vertexBegin - The min of index list
+   * @param positions - position array
+   * @param indices - index array
+   */
   static createSphereWireFrame(radius: number, vertexBegin: number, positions: Vector3[], indices: number[]) {
     const vertexCount = WireFramePrimitive.vertexCount;
     const shift = new Vector3();
@@ -149,6 +171,15 @@ export class WireFramePrimitive {
     );
   }
 
+  /**
+   * Store cone wireframe mesh data.
+   * The origin located in top of cone.
+   * @param radius - The radius of cap
+   * @param height - The height of cone
+   * @param vertexBegin - The min of index list
+   * @param positions - position array
+   * @param indices - index array
+   */
   static createConeWireFrame(
     radius: number,
     height: number,
@@ -181,6 +212,14 @@ export class WireFramePrimitive {
     );
   }
 
+  /**
+   * Store unbound cylinder wireframe mesh data.
+   * The origin located in center of sphere.
+   * @param radius - The radius
+   * @param vertexBegin - The min of index list
+   * @param positions - position array
+   * @param indices - index array
+   */
   static createUnboundCylinderWireFrame(radius: number, vertexBegin: number, positions: Vector3[], indices: number[]) {
     const height = 5;
     const vertexCount = WireFramePrimitive.vertexCount;
@@ -199,6 +238,15 @@ export class WireFramePrimitive {
     }
   }
 
+  /**
+   * Store capsule wireframe mesh data.
+   * The origin located in center of capsule.
+   * @param radius - The radius of the two hemispherical ends
+   * @param height - The height of the cylindrical part, measured between the centers of the hemispherical ends
+   * @param vertexBegin - The min of index list
+   * @param positions - position array
+   * @param indices - index array
+   */
   static createCapsuleWireFrame(
     radius: number,
     height: number,
@@ -249,6 +297,16 @@ export class WireFramePrimitive {
     );
   }
 
+  /**
+   * Store circle wireframe mesh data.
+   * @param radius - The radius
+   * @param axis - The default direction
+   * @param shift - The default shift
+   * @param vertexBegin - The min of index list
+   * @param vertexCount - count of new position
+   * @param positions - position array
+   * @param indices - index array
+   */
   static createCircleWireFrame(
     radius: number,
     axis: number,
@@ -290,6 +348,16 @@ export class WireFramePrimitive {
     }
   }
 
+  /**
+   * Store elliptic wireframe mesh data.
+   * @param radius - The radius of the two hemispherical ends
+   * @param height - The height of the cylindrical part, measured between the centers of the hemispherical ends
+   * @param axis - The default direction
+   * @param vertexBegin - The min of index list
+   * @param vertexCount - count of new position
+   * @param positions - position array
+   * @param indices - index array
+   */
   static createEllipticWireFrame(
     radius: number,
     height: number,
