@@ -147,6 +147,39 @@ export class WireFramePrimitive {
     );
   }
 
+  static createCylinderWireFrame(
+    radius: number,
+    height: number,
+    vertexBegin: number,
+    positions: Vector3[],
+    indices: number[]
+  ) {
+    const vertexCount = 40;
+    const shift = new Vector3();
+    const halfHeight = height / 2;
+
+    // Y
+    shift.y = -halfHeight;
+    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
+
+    positions.push(new Vector3(0, halfHeight, 0));
+    positions.push(new Vector3(0, -halfHeight, 0));
+    positions.push(new Vector3(radius, -halfHeight, 0));
+    positions.push(new Vector3(0, -halfHeight, radius));
+    positions.push(new Vector3(radius, -halfHeight, radius));
+    const indexBegin = vertexBegin + vertexCount;
+    indices.push(
+      indexBegin,
+      indexBegin + 1,
+      indexBegin,
+      indexBegin + 2,
+      indexBegin,
+      indexBegin + 3,
+      indexBegin,
+      indexBegin + 4
+    );
+  }
+
   static createCapsuleWireFrame(
     radius: number,
     height: number,

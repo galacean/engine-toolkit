@@ -13,7 +13,8 @@ import {
   Transform,
   PointLight,
   Camera,
-  Matrix
+  Matrix,
+  SpotLight
 } from "oasis-engine";
 import { WireFramePrimitive } from "./WireFramePrimitive";
 
@@ -187,6 +188,20 @@ export class AuxiliaryManager extends Script {
       7 + OldPositionsLength,
       4 + OldPositionsLength // back
     );
+  }
+
+  addSpotLightAuxiliary(light: SpotLight) {
+    const transform = light.entity.transform;
+    this.transforms_.push(transform);
+    const height = light.distance;
+    const radius = Math.tan(light.angle) * height;
+
+    const localPositions = this.localPositions_;
+    const OldPositionsLength = localPositions.length;
+    this.transformRanges_.push(OldPositionsLength);
+    WireFramePrimitive.createCylinderWireFrame(radius, height, OldPositionsLength, localPositions, this.indices_);
+    this.isLocalDirty_ = true;
+    this.transformNoScaleFlag.push(true);
   }
 
   addPointLightAuxiliary(light: PointLight) {
