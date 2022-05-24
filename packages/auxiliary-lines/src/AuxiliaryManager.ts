@@ -10,12 +10,17 @@ import {
   Script,
   UnlitMaterial,
   Vector3,
-  Transform
+  Transform,
+  PointLight,
+  Camera,
+  Matrix
 } from "oasis-engine";
 import { WireFramePrimitive } from "./WireFramePrimitive";
 
 export class AuxiliaryManager extends Script {
   private static positionPool_: Vector3[] = [];
+  private static viewportPosition: Vector3[] = [];
+  private static tempMatrix: Matrix = new Matrix();
 
   private isLocalDirty_: boolean = true;
   private localPositions_: Vector3[] = [];
@@ -24,6 +29,7 @@ export class AuxiliaryManager extends Script {
   private indicesArray_: Uint16Array | Uint32Array = null;
 
   private transforms_: Transform[] = [];
+  private transformNoScaleFlag: boolean[] = [];
   private transformRanges_: number[] = [];
   private renderer_: MeshRenderer;
   private material_: UnlitMaterial;
@@ -67,7 +73,14 @@ export class AuxiliaryManager extends Script {
       let positionIndex = 0;
       for (let i = 0, n = transforms.length; i < n; i++) {
         const transform = transforms[i];
-        const worldMatrix = transform.worldMatrix;
+        let worldMatrix: Matrix;
+        if (this.transformNoScaleFlag[i]) {
+          worldMatrix = AuxiliaryManager.tempMatrix;
+          Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
+        } else {
+          worldMatrix = transform.worldMatrix;
+        }
+
         const beginIndex = this.transformRanges_[i];
         let endIndex = globalPositions.length;
         if (i != n - 1) {
@@ -100,6 +113,7 @@ export class AuxiliaryManager extends Script {
 
   clear() {
     this.transforms_.length = 0;
+    this.transformNoScaleFlag.length = 0;
     this.transformRanges_.length = 0;
 
     this.localPositions_.length = 0;
@@ -107,6 +121,84 @@ export class AuxiliaryManager extends Script {
     this.indices_.length = 0;
     this.indicesArray_ = null;
     this.isLocalDirty_ = true;
+  }
+
+  addCameraAuxiliary(camera: Camera) {
+    const transform = camera.entity.transform;
+    this.transforms_.push(transform);
+    const inverseProj = camera.projectionMatrix.clone();
+    inverseProj.invert();
+
+    const localPositions = this.localPositions_;
+    const OldPositionsLength = localPositions.length;
+    this.transformRanges_.push(OldPositionsLength);
+    this.isLocalDirty_ = true;
+    this.transformNoScaleFlag.push(true);
+
+    const viewportPosition = AuxiliaryManager.viewportPosition;
+    if (viewportPosition.length == 0) {
+      viewportPosition.push(new Vector3(-1, 1, 0));
+      viewportPosition.push(new Vector3(1, 1, 0));
+      viewportPosition.push(new Vector3(1, -1, 0));
+      viewportPosition.push(new Vector3(-1, -1, 0));
+    }
+
+    // front
+    for (let i = 0; i < 4; i++) {
+      const position = viewportPosition[i];
+      const newPosition = position.clone();
+      newPosition.transformCoordinate(inverseProj);
+      localPositions.push(newPosition);
+    }
+
+    // back
+    for (let i = 0; i < 4; i++) {
+      const position = viewportPosition[i];
+      const newPosition = position.clone();
+      newPosition.z = 1;
+      newPosition.transformCoordinate(inverseProj);
+      localPositions.push(newPosition);
+    }
+
+    const indices = this.indices_;
+    indices.push(
+      0,
+      1,
+      1,
+      2,
+      2,
+      3,
+      0, // front
+      0,
+      4,
+      1,
+      5,
+      2,
+      6,
+      3,
+      7, // link
+      4,
+      5,
+      5,
+      6,
+      6,
+      7,
+      7,
+      4 // back
+    );
+  }
+
+  addPointLightAuxiliary(light: PointLight) {
+    const transform = light.entity.transform;
+    this.transforms_.push(transform);
+    const distance = light.distance;
+
+    const localPositions = this.localPositions_;
+    const OldPositionsLength = localPositions.length;
+    this.transformRanges_.push(OldPositionsLength);
+    WireFramePrimitive.createSphereWireFrame(distance, OldPositionsLength, localPositions, this.indices_);
+    this.isLocalDirty_ = true;
+    this.transformNoScaleFlag.push(true);
   }
 
   addBoxColliderShapeAuxiliary(shape: BoxColliderShape) {
@@ -127,6 +219,7 @@ export class AuxiliaryManager extends Script {
       this.indices_
     );
     this.isLocalDirty_ = true;
+    this.transformNoScaleFlag.push(false);
   }
 
   addSphereColliderShapeAuxiliary(shape: SphereColliderShape) {
@@ -145,6 +238,7 @@ export class AuxiliaryManager extends Script {
       this.indices_
     );
     this.isLocalDirty_ = true;
+    this.transformNoScaleFlag.push(false);
   }
 
   addCapsuleColliderShapeAuxiliary(shape: CapsuleColliderShape) {
@@ -166,6 +260,7 @@ export class AuxiliaryManager extends Script {
       this.indices_
     );
     this.isLocalDirty_ = true;
+    this.transformNoScaleFlag.push(false);
   }
 
   private static _generateIndices(engine: Engine, vertexCount: number, indexCount: number): Uint16Array | Uint32Array {
