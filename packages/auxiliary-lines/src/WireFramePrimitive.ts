@@ -163,10 +163,10 @@ export class WireFramePrimitive {
     WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
 
     positions.push(new Vector3(0, halfHeight, 0));
-    positions.push(new Vector3(0, -halfHeight, 0));
+    positions.push(new Vector3(-radius, -halfHeight, 0));
     positions.push(new Vector3(radius, -halfHeight, 0));
     positions.push(new Vector3(0, -halfHeight, radius));
-    positions.push(new Vector3(radius, -halfHeight, radius));
+    positions.push(new Vector3(0, -halfHeight, -radius));
     const indexBegin = vertexBegin + vertexCount;
     indices.push(
       indexBegin,
