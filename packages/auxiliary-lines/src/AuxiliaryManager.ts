@@ -40,6 +40,10 @@ export class AuxiliaryManager extends Script {
   private material_: UnlitMaterial;
   private mesh_: ModelMesh;
 
+  /**
+   * Force update buffer when state change.
+   * reset to false after update buffer.
+   */
   public needUpdate: boolean = false;
 
   /**
@@ -350,6 +354,7 @@ export class AuxiliaryManager extends Script {
       mesh.addSubMesh(0, this.indices_.length, MeshTopology.Lines);
       this.renderer_.mesh = mesh;
     }
+    this.needUpdate = false;
     this.isLocalDirty_ = false;
   }
 }
