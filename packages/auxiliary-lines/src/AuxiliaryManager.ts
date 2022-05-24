@@ -162,29 +162,30 @@ export class AuxiliaryManager extends Script {
 
     const indices = this.indices_;
     indices.push(
-      0,
-      1,
-      1,
-      2,
-      2,
-      3,
-      0, // front
-      0,
-      4,
-      1,
-      5,
-      2,
-      6,
-      3,
-      7, // link
-      4,
-      5,
-      5,
-      6,
-      6,
-      7,
-      7,
-      4 // back
+      OldPositionsLength,
+      1 + OldPositionsLength,
+      1 + OldPositionsLength,
+      2 + OldPositionsLength,
+      2 + OldPositionsLength,
+      3 + OldPositionsLength,
+      3 + OldPositionsLength,
+      OldPositionsLength, // front
+      OldPositionsLength,
+      4 + OldPositionsLength,
+      1 + OldPositionsLength,
+      5 + OldPositionsLength,
+      2 + OldPositionsLength,
+      6 + OldPositionsLength,
+      3 + OldPositionsLength,
+      7 + OldPositionsLength, // link
+      4 + OldPositionsLength,
+      5 + OldPositionsLength,
+      5 + OldPositionsLength,
+      6 + OldPositionsLength,
+      6 + OldPositionsLength,
+      7 + OldPositionsLength,
+      7 + OldPositionsLength,
+      4 + OldPositionsLength // back
     );
   }
 
