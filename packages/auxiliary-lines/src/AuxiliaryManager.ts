@@ -314,7 +314,8 @@ export class AuxiliaryManager extends Script {
       const mesh = this.mesh_;
 
       const localPositions = this.localPositions_;
-      this.globalPositions_.length = localPositions.length;
+      const localPositionLength = localPositions.length;
+      this.globalPositions_.length = localPositionLength;
       const globalPositions = this.globalPositions_;
       const transforms = this.transforms_;
       let positionIndex = 0;
@@ -329,7 +330,7 @@ export class AuxiliaryManager extends Script {
         }
 
         const beginIndex = this.transformRanges_[i];
-        let endIndex = globalPositions.length;
+        let endIndex = localPositionLength;
         if (i != n - 1) {
           endIndex = this.transformRanges_[i + 1];
         }
