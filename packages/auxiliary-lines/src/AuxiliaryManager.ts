@@ -300,9 +300,10 @@ export class AuxiliaryManager extends Script {
   onUpdate(deltaTime: number) {
     if (this.isLocalDirty_) {
       const indices = this.indices_;
-      this.indicesArray_ = AuxiliaryManager._generateIndices(this.engine, this.localPositions_.length, indices.length);
+      const indicesCount = indices.length;
+      this.indicesArray_ = AuxiliaryManager._generateIndices(this.engine, this.localPositions_.length, indicesCount);
       const indicesArray = this.indicesArray_;
-      for (let i = 0; i < indices.length; i++) {
+      for (let i = 0; i < indicesCount; i++) {
         indicesArray[i] = indices[i];
       }
     }

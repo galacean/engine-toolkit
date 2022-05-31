@@ -316,10 +316,11 @@ export class WireFramePrimitive {
     positions: Vector3[],
     indices: number[]
   ) {
+    const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
     for (let i = 0; i < vertexCount; ++i) {
       const v = i * countReciprocal;
-      const thetaDelta = v * Math.PI * 2;
+      const thetaDelta = v * twoPi;
 
       switch (axis) {
         case 0:
@@ -367,10 +368,11 @@ export class WireFramePrimitive {
     positions: Vector3[],
     indices: number[]
   ) {
+    const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
     for (let i = 0; i < vertexCount; ++i) {
       const v = i * countReciprocal;
-      const thetaDelta = v * Math.PI * 2;
+      const thetaDelta = v * twoPi;
 
       switch (axis) {
         case 0:
