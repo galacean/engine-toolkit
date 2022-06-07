@@ -19,26 +19,34 @@ import {
 } from "oasis-engine";
 import { WireFramePrimitive } from "./WireFramePrimitive";
 
+class WireframeElement {
+  constructor(public transform: Transform, public transformNoScale: boolean, public transformRanges: number) {
+  }
+}
+
 /**
  * Auxiliary Manager to draw debug wireframe with automatic dynamic batching.
  */
-export class AuxiliaryManager extends Script {
-  private static positionPool_: Vector3[] = [];
-  private static viewportPosition: Vector3[] = [];
-  private static tempMatrix: Matrix = new Matrix();
+export class WireFrameManager extends Script {
+  private static _positionPool: Vector3[] = [];
+  private static _ndcPosition: Vector3[] = [
+    new Vector3(-1, 1, 0),
+    new Vector3(1, 1, 0),
+    new Vector3(1, -1, 0),
+    new Vector3(-1, -1, 0)
+  ];
+  private static _tempMatrix: Matrix = new Matrix();
 
-  private isLocalDirty_: boolean = true;
-  private localPositions_: Vector3[] = [];
-  private globalPositions_: Vector3[] = [];
-  private indices_: number[] = [];
-  private indicesArray_: Uint16Array | Uint32Array = null;
+  private _isLocalDirty: boolean = true;
+  private _localPositions: Vector3[] = [];
+  private _globalPositions: Vector3[] = [];
+  private _indices: number[] = [];
+  private _indicesArray: Uint16Array | Uint32Array = null;
 
-  private transforms_: Transform[] = [];
-  private transformNoScaleFlag: boolean[] = [];
-  private transformRanges_: number[] = [];
-  private renderer_: MeshRenderer;
-  private material_: UnlitMaterial;
-  private mesh_: ModelMesh;
+  private _wireframeElements: WireframeElement[] = [];
+  private _renderer: MeshRenderer;
+  private _material: UnlitMaterial;
+  private _mesh: ModelMesh;
 
   /**
    * Force update buffer when state change.
@@ -50,15 +58,13 @@ export class AuxiliaryManager extends Script {
    * clear all cache info
    */
   clear() {
-    this.transforms_.length = 0;
-    this.transformNoScaleFlag.length = 0;
-    this.transformRanges_.length = 0;
+    this._wireframeElements.length = 0;
 
-    this.localPositions_.length = 0;
-    this.globalPositions_.length = 0;
-    this.indices_.length = 0;
-    this.indicesArray_ = null;
-    this.isLocalDirty_ = true;
+    this._localPositions.length = 0;
+    this._globalPositions.length = 0;
+    this._indices.length = 0;
+    this._indicesArray = null;
+    this._isLocalDirty = true;
   }
 
   /**
@@ -67,27 +73,18 @@ export class AuxiliaryManager extends Script {
    */
   addCameraAuxiliary(camera: Camera) {
     const transform = camera.entity.transform;
-    this.transforms_.push(transform);
     const inverseProj = camera.projectionMatrix.clone();
     inverseProj.invert();
 
-    const localPositions = this.localPositions_;
+    const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    this.transformRanges_.push(OldPositionsLength);
-    this.isLocalDirty_ = true;
-    this.transformNoScaleFlag.push(true);
+    this._isLocalDirty = true;
+    this._wireframeElements.push(new WireframeElement(transform, true, OldPositionsLength));
 
-    const viewportPosition = AuxiliaryManager.viewportPosition;
-    if (viewportPosition.length == 0) {
-      viewportPosition.push(new Vector3(-1, 1, 0));
-      viewportPosition.push(new Vector3(1, 1, 0));
-      viewportPosition.push(new Vector3(1, -1, 0));
-      viewportPosition.push(new Vector3(-1, -1, 0));
-    }
-
+    const ndcPosition = WireFrameManager._ndcPosition;
     // front
     for (let i = 0; i < 4; i++) {
-      const position = viewportPosition[i];
+      const position = ndcPosition[i];
       const newPosition = position.clone();
       newPosition.transformCoordinate(inverseProj);
       localPositions.push(newPosition);
@@ -95,14 +92,14 @@ export class AuxiliaryManager extends Script {
 
     // back
     for (let i = 0; i < 4; i++) {
-      const position = viewportPosition[i];
+      const position = ndcPosition[i];
       const newPosition = position.clone();
       newPosition.z = 1;
       newPosition.transformCoordinate(inverseProj);
       localPositions.push(newPosition);
     }
 
-    const indices = this.indices_;
+    const indices = this._indices;
     indices.push(
       OldPositionsLength,
       1 + OldPositionsLength,
@@ -137,16 +134,14 @@ export class AuxiliaryManager extends Script {
    */
   addSpotLightAuxiliary(light: SpotLight) {
     const transform = light.entity.transform;
-    this.transforms_.push(transform);
     const height = light.distance;
     const radius = Math.tan(light.angle) * height;
 
-    const localPositions = this.localPositions_;
+    const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    this.transformRanges_.push(OldPositionsLength);
-    WireFramePrimitive.createConeWireFrame(radius, height, OldPositionsLength, localPositions, this.indices_);
-    this.isLocalDirty_ = true;
-    this.transformNoScaleFlag.push(true);
+    WireFramePrimitive.createConeWireFrame(radius, height, OldPositionsLength, localPositions, this._indices);
+    this._isLocalDirty = true;
+    this._wireframeElements.push(new WireframeElement(transform, true, OldPositionsLength));
   }
 
   /**
@@ -155,15 +150,13 @@ export class AuxiliaryManager extends Script {
    */
   addPointLightAuxiliary(light: PointLight) {
     const transform = light.entity.transform;
-    this.transforms_.push(transform);
     const distance = light.distance;
 
-    const localPositions = this.localPositions_;
+    const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    this.transformRanges_.push(OldPositionsLength);
-    WireFramePrimitive.createSphereWireFrame(distance, OldPositionsLength, localPositions, this.indices_);
-    this.isLocalDirty_ = true;
-    this.transformNoScaleFlag.push(true);
+    WireFramePrimitive.createSphereWireFrame(distance, OldPositionsLength, localPositions, this._indices);
+    this._isLocalDirty = true;
+    this._wireframeElements.push(new WireframeElement(transform, true, OldPositionsLength));
   }
 
   /**
@@ -172,14 +165,12 @@ export class AuxiliaryManager extends Script {
    */
   addDirectLightAuxiliary(light: DirectLight) {
     const transform = light.entity.transform;
-    this.transforms_.push(transform);
 
-    const localPositions = this.localPositions_;
+    const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    this.transformRanges_.push(OldPositionsLength);
-    WireFramePrimitive.createUnboundCylinderWireFrame(1, OldPositionsLength, localPositions, this.indices_);
-    this.isLocalDirty_ = true;
-    this.transformNoScaleFlag.push(true);
+    WireFramePrimitive.createUnboundCylinderWireFrame(1, OldPositionsLength, localPositions, this._indices);
+    this._isLocalDirty = true;
+    this._wireframeElements.push(new WireframeElement(transform, true, OldPositionsLength));
   }
 
   /**
@@ -188,23 +179,21 @@ export class AuxiliaryManager extends Script {
    */
   addBoxColliderShapeAuxiliary(shape: BoxColliderShape) {
     const transform = shape.collider.entity.transform;
-    this.transforms_.push(transform);
     const worldScale = transform.lossyWorldScale;
     const size = shape.size;
 
-    const localPositions = this.localPositions_;
+    const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    this.transformRanges_.push(OldPositionsLength);
     WireFramePrimitive.createCuboidWireFrame(
       worldScale.x * size.x,
       worldScale.y * size.y,
       worldScale.z * size.z,
       OldPositionsLength,
       localPositions,
-      this.indices_
+      this._indices
     );
-    this.isLocalDirty_ = true;
-    this.transformNoScaleFlag.push(false);
+    this._isLocalDirty = true;
+    this._wireframeElements.push(new WireframeElement(transform, false, OldPositionsLength));
   }
 
   /**
@@ -213,21 +202,19 @@ export class AuxiliaryManager extends Script {
    */
   addSphereColliderShapeAuxiliary(shape: SphereColliderShape) {
     const transform = shape.collider.entity.transform;
-    this.transforms_.push(transform);
     const worldScale = transform.lossyWorldScale;
     const radius = shape.radius;
 
-    const localPositions = this.localPositions_;
+    const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    this.transformRanges_.push(OldPositionsLength);
     WireFramePrimitive.createSphereWireFrame(
       Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
       OldPositionsLength,
       localPositions,
-      this.indices_
+      this._indices
     );
-    this.isLocalDirty_ = true;
-    this.transformNoScaleFlag.push(false);
+    this._isLocalDirty = true;
+    this._wireframeElements.push(new WireframeElement(transform, false, OldPositionsLength));
   }
 
   /**
@@ -236,24 +223,22 @@ export class AuxiliaryManager extends Script {
    */
   addCapsuleColliderShapeAuxiliary(shape: CapsuleColliderShape) {
     const transform = shape.collider.entity.transform;
-    this.transforms_.push(transform);
     const worldScale = transform.lossyWorldScale;
     const maxScale = Math.max(worldScale.x, worldScale.y, worldScale.z);
     const radius = shape.radius;
     const height = shape.height;
 
-    const localPositions = this.localPositions_;
+    const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    this.transformRanges_.push(OldPositionsLength);
     WireFramePrimitive.createCapsuleWireFrame(
       maxScale * radius,
       maxScale * height,
       OldPositionsLength,
       localPositions,
-      this.indices_
+      this._indices
     );
-    this.isLocalDirty_ = true;
-    this.transformNoScaleFlag.push(false);
+    this._isLocalDirty = true;
+    this._wireframeElements.push(new WireframeElement(transform, false, OldPositionsLength));
   }
 
   private static _generateIndices(engine: Engine, vertexCount: number, indexCount: number): Uint16Array | Uint32Array {
@@ -274,23 +259,23 @@ export class AuxiliaryManager extends Script {
    * @override
    */
   onAwake() {
-    this.material_ = new UnlitMaterial(this.engine);
-    this.renderer_ = this.entity.addComponent(MeshRenderer);
-    this.renderer_.setMaterial(this.material_);
+    this._material = new UnlitMaterial(this.engine);
+    this._renderer = this.entity.addComponent(MeshRenderer);
+    this._renderer.setMaterial(this._material);
   }
 
   /**
    * @override
    */
   onEnable() {
-    this.renderer_._onEnable();
+    this._renderer.enabled = true;
   }
 
   /**
    * @override
    */
   onDisable() {
-    this.renderer_._onDisable();
+    this._renderer.enabled = false;
   }
 
   /**
@@ -298,51 +283,52 @@ export class AuxiliaryManager extends Script {
    * @param deltaTime
    */
   onUpdate(deltaTime: number) {
-    if (this.isLocalDirty_) {
-      const indices = this.indices_;
+    if (this._isLocalDirty) {
+      const indices = this._indices;
       const indicesCount = indices.length;
-      this.indicesArray_ = AuxiliaryManager._generateIndices(this.engine, this.localPositions_.length, indicesCount);
-      const indicesArray = this.indicesArray_;
+      this._indicesArray = WireFrameManager._generateIndices(this.engine, this._localPositions.length, indicesCount);
+      const indicesArray = this._indicesArray;
       for (let i = 0; i < indicesCount; i++) {
         indicesArray[i] = indices[i];
       }
     }
 
-    if (this.isLocalDirty_ || this.needUpdate) {
-      this.mesh_ && this.mesh_.destroy();
-      this.mesh_ = new ModelMesh(this.engine);
-      const mesh = this.mesh_;
+    if (this._isLocalDirty || this.needUpdate) {
+      this._mesh && this._mesh.destroy();
+      this._mesh = new ModelMesh(this.engine);
+      const mesh = this._mesh;
 
-      const localPositions = this.localPositions_;
+      const localPositions = this._localPositions;
       const localPositionLength = localPositions.length;
-      this.globalPositions_.length = localPositionLength;
-      const globalPositions = this.globalPositions_;
-      const transforms = this.transforms_;
+      this._globalPositions.length = localPositionLength;
+      const globalPositions = this._globalPositions;
+      const wireframeElements = this._wireframeElements;
       let positionIndex = 0;
-      for (let i = 0, n = transforms.length; i < n; i++) {
-        const transform = transforms[i];
+      for (let i = 0, n = wireframeElements.length; i < n; i++) {
+        const wireframeElement = wireframeElements[i];
+        const transform = wireframeElement.transform;
         let worldMatrix: Matrix;
-        if (this.transformNoScaleFlag[i]) {
-          worldMatrix = AuxiliaryManager.tempMatrix;
+        if (wireframeElement.transformNoScale) {
+          worldMatrix = WireFrameManager._tempMatrix;
           Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
         } else {
           worldMatrix = transform.worldMatrix;
         }
 
-        const beginIndex = this.transformRanges_[i];
+        const beginIndex = wireframeElement.transformRanges;
         let endIndex = localPositionLength;
         if (i != n - 1) {
-          endIndex = this.transformRanges_[i + 1];
+          endIndex = wireframeElements[i + 1].transformRanges;
         }
 
         for (let j = beginIndex; j < endIndex; j++) {
           const localPosition = localPositions[positionIndex];
           let globalPosition: Vector3;
-          if (positionIndex < AuxiliaryManager.positionPool_.length) {
-            globalPosition = AuxiliaryManager.positionPool_[positionIndex];
+          if (positionIndex < WireFrameManager._positionPool.length) {
+            globalPosition = WireFrameManager._positionPool[positionIndex];
           } else {
             globalPosition = new Vector3();
-            AuxiliaryManager.positionPool_.push(globalPosition);
+            WireFrameManager._positionPool.push(globalPosition);
           }
           Vector3.transformCoordinate(localPosition, worldMatrix, globalPosition);
           globalPositions[positionIndex] = globalPosition;
@@ -351,12 +337,12 @@ export class AuxiliaryManager extends Script {
       }
 
       mesh.setPositions(globalPositions);
-      mesh.setIndices(this.indicesArray_);
+      mesh.setIndices(this._indicesArray);
       mesh.uploadData(true);
-      mesh.addSubMesh(0, this.indices_.length, MeshTopology.Lines);
-      this.renderer_.mesh = mesh;
+      mesh.addSubMesh(0, this._indices.length, MeshTopology.Lines);
+      this._renderer.mesh = mesh;
     }
     this.needUpdate = false;
-    this.isLocalDirty_ = false;
+    this._isLocalDirty = false;
   }
 }
