@@ -15,13 +15,16 @@ import {
   Camera,
   Matrix,
   SpotLight,
-  DirectLight
+  DirectLight,
+  Collider,
+  Entity,
+  DynamicCollider,
+  StaticCollider
 } from "oasis-engine";
 import { WireFramePrimitive } from "./WireFramePrimitive";
 
 class WireframeElement {
-  constructor(public transform: Transform, public transformNoScale: boolean, public transformRanges: number) {
-  }
+  constructor(public transform: Transform, public transformNoScale: boolean, public transformRanges: number) {}
 }
 
 /**
@@ -68,10 +71,57 @@ export class WireFrameManager extends Script {
   }
 
   /**
+   * Create auxiliary mesh for entity.
+   * @param entity - The entity
+   * @param includeChildren - whether include child entity(default is true)
+   */
+  addEntityWireframe(entity: Entity, includeChildren: boolean = true) {
+    if (includeChildren) {
+      const cameras: Camera[] = [];
+      entity.getComponentsIncludeChildren(Camera, cameras);
+      for (let i = 0, n = cameras.length; i < n; i++) {
+        this.addCameraWireframe(cameras[i]);
+      }
+      const spots: SpotLight[] = [];
+      entity.getComponentsIncludeChildren(SpotLight, spots);
+      for (let i = 0, n = spots.length; i < n; i++) {
+        this.addSpotLightWireframe(spots[i]);
+      }
+      const directs: DirectLight[] = [];
+      entity.getComponentsIncludeChildren(DirectLight, directs);
+      for (let i = 0, n = directs.length; i < n; i++) {
+        this.addDirectLightWireframe(directs[i]);
+      }
+      const points: PointLight[] = [];
+      entity.getComponentsIncludeChildren(PointLight, points);
+      for (let i = 0, n = points.length; i < n; i++) {
+        this.addPointLightWireframe(points[i]);
+      }
+      const dynamics: DynamicCollider[] = [];
+      entity.getComponentsIncludeChildren(DynamicCollider, dynamics);
+      for (let i = 0, n = dynamics.length; i < n; i++) {
+        this.addColliderAuxiliary(dynamics[i]);
+      }
+      const statics: StaticCollider[] = [];
+      entity.getComponentsIncludeChildren(StaticCollider, statics);
+      for (let i = 0, n = statics.length; i < n; i++) {
+        this.addColliderAuxiliary(statics[i]);
+      }
+    } else {
+      this.addCameraWireframe(entity.getComponent(Camera));
+      this.addSpotLightWireframe(entity.getComponent(SpotLight));
+      this.addDirectLightWireframe(entity.getComponent(DirectLight));
+      this.addPointLightWireframe(entity.getComponent(PointLight));
+      this.addColliderAuxiliary(entity.getComponent(DynamicCollider));
+      this.addColliderAuxiliary(entity.getComponent(StaticCollider));
+    }
+  }
+
+  /**
    * Create auxiliary mesh for camera.
    * @param camera - The Camera
    */
-  addCameraAuxiliary(camera: Camera) {
+  addCameraWireframe(camera: Camera) {
     const transform = camera.entity.transform;
     const inverseProj = camera.projectionMatrix.clone();
     inverseProj.invert();
@@ -132,7 +182,7 @@ export class WireFrameManager extends Script {
    * Create auxiliary mesh for spot light.
    * @param light - The SpotLight
    */
-  addSpotLightAuxiliary(light: SpotLight) {
+  addSpotLightWireframe(light: SpotLight) {
     const transform = light.entity.transform;
     const height = light.distance;
     const radius = Math.tan(light.angle) * height;
@@ -148,7 +198,7 @@ export class WireFrameManager extends Script {
    * Create auxiliary mesh for point light.
    * @param light - The PointLight
    */
-  addPointLightAuxiliary(light: PointLight) {
+  addPointLightWireframe(light: PointLight) {
     const transform = light.entity.transform;
     const distance = light.distance;
 
@@ -163,7 +213,7 @@ export class WireFrameManager extends Script {
    * Create auxiliary mesh for directional light.
    * @param light - The DirectLight
    */
-  addDirectLightAuxiliary(light: DirectLight) {
+  addDirectLightWireframe(light: DirectLight) {
     const transform = light.entity.transform;
 
     const localPositions = this._localPositions;
@@ -174,10 +224,28 @@ export class WireFrameManager extends Script {
   }
 
   /**
+   * Create auxiliary mesh for collider
+   * @param collider - The Collider
+   */
+  addColliderAuxiliary(collider: Collider) {
+    const shapes = collider.shapes;
+    for (let i = 0, n = shapes.length; i < n; i++) {
+      const shape = shapes[i];
+      if (shape instanceof BoxColliderShape) {
+        this.addBoxColliderShapeWireframe(shape);
+      } else if (shape instanceof SphereColliderShape) {
+        this.addSphereColliderShapeWireframe(shape);
+      } else if (shape instanceof CapsuleColliderShape) {
+        this.addCapsuleColliderShapeWireframe(shape);
+      }
+    }
+  }
+
+  /**
    * Create auxiliary mesh for box collider shape.
    * @param shape - The BoxColliderShape
    */
-  addBoxColliderShapeAuxiliary(shape: BoxColliderShape) {
+  addBoxColliderShapeWireframe(shape: BoxColliderShape) {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
     const size = shape.size;
@@ -200,7 +268,7 @@ export class WireFrameManager extends Script {
    * Create auxiliary mesh for sphere collider shape.
    * @param shape - The SphereColliderShape
    */
-  addSphereColliderShapeAuxiliary(shape: SphereColliderShape) {
+  addSphereColliderShapeWireframe(shape: SphereColliderShape) {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
     const radius = shape.radius;
@@ -221,7 +289,7 @@ export class WireFrameManager extends Script {
    * Create auxiliary mesh for capsule collider shape.
    * @param shape - The CapsuleColliderShape
    */
-  addCapsuleColliderShapeAuxiliary(shape: CapsuleColliderShape) {
+  addCapsuleColliderShapeWireframe(shape: CapsuleColliderShape) {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
     const maxScale = Math.max(worldScale.x, worldScale.y, worldScale.z);
