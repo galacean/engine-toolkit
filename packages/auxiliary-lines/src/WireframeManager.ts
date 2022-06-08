@@ -65,7 +65,7 @@ export class WireframeManager extends Script {
     this._localPositions.length = 0;
     this._globalPositions.length = 0;
     this._indicesCount = 0;
-    this._mesh.clearSubMesh();
+    this._mesh.subMesh.count = 0;
   }
 
   /**
@@ -395,12 +395,16 @@ export class WireframeManager extends Script {
     this._supportUint32Array = this.engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
     this._indices = this._supportUint32Array ? new Uint32Array(128) : new Uint16Array(128);
 
-    this._mesh = new ModelMesh(this.engine);
-    this._material = new UnlitMaterial(this.engine);
     const renderer = this.entity.getComponent(MeshRenderer);
-    renderer.setMaterial(this._material);
-    renderer.mesh = this._mesh;
     this._renderer = renderer;
+
+    const mesh = new ModelMesh(this.engine);
+    mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
+    renderer.mesh = mesh;
+    this._mesh = mesh;
+
+    this._material = new UnlitMaterial(this.engine);
+    renderer.setMaterial(this._material);
   }
 
   /**
@@ -430,6 +434,7 @@ export class WireframeManager extends Script {
     const globalPositions = this._globalPositions;
     const wireframeElements = this._wireframeElements;
     let positionIndex = 0;
+    let needUpdate = false;
     for (let i = 0, n = wireframeElements.length; i < n; i++) {
       const wireframeElement = wireframeElements[i];
       const beginIndex = wireframeElement.transformRanges;
@@ -455,15 +460,17 @@ export class WireframeManager extends Script {
           positionIndex++;
         }
         wireframeElement.updateFlag.flag = false;
+        needUpdate = true;
       } else {
         positionIndex += endIndex - beginIndex;
       }
     }
 
-    mesh.setPositions(globalPositions);
-    mesh.setIndices(this._indices);
-    mesh.uploadData(false);
-    mesh.clearSubMesh();
-    mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
+    if (needUpdate) {
+      mesh.setPositions(globalPositions);
+      mesh.setIndices(this._indices);
+      mesh.uploadData(false);
+      mesh.subMesh.count = this._indicesCount;
+    }
   }
 }
