@@ -75,7 +75,7 @@ export class WireframePrimitive {
     positions: Vector3[],
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
-  ) {
+  ): void {
     const halfWidth: number = width / 2;
     const halfHeight: number = height / 2;
     const halfDepth: number = depth / 2;
@@ -192,7 +192,7 @@ export class WireframePrimitive {
     positions: Vector3[],
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
-  ) {
+  ): void {
     const shift = new Vector3();
 
     // X
@@ -238,7 +238,7 @@ export class WireframePrimitive {
     positions: Vector3[],
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
-  ) {
+  ): void {
     const shift = new Vector3();
 
     // Y
@@ -277,7 +277,7 @@ export class WireframePrimitive {
     positions: Vector3[],
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
-  ) {
+  ): void {
     const height = 5;
     const shift = new Vector3();
 
@@ -313,7 +313,7 @@ export class WireframePrimitive {
     positions: Vector3[],
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
-  ) {
+  ): void {
     const circleIndicesCount = WireframePrimitive.circleIndicesCount;
     const vertexCount = WireframePrimitive.vertexCount;
     const shift = new Vector3();
@@ -376,7 +376,7 @@ export class WireframePrimitive {
     positions: Vector3[],
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
-  ) {
+  ): void {
     const vertexCount = WireframePrimitive.vertexCount;
 
     const twoPi = Math.PI * 2;
@@ -432,7 +432,7 @@ export class WireframePrimitive {
     positions: Vector3[],
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
-  ) {
+  ): void {
     const vertexCount = WireframePrimitive.vertexCount;
     const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
