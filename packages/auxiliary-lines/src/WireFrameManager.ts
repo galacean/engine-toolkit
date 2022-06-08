@@ -116,12 +116,18 @@ export class WireFrameManager extends Script {
         this.addColliderAuxiliary(statics[i]);
       }
     } else {
-      this.addCameraWireframe(entity.getComponent(Camera));
-      this.addSpotLightWireframe(entity.getComponent(SpotLight));
-      this.addDirectLightWireframe(entity.getComponent(DirectLight));
-      this.addPointLightWireframe(entity.getComponent(PointLight));
-      this.addColliderAuxiliary(entity.getComponent(DynamicCollider));
-      this.addColliderAuxiliary(entity.getComponent(StaticCollider));
+      const camera = entity.getComponent(Camera);
+      camera && this.addCameraWireframe(camera);
+      const spotLight = entity.getComponent(SpotLight);
+      spotLight && this.addSpotLightWireframe(spotLight);
+      const directLight = entity.getComponent(DirectLight);
+      directLight && this.addDirectLightWireframe(directLight);
+      const pointLight = entity.getComponent(PointLight);
+      pointLight && this.addPointLightWireframe(pointLight);
+      let collider: Collider = entity.getComponent(DynamicCollider);
+      collider && this.addColliderAuxiliary(collider);
+      collider = entity.getComponent(StaticCollider);
+      collider && this.addColliderAuxiliary(collider);
     }
   }
 
