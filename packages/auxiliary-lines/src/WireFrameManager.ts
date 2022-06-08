@@ -427,6 +427,11 @@ export class WireFrameManager extends Script {
     let positionIndex = 0;
     for (let i = 0, n = wireframeElements.length; i < n; i++) {
       const wireframeElement = wireframeElements[i];
+      const beginIndex = wireframeElement.transformRanges;
+      let endIndex = localPositionLength;
+      if (i != n - 1) {
+        endIndex = wireframeElements[i + 1].transformRanges;
+      }
       if (wireframeElement.updateFlag.flag) {
         const transform = wireframeElement.transform;
         let worldMatrix: Matrix;
@@ -435,12 +440,6 @@ export class WireFrameManager extends Script {
           Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
         } else {
           worldMatrix = transform.worldMatrix;
-        }
-
-        const beginIndex = wireframeElement.transformRanges;
-        let endIndex = localPositionLength;
-        if (i != n - 1) {
-          endIndex = wireframeElements[i + 1].transformRanges;
         }
 
         for (let j = beginIndex; j < endIndex; j++) {
@@ -457,12 +456,14 @@ export class WireFrameManager extends Script {
           positionIndex++;
         }
         wireframeElement.updateFlag.flag = false;
+      } else {
+        positionIndex += endIndex - beginIndex;
       }
     }
 
     mesh.setPositions(globalPositions);
     mesh.setIndices(this._indices);
-    mesh.uploadData(true);
+    mesh.uploadData(false);
     mesh.clearSubMesh();
     mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
   }
