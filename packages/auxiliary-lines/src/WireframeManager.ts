@@ -48,6 +48,18 @@ export class WireframeManager extends Script {
   private _material: UnlitMaterial;
   private _mesh: ModelMesh;
 
+  private static _getPositionFromPool(positionIndex: number): Vector3 {
+    let position: Vector3;
+    const positionPool = WireframeManager._positionPool;
+    if (positionIndex < positionPool.length) {
+      position = positionPool[positionIndex];
+    } else {
+      position = new Vector3();
+      WireframeManager._positionPool.push(position);
+    }
+    return position;
+  }
+
   /**
    * Clear all wireframe.
    */
@@ -141,31 +153,31 @@ export class WireframeManager extends Script {
     }
 
     this._growthIndexMemory(24);
-    const indicesArray = this._indices;
-    indicesArray[this._indicesCount++] = positionsOffset;
-    indicesArray[this._indicesCount++] = positionsOffset + 1;
-    indicesArray[this._indicesCount++] = positionsOffset + 1;
-    indicesArray[this._indicesCount++] = positionsOffset + 2;
-    indicesArray[this._indicesCount++] = positionsOffset + 2;
-    indicesArray[this._indicesCount++] = positionsOffset + 3;
-    indicesArray[this._indicesCount++] = positionsOffset + 3;
-    indicesArray[this._indicesCount++] = positionsOffset; // front
-    indicesArray[this._indicesCount++] = positionsOffset;
-    indicesArray[this._indicesCount++] = positionsOffset + 4;
-    indicesArray[this._indicesCount++] = positionsOffset + 1;
-    indicesArray[this._indicesCount++] = positionsOffset + 5;
-    indicesArray[this._indicesCount++] = positionsOffset + 2;
-    indicesArray[this._indicesCount++] = positionsOffset + 6;
-    indicesArray[this._indicesCount++] = positionsOffset + 3;
-    indicesArray[this._indicesCount++] = positionsOffset + 7; // link
-    indicesArray[this._indicesCount++] = positionsOffset + 4;
-    indicesArray[this._indicesCount++] = positionsOffset + 5;
-    indicesArray[this._indicesCount++] = positionsOffset + 5;
-    indicesArray[this._indicesCount++] = positionsOffset + 6;
-    indicesArray[this._indicesCount++] = positionsOffset + 6;
-    indicesArray[this._indicesCount++] = positionsOffset + 7;
-    indicesArray[this._indicesCount++] = positionsOffset + 7;
-    indicesArray[this._indicesCount++] = positionsOffset + 4; // back
+    const indices = this._indices;
+    indices[this._indicesCount++] = positionsOffset;
+    indices[this._indicesCount++] = positionsOffset + 1;
+    indices[this._indicesCount++] = positionsOffset + 1;
+    indices[this._indicesCount++] = positionsOffset + 2;
+    indices[this._indicesCount++] = positionsOffset + 2;
+    indices[this._indicesCount++] = positionsOffset + 3;
+    indices[this._indicesCount++] = positionsOffset + 3;
+    indices[this._indicesCount++] = positionsOffset; // front
+    indices[this._indicesCount++] = positionsOffset;
+    indices[this._indicesCount++] = positionsOffset + 4;
+    indices[this._indicesCount++] = positionsOffset + 1;
+    indices[this._indicesCount++] = positionsOffset + 5;
+    indices[this._indicesCount++] = positionsOffset + 2;
+    indices[this._indicesCount++] = positionsOffset + 6;
+    indices[this._indicesCount++] = positionsOffset + 3;
+    indices[this._indicesCount++] = positionsOffset + 7; // link
+    indices[this._indicesCount++] = positionsOffset + 4;
+    indices[this._indicesCount++] = positionsOffset + 5;
+    indices[this._indicesCount++] = positionsOffset + 5;
+    indices[this._indicesCount++] = positionsOffset + 6;
+    indices[this._indicesCount++] = positionsOffset + 6;
+    indices[this._indicesCount++] = positionsOffset + 7;
+    indices[this._indicesCount++] = positionsOffset + 7;
+    indices[this._indicesCount++] = positionsOffset + 4; // back
   }
 
   /**
@@ -173,27 +185,26 @@ export class WireframeManager extends Script {
    * @param light - The SpotLight
    */
   addSpotLightWireframe(light: SpotLight): void {
-    const transform = light.entity.transform;
     const height = light.distance;
     const radius = Math.tan(light.angle) * height;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
+    const coneIndicesCount = WireframePrimitive.coneIndexCount;
 
-    const coneIndicesCount = WireframePrimitive.coneIndicesCount;
     this._growthIndexMemory(coneIndicesCount);
-    const indicesArray = this._indices;
+    const indices = this._indices;
     WireframePrimitive.createConeWireframe(
       radius,
       height,
-      positionsOffset,
       localPositions,
-      indicesArray,
+      positionsOffset,
+      indices,
       this._indicesCount
     );
     this._indicesCount += coneIndicesCount;
 
-    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
 
   /**
@@ -201,25 +212,22 @@ export class WireframeManager extends Script {
    * @param light - The PointLight
    */
   addPointLightWireframe(light: PointLight): void {
-    const transform = light.entity.transform;
-    const distance = light.distance;
-
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
+    const sphereIndicesCount = WireframePrimitive.sphereIndexCount;
 
-    const sphereIndicesCount = WireframePrimitive.sphereIndicesCount;
     this._growthIndexMemory(sphereIndicesCount);
-    const indicesArray = this._indices;
+    const indices = this._indices;
     WireframePrimitive.createSphereWireframe(
-      distance,
-      positionsOffset,
+      light.distance,
       localPositions,
-      indicesArray,
+      positionsOffset,
+      indices,
       this._indicesCount
     );
     this._indicesCount += sphereIndicesCount;
 
-    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
 
   /**
@@ -227,24 +235,16 @@ export class WireframeManager extends Script {
    * @param light - The DirectLight
    */
   addDirectLightWireframe(light: DirectLight): void {
-    const transform = light.entity.transform;
-
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
+    const unboundCylinderIndicesCount = WireframePrimitive.unboundCylinderIndexCount;
 
-    const unboundCylinderIndicesCount = WireframePrimitive.unboundCylinderIndicesCount;
     this._growthIndexMemory(unboundCylinderIndicesCount);
-    const indicesArray = this._indices;
-    WireframePrimitive.createUnboundCylinderWireframe(
-      1,
-      positionsOffset,
-      localPositions,
-      indicesArray,
-      this._indicesCount
-    );
+    const indices = this._indices;
+    WireframePrimitive.createUnboundCylinderWireframe(1, localPositions, positionsOffset, indices, this._indicesCount);
     this._indicesCount += unboundCylinderIndicesCount;
 
-    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
 
   /**
@@ -277,16 +277,16 @@ export class WireframeManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const cuboidIndicesCount = WireframePrimitive.cuboidIndicesCount;
+    const cuboidIndicesCount = WireframePrimitive.cuboidIndexCount;
     this._growthIndexMemory(cuboidIndicesCount);
-    const indicesArray = this._indices;
+    const indices = this._indices;
     WireframePrimitive.createCuboidWireframe(
       worldScale.x * size.x,
       worldScale.y * size.y,
       worldScale.z * size.z,
-      positionsOffset,
       localPositions,
-      indicesArray,
+      positionsOffset,
+      indices,
       this._indicesCount
     );
     this._indicesCount += cuboidIndicesCount;
@@ -306,14 +306,14 @@ export class WireframeManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const sphereIndicesCount = WireframePrimitive.sphereIndicesCount;
+    const sphereIndicesCount = WireframePrimitive.sphereIndexCount;
     this._growthIndexMemory(sphereIndicesCount);
-    const indicesArray = this._indices;
+    const indices = this._indices;
     WireframePrimitive.createSphereWireframe(
       Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
-      positionsOffset,
       localPositions,
-      indicesArray,
+      positionsOffset,
+      indices,
       this._indicesCount
     );
     this._indicesCount += sphereIndicesCount;
@@ -335,15 +335,15 @@ export class WireframeManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const capsuleIndicesCount = WireframePrimitive.capsuleIndicesCount;
+    const capsuleIndicesCount = WireframePrimitive.capsuleIndexCount;
     this._growthIndexMemory(capsuleIndicesCount);
-    const indicesArray = this._indices;
+    const indices = this._indices;
     WireframePrimitive.createCapsuleWireframe(
       maxScale * radius,
       maxScale * height,
-      positionsOffset,
       localPositions,
-      indicesArray,
+      positionsOffset,
+      indices,
       this._indicesCount
     );
     this._indicesCount += capsuleIndicesCount;
@@ -351,50 +351,25 @@ export class WireframeManager extends Script {
     this._wireframeElements.push(new WireframeElement(transform, false, positionsOffset));
   }
 
-  private _growthIndexMemory(length: number): void {
-    const indices = this._indices;
-    const neededLength = this._indicesCount + length;
-    if (neededLength > indices.length) {
-      const maxLength = this._supportUint32Array ? 65535 : 4294967295;
-      if (neededLength > maxLength) {
-        throw Error("The vertex count is over limit.");
-      }
-
-      const newIndices = this._supportUint32Array ? new Uint16Array(neededLength) : new Uint32Array(neededLength);
-      newIndices.set(indices);
-      this._indices = newIndices;
-    }
-  }
-
-  private static _getPositionFromPool(positionIndex: number): Vector3 {
-    let position: Vector3;
-    const positionPool = WireframeManager._positionPool;
-    if (positionIndex < positionPool.length) {
-      position = positionPool[positionIndex];
-    } else {
-      position = new Vector3();
-      WireframeManager._positionPool.push(position);
-    }
-    return position;
-  }
-
   /**
    * @override
    */
   onAwake(): void {
-    this._supportUint32Array = this.engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
-    this._indices = this._supportUint32Array ? new Uint32Array(128) : new Uint16Array(128);
-
+    const engine = this.engine;
+    const mesh = new ModelMesh(engine);
+    const material = new UnlitMaterial(engine);
     const renderer = this.entity.getComponent(MeshRenderer);
-    this._renderer = renderer;
+    const supportUint32Array = engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
 
-    const mesh = new ModelMesh(this.engine);
     mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
     renderer.mesh = mesh;
-    this._mesh = mesh;
+    renderer.setMaterial(material);
 
-    this._material = new UnlitMaterial(this.engine);
-    renderer.setMaterial(this._material);
+    this._mesh = mesh;
+    this._material = material;
+    this._renderer = renderer;
+    this._indices = supportUint32Array ? new Uint32Array(128) : new Uint16Array(128);
+    this._supportUint32Array = supportUint32Array;
   }
 
   /**
@@ -417,12 +392,12 @@ export class WireframeManager extends Script {
    */
   onUpdate(deltaTime: number): void {
     const mesh = this._mesh;
-
     const localPositions = this._localPositions;
-    const localPositionLength = localPositions.length;
-    this._globalPositions.length = localPositionLength;
     const globalPositions = this._globalPositions;
     const wireframeElements = this._wireframeElements;
+
+    const localPositionLength = localPositions.length;
+    globalPositions.length = localPositionLength;
     let positionIndex = 0;
     let needUpdate = false;
     for (let i = 0, n = wireframeElements.length; i < n; i++) {
@@ -458,6 +433,21 @@ export class WireframeManager extends Script {
       mesh.setIndices(this._indices);
       mesh.uploadData(false);
       mesh.subMesh.count = this._indicesCount;
+    }
+  }
+
+  private _growthIndexMemory(length: number): void {
+    const indices = this._indices;
+    const neededLength = this._indicesCount + length;
+    if (neededLength > indices.length) {
+      const maxLength = this._supportUint32Array ? 65535 : 4294967295;
+      if (neededLength > maxLength) {
+        throw Error("The vertex count is over limit.");
+      }
+
+      const newIndices = this._supportUint32Array ? new Uint16Array(neededLength) : new Uint32Array(neededLength);
+      newIndices.set(indices);
+      this._indices = newIndices;
     }
   }
 }
