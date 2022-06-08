@@ -2,7 +2,6 @@ import {
   BoxColliderShape,
   CapsuleColliderShape,
   SphereColliderShape,
-  Engine,
   GLCapabilityType,
   MeshRenderer,
   MeshTopology,
