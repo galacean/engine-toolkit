@@ -108,12 +108,12 @@ export class WireFrameManager extends Script {
       const dynamics: DynamicCollider[] = [];
       entity.getComponentsIncludeChildren(DynamicCollider, dynamics);
       for (let i = 0, n = dynamics.length; i < n; i++) {
-        this.addColliderAuxiliary(dynamics[i]);
+        this.addCollideWireframe(dynamics[i]);
       }
       const statics: StaticCollider[] = [];
       entity.getComponentsIncludeChildren(StaticCollider, statics);
       for (let i = 0, n = statics.length; i < n; i++) {
-        this.addColliderAuxiliary(statics[i]);
+        this.addCollideWireframe(statics[i]);
       }
     } else {
       const camera = entity.getComponent(Camera);
@@ -125,9 +125,9 @@ export class WireFrameManager extends Script {
       const pointLight = entity.getComponent(PointLight);
       pointLight && this.addPointLightWireframe(pointLight);
       let collider: Collider = entity.getComponent(DynamicCollider);
-      collider && this.addColliderAuxiliary(collider);
+      collider && this.addCollideWireframe(collider);
       collider = entity.getComponent(StaticCollider);
-      collider && this.addColliderAuxiliary(collider);
+      collider && this.addCollideWireframe(collider);
     }
   }
 
@@ -277,7 +277,7 @@ export class WireFrameManager extends Script {
    * Create auxiliary mesh for collider
    * @param collider - The Collider
    */
-  addColliderAuxiliary(collider: Collider) {
+  addCollideWireframe(collider: Collider) {
     const shapes = collider.shapes;
     for (let i = 0, n = shapes.length; i < n; i++) {
       const shape = shapes[i];
