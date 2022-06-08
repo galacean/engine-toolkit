@@ -43,8 +43,8 @@ export class WireFrameManager extends Script {
   private _isLocalDirty: boolean = true;
   private _localPositions: Vector3[] = [];
   private _globalPositions: Vector3[] = [];
-  private _indices: number[] = [];
   private _indicesArray: Uint16Array | Uint32Array = null;
+  private _indicesCount: number = 0;
 
   private _wireframeElements: WireframeElement[] = [];
   private _renderer: MeshRenderer;
@@ -57,6 +57,15 @@ export class WireFrameManager extends Script {
    */
   public needUpdate: boolean = false;
 
+  constructor(entity: Entity) {
+    super(entity);
+    if (this.engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint)) {
+      this._indicesArray = new Uint32Array(0);
+    } else {
+      this._indicesArray = new Uint16Array(0);
+    }
+  }
+
   /**
    * clear all cache info
    */
@@ -65,8 +74,7 @@ export class WireFrameManager extends Script {
 
     this._localPositions.length = 0;
     this._globalPositions.length = 0;
-    this._indices.length = 0;
-    this._indicesArray = null;
+    this._indicesCount = 0;
     this._isLocalDirty = true;
   }
 
@@ -149,33 +157,32 @@ export class WireFrameManager extends Script {
       localPositions.push(newPosition);
     }
 
-    const indices = this._indices;
-    indices.push(
-      OldPositionsLength,
-      1 + OldPositionsLength,
-      1 + OldPositionsLength,
-      2 + OldPositionsLength,
-      2 + OldPositionsLength,
-      3 + OldPositionsLength,
-      3 + OldPositionsLength,
-      OldPositionsLength, // front
-      OldPositionsLength,
-      4 + OldPositionsLength,
-      1 + OldPositionsLength,
-      5 + OldPositionsLength,
-      2 + OldPositionsLength,
-      6 + OldPositionsLength,
-      3 + OldPositionsLength,
-      7 + OldPositionsLength, // link
-      4 + OldPositionsLength,
-      5 + OldPositionsLength,
-      5 + OldPositionsLength,
-      6 + OldPositionsLength,
-      6 + OldPositionsLength,
-      7 + OldPositionsLength,
-      7 + OldPositionsLength,
-      4 + OldPositionsLength // back
-    );
+    this._growthMemory(24);
+    const indicesArray = this._indicesArray;
+    indicesArray[this._indicesCount++] = OldPositionsLength;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 1;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 1;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 2;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 2;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 3;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 3;
+    indicesArray[this._indicesCount++] = OldPositionsLength; // front
+    indicesArray[this._indicesCount++] = OldPositionsLength;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 4;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 1;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 5;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 2;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 6;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 3;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 7; // link
+    indicesArray[this._indicesCount++] = OldPositionsLength + 4;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 5;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 5;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 6;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 6;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 7;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 7;
+    indicesArray[this._indicesCount++] = OldPositionsLength + 4; // back
   }
 
   /**
@@ -189,7 +196,20 @@ export class WireFrameManager extends Script {
 
     const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    WireFramePrimitive.createConeWireFrame(radius, height, OldPositionsLength, localPositions, this._indices);
+
+    const coneIndicesCount = WireFramePrimitive.coneIndicesCount;
+    this._growthMemory(coneIndicesCount);
+    const indicesArray = this._indicesArray;
+    WireFramePrimitive.createConeWireFrame(
+      radius,
+      height,
+      OldPositionsLength,
+      localPositions,
+      indicesArray,
+      this._indicesCount
+    );
+    this._indicesCount += coneIndicesCount;
+
     this._isLocalDirty = true;
     this._wireframeElements.push(new WireframeElement(transform, true, OldPositionsLength));
   }
@@ -204,7 +224,19 @@ export class WireFrameManager extends Script {
 
     const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    WireFramePrimitive.createSphereWireFrame(distance, OldPositionsLength, localPositions, this._indices);
+
+    const sphereIndicesCount = WireFramePrimitive.sphereIndicesCount;
+    this._growthMemory(sphereIndicesCount);
+    const indicesArray = this._indicesArray;
+    WireFramePrimitive.createSphereWireFrame(
+      distance,
+      OldPositionsLength,
+      localPositions,
+      indicesArray,
+      this._indicesCount
+    );
+    this._indicesCount += sphereIndicesCount;
+
     this._isLocalDirty = true;
     this._wireframeElements.push(new WireframeElement(transform, true, OldPositionsLength));
   }
@@ -218,7 +250,19 @@ export class WireFrameManager extends Script {
 
     const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
-    WireFramePrimitive.createUnboundCylinderWireFrame(1, OldPositionsLength, localPositions, this._indices);
+
+    const unboundCylinderIndicesCount = WireFramePrimitive.unboundCylinderIndicesCount;
+    this._growthMemory(unboundCylinderIndicesCount);
+    const indicesArray = this._indicesArray;
+    WireFramePrimitive.createUnboundCylinderWireFrame(
+      1,
+      OldPositionsLength,
+      localPositions,
+      indicesArray,
+      this._indicesCount
+    );
+    this._indicesCount += unboundCylinderIndicesCount;
+
     this._isLocalDirty = true;
     this._wireframeElements.push(new WireframeElement(transform, true, OldPositionsLength));
   }
@@ -252,14 +296,21 @@ export class WireFrameManager extends Script {
 
     const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
+
+    const cuboidIndicesCount = WireFramePrimitive.cuboidIndicesCount;
+    this._growthMemory(cuboidIndicesCount);
+    const indicesArray = this._indicesArray;
     WireFramePrimitive.createCuboidWireFrame(
       worldScale.x * size.x,
       worldScale.y * size.y,
       worldScale.z * size.z,
       OldPositionsLength,
       localPositions,
-      this._indices
+      indicesArray,
+      this._indicesCount
     );
+    this._indicesCount += cuboidIndicesCount;
+
     this._isLocalDirty = true;
     this._wireframeElements.push(new WireframeElement(transform, false, OldPositionsLength));
   }
@@ -275,12 +326,19 @@ export class WireFrameManager extends Script {
 
     const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
+
+    const sphereIndicesCount = WireFramePrimitive.sphereIndicesCount;
+    this._growthMemory(sphereIndicesCount);
+    const indicesArray = this._indicesArray;
     WireFramePrimitive.createSphereWireFrame(
       Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
       OldPositionsLength,
       localPositions,
-      this._indices
+      indicesArray,
+      this._indicesCount
     );
+    this._indicesCount += sphereIndicesCount;
+
     this._isLocalDirty = true;
     this._wireframeElements.push(new WireframeElement(transform, false, OldPositionsLength));
   }
@@ -298,29 +356,46 @@ export class WireFrameManager extends Script {
 
     const localPositions = this._localPositions;
     const OldPositionsLength = localPositions.length;
+
+    const capsuleIndicesCount = WireFramePrimitive.capsuleIndicesCount;
+    this._growthMemory(capsuleIndicesCount);
+    const indicesArray = this._indicesArray;
     WireFramePrimitive.createCapsuleWireFrame(
       maxScale * radius,
       maxScale * height,
       OldPositionsLength,
       localPositions,
-      this._indices
+      indicesArray,
+      this._indicesCount
     );
+    this._indicesCount += capsuleIndicesCount;
+
     this._isLocalDirty = true;
     this._wireframeElements.push(new WireframeElement(transform, false, OldPositionsLength));
   }
 
-  private static _generateIndices(engine: Engine, vertexCount: number, indexCount: number): Uint16Array | Uint32Array {
-    let indices: Uint16Array | Uint32Array = null;
-    if (vertexCount > 65535) {
-      if (engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint)) {
-        indices = new Uint32Array(indexCount);
+  private _growthMemory(length: number) {
+    const indicesArray = this._indicesArray;
+    const newArrayLength = this._indicesCount + length;
+    if (newArrayLength > indicesArray.length) {
+      if (indicesArray instanceof Uint16Array) {
+        if (newArrayLength > 65535) {
+          throw Error("The vertex count is over limit.");
+        } else {
+          const newArray = new Uint16Array(newArrayLength);
+          for (let i = 0, n = indicesArray.length; i < n; i++) {
+            newArray[i] = indicesArray[i];
+          }
+          this._indicesArray = newArray;
+        }
       } else {
-        throw Error("The vertex count is over limit.");
+        const newArray = new Uint32Array(newArrayLength);
+        for (let i = 0, n = indicesArray.length; i < n; i++) {
+          newArray[i] = indicesArray[i];
+        }
+        this._indicesArray = newArray;
       }
-    } else {
-      indices = new Uint16Array(indexCount);
     }
-    return indices;
   }
 
   /**
@@ -351,16 +426,6 @@ export class WireFrameManager extends Script {
    * @param deltaTime
    */
   onUpdate(deltaTime: number) {
-    if (this._isLocalDirty) {
-      const indices = this._indices;
-      const indicesCount = indices.length;
-      this._indicesArray = WireFrameManager._generateIndices(this.engine, this._localPositions.length, indicesCount);
-      const indicesArray = this._indicesArray;
-      for (let i = 0; i < indicesCount; i++) {
-        indicesArray[i] = indices[i];
-      }
-    }
-
     if (this._isLocalDirty || this.needUpdate) {
       this._mesh && this._mesh.destroy();
       this._mesh = new ModelMesh(this.engine);
@@ -407,7 +472,7 @@ export class WireFrameManager extends Script {
       mesh.setPositions(globalPositions);
       mesh.setIndices(this._indicesArray);
       mesh.uploadData(true);
-      mesh.addSubMesh(0, this._indices.length, MeshTopology.Lines);
+      mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
       this._renderer.mesh = mesh;
     }
     this.needUpdate = false;

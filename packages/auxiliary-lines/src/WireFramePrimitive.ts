@@ -8,6 +8,55 @@ export class WireFramePrimitive {
   static vertexCount = 40;
 
   /**
+   * Get cuboid wire frame indices count
+   */
+  static get cuboidIndicesCount(): number {
+    return 48;
+  }
+
+  /**
+   * Get sphere wire frame indices count
+   */
+  static get sphereIndicesCount(): number {
+    return WireFramePrimitive.circleIndicesCount * 3;
+  }
+
+  /**
+   * Get cone wire frame indices count
+   */
+  static get coneIndicesCount(): number {
+    return WireFramePrimitive.circleIndicesCount + 8;
+  }
+
+  /**
+   * Get unbound cylinder wire frame indices count
+   */
+  static get unboundCylinderIndicesCount(): number {
+    return WireFramePrimitive.circleIndicesCount + 16;
+  }
+
+  /**
+   * Get capsule wire frame indices count
+   */
+  static get capsuleIndicesCount(): number {
+    return (WireFramePrimitive.circleIndicesCount + WireFramePrimitive.ellipticIndicesCount) * 2;
+  }
+
+  /**
+   * Get circle wire frame indices count
+   */
+  static get circleIndicesCount(): number {
+    return WireFramePrimitive.vertexCount * 2;
+  }
+
+  /**
+   * Get elliptic wire frame indices count
+   */
+  static get ellipticIndicesCount(): number {
+    return WireFramePrimitive.vertexCount * 2;
+  }
+
+  /**
    * Store cuboid wireframe mesh data.
    * The origin located in center of cuboid.
    * @param width - Cuboid width
@@ -16,6 +65,7 @@ export class WireFramePrimitive {
    * @param vertexBegin - The min of index list
    * @param positions - position array
    * @param indices - index array
+   * @param indicesOffset - index array offset
    */
   static createCuboidWireFrame(
     width: number,
@@ -23,7 +73,8 @@ export class WireFramePrimitive {
     depth: number,
     vertexBegin: number,
     positions: Vector3[],
-    indices: number[]
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
   ) {
     const halfWidth: number = width / 2;
     const halfHeight: number = height / 2;
@@ -66,71 +117,64 @@ export class WireFramePrimitive {
     positions.push(new Vector3(-halfWidth, -halfHeight, -halfDepth));
 
     // Up
-    indices.push(
-      vertexBegin,
-      1 + vertexBegin,
-      1 + vertexBegin,
-      2 + vertexBegin,
-      2 + vertexBegin,
-      3 + vertexBegin,
-      3 + vertexBegin,
-      vertexBegin
-    );
+    indices[indicesOffset++] = vertexBegin;
+    indices[indicesOffset++] = vertexBegin + 1;
+    indices[indicesOffset++] = vertexBegin + 1;
+    indices[indicesOffset++] = vertexBegin + 2;
+    indices[indicesOffset++] = vertexBegin + 2;
+    indices[indicesOffset++] = vertexBegin + 3;
+    indices[indicesOffset++] = vertexBegin + 3;
+    indices[indicesOffset++] = vertexBegin;
+
     // Down
-    indices.push(
-      4 + vertexBegin,
-      5 + vertexBegin,
-      5 + vertexBegin,
-      6 + vertexBegin,
-      6 + vertexBegin,
-      7 + vertexBegin,
-      7 + vertexBegin,
-      4 + vertexBegin
-    );
+    indices[indicesOffset++] = vertexBegin + 4;
+    indices[indicesOffset++] = vertexBegin + 5;
+    indices[indicesOffset++] = vertexBegin + 5;
+    indices[indicesOffset++] = vertexBegin + 6;
+    indices[indicesOffset++] = vertexBegin + 6;
+    indices[indicesOffset++] = vertexBegin + 7;
+    indices[indicesOffset++] = vertexBegin + 7;
+    indices[indicesOffset++] = vertexBegin + 4;
+
     // Left
-    indices.push(
-      8 + vertexBegin,
-      9 + vertexBegin,
-      9 + vertexBegin,
-      10 + vertexBegin,
-      10 + vertexBegin,
-      11 + vertexBegin,
-      11 + vertexBegin,
-      8 + vertexBegin
-    );
+    indices[indicesOffset++] = vertexBegin + 8;
+    indices[indicesOffset++] = vertexBegin + 9;
+    indices[indicesOffset++] = vertexBegin + 9;
+    indices[indicesOffset++] = vertexBegin + 10;
+    indices[indicesOffset++] = vertexBegin + 10;
+    indices[indicesOffset++] = vertexBegin + 11;
+    indices[indicesOffset++] = vertexBegin + 11;
+    indices[indicesOffset++] = vertexBegin + 8;
+
     // Right
-    indices.push(
-      12 + vertexBegin,
-      13 + vertexBegin,
-      13 + vertexBegin,
-      14 + vertexBegin,
-      14 + vertexBegin,
-      15 + vertexBegin,
-      15 + vertexBegin,
-      12 + vertexBegin
-    );
+    indices[indicesOffset++] = vertexBegin + 12;
+    indices[indicesOffset++] = vertexBegin + 13;
+    indices[indicesOffset++] = vertexBegin + 13;
+    indices[indicesOffset++] = vertexBegin + 14;
+    indices[indicesOffset++] = vertexBegin + 14;
+    indices[indicesOffset++] = vertexBegin + 15;
+    indices[indicesOffset++] = vertexBegin + 15;
+    indices[indicesOffset++] = vertexBegin + 12;
+
     // Front
-    indices.push(
-      16 + vertexBegin,
-      17 + vertexBegin,
-      17 + vertexBegin,
-      18 + vertexBegin,
-      18 + vertexBegin,
-      19 + vertexBegin,
-      19 + vertexBegin,
-      16 + vertexBegin
-    );
+    indices[indicesOffset++] = vertexBegin + 16;
+    indices[indicesOffset++] = vertexBegin + 17;
+    indices[indicesOffset++] = vertexBegin + 17;
+    indices[indicesOffset++] = vertexBegin + 18;
+    indices[indicesOffset++] = vertexBegin + 18;
+    indices[indicesOffset++] = vertexBegin + 19;
+    indices[indicesOffset++] = vertexBegin + 19;
+    indices[indicesOffset++] = vertexBegin + 16;
+
     // Back
-    indices.push(
-      20 + vertexBegin,
-      21 + vertexBegin,
-      21 + vertexBegin,
-      22 + vertexBegin,
-      22 + vertexBegin,
-      23 + vertexBegin,
-      23 + vertexBegin,
-      20 + vertexBegin
-    );
+    indices[indicesOffset++] = vertexBegin + 20;
+    indices[indicesOffset++] = vertexBegin + 21;
+    indices[indicesOffset++] = vertexBegin + 21;
+    indices[indicesOffset++] = vertexBegin + 22;
+    indices[indicesOffset++] = vertexBegin + 22;
+    indices[indicesOffset++] = vertexBegin + 23;
+    indices[indicesOffset++] = vertexBegin + 23;
+    indices[indicesOffset++] = vertexBegin + 20;
   }
 
   /**
@@ -140,23 +184,29 @@ export class WireFramePrimitive {
    * @param vertexBegin - The min of index list
    * @param positions - position array
    * @param indices - index array
+   * @param indicesOffset - index array offset
    */
-  static createSphereWireFrame(radius: number, vertexBegin: number, positions: Vector3[], indices: number[]) {
-    const vertexCount = WireFramePrimitive.vertexCount;
+  static createSphereWireFrame(
+    radius: number,
+    vertexBegin: number,
+    positions: Vector3[],
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
+  ) {
     const shift = new Vector3();
 
     // X
-    WireFramePrimitive.createCircleWireFrame(radius, 0, shift, vertexBegin, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(radius, 0, shift, vertexBegin, positions, indices, indicesOffset);
 
     // Y
     WireFramePrimitive.createCircleWireFrame(
       radius,
       1,
       shift,
-      vertexBegin + vertexCount,
-      vertexCount,
+      vertexBegin + WireFramePrimitive.vertexCount,
       positions,
-      indices
+      indices,
+      indicesOffset + WireFramePrimitive.circleIndicesCount
     );
 
     // Z
@@ -164,10 +214,10 @@ export class WireFramePrimitive {
       radius,
       2,
       shift,
-      vertexBegin + vertexCount * 2,
-      vertexCount,
+      vertexBegin + WireFramePrimitive.vertexCount * 2,
       positions,
-      indices
+      indices,
+      indicesOffset + WireFramePrimitive.circleIndicesCount * 2
     );
   }
 
@@ -179,37 +229,37 @@ export class WireFramePrimitive {
    * @param vertexBegin - The min of index list
    * @param positions - position array
    * @param indices - index array
+   * @param indicesOffset - index array offset
    */
   static createConeWireFrame(
     radius: number,
     height: number,
     vertexBegin: number,
     positions: Vector3[],
-    indices: number[]
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
   ) {
-    const vertexCount = WireFramePrimitive.vertexCount;
     const shift = new Vector3();
 
     // Y
     shift.y = -height;
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
 
     positions.push(new Vector3(0, height, 0));
     positions.push(new Vector3(-radius, -height, 0));
     positions.push(new Vector3(radius, -height, 0));
     positions.push(new Vector3(0, -height, radius));
     positions.push(new Vector3(0, -height, -radius));
-    const indexBegin = vertexBegin + vertexCount;
-    indices.push(
-      indexBegin,
-      indexBegin + 1,
-      indexBegin,
-      indexBegin + 2,
-      indexBegin,
-      indexBegin + 3,
-      indexBegin,
-      indexBegin + 4
-    );
+    const indexBegin = vertexBegin + WireFramePrimitive.vertexCount;
+    indicesOffset += WireFramePrimitive.circleIndicesCount;
+    indices[indicesOffset++] = indexBegin;
+    indices[indicesOffset++] = indexBegin + 1;
+    indices[indicesOffset++] = indexBegin;
+    indices[indicesOffset++] = indexBegin + 2;
+    indices[indicesOffset++] = indexBegin;
+    indices[indicesOffset++] = indexBegin + 3;
+    indices[indicesOffset++] = indexBegin;
+    indices[indicesOffset++] = indexBegin + 4;
   }
 
   /**
@@ -219,22 +269,30 @@ export class WireFramePrimitive {
    * @param vertexBegin - The min of index list
    * @param positions - position array
    * @param indices - index array
+   * @param indicesOffset - index array offset
    */
-  static createUnboundCylinderWireFrame(radius: number, vertexBegin: number, positions: Vector3[], indices: number[]) {
+  static createUnboundCylinderWireFrame(
+    radius: number,
+    vertexBegin: number,
+    positions: Vector3[],
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
+  ) {
     const height = 5;
-    const vertexCount = WireFramePrimitive.vertexCount;
     const shift = new Vector3();
 
     // Y
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
 
-    const indexBegin = vertexBegin + vertexCount;
+    const indexBegin = vertexBegin + WireFramePrimitive.vertexCount;
+    indicesOffset += WireFramePrimitive.circleIndicesCount;
     for (let i = 0; i < 8; i++) {
       let radian = MathUtil.degreeToRadian(45 * i);
       positions.push(new Vector3(radius * Math.cos(radian), 0, radius * Math.sin(radian)));
       positions.push(new Vector3(radius * Math.cos(radian), -height, radius * Math.sin(radian)));
 
-      indices.push(indexBegin + 2 * i, indexBegin + 2 * i + 1);
+      indices[indicesOffset + i * 2] = indexBegin + 2 * i;
+      indices[indicesOffset + i * 2 + 1] = indexBegin + 2 * i + 1;
     }
   }
 
@@ -246,21 +304,24 @@ export class WireFramePrimitive {
    * @param vertexBegin - The min of index list
    * @param positions - position array
    * @param indices - index array
+   * @param indicesOffset - index array offset
    */
   static createCapsuleWireFrame(
     radius: number,
     height: number,
     vertexBegin: number,
     positions: Vector3[],
-    indices: number[]
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
   ) {
+    const circleIndicesCount = WireFramePrimitive.circleIndicesCount;
     const vertexCount = WireFramePrimitive.vertexCount;
     const shift = new Vector3();
     const halfHeight = height / 2;
 
     // Y-Top
     shift.y = halfHeight;
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, vertexCount, positions, indices);
+    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
 
     // Y-Bottom
     shift.y = -halfHeight;
@@ -269,9 +330,9 @@ export class WireFramePrimitive {
       1,
       shift,
       vertexBegin + vertexCount,
-      vertexCount,
       positions,
-      indices
+      indices,
+      indicesOffset + circleIndicesCount
     );
 
     // X-Elliptic
@@ -280,9 +341,9 @@ export class WireFramePrimitive {
       halfHeight,
       2,
       vertexBegin + vertexCount * 2,
-      vertexCount,
       positions,
-      indices
+      indices,
+      indicesOffset + circleIndicesCount * 2
     );
 
     // Z-Elliptic
@@ -291,9 +352,9 @@ export class WireFramePrimitive {
       halfHeight,
       0,
       vertexBegin + vertexCount * 3,
-      vertexCount,
       positions,
-      indices
+      indices,
+      indicesOffset + circleIndicesCount * 2 + WireFramePrimitive.ellipticIndicesCount
     );
   }
 
@@ -303,19 +364,21 @@ export class WireFramePrimitive {
    * @param axis - The default direction
    * @param shift - The default shift
    * @param vertexBegin - The min of index list
-   * @param vertexCount - count of new position
    * @param positions - position array
    * @param indices - index array
+   * @param indicesOffset - index array offset
    */
   static createCircleWireFrame(
     radius: number,
     axis: number,
     shift: Vector3,
     vertexBegin: number,
-    vertexCount: number,
     positions: Vector3[],
-    indices: number[]
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
   ) {
+    const vertexCount = WireFramePrimitive.vertexCount;
+
     const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
     for (let i = 0; i < vertexCount; ++i) {
@@ -342,9 +405,11 @@ export class WireFramePrimitive {
 
       const globalIndex = i + vertexBegin;
       if (i < vertexCount - 1) {
-        indices.push(globalIndex, globalIndex + 1);
+        indices[indicesOffset + 2 * i] = globalIndex;
+        indices[indicesOffset + 2 * i + 1] = globalIndex + 1;
       } else {
-        indices.push(globalIndex, vertexBegin);
+        indices[indicesOffset + 2 * i] = globalIndex;
+        indices[indicesOffset + 2 * i + 1] = vertexBegin;
       }
     }
   }
@@ -355,19 +420,20 @@ export class WireFramePrimitive {
    * @param height - The height of the cylindrical part, measured between the centers of the hemispherical ends
    * @param axis - The default direction
    * @param vertexBegin - The min of index list
-   * @param vertexCount - count of new position
    * @param positions - position array
    * @param indices - index array
+   * @param indicesOffset - index array offset
    */
   static createEllipticWireFrame(
     radius: number,
     height: number,
     axis: number,
     vertexBegin: number,
-    vertexCount: number,
     positions: Vector3[],
-    indices: number[]
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
   ) {
+    const vertexCount = WireFramePrimitive.vertexCount;
     const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
     for (let i = 0; i < vertexCount; ++i) {
@@ -392,9 +458,11 @@ export class WireFramePrimitive {
 
       const globalIndex = i + vertexBegin;
       if (i < vertexCount - 1) {
-        indices.push(globalIndex, globalIndex + 1);
+        indices[indicesOffset + 2 * i] = globalIndex;
+        indices[indicesOffset + 2 * i + 1] = globalIndex + 1;
       } else {
-        indices.push(globalIndex, vertexBegin);
+        indices[indicesOffset + 2 * i] = globalIndex;
+        indices[indicesOffset + 2 * i + 1] = vertexBegin;
       }
     }
   }
