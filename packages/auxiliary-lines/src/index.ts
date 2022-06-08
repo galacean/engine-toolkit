@@ -1,2 +1,2 @@
-export { WireFrameManager } from "./WireFrameManager";
-export { WireFramePrimitive } from "./WireFramePrimitive";
+export { WireframeManager } from "./WireframeManager";
+export { WireframePrimitive } from "./WireframePrimitive";

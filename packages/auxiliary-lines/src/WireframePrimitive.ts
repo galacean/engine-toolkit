@@ -3,7 +3,7 @@ import { MathUtil, Vector3 } from "oasis-engine";
 /**
  * Wireframe primitive.
  */
-export class WireFramePrimitive {
+export class WireframePrimitive {
   /** global settings for vertex count */
   static vertexCount = 40;
 
@@ -18,42 +18,42 @@ export class WireFramePrimitive {
    * Get sphere wire frame indices count
    */
   static get sphereIndicesCount(): number {
-    return WireFramePrimitive.circleIndicesCount * 3;
+    return WireframePrimitive.circleIndicesCount * 3;
   }
 
   /**
    * Get cone wire frame indices count
    */
   static get coneIndicesCount(): number {
-    return WireFramePrimitive.circleIndicesCount + 8;
+    return WireframePrimitive.circleIndicesCount + 8;
   }
 
   /**
    * Get unbound cylinder wire frame indices count
    */
   static get unboundCylinderIndicesCount(): number {
-    return WireFramePrimitive.circleIndicesCount + 16;
+    return WireframePrimitive.circleIndicesCount + 16;
   }
 
   /**
    * Get capsule wire frame indices count
    */
   static get capsuleIndicesCount(): number {
-    return (WireFramePrimitive.circleIndicesCount + WireFramePrimitive.ellipticIndicesCount) * 2;
+    return (WireframePrimitive.circleIndicesCount + WireframePrimitive.ellipticIndicesCount) * 2;
   }
 
   /**
    * Get circle wire frame indices count
    */
   static get circleIndicesCount(): number {
-    return WireFramePrimitive.vertexCount * 2;
+    return WireframePrimitive.vertexCount * 2;
   }
 
   /**
    * Get elliptic wire frame indices count
    */
   static get ellipticIndicesCount(): number {
-    return WireFramePrimitive.vertexCount * 2;
+    return WireframePrimitive.vertexCount * 2;
   }
 
   /**
@@ -67,7 +67,7 @@ export class WireFramePrimitive {
    * @param indices - index array
    * @param indicesOffset - index array offset
    */
-  static createCuboidWireFrame(
+  static createCuboidWireframe(
     width: number,
     height: number,
     depth: number,
@@ -186,7 +186,7 @@ export class WireFramePrimitive {
    * @param indices - index array
    * @param indicesOffset - index array offset
    */
-  static createSphereWireFrame(
+  static createSphereWireframe(
     radius: number,
     vertexBegin: number,
     positions: Vector3[],
@@ -196,28 +196,28 @@ export class WireFramePrimitive {
     const shift = new Vector3();
 
     // X
-    WireFramePrimitive.createCircleWireFrame(radius, 0, shift, vertexBegin, positions, indices, indicesOffset);
+    WireframePrimitive.createCircleWireframe(radius, 0, shift, vertexBegin, positions, indices, indicesOffset);
 
     // Y
-    WireFramePrimitive.createCircleWireFrame(
+    WireframePrimitive.createCircleWireframe(
       radius,
       1,
       shift,
-      vertexBegin + WireFramePrimitive.vertexCount,
+      vertexBegin + WireframePrimitive.vertexCount,
       positions,
       indices,
-      indicesOffset + WireFramePrimitive.circleIndicesCount
+      indicesOffset + WireframePrimitive.circleIndicesCount
     );
 
     // Z
-    WireFramePrimitive.createCircleWireFrame(
+    WireframePrimitive.createCircleWireframe(
       radius,
       2,
       shift,
-      vertexBegin + WireFramePrimitive.vertexCount * 2,
+      vertexBegin + WireframePrimitive.vertexCount * 2,
       positions,
       indices,
-      indicesOffset + WireFramePrimitive.circleIndicesCount * 2
+      indicesOffset + WireframePrimitive.circleIndicesCount * 2
     );
   }
 
@@ -231,7 +231,7 @@ export class WireFramePrimitive {
    * @param indices - index array
    * @param indicesOffset - index array offset
    */
-  static createConeWireFrame(
+  static createConeWireframe(
     radius: number,
     height: number,
     vertexBegin: number,
@@ -243,15 +243,15 @@ export class WireFramePrimitive {
 
     // Y
     shift.y = -height;
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
+    WireframePrimitive.createCircleWireframe(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
 
     positions.push(new Vector3(0, height, 0));
     positions.push(new Vector3(-radius, -height, 0));
     positions.push(new Vector3(radius, -height, 0));
     positions.push(new Vector3(0, -height, radius));
     positions.push(new Vector3(0, -height, -radius));
-    const indexBegin = vertexBegin + WireFramePrimitive.vertexCount;
-    indicesOffset += WireFramePrimitive.circleIndicesCount;
+    const indexBegin = vertexBegin + WireframePrimitive.vertexCount;
+    indicesOffset += WireframePrimitive.circleIndicesCount;
     indices[indicesOffset++] = indexBegin;
     indices[indicesOffset++] = indexBegin + 1;
     indices[indicesOffset++] = indexBegin;
@@ -271,7 +271,7 @@ export class WireFramePrimitive {
    * @param indices - index array
    * @param indicesOffset - index array offset
    */
-  static createUnboundCylinderWireFrame(
+  static createUnboundCylinderWireframe(
     radius: number,
     vertexBegin: number,
     positions: Vector3[],
@@ -282,10 +282,10 @@ export class WireFramePrimitive {
     const shift = new Vector3();
 
     // Y
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
+    WireframePrimitive.createCircleWireframe(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
 
-    const indexBegin = vertexBegin + WireFramePrimitive.vertexCount;
-    indicesOffset += WireFramePrimitive.circleIndicesCount;
+    const indexBegin = vertexBegin + WireframePrimitive.vertexCount;
+    indicesOffset += WireframePrimitive.circleIndicesCount;
     for (let i = 0; i < 8; i++) {
       let radian = MathUtil.degreeToRadian(45 * i);
       positions.push(new Vector3(radius * Math.cos(radian), 0, radius * Math.sin(radian)));
@@ -306,7 +306,7 @@ export class WireFramePrimitive {
    * @param indices - index array
    * @param indicesOffset - index array offset
    */
-  static createCapsuleWireFrame(
+  static createCapsuleWireframe(
     radius: number,
     height: number,
     vertexBegin: number,
@@ -314,18 +314,18 @@ export class WireFramePrimitive {
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
   ) {
-    const circleIndicesCount = WireFramePrimitive.circleIndicesCount;
-    const vertexCount = WireFramePrimitive.vertexCount;
+    const circleIndicesCount = WireframePrimitive.circleIndicesCount;
+    const vertexCount = WireframePrimitive.vertexCount;
     const shift = new Vector3();
     const halfHeight = height / 2;
 
     // Y-Top
     shift.y = halfHeight;
-    WireFramePrimitive.createCircleWireFrame(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
+    WireframePrimitive.createCircleWireframe(radius, 1, shift, vertexBegin, positions, indices, indicesOffset);
 
     // Y-Bottom
     shift.y = -halfHeight;
-    WireFramePrimitive.createCircleWireFrame(
+    WireframePrimitive.createCircleWireframe(
       radius,
       1,
       shift,
@@ -336,7 +336,7 @@ export class WireFramePrimitive {
     );
 
     // X-Elliptic
-    WireFramePrimitive.createEllipticWireFrame(
+    WireframePrimitive.createEllipticWireframe(
       radius,
       halfHeight,
       2,
@@ -347,14 +347,14 @@ export class WireFramePrimitive {
     );
 
     // Z-Elliptic
-    WireFramePrimitive.createEllipticWireFrame(
+    WireframePrimitive.createEllipticWireframe(
       radius,
       halfHeight,
       0,
       vertexBegin + vertexCount * 3,
       positions,
       indices,
-      indicesOffset + circleIndicesCount * 2 + WireFramePrimitive.ellipticIndicesCount
+      indicesOffset + circleIndicesCount * 2 + WireframePrimitive.ellipticIndicesCount
     );
   }
 
@@ -368,7 +368,7 @@ export class WireFramePrimitive {
    * @param indices - index array
    * @param indicesOffset - index array offset
    */
-  static createCircleWireFrame(
+  static createCircleWireframe(
     radius: number,
     axis: number,
     shift: Vector3,
@@ -377,7 +377,7 @@ export class WireFramePrimitive {
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
   ) {
-    const vertexCount = WireFramePrimitive.vertexCount;
+    const vertexCount = WireframePrimitive.vertexCount;
 
     const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
@@ -424,7 +424,7 @@ export class WireFramePrimitive {
    * @param indices - index array
    * @param indicesOffset - index array offset
    */
-  static createEllipticWireFrame(
+  static createEllipticWireframe(
     radius: number,
     height: number,
     axis: number,
@@ -433,7 +433,7 @@ export class WireFramePrimitive {
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
   ) {
-    const vertexCount = WireFramePrimitive.vertexCount;
+    const vertexCount = WireframePrimitive.vertexCount;
     const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
     for (let i = 0; i < vertexCount; ++i) {

@@ -21,7 +21,7 @@ import {
   DynamicCollider,
   StaticCollider
 } from "oasis-engine";
-import { WireFramePrimitive } from "./WireFramePrimitive";
+import { WireframePrimitive } from "./WireframePrimitive";
 import { BoolUpdateFlag } from "@oasis-engine/core/types/BoolUpdateFlag";
 
 class WireframeElement {
@@ -35,7 +35,7 @@ class WireframeElement {
 /**
  * Auxiliary Manager to draw debug wireframe with automatic dynamic batching.
  */
-export class WireFrameManager extends Script {
+export class WireframeManager extends Script {
   private static _positionPool: Vector3[] = [];
   private static _ndcPosition: Vector3[] = [
     new Vector3(-1, 1, 0),
@@ -141,7 +141,7 @@ export class WireFrameManager extends Script {
     const positionsOffset = localPositions.length;
     this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
 
-    const ndcPosition = WireFrameManager._ndcPosition;
+    const ndcPosition = WireframeManager._ndcPosition;
     // front
     for (let i = 0; i < 4; i++) {
       const position = ndcPosition[i];
@@ -199,10 +199,10 @@ export class WireFrameManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const coneIndicesCount = WireFramePrimitive.coneIndicesCount;
+    const coneIndicesCount = WireframePrimitive.coneIndicesCount;
     this._growthMemory(coneIndicesCount);
     const indicesArray = this._indices;
-    WireFramePrimitive.createConeWireFrame(
+    WireframePrimitive.createConeWireframe(
       radius,
       height,
       positionsOffset,
@@ -226,10 +226,10 @@ export class WireFrameManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const sphereIndicesCount = WireFramePrimitive.sphereIndicesCount;
+    const sphereIndicesCount = WireframePrimitive.sphereIndicesCount;
     this._growthMemory(sphereIndicesCount);
     const indicesArray = this._indices;
-    WireFramePrimitive.createSphereWireFrame(
+    WireframePrimitive.createSphereWireframe(
       distance,
       positionsOffset,
       localPositions,
@@ -251,10 +251,10 @@ export class WireFrameManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const unboundCylinderIndicesCount = WireFramePrimitive.unboundCylinderIndicesCount;
+    const unboundCylinderIndicesCount = WireframePrimitive.unboundCylinderIndicesCount;
     this._growthMemory(unboundCylinderIndicesCount);
     const indicesArray = this._indices;
-    WireFramePrimitive.createUnboundCylinderWireFrame(
+    WireframePrimitive.createUnboundCylinderWireframe(
       1,
       positionsOffset,
       localPositions,
@@ -296,10 +296,10 @@ export class WireFrameManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const cuboidIndicesCount = WireFramePrimitive.cuboidIndicesCount;
+    const cuboidIndicesCount = WireframePrimitive.cuboidIndicesCount;
     this._growthMemory(cuboidIndicesCount);
     const indicesArray = this._indices;
-    WireFramePrimitive.createCuboidWireFrame(
+    WireframePrimitive.createCuboidWireframe(
       worldScale.x * size.x,
       worldScale.y * size.y,
       worldScale.z * size.z,
@@ -325,10 +325,10 @@ export class WireFrameManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const sphereIndicesCount = WireFramePrimitive.sphereIndicesCount;
+    const sphereIndicesCount = WireframePrimitive.sphereIndicesCount;
     this._growthMemory(sphereIndicesCount);
     const indicesArray = this._indices;
-    WireFramePrimitive.createSphereWireFrame(
+    WireframePrimitive.createSphereWireframe(
       Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
       positionsOffset,
       localPositions,
@@ -354,10 +354,10 @@ export class WireFrameManager extends Script {
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
 
-    const capsuleIndicesCount = WireFramePrimitive.capsuleIndicesCount;
+    const capsuleIndicesCount = WireframePrimitive.capsuleIndicesCount;
     this._growthMemory(capsuleIndicesCount);
     const indicesArray = this._indices;
-    WireFramePrimitive.createCapsuleWireFrame(
+    WireframePrimitive.createCapsuleWireframe(
       maxScale * radius,
       maxScale * height,
       positionsOffset,
@@ -436,7 +436,7 @@ export class WireFrameManager extends Script {
         const transform = wireframeElement.transform;
         let worldMatrix: Matrix;
         if (wireframeElement.transformNoScale) {
-          worldMatrix = WireFrameManager._tempMatrix;
+          worldMatrix = WireframeManager._tempMatrix;
           Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
         } else {
           worldMatrix = transform.worldMatrix;
@@ -445,11 +445,11 @@ export class WireFrameManager extends Script {
         for (let j = beginIndex; j < endIndex; j++) {
           const localPosition = localPositions[positionIndex];
           let globalPosition: Vector3;
-          if (positionIndex < WireFrameManager._positionPool.length) {
-            globalPosition = WireFrameManager._positionPool[positionIndex];
+          if (positionIndex < WireframeManager._positionPool.length) {
+            globalPosition = WireframeManager._positionPool[positionIndex];
           } else {
             globalPosition = new Vector3();
-            WireFrameManager._positionPool.push(globalPosition);
+            WireframeManager._positionPool.push(globalPosition);
           }
           Vector3.transformCoordinate(localPosition, worldMatrix, globalPosition);
           globalPositions[positionIndex] = globalPosition;
