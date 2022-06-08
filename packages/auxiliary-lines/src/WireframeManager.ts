@@ -18,7 +18,8 @@ import {
   Collider,
   Entity,
   DynamicCollider,
-  StaticCollider
+  StaticCollider,
+  dependentComponents
 } from "oasis-engine";
 import { WireframePrimitive } from "./WireframePrimitive";
 import { BoolUpdateFlag } from "@oasis-engine/core/types/BoolUpdateFlag";
@@ -33,7 +34,9 @@ class WireframeElement {
 
 /**
  * Auxiliary Manager to draw debug wireframe with automatic dynamic batching.
+ * @decorator `@dependentComponents(MeshRenderer)`
  */
+@dependentComponents(MeshRenderer)
 export class WireframeManager extends Script {
   private static _positionPool: Vector3[] = [];
   private static _ndcPosition: Vector3[] = [
@@ -391,7 +394,7 @@ export class WireframeManager extends Script {
    * @override
    */
   onAwake() {
-    const renderer = this.entity.addComponent(MeshRenderer);
+    const renderer = this.entity.getComponent(MeshRenderer);
     renderer.setMaterial(this._material);
     renderer.mesh = this._mesh;
     this._renderer = renderer;
