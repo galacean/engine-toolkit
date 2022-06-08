@@ -8,49 +8,49 @@ export class WireframePrimitive {
   static circleVertexCount = 40;
 
   /**
-   * Get cuboid wire frame indices count
+   * Get cuboid wire frame index count.
    */
   static get cuboidIndexCount(): number {
     return 48;
   }
 
   /**
-   * Get sphere wire frame indices count
+   * Get sphere wire frame index count.
    */
   static get sphereIndexCount(): number {
     return WireframePrimitive.circleIndexCount * 3;
   }
 
   /**
-   * Get cone wire frame indices count
+   * Get cone wire frame index count.
    */
   static get coneIndexCount(): number {
     return WireframePrimitive.circleIndexCount + 8;
   }
 
   /**
-   * Get unbound cylinder wire frame indices count
+   * Get unbound cylinder wire frame index count.
    */
   static get unboundCylinderIndexCount(): number {
     return WireframePrimitive.circleIndexCount + 16;
   }
 
   /**
-   * Get capsule wire frame indices count
+   * Get capsule wire frame index count.
    */
   static get capsuleIndexCount(): number {
     return (WireframePrimitive.circleIndexCount + WireframePrimitive.ellipticIndexCount) * 2;
   }
 
   /**
-   * Get circle wire frame indices count
+   * Get circle wire frame index count.
    */
   static get circleIndexCount(): number {
     return WireframePrimitive.circleVertexCount * 2;
   }
 
   /**
-   * Get elliptic wire frame indices count
+   * Get elliptic wire frame index count.
    */
   static get ellipticIndexCount(): number {
     return WireframePrimitive.circleVertexCount * 2;

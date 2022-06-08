@@ -248,7 +248,7 @@ export class WireframeManager extends Script {
   }
 
   /**
-   * Create auxiliary mesh for collider
+   * Create auxiliary mesh for collider.
    * @param collider - The Collider
    */
   addCollideWireframe(collider: Collider): void {
