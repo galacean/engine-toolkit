@@ -17,8 +17,6 @@ import {
   DirectLight,
   Collider,
   Entity,
-  DynamicCollider,
-  StaticCollider,
   dependentComponents
 } from "oasis-engine";
 import { WireframePrimitive } from "./WireframePrimitive";
@@ -51,19 +49,12 @@ export class WireframeManager extends Script {
   private _globalPositions: Vector3[] = [];
   private _indices: Uint16Array | Uint32Array = null;
   private _indicesCount: number = 0;
+  private _supportUint32Array: boolean;
 
   private _wireframeElements: WireframeElement[] = [];
   private _renderer: MeshRenderer;
-  private readonly _material: UnlitMaterial;
-  private readonly _mesh: ModelMesh;
-
-  constructor(entity: Entity) {
-    super(entity);
-    this._mesh = new ModelMesh(this.engine);
-    this._material = new UnlitMaterial(this.engine);
-    const support32Array = this.engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
-    this._indices = support32Array ? new Uint32Array(128) : new Uint16Array(128);
-  }
+  private _material: UnlitMaterial;
+  private _mesh: ModelMesh;
 
   /**
    * clear all cache info
@@ -84,35 +75,34 @@ export class WireframeManager extends Script {
    */
   addEntityWireframe(entity: Entity, includeChildren: boolean = true) {
     if (includeChildren) {
-      const cameras: Camera[] = [];
-      entity.getComponentsIncludeChildren(Camera, cameras);
-      for (let i = 0, n = cameras.length; i < n; i++) {
-        this.addCameraWireframe(cameras[i]);
+      const components = new Array<Camera | SpotLight | DirectLight | PointLight | Collider>();
+      entity.getComponentsIncludeChildren(Camera, components);
+      for (let i = 0, n = components.length; i < n; i++) {
+        this.addCameraWireframe(<Camera>components[i]);
       }
-      const spots: SpotLight[] = [];
-      entity.getComponentsIncludeChildren(SpotLight, spots);
-      for (let i = 0, n = spots.length; i < n; i++) {
-        this.addSpotLightWireframe(spots[i]);
+      let componentsOffset = components.length;
+
+      entity.getComponentsIncludeChildren(SpotLight, components);
+      for (let i = componentsOffset, n = components.length; i < n; i++) {
+        this.addSpotLightWireframe(<SpotLight>components[i]);
       }
-      const directs: DirectLight[] = [];
-      entity.getComponentsIncludeChildren(DirectLight, directs);
-      for (let i = 0, n = directs.length; i < n; i++) {
-        this.addDirectLightWireframe(directs[i]);
+      componentsOffset = components.length;
+
+      entity.getComponentsIncludeChildren(DirectLight, components);
+      for (let i = componentsOffset, n = components.length; i < n; i++) {
+        this.addDirectLightWireframe(<DirectLight>components[i]);
       }
-      const points: PointLight[] = [];
-      entity.getComponentsIncludeChildren(PointLight, points);
-      for (let i = 0, n = points.length; i < n; i++) {
-        this.addPointLightWireframe(points[i]);
+      componentsOffset = components.length;
+
+      entity.getComponentsIncludeChildren(PointLight, components);
+      for (let i = componentsOffset, n = components.length; i < n; i++) {
+        this.addPointLightWireframe(<PointLight>components[i]);
       }
-      const dynamics: DynamicCollider[] = [];
-      entity.getComponentsIncludeChildren(DynamicCollider, dynamics);
-      for (let i = 0, n = dynamics.length; i < n; i++) {
-        this.addCollideWireframe(dynamics[i]);
-      }
-      const statics: StaticCollider[] = [];
-      entity.getComponentsIncludeChildren(StaticCollider, statics);
-      for (let i = 0, n = statics.length; i < n; i++) {
-        this.addCollideWireframe(statics[i]);
+      componentsOffset = components.length;
+
+      entity.getComponentsIncludeChildren(Collider, components);
+      for (let i = componentsOffset, n = components.length; i < n; i++) {
+        this.addCollideWireframe(<Collider>components[i]);
       }
     } else {
       const camera = entity.getComponent(Camera);
@@ -123,9 +113,7 @@ export class WireframeManager extends Script {
       directLight && this.addDirectLightWireframe(directLight);
       const pointLight = entity.getComponent(PointLight);
       pointLight && this.addPointLightWireframe(pointLight);
-      let collider: Collider = entity.getComponent(DynamicCollider);
-      collider && this.addCollideWireframe(collider);
-      collider = entity.getComponent(StaticCollider);
+      let collider: Collider = entity.getComponent(Collider);
       collider && this.addCollideWireframe(collider);
     }
   }
@@ -161,7 +149,7 @@ export class WireframeManager extends Script {
       localPositions.push(newPosition);
     }
 
-    this._growthMemory(24);
+    this._growthIndexMemory(24);
     const indicesArray = this._indices;
     indicesArray[this._indicesCount++] = positionsOffset;
     indicesArray[this._indicesCount++] = positionsOffset + 1;
@@ -202,7 +190,7 @@ export class WireframeManager extends Script {
     const positionsOffset = localPositions.length;
 
     const coneIndicesCount = WireframePrimitive.coneIndicesCount;
-    this._growthMemory(coneIndicesCount);
+    this._growthIndexMemory(coneIndicesCount);
     const indicesArray = this._indices;
     WireframePrimitive.createConeWireframe(
       radius,
@@ -229,7 +217,7 @@ export class WireframeManager extends Script {
     const positionsOffset = localPositions.length;
 
     const sphereIndicesCount = WireframePrimitive.sphereIndicesCount;
-    this._growthMemory(sphereIndicesCount);
+    this._growthIndexMemory(sphereIndicesCount);
     const indicesArray = this._indices;
     WireframePrimitive.createSphereWireframe(
       distance,
@@ -254,7 +242,7 @@ export class WireframeManager extends Script {
     const positionsOffset = localPositions.length;
 
     const unboundCylinderIndicesCount = WireframePrimitive.unboundCylinderIndicesCount;
-    this._growthMemory(unboundCylinderIndicesCount);
+    this._growthIndexMemory(unboundCylinderIndicesCount);
     const indicesArray = this._indices;
     WireframePrimitive.createUnboundCylinderWireframe(
       1,
@@ -299,7 +287,7 @@ export class WireframeManager extends Script {
     const positionsOffset = localPositions.length;
 
     const cuboidIndicesCount = WireframePrimitive.cuboidIndicesCount;
-    this._growthMemory(cuboidIndicesCount);
+    this._growthIndexMemory(cuboidIndicesCount);
     const indicesArray = this._indices;
     WireframePrimitive.createCuboidWireframe(
       worldScale.x * size.x,
@@ -328,7 +316,7 @@ export class WireframeManager extends Script {
     const positionsOffset = localPositions.length;
 
     const sphereIndicesCount = WireframePrimitive.sphereIndicesCount;
-    this._growthMemory(sphereIndicesCount);
+    this._growthIndexMemory(sphereIndicesCount);
     const indicesArray = this._indices;
     WireframePrimitive.createSphereWireframe(
       Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
@@ -357,7 +345,7 @@ export class WireframeManager extends Script {
     const positionsOffset = localPositions.length;
 
     const capsuleIndicesCount = WireframePrimitive.capsuleIndicesCount;
-    this._growthMemory(capsuleIndicesCount);
+    this._growthIndexMemory(capsuleIndicesCount);
     const indicesArray = this._indices;
     WireframePrimitive.createCapsuleWireframe(
       maxScale * radius,
@@ -372,17 +360,16 @@ export class WireframeManager extends Script {
     this._wireframeElements.push(new WireframeElement(transform, false, positionsOffset));
   }
 
-  private _growthMemory(length: number) {
+  private _growthIndexMemory(length: number) {
     const indicesArray = this._indices;
     const newArrayLength = this._indicesCount + length;
     if (newArrayLength > indicesArray.length) {
-      const maxLength = indicesArray instanceof Uint16Array ? 65535 : 4294967295;
+      const maxLength = this._supportUint32Array ? 65535 : 4294967295;
       if (newArrayLength > maxLength) {
         throw Error("The vertex count is over limit.");
       }
 
-      const newArray =
-        indicesArray instanceof Uint16Array ? new Uint16Array(newArrayLength) : new Uint32Array(newArrayLength);
+      const newArray = this._supportUint32Array ? new Uint16Array(newArrayLength) : new Uint32Array(newArrayLength);
       for (let i = 0, n = indicesArray.length; i < n; i++) {
         newArray[i] = indicesArray[i];
       }
@@ -390,10 +377,26 @@ export class WireframeManager extends Script {
     }
   }
 
+  private static _getAvailablePosition(positionIndex: number): Vector3 {
+    let globalPosition: Vector3;
+    if (positionIndex < WireframeManager._positionPool.length) {
+      globalPosition = WireframeManager._positionPool[positionIndex];
+    } else {
+      globalPosition = new Vector3();
+      WireframeManager._positionPool.push(globalPosition);
+    }
+    return globalPosition;
+  }
+
   /**
    * @override
    */
   onAwake() {
+    this._supportUint32Array = this.engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
+    this._indices = this._supportUint32Array ? new Uint32Array(128) : new Uint16Array(128);
+
+    this._mesh = new ModelMesh(this.engine);
+    this._material = new UnlitMaterial(this.engine);
     const renderer = this.entity.getComponent(MeshRenderer);
     renderer.setMaterial(this._material);
     renderer.mesh = this._mesh;
@@ -446,13 +449,7 @@ export class WireframeManager extends Script {
 
         for (let j = beginIndex; j < endIndex; j++) {
           const localPosition = localPositions[positionIndex];
-          let globalPosition: Vector3;
-          if (positionIndex < WireframeManager._positionPool.length) {
-            globalPosition = WireframeManager._positionPool[positionIndex];
-          } else {
-            globalPosition = new Vector3();
-            WireframeManager._positionPool.push(globalPosition);
-          }
+          const globalPosition = WireframeManager._getAvailablePosition(positionIndex);
           Vector3.transformCoordinate(localPosition, worldMatrix, globalPosition);
           globalPositions[positionIndex] = globalPosition;
           positionIndex++;
