@@ -9,7 +9,7 @@ Shader.create("framebuffer-picker-color", vs, fs);
  */
 export class ColorMaterial extends Material {
   private _currentId: number = 0;
-  private _primitivesMap = [];
+  private _primitivesMap: RenderElement[] = [];
 
   constructor(engine: Engine) {
     super(engine, Shader.find("framebuffer-picker-color"));
@@ -55,9 +55,8 @@ export class ColorMaterial extends Material {
    * @override
    */
   _preRender(renderElement: RenderElement) {
-    const { component, mesh } = renderElement;
     this._currentId += 1;
-    this._primitivesMap[this._currentId] = { component, mesh };
-    component.shaderData.setVector3("u_colorId", this.id2Color(this._currentId));
+    this._primitivesMap[this._currentId] = renderElement;
+    renderElement.component.shaderData.setVector3("u_colorId", this.id2Color(this._currentId));
   }
 }

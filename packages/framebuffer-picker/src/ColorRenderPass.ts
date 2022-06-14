@@ -6,14 +6,14 @@ import { ColorMaterial } from "./ColorMaterial";
  */
 class ColorRenderPass extends RenderPass {
   private _needPick: boolean;
-  private onPick: Function;
-  private _pickPos;
+  private _pickPos: [number, number];
+  /** @internal */
+  _pickResolve: Function;
 
   constructor(name: string, priority: number, renderTarget: RenderTarget, mask: Layer, engine?: Engine) {
     super(name, priority, renderTarget, new ColorMaterial(engine), mask);
 
     this._needPick = false;
-    this.onPick = (o: any) => console.log(o);
   }
 
   /**
@@ -36,10 +36,10 @@ class ColorRenderPass extends RenderPass {
   postRender(camera: Camera) {
     if (this._needPick) {
       const color = this.readColorFromRenderTarget(camera);
-      const object = (this.replaceMaterial as ColorMaterial).getObjectByColor(color);
+      const renderElement = (this.replaceMaterial as ColorMaterial).getObjectByColor(color);
       this._needPick = false;
 
-      if (this.onPick) this.onPick(object);
+      if (this._pickResolve) this._pickResolve(renderElement);
     }
   }
 
