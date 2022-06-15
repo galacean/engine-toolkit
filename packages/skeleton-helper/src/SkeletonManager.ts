@@ -1,7 +1,7 @@
-import { Entity, Script, SkinnedMeshRenderer } from "oasis-engine";
+import { Entity, Component, SkinnedMeshRenderer } from "oasis-engine";
 import { SkeletonViewer } from "./SkeletonViewer";
 
-export class SkeletonManager extends Script {
+export class SkeletonManager extends Component {
   private _skeletonViewer: SkeletonViewer[] = [];
 
   constructor(entity: Entity) {
