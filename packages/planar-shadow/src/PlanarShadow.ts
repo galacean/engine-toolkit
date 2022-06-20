@@ -136,10 +136,10 @@ Shader.create(
     vec3 ShadowProjectPos(vec4 vertPos) {
       vec3 shadowPos;
 
-      //得到顶点的世界空间坐标
+      // get the world space coordinates of the vertex
       vec3 worldPos = (u_modelMat * vertPos).xyz;
       
-      //阴影的世界空间坐标（低于地面的部分不做改变）
+      // world space coordinates of the shadow (the part below the ground is unchanged)
       shadowPos.y = min(worldPos.y , u_planarHeight);
       shadowPos.xz = worldPos.xz - u_lightDir.xz * max(0.0, worldPos.y - u_planarHeight) / u_lightDir.y;
 
@@ -165,18 +165,18 @@ Shader.create(
           position = skinMatrix * position;
       #endif
 
-      //得到阴影的世界空间坐标
+      // get the shadow's world space coordinates
       vec3 shadowPos = ShadowProjectPos(position);
 
-      //转换到裁切空间
+      // convert to clip space
       gl_Position = u_VPMat * vec4(shadowPos, 1.0);
 
-      //得到中心点世界坐标
+      // get the world coordinates of the center point
       vec3 center = vec3(u_modelMat[3].x, u_planarHeight, u_modelMat[3].z);
-      //计算阴影衰减
+      // calculate shadow falloff
       float falloff = 0.5 - clamp(distance(shadowPos , center) * u_planarShadowFalloff, 0.0, 1.0);
 
-      //阴影颜色
+      // shadow color
       color = u_planarShadowColor;
       color.a *= falloff;
     }
