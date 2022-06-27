@@ -107,9 +107,7 @@ function config({ location, pkgJson }) {
             sourcemap: false
           }
         ],
-        external: Object.keys(pkgJson.dependencies || {})
-          .concat("@oasis-engine/miniprogram-adapter")
-          .map((name) => `${name}/dist/miniprogram`),
+        external: Object.keys(pkgJson.dependencies || {}).map((name) => `${name}/dist/miniprogram`),
         plugins
       };
     },

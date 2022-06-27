@@ -1,14 +1,15 @@
 {
-  "name": "@oasis-engine-toolkit/framebuffer-picker",
+  "name": "@oasis-engine-toolkit/auxiliary-lines",
   "version": "0.7.0-beta.3",
   "license": "MIT",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
-  "browser": "dist/browser.js",
   "scripts": {
-    "b:types": "tsc"
+    "b:types": "tsc",
+    "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
   "types": "types/index.d.ts",
+  "browser": "dist/browser.js",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
   "files": [
     "dist/**/*",
     "types/**/*"

@@ -1,4 +1,4 @@
-import { Camera, Entity, RenderTarget, Script, Texture2D } from "oasis-engine";
+import { Camera, Entity, RenderElement, RenderTarget, Script, Texture2D } from "oasis-engine";
 import { ColorRenderPass } from "./ColorRenderPass";
 
 /**
@@ -37,24 +37,17 @@ export class FramebufferPicker extends Script {
   }
 
   /**
-   * Set the callback function after pick up.
-   * @param {Function} fun Callback function. if there is an renderer selected, the parameter 1 is {component, primitive }, otherwise it is undefined
-   */
-  set onPick(fun: Function) {
-    if (typeof fun === "function") {
-      (this.colorRenderPass as any).onPick = fun;
-    }
-  }
-
-  /**
    * Pick the object at the screen coordinate position.
    * @param offsetX Relative X coordinate of the canvas
    * @param offsetY Relative Y coordinate of the canvas
    */
-  pick(offsetX: number, offsetY: number) {
+  pick(offsetX: number, offsetY: number): Promise<RenderElement> {
     if (this.enabled) {
       this._needPick = true;
       this._pickPos = [offsetX, offsetY];
+      return new Promise((resolve) => {
+        this.colorRenderPass._pickResolve = resolve;
+      });
     }
   }
 
