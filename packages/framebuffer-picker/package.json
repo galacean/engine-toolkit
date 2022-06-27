@@ -14,6 +14,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^0.7.0-beta.3"
+    "oasis-engine": "^0.7.0-beta.7"
   }
 }
