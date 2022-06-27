@@ -1,8 +1,9 @@
 {
   "name": "@oasis-engine-toolkit/auxiliary-lines",
-  "version": "0.8.0-alpha.5",
+  "version": "0.8.0-alpha.6",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "license": "MIT",
   "scripts": {

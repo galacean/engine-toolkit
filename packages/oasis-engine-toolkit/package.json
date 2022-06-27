@@ -1,12 +1,13 @@
 {
   "name": "oasis-engine-toolkit",
-  "version": "0.8.0-alpha.5",
+  "version": "0.8.0-alpha.6",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "types": "types/index.d.ts",
   "main": "dist/browser.min.js",
@@ -17,9 +18,9 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-alpha.5",
-    "@oasis-engine-toolkit/controls": "0.8.0-alpha.5",
-    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-alpha.5",
-    "@oasis-engine-toolkit/stats": "0.8.0-alpha.5"
+    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-alpha.6",
+    "@oasis-engine-toolkit/controls": "0.8.0-alpha.6",
+    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-alpha.6",
+    "@oasis-engine-toolkit/stats": "0.8.0-alpha.6"
   }
 }
