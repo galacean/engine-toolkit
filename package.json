@@ -75,8 +75,5 @@
       "eslint --fix",
       "git add"
     ]
-  },
-  "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "^0.8.0-alpha.6"
   }
 }
