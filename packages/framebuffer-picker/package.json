@@ -1,10 +1,13 @@
 {
   "name": "@oasis-engine-toolkit/framebuffer-picker",
-  "version": "0.8.0-alpha.3",
+  "version": "0.8.0-alpha.4",
   "license": "MIT",
   "main": "dist/main.js",
   "module": "dist/module.js",
   "browser": "dist/browser.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "b:types": "tsc"
   },
