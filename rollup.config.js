@@ -48,7 +48,7 @@ const commonPlugins = [
   NODE_ENV === "development"
     ? serve({
         contentBase: "packages",
-        port: 9999
+        port: 9998
       })
     : null
 ];
