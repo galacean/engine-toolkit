@@ -61,8 +61,8 @@
     "rollup-plugin-serve": "^1.1.0",
     "rollup-plugin-terser": "^7.0.2",
     "ts-node": "^9.1.1",
-    "typescript": "^4.4.3",
-    "oasis-engine": "^0.3.11"
+    "oasis-engine": "^0.7.0-beta.7",
+    "typescript": "^4.4.3"
   },
   "husky": {
     "hooks": {
