@@ -114,7 +114,7 @@ function config({ location, pkgJson }) {
       const plugins = [...commonPlugins];
       return {
         input,
-        external,
+        external: [...external, "oasis-engine"],
         output: [
           {
             file: path.join(location, pkgJson.module),
