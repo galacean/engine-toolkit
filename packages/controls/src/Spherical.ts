@@ -1,4 +1,4 @@
-import { Vector3, MathUtil } from "oasis-engine";
+import { MathUtil, Vector3 } from "oasis-engine";
 
 // Prevent gimbal lock.
 const ESP = MathUtil.zeroTolerance;
@@ -43,11 +43,7 @@ export class Spherical {
 
   setToVec3(v3: Vector3) {
     const sinPhiRadius = Math.sin(this.phi) * this.radius;
-    v3.setValue(
-      sinPhiRadius * Math.sin(this.theta),
-      Math.cos(this.phi) * this.radius,
-      sinPhiRadius * Math.cos(this.theta)
-    );
+    v3.set(sinPhiRadius * Math.sin(this.theta), Math.cos(this.phi) * this.radius, sinPhiRadius * Math.cos(this.theta));
 
     return this;
   }
