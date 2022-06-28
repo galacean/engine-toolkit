@@ -82,7 +82,7 @@ function config({ location, pkgJson }) {
 
       return {
         input,
-        external: name === "oasis-engine" ? {} : external,
+        external: [...external, "oasis-engine"],
         output: [
           {
             file,
