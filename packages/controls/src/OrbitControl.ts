@@ -287,7 +287,7 @@ export class OrbitControl extends Script {
     if (!this.enabled) return;
 
     const position: Vector3 = this.camera.transform.position;
-    position.cloneTo(this._offset);
+    this._offset.copyFrom(position);
     this._offset.subtract(this.target);
     this._spherical.setFromVec3(this._offset);
 
@@ -311,7 +311,7 @@ export class OrbitControl extends Script {
 
     this.target.add(this._panOffset);
     this._spherical.setToVec3(this._offset);
-    this.target.cloneTo(this._position);
+    this._position.copyFrom(this.target);
     this._position.add(this._offset);
 
     this.camera.transform.position = this._position;
@@ -334,7 +334,7 @@ export class OrbitControl extends Script {
     }
 
     this._scale = 1;
-    this._panOffset.setValue(0, 0, 0);
+    this._panOffset.set(0, 0, 0);
   }
 
   /**
@@ -378,7 +378,7 @@ export class OrbitControl extends Script {
    */
   panLeft(distance: number, worldMatrix: Matrix) {
     const e = worldMatrix.elements;
-    this._vPan.setValue(e[0], e[1], e[2]);
+    this._vPan.set(e[0], e[1], e[2]);
     this._vPan.scale(distance);
     this._panOffset.add(this._vPan);
   }
@@ -388,7 +388,7 @@ export class OrbitControl extends Script {
    */
   panUp(distance: number, worldMatrix: Matrix) {
     const e = worldMatrix.elements;
-    this._vPan.setValue(e[4], e[5], e[6]);
+    this._vPan.set(e[4], e[5], e[6]);
     this._vPan.scale(distance);
     this._panOffset.add(this._vPan);
   }
@@ -400,8 +400,8 @@ export class OrbitControl extends Script {
    */
   pan(deltaX: number, deltaY: number) {
     // perspective only
-    const position: Vector3 = this.camera.transform.position;
-    position.cloneTo(this._vPan);
+    const position = this.camera.transform.position;
+    this._vPan.copyFrom(position);
     this._vPan.subtract(this.target);
     let targetDistance = this._vPan.length();
 
@@ -431,41 +431,41 @@ export class OrbitControl extends Script {
    * Rotation parameter update on mouse click.
    */
   handleMouseDownRotate(event) {
-    this._rotateStart.setValue(event.clientX, event.clientY);
+    this._rotateStart.set(event.clientX, event.clientY);
   }
 
   /**
    * Zoom parameter update on mouse click.
    */
   handleMouseDownZoom(event) {
-    this._zoomStart.setValue(event.clientX, event.clientY);
+    this._zoomStart.set(event.clientX, event.clientY);
   }
 
   /**
    * Pan parameter update on mouse click.
    */
   handleMouseDownPan(event) {
-    this._panStart.setValue(event.clientX, event.clientY);
+    this._panStart.set(event.clientX, event.clientY);
   }
 
   /**
    * Rotation parameter update when the mouse moves.
    */
   handleMouseMoveRotate(event) {
-    this._rotateEnd.setValue(event.clientX, event.clientY);
+    this._rotateEnd.set(event.clientX, event.clientY);
     Vector2.subtract(this._rotateEnd, this._rotateStart, this._rotateDelta);
 
     this.rotateLeft(2 * Math.PI * (this._rotateDelta.x / this.mainElement.clientWidth) * this.rotateSpeed);
     this.rotateUp(2 * Math.PI * (this._rotateDelta.y / this.mainElement.clientHeight) * this.rotateSpeed);
 
-    this._rotateEnd.cloneTo(this._rotateStart);
+    this._rotateStart.copyFrom(this._rotateEnd);
   }
 
   /**
    * Zoom parameters update when the mouse moves.
    */
   handleMouseMoveZoom(event) {
-    this._zoomEnd.setValue(event.clientX, event.clientY);
+    this._zoomEnd.set(event.clientX, event.clientY);
     Vector2.subtract(this._zoomEnd, this._zoomStart, this._zoomDelta);
 
     if (this._zoomDelta.y > 0) {
@@ -474,19 +474,19 @@ export class OrbitControl extends Script {
       this.zoomIn(this.getZoomScale());
     }
 
-    this._zoomEnd.cloneTo(this._zoomStart);
+    this._zoomStart.copyFrom(this._zoomEnd);
   }
 
   /**
    * Pan parameters update when the mouse moves.
    */
   handleMouseMovePan(event: MouseEvent): void {
-    this._panEnd.setValue(event.clientX, event.clientY);
+    this._panEnd.set(event.clientX, event.clientY);
     Vector2.subtract(this._panEnd, this._panStart, this._panDelta);
 
     this.pan(this._panDelta.x, this._panDelta.y);
 
-    this._panEnd.cloneTo(this._panStart);
+    this._panStart.copyFrom(this._panEnd);
   }
 
   /**
@@ -524,7 +524,7 @@ export class OrbitControl extends Script {
    * Rotation parameter update when touch is dropped.
    */
   handleTouchStartRotate(event: TouchEvent) {
-    this._rotateStart.setValue(event.touches[0].pageX, event.touches[0].pageY);
+    this._rotateStart.set(event.touches[0].pageX, event.touches[0].pageY);
   }
 
   /**
@@ -536,27 +536,27 @@ export class OrbitControl extends Script {
 
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    this._zoomStart.setValue(0, distance);
+    this._zoomStart.set(0, distance);
   }
 
   /**
    * Update the translation parameter when touch down.
    */
   handleTouchStartPan(event: TouchEvent) {
-    this._panStart.setValue(event.touches[0].pageX, event.touches[0].pageY);
+    this._panStart.set(event.touches[0].pageX, event.touches[0].pageY);
   }
 
   /**
    * Rotation parameter update when touch to move.
    */
   handleTouchMoveRotate(event: TouchEvent) {
-    this._rotateEnd.setValue(event.touches[0].pageX, event.touches[0].pageY);
+    this._rotateEnd.set(event.touches[0].pageX, event.touches[0].pageY);
     Vector2.subtract(this._rotateEnd, this._rotateStart, this._rotateDelta);
 
     this.rotateLeft(((2 * Math.PI * this._rotateDelta.x) / this.mainElement.clientWidth) * this.rotateSpeed);
     this.rotateUp(((2 * Math.PI * this._rotateDelta.y) / this.mainElement.clientHeight) * this.rotateSpeed);
 
-    this._rotateEnd.cloneTo(this._rotateStart);
+    this._rotateStart.copyFrom(this._rotateEnd);
   }
 
   /**
@@ -568,7 +568,7 @@ export class OrbitControl extends Script {
 
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    this._zoomEnd.setValue(0, distance);
+    this._zoomEnd.set(0, distance);
 
     Vector2.subtract(this._zoomEnd, this._zoomStart, this._zoomDelta);
 
@@ -578,20 +578,20 @@ export class OrbitControl extends Script {
       this.zoomOut(this.getZoomScale());
     }
 
-    this._zoomEnd.cloneTo(this._zoomStart);
+    this._zoomStart.copyFrom(this._zoomEnd);
   }
 
   /**
    * Pan parameter update when touch moves.
    */
   handleTouchMovePan(event: TouchEvent) {
-    this._panEnd.setValue(event.touches[0].pageX, event.touches[0].pageY);
+    this._panEnd.set(event.touches[0].pageX, event.touches[0].pageY);
 
     Vector2.subtract(this._panEnd, this._panStart, this._panDelta);
 
     this.pan(this._panDelta.x, this._panDelta.y);
 
-    this._panEnd.cloneTo(this._panStart);
+    this._panStart.copyFrom(this._panEnd);
   }
 
   /**
