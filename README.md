@@ -13,6 +13,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - 🫧  &nbsp;**FrameBufferPicker** - Pixel-based object picking
 - 📊  &nbsp;**Stats** - Statistics rendering data
 - 🖇  &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
+- 📐  &nbsp;**Lines** - 2D Solid Line & Dash Line
 
 ## npm
 
