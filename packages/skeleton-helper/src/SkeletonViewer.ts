@@ -112,8 +112,8 @@ export class SkeletonViewer {
 
     const { bounds } = mesh;
     const { min, max } = bounds;
-    min.setValue(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
-    max.setValue(-Number.NEGATIVE_INFINITY, -Number.NEGATIVE_INFINITY, -Number.NEGATIVE_INFINITY);
+    min.set(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+    max.set(-Number.NEGATIVE_INFINITY, -Number.NEGATIVE_INFINITY, -Number.NEGATIVE_INFINITY);
 
     for (let i = 0; i < 6; i++) {
       const position = vertex[i];
@@ -162,7 +162,7 @@ export class SkeletonViewer {
     }
     const material = new Material(engine, shader);
     material.renderState.rasterState.depthBias = -100000000;
-    material.renderQueueType = RenderQueueType.Transparent + 1;
+    material.renderQueueType = RenderQueueType.Transparent;
     material.shaderData.setColor("u_colorMin", this.colorMin);
     material.shaderData.setColor("u_colorMax", this.colorMax);
 
@@ -185,14 +185,11 @@ export class SkeletonViewer {
       const renderer = entity.addComponent(MeshRenderer);
       renderer.mesh = PrimitiveMesh.createSphere(this.engine, this.ballSize, 16);
       renderer.setMaterial(skeletonMaterial);
+      renderer.priority = 1;
 
       spheres.push([entity, joint]);
 
-      // @ts-ignore
-      renderer._debug = true;
       this.debugMesh.push(renderer);
-
-      entity.layer = Layer.Layer1;
 
       // 连接体
       for (let j = 0; j < joint.childCount; j++) {
@@ -210,11 +207,8 @@ export class SkeletonViewer {
         const renderer = entity.addComponent(MeshRenderer);
         renderer.setMaterial(skeletonMaterial);
         renderer.mesh = this._createSpur(direction);
+        renderer.priority = 1;
 
-        entity.layer = Layer.Layer2;
-
-        // @ts-ignore
-        renderer._debug = true;
         this.debugMesh.push(renderer);
       }
     }
