@@ -7,7 +7,6 @@ import babel from "@rollup/plugin-babel";
 import glslify from "rollup-plugin-glslify";
 import { terser } from "rollup-plugin-terser";
 import serve from "rollup-plugin-serve";
-import miniProgramPlugin from "./rollup.miniprogram.plugin";
 import replace from "@rollup/plugin-replace";
 
 const camelCase = require("camelcase");
@@ -49,7 +48,7 @@ const commonPlugins = [
   NODE_ENV === "development"
     ? serve({
         contentBase: "packages",
-        port: 9999
+        port: 9998
       })
     : null
 ];
@@ -83,7 +82,7 @@ function config({ location, pkgJson }) {
 
       return {
         input,
-        external: name === "oasis-engine" ? {} : external,
+        external: [...external, "oasis-engine"],
         output: [
           {
             file,
@@ -97,7 +96,7 @@ function config({ location, pkgJson }) {
       };
     },
     mini: () => {
-      const plugins = [...commonPlugins, ...miniProgramPlugin];
+      const plugins = [...commonPlugins];
       return {
         input,
         output: [
@@ -107,9 +106,7 @@ function config({ location, pkgJson }) {
             sourcemap: false
           }
         ],
-        external: Object.keys(pkgJson.dependencies || {})
-          .concat("@oasis-engine/miniprogram-adapter")
-          .map((name) => `${name}/dist/miniprogram`),
+        external: Object.keys(pkgJson.dependencies || {}).map((name) => `${name}/dist/miniprogram`),
         plugins
       };
     },
@@ -117,7 +114,7 @@ function config({ location, pkgJson }) {
       const plugins = [...commonPlugins];
       return {
         input,
-        external,
+        external: [...external, "oasis-engine"],
         output: [
           {
             file: path.join(location, pkgJson.module),

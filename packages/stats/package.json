@@ -1,9 +1,13 @@
 {
   "name": "@oasis-engine-toolkit/stats",
-  "version": "0.7.0-beta.3",
+  "version": "0.8.0-y.0",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   },
   "types": "types/index.d.ts",
   "main": "dist/main.js",
@@ -13,7 +17,7 @@
     "dist/**/*",
     "types/**/*"
   ],
-  "dependencies": {
-    "oasis-engine": "0.7.0-beta.3"
+  "peerDependencies": {
+    "oasis-engine": "^0.7.0-beta.7"
   }
 }

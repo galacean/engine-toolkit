@@ -53,7 +53,7 @@ export class OrthoControl extends Script {
         return;
       }
       this._handlePan();
-      panEnd.cloneTo(panStart);
+      panStart.copyFrom(panEnd);
     }
   }
 
@@ -81,9 +81,9 @@ export class OrthoControl extends Script {
   panStart(x: number, y: number): void {
     if (!this.enabled) return;
 
-    this.cameraEntity.transform.position.cloneTo(this._panStartPos);
-    this._panStart.setValue(x, y);
-    this._panEnd.setValue(x, y);
+    this._panStartPos.copyFrom(this.cameraEntity.transform.position);
+    this._panStart.set(x, y);
+    this._panEnd.set(x, y);
     this._isPanStart = true;
   }
 
@@ -99,7 +99,7 @@ export class OrthoControl extends Script {
     if (!this._isPanStart) {
       Logger.warn("Make sure to call panStart before calling panMove");
     }
-    this._panEnd.setValue(x, y);
+    this._panEnd.set(x, y);
   }
 
   /**
