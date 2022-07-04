@@ -1,40 +1,27 @@
 import {
-  Color,
   Engine,
   Entity,
-  Layer,
-  Material,
   Matrix,
   MeshRenderer,
   ModelMesh,
   PrimitiveMesh,
   Quaternion,
-  RenderQueueType,
-  Shader,
   SkinnedMeshRenderer,
   Vector3
 } from "oasis-engine";
-let skeletonMaterial: Material = null;
+import { SkeletonManager } from "./SkeletonManager";
 
 export class SkeletonViewer {
   engine: Engine;
   debugMesh: MeshRenderer[] = [];
   skin: SkinnedMeshRenderer;
+  manager: SkeletonManager;
 
-  // Config
-  midStep: number = 0.2;
-  midWidthScale: number = 0.1;
-  ballSize: number = 0.25;
-  scaleFactor: number = 0.85;
-  colorMin: Color = new Color(0.35, 0.35, 0.35, 1);
-  colorMax: Color = new Color(0.7, 0.7, 0.7, 1);
-
-  constructor(engine: Engine, skin: SkinnedMeshRenderer) {
+  constructor(engine: Engine, skin: SkinnedMeshRenderer, manager: SkeletonManager) {
     this.engine = engine;
     this.skin = skin;
-    if (!skeletonMaterial) {
-      skeletonMaterial = this._createSkeletonMaterial(engine);
-    }
+    this.manager = manager;
+
     if (!this.skin.jointNodes) {
       this.skin.update(0);
     }
@@ -55,8 +42,8 @@ export class SkeletonViewer {
   private _createSpur(direction: Vector3): ModelMesh {
     const mesh = new ModelMesh(this.engine);
     const length = direction.length();
-    const midLength = this.midStep * length;
-    const midHalfWidth = length * this.midWidthScale;
+    const midLength = this.manager.midStep * length;
+    const midHalfWidth = length * this.manager.midWidthScale;
 
     const positions: Vector3[] = new Array(24);
     const normals: Vector3[] = new Array(24);
@@ -129,46 +116,6 @@ export class SkeletonViewer {
     return mesh;
   }
 
-  private _createSkeletonMaterial(engine: Engine): Material {
-    let shader: Shader;
-    if (!(shader = Shader.find("skeleton-viewer"))) {
-      shader = Shader.create(
-        "skeleton-viewer",
-        `
-        attribute vec3 POSITION;
-        attribute vec3 NORMAL;
-      
-        uniform mat4 u_MVPMat;
-        uniform mat4 u_normalMat;
-      
-        varying vec3 v_normal;
-      
-        void main(){
-            gl_Position = u_MVPMat * vec4( POSITION , 1.0 );;
-            v_normal = normalize( mat3(u_normalMat) * NORMAL );
-        }`,
-        `
-            uniform vec3 u_colorMin;
-            uniform vec3 u_colorMax;
-            varying vec3 v_normal;
-      
-            void main(){
-              float ndl = dot(v_normal, vec3(0,1,0)) * 0.5 + 0.5;
-              vec3 diffuse = mix(u_colorMin, u_colorMax, ndl);
-              gl_FragColor = vec4(diffuse,1);
-            }
-            `
-      );
-    }
-    const material = new Material(engine, shader);
-    material.renderState.rasterState.depthBias = -100000000;
-    material.renderQueueType = RenderQueueType.Transparent;
-    material.shaderData.setColor("u_colorMin", this.colorMin);
-    material.shaderData.setColor("u_colorMax", this.colorMax);
-
-    return material;
-  }
-
   private _showSkeleton(): void {
     const joints = this.skin.jointNodes;
 
@@ -183,8 +130,8 @@ export class SkeletonViewer {
       // 球
       const entity = joint.createChild();
       const renderer = entity.addComponent(MeshRenderer);
-      renderer.mesh = PrimitiveMesh.createSphere(this.engine, this.ballSize, 16);
-      renderer.setMaterial(skeletonMaterial);
+      renderer.mesh = PrimitiveMesh.createSphere(this.engine, this.manager.ballSize, 16);
+      renderer.setMaterial(this.manager.material);
       renderer.priority = 1;
 
       spheres.push([entity, joint]);
@@ -205,7 +152,7 @@ export class SkeletonViewer {
 
         const entity = joint;
         const renderer = entity.addComponent(MeshRenderer);
-        renderer.setMaterial(skeletonMaterial);
+        renderer.setMaterial(this.manager.material);
         renderer.mesh = this._createSpur(direction);
         renderer.priority = 1;
 
@@ -226,7 +173,7 @@ export class SkeletonViewer {
         base = base.parent;
       }
 
-      const scale = 0.5 * maxLength * Math.pow(this.scaleFactor, count);
+      const scale = 0.5 * maxLength * Math.pow(this.manager.scaleFactor, count);
       const worldScale = sphere.transform.lossyWorldScale;
       sphere.transform.setScale(scale / worldScale.x, scale / worldScale.y, scale / worldScale.z);
     }
