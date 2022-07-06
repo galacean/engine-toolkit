@@ -32,14 +32,14 @@ export class PlanarShadow extends BaseMaterial {
   /**
    * Light direction
    */
-  get LightDir(): Vector3 {
+  get lightDir(): Vector3 {
     return this.shaderData.getVector3(PlanarShadow._lightDirProp);
   }
 
-  set LightDir(value: Vector3) {
+  set lightDir(value: Vector3) {
     const lightDir = this.shaderData.getVector3(PlanarShadow._lightDirProp);
     if (value !== lightDir) {
-      value.normalize().cloneTo(lightDir);
+      lightDir.copyFrom(value.normalize());
     } else {
       value.normalize();
     }
@@ -55,7 +55,7 @@ export class PlanarShadow extends BaseMaterial {
   set shadowColor(value: Color) {
     const shadowColor = this.shaderData.getColor(PlanarShadow._shadowColorProp);
     if (value !== shadowColor) {
-      value.cloneTo(shadowColor);
+      shadowColor.copyFrom(value);
     }
   }
 
@@ -74,18 +74,22 @@ export class PlanarShadow extends BaseMaterial {
     super(engine, Shader.find("planar-shadow"));
 
     this.isTransparent = true;
-    this.renderState.stencilState.enabled = true;
-    this.renderState.stencilState.referenceValue = 0;
-    this.renderState.stencilState.compareFunctionFront = CompareFunction.Equal;
-    this.renderState.stencilState.compareFunctionBack = CompareFunction.Equal;
-    this.renderState.stencilState.failOperationFront = StencilOperation.Keep;
-    this.renderState.stencilState.failOperationBack = StencilOperation.Keep;
-    this.renderState.stencilState.zFailOperationFront = StencilOperation.Keep;
-    this.renderState.stencilState.zFailOperationBack = StencilOperation.Keep;
-    this.renderState.stencilState.passOperationFront = StencilOperation.IncrementWrap;
-    this.renderState.stencilState.passOperationBack = StencilOperation.IncrementWrap;
-    this.renderState.blendState.targetBlendState.sourceAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    this.renderState.blendState.targetBlendState.destinationAlphaBlendFactor = BlendFactor.One;
+    const {
+      stencilState,
+      blendState: { targetBlendState }
+    } = this.renderState;
+    stencilState.enabled = true;
+    stencilState.referenceValue = 0;
+    stencilState.compareFunctionFront = CompareFunction.Equal;
+    stencilState.compareFunctionBack = CompareFunction.Equal;
+    stencilState.failOperationFront = StencilOperation.Keep;
+    stencilState.failOperationBack = StencilOperation.Keep;
+    stencilState.zFailOperationFront = StencilOperation.Keep;
+    stencilState.zFailOperationBack = StencilOperation.Keep;
+    stencilState.passOperationFront = StencilOperation.IncrementWrap;
+    stencilState.passOperationBack = StencilOperation.IncrementWrap;
+    targetBlendState.sourceAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+    targetBlendState.destinationAlphaBlendFactor = BlendFactor.One;
 
     const shaderData = this.shaderData;
     shaderData.setFloat(PlanarShadow._shadowFalloffProp, 0);
