@@ -58,8 +58,12 @@ export class SkeletonManager extends Component {
     entity.getComponentsIncludeChildren(SkinnedMeshRenderer, skinnedMeshRenderers);
 
     for (let i = 0; i < skinnedMeshRenderers.length; i++) {
-      this._skeletonViewer[i] = new SkeletonViewer(this.engine, skinnedMeshRenderers[i], this);
-      this._skeletonViewer[i].update();
+      const renderer = skinnedMeshRenderers[i];
+      if (renderer.skin) {
+        const viewer = new SkeletonViewer(this.engine, renderer, this);
+        this._skeletonViewer.push(viewer);
+        viewer.update();
+      }
     }
   }
 
