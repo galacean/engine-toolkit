@@ -1,4 +1,3 @@
-"use strict";
 import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "oasis-engine";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
 import { ControlInputDevice } from "./inputDevice/ControlInputDevice";
@@ -25,12 +24,6 @@ export class OrbitControl extends Script {
   autoRotate: boolean = false;
   /** The radian of automatic rotation per second. */
   autoRotateSpeed: number = Math.PI;
-  /** Whether to enable rotation, the default is true. */
-  enableRotate: boolean;
-  /** Whether to enable camera damping, the default is true. */
-  enableZoom: boolean = true;
-  /** Whether to enable translation, the default is true. */
-  enablePan: boolean = true;
   /** Whether to enable keyboard. */
   enableKeys: boolean = false;
   /** Whether to enable camera damping, the default is true. */
@@ -69,6 +62,52 @@ export class OrbitControl extends Script {
   private _scale: number = 1;
   private _panOffset: Vector3 = new Vector3();
   private _tempVec3: Vector3 = new Vector3();
+  private _enableHandler: number = ControlHandlerType.All;
+
+  /**
+   *  Return Whether to enable rotation, the default is true.
+   */
+  get enableRotate(): boolean {
+    return (this._enableHandler & ControlHandlerType.ROTATE) !== 0;
+  }
+
+  set enableRotate(value: boolean) {
+    if (value) {
+      this._enableHandler |= ControlHandlerType.ROTATE;
+    } else {
+      this._enableHandler &= ~ControlHandlerType.ROTATE;
+    }
+  }
+
+  /**
+   *  Whether to enable camera damping, the default is true.
+   */
+  get enableZoom(): boolean {
+    return (this._enableHandler & ControlHandlerType.ZOOM) !== 0;
+  }
+
+  set enableZoom(value: boolean) {
+    if (value) {
+      this._enableHandler |= ControlHandlerType.ZOOM;
+    } else {
+      this._enableHandler &= ~ControlHandlerType.ZOOM;
+    }
+  }
+
+  /**
+   *  Whether to enable translation, the default is true.
+   */
+  get enablePan(): boolean {
+    return (this._enableHandler & ControlHandlerType.PAN) !== 0;
+  }
+
+  set enablePan(value: boolean) {
+    if (value) {
+      this._enableHandler |= ControlHandlerType.PAN;
+    } else {
+      this._enableHandler &= ~ControlHandlerType.PAN;
+    }
+  }
 
   onAwake(): void {
     const { engine, entity } = this;
@@ -78,7 +117,7 @@ export class OrbitControl extends Script {
     this.cameraTransform = entity.transform;
   }
 
-  onUpdate(deltaTime: number) :void{
+  onUpdate(deltaTime: number): void {
     /** Update this._sphericalDelta, this._scale and this._panOffset. */
     this._updateInputDelta(deltaTime);
     /** Update camera's transform. */
@@ -87,23 +126,23 @@ export class OrbitControl extends Script {
 
   private _updateInputDelta(deltaTime: number): void {
     let curMode = ControlHandlerType.None;
-    const { _tempVec3: delta } = this;
+    const { _tempVec3: delta, _enableHandler: enableHandler } = this;
     const { inputDevices: modes, input } = this;
     for (let i = modes.length - 1; i >= 0; i--) {
       const handler = modes[i];
       const mode = handler.onUpdateHandler(input);
-      if (mode !== ControlHandlerType.None) {
+      if (mode & enableHandler) {
         curMode |= mode;
         handler.onUpdateDelta(this, delta);
         switch (mode) {
           case ControlHandlerType.ROTATE:
-            this.enableRotate && this._rotate(delta);
+            this._rotate(delta);
             break;
           case ControlHandlerType.ZOOM:
-            this.enableZoom && this._zoom(delta);
+            this._zoom(delta);
             break;
           case ControlHandlerType.PAN:
-            this.enablePan && this._pan(delta);
+            this._pan(delta);
             break;
           default:
             break;
@@ -116,17 +155,17 @@ export class OrbitControl extends Script {
       this._sphericalDelta.theta -= rotateAngle;
     }
     if (this.enableDamping) {
-      if (curMode ^ ControlHandlerType.ZOOM) {
+      if (enableHandler & ControlHandlerType.ZOOM && curMode ^ ControlHandlerType.ZOOM) {
         this._zoomFrag *= 1 - this.zoomFactor;
       }
-      if (curMode ^ ControlHandlerType.ROTATE) {
+      if (enableHandler & ControlHandlerType.ROTATE && curMode ^ ControlHandlerType.ROTATE) {
         _sphericalDelta.theta = _sphericalDump.theta *= 1 - this.dampingFactor;
         _sphericalDelta.phi = _sphericalDump.phi *= 1 - this.dampingFactor;
       }
     }
   }
 
-  private _rotate(delta: Vector3) :void{
+  private _rotate(delta: Vector3): void {
     const radianLeft = ((2 * Math.PI * delta.x) / this.canvas.width) * this.rotateSpeed;
     this._sphericalDelta.theta -= radianLeft;
     const radianUp = ((2 * Math.PI * delta.y) / this.canvas.height) * this.rotateSpeed;
@@ -137,11 +176,11 @@ export class OrbitControl extends Script {
     }
   }
 
-  private _zoom(delta: Vector3):void {
+  private _zoom(delta: Vector3): void {
     this._scale *= delta.x;
   }
 
-  private _pan(delta: Vector3) :void{
+  private _pan(delta: Vector3): void {
     const { cameraTransform } = this;
     const { elements } = cameraTransform.worldMatrix;
     const { height } = this.canvas;
@@ -154,7 +193,7 @@ export class OrbitControl extends Script {
     this._panOffset.z += elements[2] * distanceLeft + elements[6] * distanceUp;
   }
 
-  private _updateTransform() :void{
+  private _updateTransform(): void {
     const { cameraTransform, target, _tempVec3, _spherical, _sphericalDelta, _panOffset } = this;
     Vector3.subtract(cameraTransform.position, target, _tempVec3);
     _spherical.setFromVec3(_tempVec3);
