@@ -5,9 +5,7 @@ import { ControlInputDevice } from "./ControlInputDevice";
 
 export class ControlPointer extends ControlInputDevice {
   onUpdateHandler(input: InputManager): ControlHandlerType {
-    const { pointers } = input;
-    const pointersLength = pointers.length;
-    switch (pointersLength) {
+    switch (input.pointers.length) {
       case 1:
         if (input.isPointerHeldDown(PointerButton.Secondary)) {
           return ControlHandlerType.PAN;
@@ -18,7 +16,6 @@ export class ControlPointer extends ControlInputDevice {
         } else {
           return ControlHandlerType.None;
         }
-        break;
       case 2:
         return ControlHandlerType.ZOOM;
       case 3:
