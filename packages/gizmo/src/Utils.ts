@@ -1,4 +1,4 @@
-import { Material, Mesh, Engine, Vector4, PrimitiveMesh} from "oasis-engine";
+import { Material, Mesh, Layer, Engine, Vector4, PrimitiveMesh, Vector3, BlinnPhongMaterial } from "oasis-engine";
 import { LinesMesh, ArcLineMesh } from "./Mesh";
 import { createMeshMaterial } from "./material";
 
@@ -149,6 +149,7 @@ class Utils {
       arc: 180
     });
 
+    // 这个可以有数学公式进行表达...
     this.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.06, 0.24);
     this.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
     this.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);

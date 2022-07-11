@@ -1,4 +1,5 @@
 import { Vector4, Component, Entity, MeshRenderer, Layer, Material, RenderQueueType } from "oasis-engine";
+import { AxisProps } from "./Type";
 import { utils } from "./Utils";
 export class Axis extends Component {
   private material: Material;
@@ -7,11 +8,9 @@ export class Axis extends Component {
     super(entity);
   }
 
-  public initAxis(value) {
+  public initAxis(value: AxisProps) {
     this.material = value.axisMaterial;
     this.material.renderQueueType = RenderQueueType.Transparent;
-    // this.material.renderQueueType = RenderQueueType.Transparent + 10;
-
     this.color = value.axisMaterial.shaderData._properties[74];
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {
@@ -19,7 +18,7 @@ export class Axis extends Component {
       axisEntity.transform.rotate(value.axisRotation[i]);
       axisEntity.transform.translate(value.axisTranslation[i]);
       const axisRenderer = axisEntity.addComponent(MeshRenderer);
-      axisRenderer.priority = 10;
+      axisRenderer.priority = 100;
       axisRenderer.mesh = value.axisMesh[i];
       axisRenderer.setMaterial(this.material);
     }
@@ -32,6 +31,7 @@ export class Axis extends Component {
       axisHelperEntity.transform.rotate(value.axisRotation[i]);
       axisHelperEntity.transform.translate(value.axisTranslation[i]);
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
+      axisHelperRenderer.priority = 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
       axisHelperRenderer.setMaterial(utils.invisibleMaterial);
     }

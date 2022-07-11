@@ -37,7 +37,7 @@ export function createMeshMaterial(options: Partial<Option> = {}, engine: Engine
   const material = new Material(engine, Shader.find("gizmo-shader"));
   material.shaderData.setVector4("u_color", newOptions.color);
   material.shaderData.setFloat("u_highLight", 0);
-  material.renderQueueType = RenderQueueType.Transparent + 100;
+  material.renderQueueType = RenderQueueType.Transparent;
 
   if (newOptions.doubleSide) {
     material.renderState.rasterState.cullMode = CullMode.Off;

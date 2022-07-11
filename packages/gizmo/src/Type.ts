@@ -1,19 +1,21 @@
-import { Component, Entity, Ray, Vector3, Mesh, Material } from "oasis-engine";
+import { Component, Entity, Ray, Vector3, Mesh, Material, Camera } from "oasis-engine";
 
+// 是否要把selectedEntity头
 export abstract class GizmoComponent extends Component {
   /**
    * Called when select entity.
    * @param entityArr - The selected entity array. Could be empty.
    */
   onSelected?(entity: Entity): void;
-  onHoverStart?(axis: string): void;
+  initCamera?(camera: Camera): void;
+  onHoverStart?(axisName: string): void;
   onHoverEnd?(): void;
-  onMoveStart?(ray: Ray, axis: string) {}
-  onMoveEnd?() {}
-  onMove?(ray: Ray) {}
+  onMoveStart?(ray: Ray, axisName: string): void;
+  onMoveEnd?(): void;
+  onMove?(ray: Ray): void;
 }
 
-export const axisNormal: { [key: string]: Vector3 } = {
+export const axisVector: { [key: string]: Vector3 } = {
   x: new Vector3(1, 0, 0),
   y: new Vector3(0, 1, 0),
   z: new Vector3(0, 0, 1),
