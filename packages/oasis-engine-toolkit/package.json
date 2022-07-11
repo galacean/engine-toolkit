@@ -1,6 +1,6 @@
 {
   "name": "oasis-engine-toolkit",
-  "version": "0.8.0-alpha.1",
+  "version": "0.8.0-alpha.2",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
@@ -18,9 +18,9 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-alpha.1",
-    "@oasis-engine-toolkit/controls": "0.8.0-alpha.1",
-    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-alpha.1",
-    "@oasis-engine-toolkit/stats": "0.8.0-alpha.1"
+    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-alpha.2",
+    "@oasis-engine-toolkit/controls": "0.8.0-alpha.2",
+    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-alpha.2",
+    "@oasis-engine-toolkit/stats": "0.8.0-alpha.2"
   }
 }
