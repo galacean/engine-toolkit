@@ -1,10 +1,12 @@
 import { InputManager, Keys, Vector3 } from "oasis-engine";
 import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { OrbitControl } from "../OrbitControl";
-import { ControlInputDevice } from "./ControlInputDevice";
+import { IControlInput } from "./IControlInput";
+import { StaticInterfaceImplement } from "./StaticInterfaceImplement";
 
-export class ControlKeyboard extends ControlInputDevice {
-  onUpdateHandler(input: InputManager): ControlHandlerType {
+@StaticInterfaceImplement<IControlInput>()
+export class ControlKeyboard {
+  static onUpdateHandler(input: InputManager): ControlHandlerType {
     if (
       input.isKeyHeldDown(Keys.ArrowLeft) ||
       input.isKeyHeldDown(Keys.ArrowRight) ||
@@ -17,7 +19,7 @@ export class ControlKeyboard extends ControlInputDevice {
     }
   }
 
-  onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
+  static onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
     const { keyPanSpeed, input } = control;
     outDelta.x = outDelta.y = 0;
     if (input.isKeyHeldDown(Keys.ArrowLeft)) {
