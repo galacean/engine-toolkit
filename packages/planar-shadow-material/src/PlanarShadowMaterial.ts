@@ -12,7 +12,7 @@ import {
 /**
  * Planar Shadow
  */
-export class PlanarShadow extends BaseMaterial {
+export class PlanarShadowMaterial extends BaseMaterial {
   private static _lightDirProp = Shader.getPropertyByName("u_lightDir");
   private static _planarHeightProp = Shader.getPropertyByName("u_planarHeight");
   private static _shadowColorProp = Shader.getPropertyByName("u_planarShadowColor");
@@ -22,22 +22,22 @@ export class PlanarShadow extends BaseMaterial {
    * Planar height
    */
   get planarHeight(): number {
-    return this.shaderData.getFloat(PlanarShadow._planarHeightProp);
+    return this.shaderData.getFloat(PlanarShadowMaterial._planarHeightProp);
   }
 
   set planarHeight(value: number) {
-    this.shaderData.setFloat(PlanarShadow._planarHeightProp, value);
+    this.shaderData.setFloat(PlanarShadowMaterial._planarHeightProp, value);
   }
 
   /**
    * Light direction
    */
-  get lightDir(): Vector3 {
-    return this.shaderData.getVector3(PlanarShadow._lightDirProp);
+  get lightDirection(): Vector3 {
+    return this.shaderData.getVector3(PlanarShadowMaterial._lightDirProp);
   }
 
-  set lightDir(value: Vector3) {
-    const lightDir = this.shaderData.getVector3(PlanarShadow._lightDirProp);
+  set lightDirection(value: Vector3) {
+    const lightDir = this.shaderData.getVector3(PlanarShadowMaterial._lightDirProp);
     if (value !== lightDir) {
       lightDir.copyFrom(value.normalize());
     } else {
@@ -49,11 +49,11 @@ export class PlanarShadow extends BaseMaterial {
    * Shadow color
    */
   get shadowColor(): Color {
-    return this.shaderData.getColor(PlanarShadow._shadowColorProp);
+    return this.shaderData.getColor(PlanarShadowMaterial._shadowColorProp);
   }
 
   set shadowColor(value: Color) {
-    const shadowColor = this.shaderData.getColor(PlanarShadow._shadowColorProp);
+    const shadowColor = this.shaderData.getColor(PlanarShadowMaterial._shadowColorProp);
     if (value !== shadowColor) {
       shadowColor.copyFrom(value);
     }
@@ -63,15 +63,15 @@ export class PlanarShadow extends BaseMaterial {
    * Shadow falloff coefficient
    */
   get shadowFalloff(): number {
-    return this.shaderData.getFloat(PlanarShadow._shadowFalloffProp);
+    return this.shaderData.getFloat(PlanarShadowMaterial._shadowFalloffProp);
   }
 
   set shadowFalloff(value: number) {
-    this.shaderData.setFloat(PlanarShadow._shadowFalloffProp, value);
+    this.shaderData.setFloat(PlanarShadowMaterial._shadowFalloffProp, value);
   }
 
   constructor(engine: Engine) {
-    super(engine, Shader.find("planar-shadow"));
+    super(engine, Shader.find("planar-shadow-material"));
 
     this.isTransparent = true;
     const {
@@ -92,15 +92,15 @@ export class PlanarShadow extends BaseMaterial {
     targetBlendState.destinationAlphaBlendFactor = BlendFactor.One;
 
     const shaderData = this.shaderData;
-    shaderData.setFloat(PlanarShadow._shadowFalloffProp, 0);
-    shaderData.setColor(PlanarShadow._shadowColorProp, new Color(1.0, 1.0, 1.0, 1.0));
-    shaderData.setVector3(PlanarShadow._lightDirProp, new Vector3(0, 0, 0));
-    shaderData.setFloat(PlanarShadow._planarHeightProp, 0);
+    shaderData.setFloat(PlanarShadowMaterial._shadowFalloffProp, 0);
+    shaderData.setColor(PlanarShadowMaterial._shadowColorProp, new Color(1.0, 1.0, 1.0, 1.0));
+    shaderData.setVector3(PlanarShadowMaterial._lightDirProp, new Vector3(0, 0, 0));
+    shaderData.setFloat(PlanarShadowMaterial._planarHeightProp, 0);
   }
 }
 
 Shader.create(
-  "planar-shadow",
+  "planar-shadow-material",
   `
     attribute vec4 POSITION;
     varying vec4 color;
