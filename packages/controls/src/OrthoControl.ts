@@ -162,7 +162,7 @@ export class OrthoControl extends Script {
   }
 
   private _updateCamera(): void {
-    const { cameraTransform, camera } = this;
+    const { cameraTransform, camera, _panOffset } = this;
 
     // Update Zoom
     const sizeDiff = this._zoomScaleUnit * (this._scale - 1);
@@ -171,7 +171,7 @@ export class OrthoControl extends Script {
     
     // Update X and Y
     const { width, height } = this.canvas;
-    const { x, y } = this._panOffset;
+    const { x, y } = _panOffset;
     const doubleOrthographicSize = camera.orthographicSize * 2;
     const width3D = doubleOrthographicSize * camera.aspectRatio;
     const height3D = doubleOrthographicSize;
@@ -185,5 +185,6 @@ export class OrthoControl extends Script {
     cameraTransform.position = curPosition;
     /** Reset cache value. */
     this._scale = 1;
+    _panOffset.set(0, 0, 0);
   }
 }
