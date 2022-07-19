@@ -1,6 +1,6 @@
 {
   "name": "@oasis-engine-toolkit/skeleton-helper",
-  "version": "0.8.0-y.0",
+  "version": "0.8.0-alpha.5",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
@@ -14,6 +14,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^0.7.0-beta.7"
+    "oasis-engine": "^0.8.0-alpha.3"
   }
 }
