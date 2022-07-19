@@ -1,0 +1,23 @@
+{
+  "name": "@oasis-engine-toolkit/outline",
+  "version": "0.8.0-alpha.10",
+  "license": "MIT",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "browser": "dist/browser.js",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "b:types": "tsc"
+  },
+  "types": "types/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "types/**/*"
+  ],
+  "peerDependencies": {
+    "oasis-engine": "^0.8.0-alpha.3"
+  }
+}

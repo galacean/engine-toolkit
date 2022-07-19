@@ -16,6 +16,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - 🗳  &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
 - ⎈  &nbsp;**Skeleton Viewer** - Skeleton visualization
 - 🟣  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling) objects
+- 🎁 &nbsp;**Outline** - Show outline of mesh renderers
 
 ## npm
 
