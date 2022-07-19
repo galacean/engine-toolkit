@@ -40,7 +40,6 @@ export class GizmoControls extends Script {
     this.gizmoMap[name] = { entity, component };
   }
 
-  // 如何和viewport里的toolkit交互
   public onGizmoChange(currentState: GizmoState) {
     Object.values(this.gizmoMap).forEach((gizmo) => (gizmo.entity.isActive = false));
     this.gizmoState = currentState;

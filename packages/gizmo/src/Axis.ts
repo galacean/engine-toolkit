@@ -16,7 +16,7 @@ export class Axis extends Component {
     for (let i = 0; i < value.axisMesh.length; i++) {
       const axisEntity = this.entity.createChild(value.name);
       axisEntity.transform.rotate(value.axisRotation[i]);
-      axisEntity.transform.translate(value.axisTranslation[i]);
+      axisEntity.transform.translate(value.axisTranslation[i], false);
       const axisRenderer = axisEntity.addComponent(MeshRenderer);
       axisRenderer.priority = 100;
       axisRenderer.mesh = value.axisMesh[i];
@@ -29,7 +29,7 @@ export class Axis extends Component {
       const temp = gizmoHelperEntity.createChild(value.name);
       const axisHelperEntity = temp.createChild(value.name);
       axisHelperEntity.transform.rotate(value.axisRotation[i]);
-      axisHelperEntity.transform.translate(value.axisTranslation[i]);
+      axisHelperEntity.transform.translate(value.axisTranslation[i], false);
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
       axisHelperRenderer.priority = 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
