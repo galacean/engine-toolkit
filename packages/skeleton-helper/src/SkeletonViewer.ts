@@ -15,44 +15,26 @@ import {
   Vector3
 } from "oasis-engine";
 
-Shader.create(
-  "skeleton-viewer",
-  `
-  attribute vec3 POSITION;
-  attribute vec3 NORMAL;
-
-  uniform mat4 u_MVPMat;
-  uniform mat4 u_normalMat;
-
-  varying vec3 v_normal;
-
-  void main(){
-      gl_Position = u_MVPMat * vec4( POSITION , 1.0 );;
-      v_normal = normalize( mat3(u_normalMat) * NORMAL );
-  }`,
-  `
-      uniform vec3 u_colorMin;
-      uniform vec3 u_colorMax;
-      varying vec3 v_normal;
-
-      void main(){
-        float ndl = dot(v_normal, vec3(0, 1, 0)) * 0.5 + 0.5;
-        vec3 diffuse = mix(u_colorMin, u_colorMax, ndl);
-        gl_FragColor = vec4(diffuse, 1.0);
-      }
-      `
-);
-const materialMap = new Map<Engine, Material>();
-
+/**
+ * Skeleton visualization.
+ * @example
+ * rootEntity.addComponent(SkeletonViewer);
+ */
 export class SkeletonViewer extends Script {
   material: Material;
 
-  // Config
+  /** Distance from connector to bone, [0~1]. */
   midStep: number = 0.2;
+
+  /** The scale of the linker. */
   midWidthScale: number = 0.1;
+  /** Ball size. */
   ballSize: number = 0.25;
+  /** Skeletal Decrease Factor. */
   scaleFactor: number = 0.85;
+  /** The min color.  */
   colorMin: Color = new Color(0.35, 0.35, 0.35, 1);
+  /** The max color. */
   colorMax: Color = new Color(0.7, 0.7, 0.7, 1);
 
   private _debugMesh: MeshRenderer[] = [];
@@ -87,6 +69,18 @@ export class SkeletonViewer extends Script {
       this._debugMesh[i].destroy();
     }
     this._debugMesh.length = 0;
+  }
+
+  onEnable() {
+    for (let i = 0, length = this._debugMesh.length; i < length; i++) {
+      this._debugMesh[i].enabled = true;
+    }
+  }
+
+  onDisable() {
+    for (let i = 0, length = this._debugMesh.length; i < length; i++) {
+      this._debugMesh[i].enabled = false;
+    }
   }
 
   private _createSpur(direction: Vector3): ModelMesh {
@@ -214,7 +208,7 @@ export class SkeletonViewer extends Script {
       }
     }
 
-    // 调整球大小
+    // change size of ball
     for (let i = 0; i < spheres.length; i++) {
       const sphere = spheres[i][0];
       const joint = spheres[i][1];
@@ -233,3 +227,33 @@ export class SkeletonViewer extends Script {
     }
   }
 }
+
+Shader.create(
+  "skeleton-viewer",
+  `
+  attribute vec3 POSITION;
+  attribute vec3 NORMAL;
+
+  uniform mat4 u_MVPMat;
+  uniform mat4 u_normalMat;
+
+  varying vec3 v_normal;
+
+  void main(){
+      gl_Position = u_MVPMat * vec4( POSITION , 1.0 );;
+      v_normal = normalize( mat3(u_normalMat) * NORMAL );
+  }`,
+  `
+      uniform vec3 u_colorMin;
+      uniform vec3 u_colorMax;
+      varying vec3 v_normal;
+
+      void main(){
+        float ndl = dot(v_normal, vec3(0, 1, 0)) * 0.5 + 0.5;
+        vec3 diffuse = mix(u_colorMin, u_colorMax, ndl);
+        gl_FragColor = vec4(diffuse, 1.0);
+      }
+      `
+);
+
+const materialMap = new Map<Engine, Material>();
