@@ -26,7 +26,7 @@ export class GizmoControls extends Script {
     this.createGizmoControl("rotate", RotateControl);
     this.onGizmoChange(this.gizmoState);
   }
-  // 选择的逻辑
+
   public initGizmoControl(camera: Camera) {
     this.editorCamera = camera;
     Object.values(this.gizmoMap).forEach((gizmo) => gizmo.component.initCamera(camera));

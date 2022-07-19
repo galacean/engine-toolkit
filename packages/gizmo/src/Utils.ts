@@ -149,7 +149,6 @@ class Utils {
       arc: 180
     });
 
-    // 这个可以有数学公式进行表达...
     this.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.06, 0.24);
     this.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
     this.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
