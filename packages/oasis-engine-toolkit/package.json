@@ -22,6 +22,7 @@
     "@oasis-engine-toolkit/controls": "0.8.0-alpha.10",
     "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-alpha.10",
     "@oasis-engine-toolkit/planar-shadow-material": "0.8.0-alpha.10",
-    "@oasis-engine-toolkit/stats": "0.8.0-alpha.10"
+    "@oasis-engine-toolkit/stats": "0.8.0-alpha.10",
+    "@oasis-engine-toolkit/skeleton-helper": "0.8.0-alpha.10"
   }
 }

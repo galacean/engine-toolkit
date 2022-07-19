@@ -1,13 +1,4 @@
-import {
-  BaseMaterial,
-  BlendFactor,
-  Color,
-  CompareFunction,
-  Engine,
-  Shader,
-  StencilOperation,
-  Vector3
-} from "oasis-engine";
+import { BaseMaterial, Color, CompareFunction, Engine, Shader, StencilOperation, Vector3 } from "oasis-engine";
 
 /**
  * Planar Shadow
@@ -74,10 +65,7 @@ export class PlanarShadowMaterial extends BaseMaterial {
     super(engine, Shader.find("planar-shadow-material"));
 
     this.isTransparent = true;
-    const {
-      stencilState,
-      blendState: { targetBlendState }
-    } = this.renderState;
+    const { stencilState } = this.renderState;
     stencilState.enabled = true;
     stencilState.referenceValue = 0;
     stencilState.compareFunctionFront = CompareFunction.Equal;
@@ -88,8 +76,6 @@ export class PlanarShadowMaterial extends BaseMaterial {
     stencilState.zFailOperationBack = StencilOperation.Keep;
     stencilState.passOperationFront = StencilOperation.IncrementWrap;
     stencilState.passOperationBack = StencilOperation.IncrementWrap;
-    targetBlendState.sourceAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    targetBlendState.destinationAlphaBlendFactor = BlendFactor.One;
 
     const shaderData = this.shaderData;
     shaderData.setFloat(PlanarShadowMaterial._shadowFalloffProp, 0);
