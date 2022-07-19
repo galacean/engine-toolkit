@@ -1,11 +1,7 @@
 {
-  "name": "@oasis-engine-toolkit/controls",
-  "version": "0.8.0-alpha.5",
+  "name": "@oasis-engine-toolkit/planar-shadow-material",
+  "version": "0.7.0-beta.3",
   "license": "MIT",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org"
-  },
   "scripts": {
     "b:types": "tsc",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
@@ -18,7 +14,7 @@
     "dist/**/*",
     "types/**/*"
   ],
-  "peerDependencies": {
-    "oasis-engine": "^0.8.0-alpha.3"
+  "dependencies": {
+    "oasis-engine": "0.7.0-beta.6"
   }
 }
