@@ -21,11 +21,8 @@ import {
  * rootEntity.addComponent(SkeletonViewer);
  */
 export class SkeletonViewer extends Script {
-  material: Material;
-
   /** Distance from connector to bone, [0~1]. */
   midStep: number = 0.2;
-
   /** The scale of the linker. */
   midWidthScale: number = 0.1;
   /** Ball size. */
@@ -38,6 +35,7 @@ export class SkeletonViewer extends Script {
   colorMax: Color = new Color(0.7, 0.7, 0.7, 1);
 
   private _debugMesh: MeshRenderer[] = [];
+  private _material: Material;
 
   constructor(entity: Entity) {
     super(entity);
@@ -50,9 +48,9 @@ export class SkeletonViewer extends Script {
       materialMap.set(engine, material);
     }
 
-    this.material = materialMap.get(engine);
-    this.material.shaderData.setColor("u_colorMin", this.colorMin);
-    this.material.shaderData.setColor("u_colorMax", this.colorMax);
+    this._material = materialMap.get(engine);
+    this._material.shaderData.setColor("u_colorMin", this.colorMin);
+    this._material.shaderData.setColor("u_colorMax", this.colorMax);
 
     const skinnedMeshRenderers = [];
     this.entity.getComponentsIncludeChildren(SkinnedMeshRenderer, skinnedMeshRenderers);
@@ -179,7 +177,7 @@ export class SkeletonViewer extends Script {
       const entity = joint.createChild();
       const renderer = entity.addComponent(MeshRenderer);
       renderer.mesh = PrimitiveMesh.createSphere(this.engine, this.ballSize, 16);
-      renderer.setMaterial(this.material);
+      renderer.setMaterial(this._material);
       renderer.priority = 1;
 
       spheres.push([entity, joint]);
@@ -200,7 +198,7 @@ export class SkeletonViewer extends Script {
 
         const entity = joint;
         const renderer = entity.addComponent(MeshRenderer);
-        renderer.setMaterial(this.material);
+        renderer.setMaterial(this._material);
         renderer.mesh = this._createSpur(direction);
         renderer.priority = 1;
 
