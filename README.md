@@ -15,7 +15,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - 🖇  &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
 - 🗳  &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
 - ⎈  &nbsp;**Skeleton Helper** - Skeleton visualization
-- 🟣  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling) objects
+- 🟣  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
 
 ## npm
 
