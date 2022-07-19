@@ -9,15 +9,15 @@ import {
   SkinnedMeshRenderer,
   Vector3
 } from "oasis-engine";
-import { SkeletonManager } from "./SkeletonManager";
+import { SkeletonHelper } from "./SkeletonManager";
 
 export class SkeletonViewer {
   engine: Engine;
   debugMesh: MeshRenderer[] = [];
   skin: SkinnedMeshRenderer;
-  manager: SkeletonManager;
+  manager: SkeletonHelper;
 
-  constructor(engine: Engine, skin: SkinnedMeshRenderer, manager: SkeletonManager) {
+  constructor(engine: Engine, skin: SkinnedMeshRenderer, manager: SkeletonHelper) {
     this.engine = engine;
     this.skin = skin;
     this.manager = manager;

@@ -1,1 +1,1 @@
-export { SkeletonManager } from "./SkeletonManager";
+export { SkeletonHelper } from "./SkeletonManager";

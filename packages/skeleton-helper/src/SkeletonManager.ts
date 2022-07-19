@@ -1,4 +1,4 @@
-import { Entity, Component, SkinnedMeshRenderer, Shader, Material, RenderQueueType, Color } from "oasis-engine";
+import { Color, Engine, Entity, Material, RenderQueueType, Script, Shader, SkinnedMeshRenderer } from "oasis-engine";
 import { SkeletonViewer } from "./SkeletonViewer";
 
 Shader.create(
@@ -29,7 +29,14 @@ Shader.create(
       `
 );
 
-export class SkeletonManager extends Component {
+const materialMap = new Map<Engine, Material>();
+
+/**
+ * Skeleton visualization.
+ * @example
+ * rootEntity.addComponent(SkeletonHelper);
+ */
+export class SkeletonHelper extends Script {
   private _skeletonViewer: SkeletonViewer[] = [];
   material: Material;
 
@@ -44,18 +51,23 @@ export class SkeletonManager extends Component {
   constructor(entity: Entity) {
     super(entity);
 
-    const material = new Material(entity.engine, Shader.find("skeleton-viewer"));
-    material.renderState.rasterState.depthBias = -100000000;
-    material.renderQueueType = RenderQueueType.Transparent;
-    material.shaderData.setColor("u_colorMin", this.colorMin);
-    material.shaderData.setColor("u_colorMax", this.colorMax);
-    this.material = material;
+    const engine = entity.engine;
+    if (!materialMap.get(engine)) {
+      const material = new Material(entity.engine, Shader.find("skeleton-viewer"));
+      material.renderState.rasterState.depthBias = -100000000;
+      material.renderQueueType = RenderQueueType.Transparent;
+      materialMap.set(engine, material);
+    }
+
+    this.material = materialMap.get(engine);
+    this.material.shaderData.setColor("u_colorMin", this.colorMin);
+    this.material.shaderData.setColor("u_colorMax", this.colorMax);
+    this._showSkin();
   }
 
-  showSkin(entity: Entity) {
-    this.clear();
+  private _showSkin() {
     const skinnedMeshRenderers = [];
-    entity.getComponentsIncludeChildren(SkinnedMeshRenderer, skinnedMeshRenderers);
+    this.entity.getComponentsIncludeChildren(SkinnedMeshRenderer, skinnedMeshRenderers);
 
     for (let i = 0; i < skinnedMeshRenderers.length; i++) {
       const renderer = skinnedMeshRenderers[i];
@@ -67,14 +79,10 @@ export class SkeletonManager extends Component {
     }
   }
 
-  clear() {
+  onDestroy() {
     for (let i = 0, length = this._skeletonViewer.length; i < length; i++) {
       this._skeletonViewer[i].destroy();
     }
     this._skeletonViewer.length = 0;
-  }
-
-  onDestroy() {
-    this.clear();
   }
 }

@@ -5,6 +5,10 @@
   "scripts": {
     "b:types": "tsc"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "types": "types/index.d.ts",
   "main": "dist/main.js",
   "module": "dist/module.js",
