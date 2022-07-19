@@ -37,7 +37,6 @@ const materialMap = new Map<Engine, Material>();
  * rootEntity.addComponent(SkeletonHelper);
  */
 export class SkeletonHelper extends Script {
-  private _skeletonViewer: SkeletonViewer[] = [];
   material: Material;
 
   // Config
@@ -47,6 +46,8 @@ export class SkeletonHelper extends Script {
   scaleFactor: number = 0.85;
   colorMin: Color = new Color(0.35, 0.35, 0.35, 1);
   colorMax: Color = new Color(0.7, 0.7, 0.7, 1);
+
+  private _skeletonViewer: SkeletonViewer[] = [];
 
   constructor(entity: Entity) {
     super(entity);
