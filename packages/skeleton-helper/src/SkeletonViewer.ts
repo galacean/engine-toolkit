@@ -62,6 +62,7 @@ export class SkeletonViewer extends Script {
     }
   }
 
+  /** @internal */
   onDestroy(): void {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].destroy();
@@ -69,12 +70,14 @@ export class SkeletonViewer extends Script {
     this._debugMesh.length = 0;
   }
 
+  /** @internal */
   onEnable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = true;
     }
   }
 
+  /** @internal */
   onDisable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = false;
