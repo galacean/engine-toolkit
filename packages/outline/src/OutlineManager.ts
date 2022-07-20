@@ -84,7 +84,7 @@ export class OutlineManager extends Script {
     this._outlineRoot.isActive = false;
     this._screenEntity.isActive = true;
     camera.renderTarget = null;
-    camera.clearFlags = CameraClearFlags.DepthStencil;
+    camera.clearFlags = CameraClearFlags.None;
     camera.enableFrustumCulling = false;
     camera.render();
     this._root.isActive = true;
