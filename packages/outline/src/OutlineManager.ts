@@ -1,4 +1,5 @@
 import {
+  BackgroundMode,
   BaseMaterial,
   Camera,
   CameraClearFlags,
@@ -11,6 +12,7 @@ import {
   Script,
   Shader,
   Texture2D,
+  UnlitMaterial,
   Vector2
 } from "oasis-engine";
 import fs from "./outline.fs.glsl";
@@ -26,11 +28,15 @@ export class OutlineManager extends Script {
   private static _texSizeProp = Shader.getPropertyByName("u_texSize");
 
   private _material: BaseMaterial;
+  private _replaceMaterial: BaseMaterial;
   private _renderTarget: RenderTarget;
   private _root: Entity;
   private _outlineRoot: Entity;
   private _screenEntity: Entity;
-  private _size: number = 2;
+  private _size: number = 1;
+  private _clearColor: Color = new Color(1, 1, 1, 1);
+  private _outlineColor: Color = new Color(0, 0, 0, 1);
+  private _replaceColor: Color = new Color(1, 0, 0, 1);
 
   /** outline color. */
   get color(): Color {
@@ -38,7 +44,10 @@ export class OutlineManager extends Script {
   }
 
   set color(value: Color) {
-    this._material.shaderData.setColor(OutlineManager._outlineColorProp, value);
+    const color = this._material.shaderData.getColor(OutlineManager._outlineColorProp);
+    if (value !== color) {
+      color.copyFrom(value);
+    }
   }
 
   /** Outline size.[1~6] */
@@ -69,19 +78,21 @@ export class OutlineManager extends Script {
   constructor(entity: Entity) {
     super(entity);
     const engine = this.engine;
-    const scene = engine.sceneManager.activeScene;
-    const material = new BaseMaterial(this.engine, Shader.find("outline-postprocess-shader"));
-
+    const scene = this.scene;
+    const material = new BaseMaterial(engine, Shader.find("outline-postprocess-shader"));
+    const replaceMaterial = new UnlitMaterial(engine);
     const outlineRoot = scene.createRootEntity();
     const screenEntity = scene.createRootEntity("screen");
     const screenRenderer = screenEntity.addComponent(MeshRenderer);
 
+    replaceMaterial.baseColor = this._replaceColor;
     screenRenderer.mesh = PrimitiveMesh.createPlane(engine, 2, 2);
     screenRenderer.setMaterial(material);
     material.isTransparent = true;
-    material.shaderData.setColor(OutlineManager._outlineColorProp, new Color(0, 0, 0, 1));
+    material.shaderData.setColor(OutlineManager._outlineColorProp, this._outlineColor);
 
     this._material = material;
+    this._replaceMaterial = replaceMaterial;
     this._outlineRoot = outlineRoot;
     this._screenEntity = screenEntity;
     this._root = scene.getRootEntity();
@@ -104,18 +115,30 @@ export class OutlineManager extends Script {
    * @param entity - The entity you wanna add.
    */
   addEntity(entity: Entity) {
-    this._outlineRoot.addChild(entity.clone());
+    const clone = entity.clone();
+    const renderers = [];
+    clone.getComponentsIncludeChildren(MeshRenderer, renderers);
+    for (let i = 0, length = renderers.length; i < length; i++) {
+      const renderer = renderers[i];
+      renderer.setMaterial(this._replaceMaterial);
+    }
+    this._outlineRoot.addChild(clone);
   }
 
   /** @internal */
   onEndRender(camera: Camera): void {
+    const scene = camera.scene;
     const originalClearFlags = camera.clearFlags;
     const originalEnableFrustumCulling = camera.enableFrustumCulling;
+    const originalSolidColor = scene.background.solidColor;
+    const originalBackgroundMode = scene.background.mode;
 
     this._root.isActive = false;
     this._screenEntity.isActive = false;
     this._outlineRoot.isActive = true;
     camera.renderTarget = this._renderTarget;
+    scene.background.solidColor = this._clearColor;
+    scene.background.mode = BackgroundMode.SolidColor;
     camera.render();
 
     this._outlineRoot.isActive = false;
@@ -129,6 +152,8 @@ export class OutlineManager extends Script {
     this._root.isActive = true;
     camera.clearFlags = originalClearFlags;
     camera.enableFrustumCulling = originalEnableFrustumCulling;
+    scene.background.solidColor = originalSolidColor;
+    scene.background.mode = originalBackgroundMode;
   }
 
   /** @internal */
