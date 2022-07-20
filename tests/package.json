@@ -1,7 +1,7 @@
 {
   "name": "@oasis-engine-toolkit/tests",
   "private": true,
-  "version": "0.8.0-alpha.10",
+  "version": "0.8.0-alpha.11",
   "license": "MIT",
   "main": "dist/main.js",
   "module": "dist/module.js",
@@ -15,9 +15,9 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-alpha.10",
-    "@oasis-engine-toolkit/controls": "0.8.0-alpha.10",
-    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-alpha.10",
-    "@oasis-engine-toolkit/stats": "0.8.0-alpha.10"
+    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-alpha.11",
+    "@oasis-engine-toolkit/controls": "0.8.0-alpha.11",
+    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-alpha.11",
+    "@oasis-engine-toolkit/stats": "0.8.0-alpha.11"
   }
 }
