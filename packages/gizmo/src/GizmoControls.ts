@@ -84,6 +84,7 @@ export class GizmoControls extends Script {
     this.currentAxis = axis;
 
     if (this.selectedEntity.engine.inputManager.pointers[0]) {
+      // 改成原生的
       const x = this.selectedEntity.engine.inputManager.pointers[0].position.x;
       const y = this.selectedEntity.engine.inputManager.pointers[0].position.y;
       let ray = new Ray();

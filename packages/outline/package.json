@@ -1,19 +1,18 @@
 {
-  "name": "@oasis-engine-toolkit/auxiliary-lines",
+  "name": "@oasis-engine-toolkit/outline",
   "version": "0.8.0-alpha.11",
+  "license": "MIT",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "browser": "dist/browser.js",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
-  "license": "MIT",
   "scripts": {
-    "b:types": "tsc",
-    "lint:fix": "tslint --fix --project ./tsconfig.json"
+    "b:types": "tsc"
   },
   "types": "types/index.d.ts",
-  "browser": "dist/browser.js",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
   "files": [
     "dist/**/*",
     "types/**/*"
