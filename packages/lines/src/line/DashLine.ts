@@ -1,27 +1,37 @@
 import { Color, Vector2 } from "oasis-engine";
 import { DashMaterial } from "./material/DashMaterial";
-import Line from "./Line";
+import { Line } from "./Line";
 import lineBuilder from "./vertexBuilder";
 
-export default class DashLine extends Line {
+export class DashLine extends Line {
   protected _material: DashMaterial = null;
 
   set dash(value: Vector2) {
     this._material.dash = value;
   }
 
+  /**
+   * The dash sequence is a series of on/off lengths in points. e.g. [3, 1] would be 3pt long lines separated by 1pt spaces.
+   */
+  get dash() {
+    return this._material.dash;
+  }
+
   constructor(entity) {
     super(entity);
   }
 
-  protected async generateData() {
+  /**
+   * @override
+   */
+  protected async _generateData() {
     return await lineBuilder.dashLine(this._flattenPoints, this._join, this._cap, 0, -1);
   }
 
   /**
    * @override
    */
-  protected initMaterial() {
+  protected _initMaterial() {
     const material = new DashMaterial(this.engine);
     material.color = new Color(1, 0, 0, 1);
     material.join = this._join;

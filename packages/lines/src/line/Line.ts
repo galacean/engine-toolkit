@@ -8,19 +8,15 @@ import {
   VertexElement,
   VertexElementFormat,
   Buffer,
-  IndexFormat
+  IndexFormat,
+  Vector2
 } from "oasis-engine";
 import { LineMaterial } from "./material/LineMaterial";
 import { LineCap, LineJoin } from "./constants";
 import lineBuilder from "./vertexBuilder";
 
-type Point = {
-  x: number;
-  y: number;
-};
-
-export default class Line extends Script {
-  protected _points: Point[] = [];
+export class Line extends Script {
+  protected _points: Vector2[] = [];
   protected _cap = LineCap.Butt;
   protected _join = LineJoin.Miter;
   protected _renderer: MeshRenderer;
@@ -29,7 +25,14 @@ export default class Line extends Script {
   protected _needUpdate = false;
   protected _flattenPoints: number[] = [];
 
-  set points(value: Point[]) {
+  /**
+   * The points that make up the line.
+   */
+  get points() {
+    return this._points;
+  }
+
+  set points(value: Vector2[]) {
     this._points = value;
     this._flattenPoints = this._points
       .map((point) => {
@@ -37,6 +40,13 @@ export default class Line extends Script {
       })
       .flat();
     this._needUpdate = true;
+  }
+
+  /**
+   * Determines the shape used to draw the end points of line.
+   */
+  get cap() {
+    return this._cap;
   }
 
   set cap(value: LineCap) {
@@ -47,6 +57,13 @@ export default class Line extends Script {
     }
   }
 
+  /**
+   * Determines the shape used to join two line segments where they meet.
+   */
+  get join() {
+    return this._join;
+  }
+
   set join(value: LineJoin) {
     if (value !== this._join) {
       this._join = value;
@@ -55,8 +72,22 @@ export default class Line extends Script {
     }
   }
 
+  /**
+   * The thickness of line.
+   */
+  get width() {
+    return this._material.width;
+  }
+
   set width(value) {
     this._material.width = value;
+  }
+
+  /**
+   * The color of line.
+   */
+  get color() {
+    return this._material.color;
   }
 
   set color(value) {
@@ -67,12 +98,51 @@ export default class Line extends Script {
     super(entity);
   }
 
-  protected async generateData() {
+  /**
+   * @override
+   */
+  onAwake(): void {
+    this._initRenderer();
+    this._initMaterial();
+  }
+
+  /**
+   * @override
+   */
+  onUpdate(): void {
+    if (this._needUpdate) {
+      this._render();
+      this._needUpdate = false;
+    }
+  }
+
+  /**
+   * @override
+   */
+  onEnable(): void {
+    this._renderer.enabled = true;
+  }
+
+  /**
+   * @override
+   */
+  onDisable(): void {
+    this._renderer.enabled = false;
+  }
+
+  /**
+   * @override
+   */
+  onDestroy() {
+    this._renderer.destroy();
+  }
+
+  protected async _generateData() {
     return await lineBuilder.solidLine(this._flattenPoints, this._join, this._cap, -1);
   }
 
-  protected async render() {
-    const { vertices, indices } = await this.generateData();
+  protected async _render() {
+    const { vertices, indices } = await this._generateData();
     const vertexBuffer = new Buffer(this.engine, BufferBindFlag.VertexBuffer, vertices, BufferUsage.Static);
     const indexBuffer = new Buffer(this.engine, BufferBindFlag.IndexBuffer, indices, BufferUsage.Static);
     vertexBuffer.setData(vertices);
@@ -98,7 +168,7 @@ export default class Line extends Script {
     this._renderer.mesh = this._mesh;
   }
 
-  protected initMaterial() {
+  protected _initMaterial() {
     const material = new LineMaterial(this.engine);
     material.color = new Color(0, 0, 0, 1);
     material.join = this._join;
@@ -108,46 +178,8 @@ export default class Line extends Script {
     this._renderer.setMaterial(this._material);
   }
 
-  protected initRenderer() {
+  protected _initRenderer() {
     const renderer = this.entity.addComponent(MeshRenderer);
     this._renderer = renderer;
-  }
-  /**
-   * @override
-   */
-  onAwake(): void {
-    this.initRenderer();
-    this.initMaterial();
-  }
-
-  /**
-   * @override
-   */
-  onUpdate(): void {
-    if (this._needUpdate) {
-      this.render();
-      this._needUpdate = false;
-    }
-  }
-
-  /**
-   * @override
-   */
-  onEnable(): void {
-    this._renderer.enabled = true;
-  }
-
-  /**
-   * @override
-   */
-  onDisable(): void {
-    this._renderer.enabled = false;
-  }
-
-  /**
-   * @override
-   */
-  onDestroy() {
-    this._renderer.destroy();
   }
 }

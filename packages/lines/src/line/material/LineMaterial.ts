@@ -59,20 +59,40 @@ void main() {
 
   `;
 
-Shader.create("line", vertexSource, fragmentSource)
+Shader.create("line", vertexSource, fragmentSource);
 
-export class LineMaterial extends Material{
+export class LineMaterial extends Material {
+  private _cap: number;
+  private _join: number;
+  private _width: number;
+  private _color: Color;
+
+  get color() {
+    return this._color;
+  }
 
   set color(val: Color) {
     this.shaderData.setColor("u_color", val);
+  }
+
+  get join() {
+    return this._join;
   }
 
   set join(val) {
     this.shaderData.setInt("u_join", val);
   }
 
+  get cap() {
+    return this._cap;
+  }
+
   set cap(val) {
     this.shaderData.setInt("u_cap", val);
+  }
+
+  get width() {
+    return this._width;
   }
 
   set width(val) {

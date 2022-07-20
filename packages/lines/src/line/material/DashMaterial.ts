@@ -78,17 +78,32 @@ void main() {
 }
 `;
 
-Shader.create("dash", vertexSource, fragmentSource)
+Shader.create("dash", vertexSource, fragmentSource);
 
 export class DashMaterial extends LineMaterial {
+  private _dash: Vector2;
+
+  /**
+   * The dash sequence is a series of on/off lengths in points.
+   */
+  get dash() {
+    return this._dash;
+  }
+
   set dash(val: Vector2) {
+    this._dash = val;
     this.shaderData.setVector2("u_dash", val);
     const texture = new Texture2D(this.engine, 1, Math.ceil((val.x + val.y) * 10));
-    texture.setPixelBuffer(this.generateDashTexture(val))
+    texture.setPixelBuffer(this._generateDashTexture(val));
     this.shaderData.setTexture("u_texture", texture);
   }
 
-  private generateDashTexture(dash) {
+  constructor(engine: Engine) {
+    super(engine);
+    this.shader = Shader.find("dash");
+  }
+
+  private _generateDashTexture(dash) {
     const pixels: number[] = [];
     const length = Math.ceil((dash.x + dash.y) * 10);
     for (let index = 0; index < length; index++) {
@@ -99,10 +114,5 @@ export class DashMaterial extends LineMaterial {
       }
     }
     return new Uint8Array(pixels);
-  }
-
-  constructor(engine: Engine) {
-    super(engine);
-    this.shader = Shader.find("dash");
   }
 }
