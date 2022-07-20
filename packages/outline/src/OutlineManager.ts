@@ -30,7 +30,9 @@ export class OutlineManager extends Script {
   private _root: Entity;
   private _outlineRoot: Entity;
   private _screenEntity: Entity;
+  private _size: number = 2;
 
+  /** outline color. */
   get color(): Color {
     return this._material.shaderData.getColor(OutlineManager._outlineColorProp);
   }
@@ -39,17 +41,37 @@ export class OutlineManager extends Script {
     this._material.shaderData.setColor(OutlineManager._outlineColorProp, value);
   }
 
+  /** Outline size.[1~6] */
+  set size(value: number) {
+    value = Math.max(1, Math.min(value, 6));
+    this._size = value;
+
+    if (this._renderTarget) {
+      this._renderTarget.getColorTexture().destroy(true);
+      this._renderTarget.destroy();
+    }
+    const { width, height } = this.engine.canvas;
+    const offWidth = width / value;
+    const offHeight = height / value;
+    const renderColorTexture = new Texture2D(this.engine, offWidth, offHeight);
+    const renderTarget = new RenderTarget(this.engine, offWidth, offHeight, renderColorTexture);
+
+    this._material.shaderData.setTexture("u_texture", renderColorTexture);
+    this._material.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / offWidth, 1 / offHeight));
+
+    this._renderTarget = renderTarget;
+  }
+
+  get size() {
+    return this._size;
+  }
+
   constructor(entity: Entity) {
     super(entity);
-    const { width, height } = this.engine.canvas;
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
     const engine = this.engine;
     const scene = engine.sceneManager.activeScene;
     const material = new BaseMaterial(this.engine, Shader.find("outline-postprocess-shader"));
 
-    const renderColorTexture = new Texture2D(engine, halfWidth, halfHeight);
-    const renderTarget = new RenderTarget(engine, halfWidth, halfHeight, renderColorTexture);
     const outlineRoot = scene.createRootEntity();
     const screenEntity = scene.createRootEntity("screen");
     const screenRenderer = screenEntity.addComponent(MeshRenderer);
@@ -57,15 +79,13 @@ export class OutlineManager extends Script {
     screenRenderer.mesh = PrimitiveMesh.createPlane(engine, 2, 2);
     screenRenderer.setMaterial(material);
     material.isTransparent = true;
-    material.shaderData.setTexture("u_texture", renderColorTexture);
     material.shaderData.setColor(OutlineManager._outlineColorProp, new Color(0, 0, 0, 1));
-    material.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / halfWidth, 1 / halfHeight));
 
     this._material = material;
-    this._renderTarget = renderTarget;
     this._outlineRoot = outlineRoot;
     this._screenEntity = screenEntity;
     this._root = scene.getRootEntity();
+    this.size = this._size;
   }
 
   /**
@@ -115,7 +135,7 @@ export class OutlineManager extends Script {
   onDestroy() {
     this._outlineRoot.destroy();
     this._screenEntity.destroy();
-    this._renderTarget.getColorTexture().destroy();
+    this._renderTarget.getColorTexture().destroy(true);
     this._renderTarget.destroy();
   }
 }
