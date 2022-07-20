@@ -65,7 +65,11 @@ export class OutlineManager extends Script {
   }
 
   clear() {
-    this._outlineRoot.clearChildren();
+    const children = this._outlineRoot.children;
+    for (let i = 0, length = children.length; i < length; i++) {
+      const child = children[i];
+      child.destroy();
+    }
   }
 
   addEntity(entity: Entity) {
@@ -97,6 +101,7 @@ export class OutlineManager extends Script {
   /** @internal */
   onDestroy() {
     this._outlineRoot.destroy();
+    this._screenEntity.destroy();
     this._renderTarget.getColorTexture().destroy();
     this._renderTarget.destroy();
   }
