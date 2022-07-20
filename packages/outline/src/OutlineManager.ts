@@ -42,6 +42,10 @@ export class OutlineManager extends Script {
   }
 
   /** Outline size.[1~6] */
+  get size() {
+    return this._size;
+  }
+
   set size(value: number) {
     value = Math.max(1, Math.min(value, 6));
     this._size = value;
@@ -60,10 +64,6 @@ export class OutlineManager extends Script {
     this._material.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / offWidth, 1 / offHeight));
 
     this._renderTarget = renderTarget;
-  }
-
-  get size() {
-    return this._size;
   }
 
   constructor(entity: Entity) {
