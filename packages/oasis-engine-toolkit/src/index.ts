@@ -4,6 +4,7 @@ export * from "@oasis-engine-toolkit/stats";
 export * from "@oasis-engine-toolkit/auxiliary-lines";
 export * from "@oasis-engine-toolkit/skeleton-helper";
 export * from "@oasis-engine-toolkit/planar-shadow-material";
+export * from "@oasis-engine-toolkit/gizmo"
 
 //@ts-ignore
 export const version = `__buildVersion`;

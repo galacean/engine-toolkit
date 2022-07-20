@@ -296,7 +296,7 @@ export class RotateControl extends Component implements GizmoComponent {
     // if (this.isStarted) {
     //   return;
     // }
-    // 相机位置
+    // // 相机位置
     // this._camera.entity.transform.worldPosition.cloneTo(this.cameraWorldPosition);
     // this.entity.transform.worldPosition = this.worldPosition;
     // this.selectedEntity.transform.worldRotationQuaternion.cloneTo(this.worldQuaternion);
