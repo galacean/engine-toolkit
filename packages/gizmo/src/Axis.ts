@@ -3,7 +3,7 @@ import { AxisProps } from "./Type";
 import { utils } from "./Utils";
 export class Axis extends Component {
   private material: Material;
-  private color: Vector4;
+  private color: Vector4 = new Vector4();
   public constructor(entity: Entity) {
     super(entity);
   }
@@ -11,7 +11,7 @@ export class Axis extends Component {
   public initAxis(value: AxisProps) {
     this.material = value.axisMaterial;
     this.material.renderQueueType = RenderQueueType.Transparent;
-    this.color = value.axisMaterial.shaderData._properties[74];
+    this.color = value.axisMaterial.shaderData.getColor("u_color");
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {
       const axisEntity = this.entity.createChild(value.name);
