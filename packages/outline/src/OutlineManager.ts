@@ -16,6 +16,10 @@ import {
 import fs from "./outline.fs.glsl";
 import vs from "./outline.vs.glsl";
 
+/**
+ * Show outline of entities.
+ * @decorator `@dependentComponents(Camera)`
+ */
 @dependentComponents(Camera)
 export class OutlineManager extends Script {
   private static _outlineColorProp = Shader.getPropertyByName("u_outlineColor");
@@ -38,8 +42,8 @@ export class OutlineManager extends Script {
   constructor(entity: Entity) {
     super(entity);
     const { width, height } = this.engine.canvas;
-    const halfWidth = width / 1.5;
-    const halfHeight = height / 1.5;
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
     const engine = this.engine;
     const scene = engine.sceneManager.activeScene;
     const material = new BaseMaterial(this.engine, Shader.find("outline-postprocess-shader"));
@@ -55,7 +59,7 @@ export class OutlineManager extends Script {
     material.isTransparent = true;
     material.shaderData.setTexture("u_texture", renderColorTexture);
     material.shaderData.setColor(OutlineManager._outlineColorProp, new Color(0, 0, 0, 1));
-    material.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / width, 1 / height));
+    material.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / halfWidth, 1 / halfHeight));
 
     this._material = material;
     this._renderTarget = renderTarget;
@@ -64,6 +68,9 @@ export class OutlineManager extends Script {
     this._root = scene.getRootEntity();
   }
 
+  /**
+   * Clear all entities you want to outline.
+   */
   clear() {
     const children = this._outlineRoot.children;
     for (let i = 0, length = children.length; i < length; i++) {
@@ -72,6 +79,10 @@ export class OutlineManager extends Script {
     }
   }
 
+  /**
+   * Add the entity you want to outline.
+   * @param entity - The entity you wanna add.
+   */
   addEntity(entity: Entity) {
     this._outlineRoot.addChild(entity.clone());
   }
@@ -80,6 +91,7 @@ export class OutlineManager extends Script {
   onEndRender(camera: Camera): void {
     const originalClearFlags = camera.clearFlags;
     const originalEnableFrustumCulling = camera.enableFrustumCulling;
+
     this._root.isActive = false;
     this._screenEntity.isActive = false;
     this._outlineRoot.isActive = true;
@@ -93,6 +105,7 @@ export class OutlineManager extends Script {
     camera.enableFrustumCulling = false;
     camera.render();
 
+    this._screenEntity.isActive = false;
     this._root.isActive = true;
     camera.clearFlags = originalClearFlags;
     camera.enableFrustumCulling = originalEnableFrustumCulling;
