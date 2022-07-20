@@ -1,4 +1,5 @@
 import { Vector4, Component, Entity, MeshRenderer, Layer, Material, RenderQueueType } from "oasis-engine";
+import { AxisProps } from "./Type";
 import { utils } from "./Utils";
 export class Axis extends Component {
   private material: Material;
@@ -7,19 +8,17 @@ export class Axis extends Component {
     super(entity);
   }
 
-  public initAxis(value) {
+  public initAxis(value: AxisProps) {
     this.material = value.axisMaterial;
     this.material.renderQueueType = RenderQueueType.Transparent;
-    // this.material.renderQueueType = RenderQueueType.Transparent + 10;
-
     this.color = value.axisMaterial.shaderData._properties[74];
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {
       const axisEntity = this.entity.createChild(value.name);
       axisEntity.transform.rotate(value.axisRotation[i]);
-      axisEntity.transform.translate(value.axisTranslation[i]);
+      axisEntity.transform.translate(value.axisTranslation[i], false);
       const axisRenderer = axisEntity.addComponent(MeshRenderer);
-      axisRenderer.priority = 10;
+      axisRenderer.priority = 100;
       axisRenderer.mesh = value.axisMesh[i];
       axisRenderer.setMaterial(this.material);
     }
@@ -30,8 +29,9 @@ export class Axis extends Component {
       const temp = gizmoHelperEntity.createChild(value.name);
       const axisHelperEntity = temp.createChild(value.name);
       axisHelperEntity.transform.rotate(value.axisRotation[i]);
-      axisHelperEntity.transform.translate(value.axisTranslation[i]);
+      axisHelperEntity.transform.translate(value.axisTranslation[i], false);
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
+      axisHelperRenderer.priority = 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
       axisHelperRenderer.setMaterial(utils.invisibleMaterial);
     }

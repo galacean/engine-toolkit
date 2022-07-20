@@ -1,4 +1,4 @@
-import { Material, Mesh, Engine, Vector4, PrimitiveMesh} from "oasis-engine";
+import { Material, Mesh, Layer, Engine, Vector4, PrimitiveMesh, Vector3, BlinnPhongMaterial } from "oasis-engine";
 import { LinesMesh, ArcLineMesh } from "./Mesh";
 import { createMeshMaterial } from "./material";
 

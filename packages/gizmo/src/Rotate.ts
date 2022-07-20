@@ -1,7 +1,17 @@
-import { Component, Entity, MeshRenderer, Plane, Quaternion, Ray, RenderQueueType, Vector3 } from "oasis-engine";
+import {
+  Camera,
+  Component,
+  Entity,
+  MeshRenderer,
+  Plane,
+  Quaternion,
+  Ray,
+  RenderQueueType,
+  Vector3
+} from "oasis-engine";
 import { Axis } from "./Axis";
 import { ArcLineMesh, CircleMesh, LinesMesh } from "./Mesh";
-import { GizmoComponent, AxisProps, axisNormal, axisIndices } from "./Type";
+import { GizmoComponent, AxisProps, axisVector } from "./Type";
 import { utils } from "./Utils";
 
 export class RotateControl extends Component implements GizmoComponent {
@@ -66,9 +76,19 @@ export class RotateControl extends Component implements GizmoComponent {
   private selectedEntity: Entity = null;
 
   private rotateNormal: Vector3 = new Vector3();
-  private movePoint = new Vector3();
   private currentAxis: string;
+  private initPosition: Vector3 = new Vector3();
+  private startQuaternion: Quaternion = new Quaternion();
   private startPoint: Vector3 = new Vector3();
+  private startPointUnit: Vector3 = new Vector3();
+  private movePoint = new Vector3();
+  private movePointUnit: Vector3 = new Vector3();
+  private endPoint: Vector3 = new Vector3();
+  private _tempVec: Vector3 = new Vector3();
+  private _tempVec1: Quaternion = new Quaternion();
+  private _tempVec2: Vector3 = new Vector3();
+  private _tempQuat: Quaternion = new Quaternion();
+  private _camera: Camera = null;
 
   constructor(entity: Entity) {
     super(entity);
@@ -151,6 +171,17 @@ export class RotateControl extends Component implements GizmoComponent {
     this.rotateHelperPlaneEntity.isActive = false;
   }
 
+  initCamera(camera: Camera): void {
+    this._camera = camera;
+  }
+
+  getRotateHitPointFromRay(ray: Ray) {
+    let plane = new Plane(this.rotateNormal, -this.initPosition[this.currentAxis]);
+    let tempDist = ray.intersectPlane(plane);
+    ray.getPoint(tempDist, this._tempVec2);
+    return this._tempVec2;
+  }
+
   onSelected(entity: Entity) {
     this.selectedEntity = entity;
   }
@@ -159,22 +190,19 @@ export class RotateControl extends Component implements GizmoComponent {
     this.currentAxis = axis;
     const currEntity = this.gizmoEntity.findByName(axis);
     const currComponent = currEntity.getComponent(Axis);
-    currComponent.highLight();
+    currComponent?.highLight && currComponent.highLight();
   }
 
   onHoverEnd() {
     const currEntity = this.gizmoEntity.findByName(this.currentAxis);
     const currComponent = currEntity.getComponent(Axis);
-    currComponent.unLight();
+    currComponent?.unLight && currComponent.unLight();
   }
-  private worldPosition: Vector3 = new Vector3();
-  private startPointNormal: Vector3 = new Vector3();
-  private startQuaternion: Quaternion = new Quaternion();
 
   onMoveStart(ray: Ray, axis: string) {
     this.currentAxis = axis;
-    this.rotateNormal = axisNormal[this.currentAxis].clone();
-    this.worldPosition = this.selectedEntity.transform.worldPosition.clone();
+    this.rotateNormal = axisVector[this.currentAxis].clone();
+    this.initPosition = this.selectedEntity.transform.worldPosition.clone();
     this.startQuaternion = this.selectedEntity.transform.rotationQuaternion.clone();
     // 变成整圆
     this.arcLineMesh[this.currentAxis].update(360);
@@ -184,75 +212,65 @@ export class RotateControl extends Component implements GizmoComponent {
       const currEntity = entityArray[i];
       const currComponent = currEntity.getComponent(Axis);
       if (currEntity.name === this.currentAxis) {
-        currComponent.yellow();
+        currComponent?.yellow && currComponent.yellow();
       } else {
-        currComponent.gray();
+        currComponent?.gray && currComponent.gray();
       }
     }
 
-    let plane = new Plane(this.rotateNormal, -this.worldPosition[this.currentAxis]);
-    let tempDist = ray.intersectPlane(plane);
-    ray.getPoint(tempDist, this.startPoint);
-
-    Vector3.subtract(this.startPoint, this.worldPosition, this.startPointNormal);
-    this.startPointNormal.normalize().scale(utils.rotateCircleRadius);
+    this.startPoint = this.getRotateHitPointFromRay(ray);
+    Vector3.subtract(this.startPoint, this.initPosition, this.startPointUnit);
+    this.startPointUnit.normalize().scale(utils.rotateCircleRadius);
 
     // 初始化开始辅助线
     this.startLineMesh.update([
       [0, 0, 0],
-      [this.startPointNormal.x, this.startPointNormal.y, this.startPointNormal.z]
+      [this.startPointUnit.x, this.startPointUnit.y, this.startPointUnit.z]
     ]);
 
     //初始化结束辅助线
     this.endLineMesh.update([
       [0, 0, 0],
-      [this.startPointNormal.x, this.startPointNormal.y, this.startPointNormal.z]
+      [this.startPointUnit.x, this.startPointUnit.y, this.startPointUnit.z]
     ]);
 
     // 初始化辅助面
-
     this.rotateHelperPlaneEntity.isActive = true;
-    this.rotateHelperPlaneEntity.transform.worldPosition = this.worldPosition;
+    this.rotateHelperPlaneEntity.transform.worldPosition = this.initPosition;
     this.rotateHelperPlaneMesh.update({
-      startPoint: this.startPointNormal,
+      startPoint: this.startPointUnit,
       normal: this.rotateNormal,
       thetaLength: 0
     });
   }
-  private movePointNormal: Vector3 = new Vector3();
-  private endPoint: Vector3 = new Vector3();
-  private tempVec: Vector3 = new Vector3();
-  private temp: Quaternion = new Quaternion();
+
   onMove(ray: Ray): void {
-    let plane = new Plane(this.rotateNormal, -this.worldPosition[this.currentAxis]);
-    let tempDist = ray.intersectPlane(plane);
-    ray.getPoint(tempDist, this.movePoint);
+    this.movePoint = this.getRotateHitPointFromRay(ray);
 
     // 移动点在圆弧上的点
-    Vector3.subtract(this.movePoint, this.worldPosition, this.movePointNormal);
-    this.movePointNormal.normalize().scale(utils.rotateCircleRadius);
-    Vector3.add(this.worldPosition, this.movePointNormal, this.endPoint);
+    Vector3.subtract(this.movePoint, this.initPosition, this.movePointUnit);
+    this.movePointUnit.normalize().scale(utils.rotateCircleRadius);
+    Vector3.add(this.initPosition, this.movePointUnit, this.endPoint);
     // 空间中两向量夹角
-    let dot = Vector3.dot(this.startPointNormal, this.movePointNormal);
-    Vector3.cross(this.startPointNormal, this.movePointNormal, this.tempVec);
-    let direction = Vector3.dot(this.tempVec, this.rotateNormal);
-    let rad = -Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
+    let dot = Vector3.dot(this.startPointUnit, this.movePointUnit);
+    Vector3.cross(this.startPointUnit, this.movePointUnit, this._tempVec);
+    let direction = Vector3.dot(this._tempVec, this.rotateNormal);
+    let rad = Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
 
     // 更细结束辅助线
     this.endLineMesh.update([
       [0, 0, 0],
-      [this.movePointNormal.x, this.movePointNormal.y, this.movePointNormal.z]
+      [this.movePointUnit.x, this.movePointUnit.y, this.movePointUnit.z]
     ]);
+
     // 更新辅助面
     this.rotateHelperPlaneMesh.update({
       thetaLength: rad
     });
-
     // 更新节点
-    let quat = new Quaternion();
-    Quaternion.rotationAxisAngle(this.rotateNormal, rad, quat);
-    Quaternion.multiply(quat, this.startQuaternion, this.temp);
-    this.selectedEntity.transform.rotationQuaternion = this.temp;
+    Quaternion.rotationAxisAngle(this.rotateNormal, rad, this._tempQuat);
+    Quaternion.multiply(this._tempQuat, this.startQuaternion, this._tempVec1);
+    this.selectedEntity.transform.rotationQuaternion = this._tempVec1;
   }
 
   onMoveEnd() {
@@ -272,5 +290,36 @@ export class RotateControl extends Component implements GizmoComponent {
       [0, 0, 0]
     ]);
     this.rotateHelperPlaneEntity.isActive = false;
+  }
+
+  updateTransform() {
+    // if (this.isStarted) {
+    //   return;
+    // }
+    // 相机位置
+    // this._camera.entity.transform.worldPosition.cloneTo(this.cameraWorldPosition);
+    // this.entity.transform.worldPosition = this.worldPosition;
+    // this.selectedEntity.transform.worldRotationQuaternion.cloneTo(this.worldQuaternion);
+    // const quaternion = this.worldQuaternion;
+    // const tempQuaternion2 = this.tempQuaternion2;
+    // const tempQuaternion = this.tempQuaternion;
+    // const alignVector = this.alignVector;
+    // this._camera.entity.transform.worldPosition.cloneTo(alignVector);
+    // this.selectedEntity.transform.worldRotationQuaternion.cloneTo(tempQuaternion2);
+    // this.selectedEntity.transform.worldRotationQuaternion.cloneTo(tempQuaternion); // 倒数
+    // Quaternion.invert(tempQuaternion, tempQuaternion);
+    // Vector3.transformByQuat(alignVector, tempQuaternion, alignVector);
+    // Quaternion.rotationX(Math.atan2(-alignVector.y, alignVector.z), tempQuaternion);
+    // Quaternion.multiply(tempQuaternion2, tempQuaternion, tempQuaternion);
+    // this.axisX.transform.rotationQuaternion = tempQuaternion;
+    // this.helperAxisX.transform.rotationQuaternion = tempQuaternion;
+    // Quaternion.rotationY(Math.atan2(alignVector.x, alignVector.z), tempQuaternion);
+    // Quaternion.multiply(tempQuaternion2, tempQuaternion, tempQuaternion);
+    // this.axisY.transform.rotationQuaternion = tempQuaternion;
+    // this.helperAxisY.transform.rotationQuaternion = tempQuaternion;
+    // Quaternion.rotationZ(Math.atan2(alignVector.y, alignVector.x), tempQuaternion);
+    // Quaternion.multiply(tempQuaternion2, tempQuaternion, tempQuaternion);
+    // this.axisZ.transform.rotationQuaternion = tempQuaternion;
+    // this.helperAxisZ.transform.rotationQuaternion = tempQuaternion;
   }
 }

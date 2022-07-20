@@ -26,9 +26,10 @@ export class GizmoControls extends Script {
     this.createGizmoControl("rotate", RotateControl);
     this.onGizmoChange(this.gizmoState);
   }
-  // 选择的逻辑
+
   public initGizmoControl(camera: Camera) {
     this.editorCamera = camera;
+    Object.values(this.gizmoMap).forEach((gizmo) => gizmo.component.initCamera(camera));
   }
 
   // 建立gizmo
@@ -39,7 +40,6 @@ export class GizmoControls extends Script {
     this.gizmoMap[name] = { entity, component };
   }
 
-  // 如何和viewport里的toolkit交互
   public onGizmoChange(currentState: GizmoState) {
     Object.values(this.gizmoMap).forEach((gizmo) => (gizmo.entity.isActive = false));
     this.gizmoState = currentState;
@@ -83,6 +83,7 @@ export class GizmoControls extends Script {
     this.isStarted = true;
     this.currentAxis = axis;
     if (this.selectedEntity.engine.inputManager.pointers[0]) {
+      // 改成原生的
       const x = this.selectedEntity.engine.inputManager.pointers[0].position.x;
       const y = this.selectedEntity.engine.inputManager.pointers[0].position.y;
       let ray = new Ray();
@@ -98,10 +99,7 @@ export class GizmoControls extends Script {
     }
   }
 
-  onUpdate(deltaTime: number): void {
-    if (!this.entityTransformChangeFlag) {
-      return;
-    }
+  public onMove() {
     if (this.isStarted) {
       if (this.selectedEntity.engine.inputManager.pointers[0]) {
         const x = this.selectedEntity.engine.inputManager.pointers[0].position.x;
@@ -110,6 +108,12 @@ export class GizmoControls extends Script {
         this.editorCamera.screenPointToRay(new Vector2(x, y), ray);
         this.gizmoMap[this.gizmoState].component.onMove(ray);
       }
+    }
+  }
+
+  onUpdate(deltaTime: number): void {
+    if (!this.entityTransformChangeFlag) {
+      return;
     }
     if (this.entityTransformChangeFlag.flag) {
       this.entity.transform.worldPosition = this.selectedEntity.transform.worldPosition;
