@@ -1,9 +1,9 @@
-import { Vector4, Component, Entity, MeshRenderer, Layer, Material, RenderQueueType } from "oasis-engine";
+import { Color, Component, Entity, Material, MeshRenderer, RenderQueueType, Vector4 } from "oasis-engine";
 import { AxisProps } from "./Type";
 import { utils } from "./Utils";
 export class Axis extends Component {
   private material: Material;
-  private color: Vector4 = new Vector4();
+  private color: Color = new Color();
   public constructor(entity: Entity) {
     super(entity);
   }
@@ -54,6 +54,6 @@ export class Axis extends Component {
   }
 
   public recover() {
-    this.material?.shaderData.setVector4("u_color", this.color);
+    this.material?.shaderData.setColor("u_color", this.color);
   }
 }
