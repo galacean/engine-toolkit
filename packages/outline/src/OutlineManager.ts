@@ -9,6 +9,7 @@ import {
   MeshRenderer,
   PrimitiveMesh,
   RenderTarget,
+  Scene,
   Script,
   Shader,
   Texture2D,
@@ -27,10 +28,10 @@ export class OutlineManager extends Script {
   private static _outlineColorProp = Shader.getPropertyByName("u_outlineColor");
   private static _texSizeProp = Shader.getPropertyByName("u_texSize");
 
+  private _outlineScene: Scene;
   private _material: BaseMaterial;
   private _replaceMaterial: BaseMaterial;
   private _renderTarget: RenderTarget;
-  private _root: Entity;
   private _outlineRoot: Entity;
   private _screenEntity: Entity;
   private _size: number = 1;
@@ -78,11 +79,11 @@ export class OutlineManager extends Script {
   constructor(entity: Entity) {
     super(entity);
     const engine = this.engine;
-    const scene = this.scene;
+    const outlineScene = new Scene(engine);
     const material = new BaseMaterial(engine, Shader.find("outline-postprocess-shader"));
     const replaceMaterial = new UnlitMaterial(engine);
-    const outlineRoot = scene.createRootEntity();
-    const screenEntity = scene.createRootEntity("screen");
+    const outlineRoot = outlineScene.createRootEntity();
+    const screenEntity = outlineScene.createRootEntity("screen");
     const screenRenderer = screenEntity.addComponent(MeshRenderer);
 
     replaceMaterial.baseColor = this._replaceColor;
@@ -91,11 +92,11 @@ export class OutlineManager extends Script {
     material.isTransparent = true;
     material.shaderData.setColor(OutlineManager._outlineColorProp, this._outlineColor);
 
+    this._outlineScene = outlineScene;
     this._material = material;
     this._replaceMaterial = replaceMaterial;
     this._outlineRoot = outlineRoot;
     this._screenEntity = screenEntity;
-    this._root = scene.getRootEntity();
     this.size = this._size;
   }
 
@@ -133,8 +134,9 @@ export class OutlineManager extends Script {
     const originalEnableFrustumCulling = camera.enableFrustumCulling;
     const originalSolidColor = scene.background.solidColor;
     const originalBackgroundMode = scene.background.mode;
+    const originalScene = this.engine.sceneManager.activeScene;
 
-    this._root.isActive = false;
+    this.engine.sceneManager.activeScene = this._outlineScene;
     this._screenEntity.isActive = false;
     this._outlineRoot.isActive = true;
     camera.renderTarget = this._renderTarget;
@@ -150,7 +152,7 @@ export class OutlineManager extends Script {
     camera.render();
 
     this._screenEntity.isActive = false;
-    this._root.isActive = true;
+    this.engine.sceneManager.activeScene = originalScene;
     camera.clearFlags = originalClearFlags;
     camera.enableFrustumCulling = originalEnableFrustumCulling;
     scene.background.solidColor = originalSolidColor;
