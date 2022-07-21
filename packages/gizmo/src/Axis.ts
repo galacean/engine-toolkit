@@ -1,25 +1,24 @@
-import { Vector4, Component, Entity, MeshRenderer, Layer, Material, RenderQueueType } from "oasis-engine";
+import { Color, Component, Entity, Material, MeshRenderer, RenderQueueType, Vector4 } from "oasis-engine";
+import { AxisProps } from "./Type";
 import { utils } from "./Utils";
 export class Axis extends Component {
   private material: Material;
-  private color: Vector4;
+  private color: Color = new Color();
   public constructor(entity: Entity) {
     super(entity);
   }
 
-  public initAxis(value) {
+  public initAxis(value: AxisProps) {
     this.material = value.axisMaterial;
     this.material.renderQueueType = RenderQueueType.Transparent;
-    // this.material.renderQueueType = RenderQueueType.Transparent + 10;
-
-    this.color = value.axisMaterial.shaderData._properties[74];
+    this.color = value.axisMaterial.shaderData.getColor("u_color");
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {
       const axisEntity = this.entity.createChild(value.name);
       axisEntity.transform.rotate(value.axisRotation[i]);
-      axisEntity.transform.translate(value.axisTranslation[i]);
+      axisEntity.transform.translate(value.axisTranslation[i], false);
       const axisRenderer = axisEntity.addComponent(MeshRenderer);
-      axisRenderer.priority = 10;
+      axisRenderer.priority = 100;
       axisRenderer.mesh = value.axisMesh[i];
       axisRenderer.setMaterial(this.material);
     }
@@ -30,8 +29,9 @@ export class Axis extends Component {
       const temp = gizmoHelperEntity.createChild(value.name);
       const axisHelperEntity = temp.createChild(value.name);
       axisHelperEntity.transform.rotate(value.axisRotation[i]);
-      axisHelperEntity.transform.translate(value.axisTranslation[i]);
+      axisHelperEntity.transform.translate(value.axisTranslation[i], false);
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
+      axisHelperRenderer.priority = 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
       axisHelperRenderer.setMaterial(utils.invisibleMaterial);
     }
@@ -54,6 +54,6 @@ export class Axis extends Component {
   }
 
   public recover() {
-    this.material?.shaderData.setVector4("u_color", this.color);
+    this.material?.shaderData.setColor("u_color", this.color);
   }
 }

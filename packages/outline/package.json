@@ -1,18 +1,18 @@
 {
-  "name": "@oasis-engine-toolkit/stats",
+  "name": "@oasis-engine-toolkit/outline",
   "version": "0.8.0-alpha.13",
   "license": "MIT",
-  "scripts": {
-    "b:types": "tsc"
-  },
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "browser": "dist/browser.js",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
+  "scripts": {
+    "b:types": "tsc"
+  },
   "types": "types/index.d.ts",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
-  "browser": "dist/browser.min.js",
   "files": [
     "dist/**/*",
     "types/**/*"
