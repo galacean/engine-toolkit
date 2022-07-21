@@ -7,7 +7,7 @@ import { utils } from "./Utils";
 
 type GizmoState = "rotate" | "translate" | "scale" | null;
 export class GizmoControls extends Script {
-  private gizmoState: GizmoState = "translate";
+  public gizmoState: GizmoState = "translate";
   private editorCamera: Camera;
   private gizmoMap: {
     [key: string]: { entity: Entity; component: GizmoComponent };
@@ -82,6 +82,7 @@ export class GizmoControls extends Script {
   triggerGizmoStart(axis: string) {
     this.isStarted = true;
     this.currentAxis = axis;
+
     if (this.selectedEntity.engine.inputManager.pointers[0]) {
       // 改成原生的
       const x = this.selectedEntity.engine.inputManager.pointers[0].position.x;
