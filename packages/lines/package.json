@@ -1,0 +1,24 @@
+{
+  "name": "@oasis-engine-toolkit/lines",
+  "version": "0.8.0-alpha.13",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "license": "MIT",
+  "scripts": {
+    "b:types": "tsc",
+    "lint:fix": "tslint --fix --project ./tsconfig.json"
+  },
+  "types": "types/index.d.ts",
+  "browser": "dist/browser.js",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "files": [
+    "dist/**/*",
+    "types/**/*"
+  ],
+  "peerDependencies": {
+    "oasis-engine": "^0.8.0-alpha.3"
+  }
+}
