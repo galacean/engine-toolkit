@@ -29,7 +29,6 @@ export class Line extends Script {
   private _color: Color = new Color(0, 0, 0, 1);
   private _mesh: BufferMesh;
   private _needUpdate = false;
-  private _vertexElements: VertexElement[];
 
   /**
    * The points that make up the line.
@@ -111,17 +110,22 @@ export class Line extends Script {
    */
   onAwake(): void {
     this._renderer = this.entity.addComponent(MeshRenderer);
-    this._vertexElements = [
-      new VertexElement("a_pos", 0, VertexElementFormat.Vector2, 0),
-      new VertexElement("a_normal", 8, VertexElementFormat.Vector2, 0),
-      new VertexElement("a_data", 16, VertexElementFormat.Short2, 0),
-      new VertexElement("a_lengthsofar", 20, VertexElementFormat.Float, 0)
-    ];
     this.color = this._color;
     this.join = this._join;
     this.cap = this._cap;
     this.width = this._width;
     this._initMaterial();
+
+    this._mesh = new BufferMesh(this.engine, "LineGeometry");
+    // Add vertexElement
+    this._mesh.setVertexElements([
+      new VertexElement("a_pos", 0, VertexElementFormat.Vector2, 0),
+      new VertexElement("a_normal", 8, VertexElementFormat.Vector2, 0),
+      new VertexElement("a_data", 16, VertexElementFormat.Short2, 0),
+      new VertexElement("a_lengthsofar", 20, VertexElementFormat.Float, 0)
+    ]);
+
+    this._renderer.mesh = this._mesh;
   }
 
   /**
@@ -174,17 +178,14 @@ export class Line extends Script {
       this._mesh.indexBufferBinding?.buffer?.destroy();
     }
 
-    this._mesh = new BufferMesh(this.engine, "LineGeometry");
-    // Add vertexElement
-    this._mesh.setVertexElements(this._vertexElements);
-    this._renderer.mesh = this._mesh;
-
     this._mesh.setVertexBufferBinding(vertexBuffer, 24, 0);
     this._mesh.setIndexBufferBinding(indexBuffer, IndexFormat.UInt16);
 
-    // Add one sub geometry.
     this._mesh.clearSubMesh();
     this._mesh.addSubMesh(0, indices.length);
+
+    // @ts-ignore
+    this._mesh._enableVAO = false;
   }
 
   protected _initMaterial() {
