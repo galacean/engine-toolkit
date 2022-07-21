@@ -361,6 +361,8 @@ export class WireframeManager extends Script {
     const renderer = this.entity.getComponent(MeshRenderer);
     const supportUint32Array = engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
 
+    // @ts-ignore
+    mesh._enableVAO = false;
     mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
     renderer.mesh = mesh;
     renderer.setMaterial(material);
