@@ -41,11 +41,6 @@ export class DashLine extends Line {
    */
   protected _initMaterial() {
     const material = new DashMaterial(this.engine);
-    material.color = new Color(1, 0, 0, 1);
-    material.join = this._join;
-    material.cap = this._cap;
-    material.width = 0.1;
-    material.dash = new Vector2(0.2, 0.1);
     this._renderer.setMaterial(material);
     this._material = material;
   }
