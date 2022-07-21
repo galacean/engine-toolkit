@@ -127,6 +127,7 @@ export class OutlineManager extends Script {
 
   /** @internal */
   onEndRender(camera: Camera): void {
+    if (!this._outlineRoot.children.length) return;
     const scene = camera.scene;
     const originalClearFlags = camera.clearFlags;
     const originalEnableFrustumCulling = camera.enableFrustumCulling;
