@@ -6,6 +6,7 @@ import {
   Color,
   dependentComponents,
   Entity,
+  Material,
   MeshRenderer,
   PrimitiveMesh,
   RenderTarget,
@@ -38,6 +39,7 @@ export class OutlineManager extends Script {
   private _clearColor: Color = new Color(1, 1, 1, 1);
   private _outlineColor: Color = new Color(0, 0, 0, 1);
   private _replaceColor: Color = new Color(1, 0, 0, 1);
+  private _outlineEntities: Entity[] = [];
 
   /** outline color. */
   get color(): Color {
@@ -104,11 +106,7 @@ export class OutlineManager extends Script {
    * Clear all entities you want to outline.
    */
   clear() {
-    const children = this._outlineRoot.children;
-    for (let i = 0, length = children.length; i < length; i++) {
-      const child = children[i];
-      child.destroy();
-    }
+    this._outlineEntities.length = 0;
   }
 
   /**
@@ -116,25 +114,34 @@ export class OutlineManager extends Script {
    * @param entity - The entity you wanna add.
    */
   addEntity(entity: Entity) {
-    const clone = entity.clone();
-    const renderers = [];
-    clone.getComponentsIncludeChildren(MeshRenderer, renderers);
-    for (let i = 0, length = renderers.length; i < length; i++) {
-      const renderer = renderers[i];
-      renderer.setMaterial(this._replaceMaterial);
-    }
-    this._outlineRoot.addChild(clone);
+    this._outlineEntities.push(entity);
   }
 
   /** @internal */
   onEndRender(camera: Camera): void {
-    if (!this._outlineRoot.children.length) return;
+    if (!this._outlineEntities.length) return;
     const scene = camera.scene;
     const originalClearFlags = camera.clearFlags;
     const originalEnableFrustumCulling = camera.enableFrustumCulling;
     const originalSolidColor = scene.background.solidColor;
     const originalBackgroundMode = scene.background.mode;
     const originalScene = this.engine.sceneManager.activeScene;
+    const parentMap = new Map<Entity, Entity>();
+    const materialMap = new Map<MeshRenderer, Material>();
+
+    for (let i = 0, length = this._outlineEntities.length; i < length; i++) {
+      const entity = this._outlineEntities[i];
+      const renderers: MeshRenderer[] = [];
+      entity.getComponentsIncludeChildren(MeshRenderer, renderers);
+      parentMap.set(entity, entity.parent);
+      this._outlineRoot.addChild(entity);
+
+      for (let j = 0; j < renderers.length; j++) {
+        const renderer = renderers[j];
+        materialMap.set(renderer, renderer.getMaterial());
+        renderer.setMaterial(this._replaceMaterial);
+      }
+    }
 
     this.engine.sceneManager.activeScene = this._outlineScene;
     this._screenEntity.isActive = false;
@@ -157,6 +164,13 @@ export class OutlineManager extends Script {
     camera.enableFrustumCulling = originalEnableFrustumCulling;
     scene.background.solidColor = originalSolidColor;
     scene.background.mode = originalBackgroundMode;
+
+    parentMap.forEach((parent, entity) => {
+      parent.addChild(entity);
+    });
+    materialMap.forEach((material, renderer) => {
+      renderer.setMaterial(material);
+    });
   }
 
   /** @internal */
