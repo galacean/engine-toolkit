@@ -245,7 +245,7 @@ export class WireframePrimitive {
     shift.y = -height;
     WireframePrimitive.createCircleWireframe(radius, 1, shift, positions, positionOffset, indices, indicesOffset);
 
-    positions.push(new Vector3(0, height, 0));
+    positions.push(new Vector3());
     positions.push(new Vector3(-radius, -height, 0));
     positions.push(new Vector3(radius, -height, 0));
     positions.push(new Vector3(0, -height, radius));
@@ -287,7 +287,7 @@ export class WireframePrimitive {
     const indexBegin = positionOffset + WireframePrimitive.circleVertexCount;
     indicesOffset += WireframePrimitive.circleIndexCount;
     for (let i = 0; i < 8; i++) {
-      let radian = MathUtil.degreeToRadian(45 * i);
+      const radian = MathUtil.degreeToRadian(45 * i);
       positions.push(new Vector3(radius * Math.cos(radian), 0, radius * Math.sin(radian)));
       positions.push(new Vector3(radius * Math.cos(radian), -height, radius * Math.sin(radian)));
 
