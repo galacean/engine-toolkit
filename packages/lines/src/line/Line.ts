@@ -15,20 +15,26 @@ import { LineMaterial } from "./material/LineMaterial";
 import { LineCap, LineJoin } from "./constants";
 import lineBuilder from "./vertexBuilder";
 
+/**
+ * Solid Line.
+ */
 export class Line extends Script {
   protected _points: Vector2[] = [];
   protected _cap = LineCap.Butt;
   protected _join = LineJoin.Miter;
   protected _renderer: MeshRenderer;
   protected _material: LineMaterial;
-  protected _mesh: BufferMesh;
-  protected _needUpdate = false;
   protected _flattenPoints: number[] = [];
+  private _width: number = 0.1;
+  private _color: Color = new Color(0, 0, 0, 1);
+  private _mesh: BufferMesh;
+  private _needUpdate = false;
+  private _vertexElements: VertexElement[];
 
   /**
    * The points that make up the line.
    */
-  get points() {
+  get points(): Vector2[] {
     return this._points;
   }
 
@@ -45,14 +51,14 @@ export class Line extends Script {
   /**
    * Determines the shape used to draw the end points of line.
    */
-  get cap() {
+  get cap(): LineCap {
     return this._cap;
   }
 
   set cap(value: LineCap) {
     if (value !== this._cap) {
       this._cap = value;
-      this._material.cap = value;
+      this._renderer?.shaderData.setInt("u_cap", value);
       this._needUpdate = true;
     }
   }
@@ -60,14 +66,14 @@ export class Line extends Script {
   /**
    * Determines the shape used to join two line segments where they meet.
    */
-  get join() {
+  get join(): LineJoin {
     return this._join;
   }
 
   set join(value: LineJoin) {
     if (value !== this._join) {
       this._join = value;
-      this._material.join = value;
+      this._renderer?.shaderData.setInt("u_join", value);
       this._needUpdate = true;
     }
   }
@@ -75,23 +81,25 @@ export class Line extends Script {
   /**
    * The thickness of line.
    */
-  get width() {
-    return this._material.width;
+  get width(): number {
+    return this._width;
   }
 
   set width(value) {
-    this._material.width = value;
+    this._width = value;
+    this._renderer.shaderData.setFloat("u_width", value);
   }
 
   /**
    * The color of line.
    */
-  get color() {
-    return this._material.color;
+  get color(): Color {
+    return this._color;
   }
 
-  set color(value) {
-    this._material.color = value;
+  set color(value: Color) {
+    this._color = value;
+    this._renderer.shaderData.setColor("u_color", value);
   }
 
   constructor(entity) {
@@ -99,15 +107,25 @@ export class Line extends Script {
   }
 
   /**
-   * @override
+   * @internal
    */
   onAwake(): void {
-    this._initRenderer();
+    this._renderer = this.entity.addComponent(MeshRenderer);
+    this._vertexElements = [
+      new VertexElement("a_pos", 0, VertexElementFormat.Vector2, 0),
+      new VertexElement("a_normal", 8, VertexElementFormat.Vector2, 0),
+      new VertexElement("a_data", 16, VertexElementFormat.Short2, 0),
+      new VertexElement("a_lengthsofar", 20, VertexElementFormat.Float, 0)
+    ];
+    this.color = this._color;
+    this.join = this._join;
+    this.cap = this._cap;
+    this.width = this._width;
     this._initMaterial();
   }
 
   /**
-   * @override
+   * @internal
    */
   onUpdate(): void {
     if (this._needUpdate) {
@@ -117,21 +135,21 @@ export class Line extends Script {
   }
 
   /**
-   * @override
+   * @internal
    */
   onEnable(): void {
     this._renderer.enabled = true;
   }
 
   /**
-   * @override
+   * @internal
    */
   onDisable(): void {
     this._renderer.enabled = false;
   }
 
   /**
-   * @override
+   * @internal
    */
   onDestroy() {
     this._renderer.destroy();
@@ -147,39 +165,31 @@ export class Line extends Script {
     const indexBuffer = new Buffer(this.engine, BufferBindFlag.IndexBuffer, indices, BufferUsage.Static);
     vertexBuffer.setData(vertices);
     indexBuffer.setData(indices);
-    // Bind buffer
+
+    // destroy old buffer
+    if (this._mesh) {
+      this._mesh.vertexBufferBindings.forEach((binding) => {
+        binding?.buffer?.destroy();
+      });
+      this._mesh.indexBufferBinding?.buffer?.destroy();
+    }
+
     this._mesh = new BufferMesh(this.engine, "LineGeometry");
-
-    this._mesh.setVertexBufferBinding(vertexBuffer, 24);
-    this._mesh.setIndexBufferBinding(indexBuffer, IndexFormat.UInt16);
-
     // Add vertexElement
-    this._mesh.setVertexElements([
-      new VertexElement("a_pos", 0, VertexElementFormat.Vector2, 0),
-      new VertexElement("a_normal", 8, VertexElementFormat.Vector2, 0),
-      new VertexElement("a_data", 16, VertexElementFormat.Short2, 0),
-      new VertexElement("a_lengthsofar", 20, VertexElementFormat.Float, 0)
-    ]);
+    this._mesh.setVertexElements(this._vertexElements);
+    this._renderer.mesh = this._mesh;
+
+    this._mesh.setVertexBufferBinding(vertexBuffer, 24, 0);
+    this._mesh.setIndexBufferBinding(indexBuffer, IndexFormat.UInt16);
 
     // Add one sub geometry.
     this._mesh.clearSubMesh();
     this._mesh.addSubMesh(0, indices.length);
-
-    this._renderer.mesh = this._mesh;
   }
 
   protected _initMaterial() {
     const material = new LineMaterial(this.engine);
-    material.color = new Color(0, 0, 0, 1);
-    material.join = this._join;
-    material.cap = this._cap;
-    material.width = 0.1;
     this._material = material;
     this._renderer.setMaterial(this._material);
-  }
-
-  protected _initRenderer() {
-    const renderer = this.entity.addComponent(MeshRenderer);
-    this._renderer = renderer;
   }
 }
