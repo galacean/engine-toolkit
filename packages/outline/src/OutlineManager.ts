@@ -133,10 +133,6 @@ export class OutlineManager extends Script {
       const entity = this._outlineEntities[i];
       const renderers: MeshRenderer[] = [];
       entity.getComponentsIncludeChildren(MeshRenderer, renderers);
-      // @ts-ignore
-      if (entity._isRoot) {
-        scene.removeRootEntity(entity);
-      }
       parentMap.set(entity, entity.parent);
       this._outlineRoot.addChild(entity);
 
@@ -171,10 +167,7 @@ export class OutlineManager extends Script {
 
     parentMap.forEach((parent, entity) => {
       if (!parent) {
-        // @ts-ignore
-        if (entity._isRoot) {
-          scene.addRootEntity(entity);
-        }
+        scene.addRootEntity(entity);
       } else {
         parent.addChild(entity);
       }
