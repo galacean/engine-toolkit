@@ -17,6 +17,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - 🧍🏼  &nbsp;**Skeleton Helper** - Skeleton visualization
 - ➡️  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
 - ⭕️  &nbsp;**Outline** - Show outline of mesh renderers
+- 📐  &nbsp;**Lines** - 2D Solid Line & Dash Line
 
 ## npm
 

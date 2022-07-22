@@ -8,6 +8,7 @@ import glslify from "rollup-plugin-glslify";
 import { terser } from "rollup-plugin-terser";
 import serve from "rollup-plugin-serve";
 import replace from "@rollup/plugin-replace";
+import { binary2base64 } from "rollup-plugin-binary2base64";
 
 const camelCase = require("camelcase");
 
@@ -45,6 +46,9 @@ const commonPlugins = [
     exclude: ["node_modules/**", "packages/**/node_modules/**"]
   }),
   commonjs(),
+  binary2base64({
+    include: ["**/*.wasm"]
+  }),
   NODE_ENV === "development"
     ? serve({
         contentBase: "packages",

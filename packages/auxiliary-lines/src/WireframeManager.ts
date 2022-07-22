@@ -1,25 +1,26 @@
 import {
+  BoolUpdateFlag,
   BoxColliderShape,
+  Camera,
   CapsuleColliderShape,
-  SphereColliderShape,
+  Collider,
+  dependentComponents,
+  DirectLight,
+  Entity,
   GLCapabilityType,
+  Matrix,
   MeshRenderer,
   MeshTopology,
   ModelMesh,
-  Script,
-  UnlitMaterial,
-  Vector3,
-  Transform,
   PointLight,
-  Camera,
-  Matrix,
+  Script,
+  SphereColliderShape,
   SpotLight,
-  DirectLight,
-  Collider,
-  Entity,
-  dependentComponents,
-  BoolUpdateFlag
+  Transform,
+  UnlitMaterial,
+  Vector3
 } from "oasis-engine";
+
 import { WireframePrimitive } from "./WireframePrimitive";
 
 /**
@@ -442,12 +443,12 @@ export class WireframeManager extends Script {
     const indices = this._indices;
     const neededLength = this._indicesCount + length;
     if (neededLength > indices.length) {
-      const maxLength = this._supportUint32Array ? 65535 : 4294967295;
+      const maxLength = this._supportUint32Array ? 4294967295 : 65535;
       if (neededLength > maxLength) {
         throw Error("The vertex count is over limit.");
       }
 
-      const newIndices = this._supportUint32Array ? new Uint16Array(neededLength) : new Uint32Array(neededLength);
+      const newIndices = this._supportUint32Array ? new Uint32Array(neededLength) : new Uint16Array(neededLength);
       newIndices.set(indices);
       this._indices = newIndices;
     }
