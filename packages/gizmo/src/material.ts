@@ -1,6 +1,5 @@
 import { BlendFactor, CullMode, Engine, Material, RenderQueueType, Shader, Vector4 } from "oasis-engine";
 
-// 顶点着色器
 const VERT_SHADER = `
 uniform mat4 u_MVPMat;
 
@@ -11,7 +10,6 @@ void main() {
 }
 `;
 
-// 片元着色器
 const FRAG_SHADER = `
 uniform vec4 u_color;
 uniform float u_highLight;
@@ -21,7 +19,7 @@ void main() {
 }
 `;
 
-Shader.create("gizmo-shader", VERT_SHADER, FRAG_SHADER);
+Shader.create("gizmos-shader", VERT_SHADER, FRAG_SHADER);
 
 const defaultOptions = {
   color: new Vector4(1.0, 1.0, 1.0, 1.0),
@@ -34,7 +32,7 @@ type Option = typeof defaultOptions;
 
 export function createMeshMaterial(options: Partial<Option> = {}, engine: Engine) {
   const newOptions = { ...defaultOptions, ...options };
-  const material = new Material(engine, Shader.find("gizmo-shader"));
+  const material = new Material(engine, Shader.find("gizmos-shader"));
   material.shaderData.setVector4("u_color", newOptions.color);
   material.shaderData.setFloat("u_highLight", 0);
   material.renderQueueType = RenderQueueType.Transparent;

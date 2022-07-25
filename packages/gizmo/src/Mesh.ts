@@ -50,7 +50,7 @@ export class ArcLineMesh extends ModelMesh {
     this.arc = arc;
 
     for (let i = 0; i <= radialSegments; i++) {
-      let theta = (arc / radialSegments / 180) * Math.PI;
+      const theta = (arc / radialSegments / 180) * Math.PI;
       this.positions.push(new Vector3(radius * Math.cos(i * theta), radius * Math.sin(i * theta), 0));
     }
 
@@ -74,7 +74,7 @@ export class ArcLineMesh extends ModelMesh {
     this.arc = arc;
     this.positions = [];
     for (let i = 0; i <= this.radialSegments; i++) {
-      let theta = (this.arc / this.radialSegments / 180) * Math.PI;
+      const theta = (this.arc / this.radialSegments / 180) * Math.PI;
       this.positions.push(new Vector3(this.radius * Math.cos(i * theta), this.radius * Math.sin(i * theta), 0));
     }
 
@@ -96,7 +96,7 @@ export class CircleMesh extends BufferMesh {
   private static _tempVector3: Vector3 = new Vector3();
 
   private center = new Vector3();
-  private segments = 20;
+  private segments = 48;
   private normal = new Vector3(0, 0, 1);
   private startPoint = new Vector3(1.6, 0, 0);
   private thetaLength: number = Math.PI * 2;
@@ -155,7 +155,7 @@ export class CircleMesh extends BufferMesh {
 
     const segments = this.segments;
     for (let s = 0; s <= segments; s++) {
-      let segment = (s / segments) * this.thetaLength;
+      const segment = (s / segments) * this.thetaLength;
       Quaternion.rotationAxisAngle(this.normal, segment, CircleMesh._tempQuat);
       Vector3.transformByQuat(this.startPoint, CircleMesh._tempQuat, CircleMesh._tempVector3);
       CircleMesh._tempVector3.copyToArray(vertices, 3 * s + 3);
