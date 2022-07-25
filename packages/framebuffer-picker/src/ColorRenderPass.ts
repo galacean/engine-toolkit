@@ -57,14 +57,11 @@ class ColorRenderPass extends RenderPass {
   readColorFromRenderTarget(camera: Camera) {
     const gl = camera.engine._hardwareRenderer.gl;
     const screenPoint = this._pickPos;
-    const canvas = gl.canvas;
-    const clientWidth = canvas.clientWidth;
-    const clientHeight = canvas.clientHeight;
     const canvasWidth = gl.drawingBufferWidth;
     const canvasHeight = gl.drawingBufferHeight;
 
-    const px = (screenPoint[0] / clientWidth) * canvasWidth;
-    const py = (screenPoint[1] / clientHeight) * canvasHeight;
+    const px = screenPoint[0];
+    const py = screenPoint[1];
 
     const viewport = camera.viewport;
     const viewWidth = (viewport.z - viewport.x) * canvasWidth;
