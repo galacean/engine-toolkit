@@ -7,7 +7,7 @@ import {
   dependentComponents,
   DirectLight,
   Entity,
-  GLCapabilityType,
+  GLCapabilityType, MathUtil,
   Matrix,
   MeshRenderer,
   MeshTopology,
@@ -187,7 +187,7 @@ export class WireframeManager extends Script {
    */
   addSpotLightWireframe(light: SpotLight): void {
     const height = light.distance;
-    const radius = Math.tan(light.angle) * height;
+    const radius = Math.tan(MathUtil.degreeToRadian(light.angle / 2)) * height;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
