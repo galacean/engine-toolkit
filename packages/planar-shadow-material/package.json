@@ -1,6 +1,6 @@
 {
   "name": "@oasis-engine-toolkit/planar-shadow-material",
-  "version": "0.8.0-alpha.13",
+  "version": "0.8.0-alpha.16",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
