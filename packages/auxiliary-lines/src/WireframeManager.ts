@@ -7,7 +7,8 @@ import {
   dependentComponents,
   DirectLight,
   Entity,
-  GLCapabilityType, MathUtil,
+  GLCapabilityType,
+  MathUtil,
   Matrix,
   MeshRenderer,
   MeshTopology,
@@ -204,6 +205,8 @@ export class WireframeManager extends Script {
       this._indicesCount
     );
     this._indicesCount += coneIndicesCount;
+    // rotation to default transform forward direction(-Z)
+    this._rotateToForward(positionsOffset);
 
     this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
@@ -244,6 +247,8 @@ export class WireframeManager extends Script {
     const indices = this._indices;
     WireframePrimitive.createUnboundCylinderWireframe(1, localPositions, positionsOffset, indices, this._indicesCount);
     this._indicesCount += unboundCylinderIndicesCount;
+    // rotation to default transform forward direction(-Z)
+    this._rotateToForward(positionsOffset);
 
     this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
@@ -451,6 +456,17 @@ export class WireframeManager extends Script {
       const newIndices = this._supportUint32Array ? new Uint32Array(neededLength) : new Uint16Array(neededLength);
       newIndices.set(indices);
       this._indices = newIndices;
+    }
+  }
+
+  private _rotateToForward(positionsOffset: number) {
+    const localPositions = this._localPositions;
+    for (let i = positionsOffset; i < localPositions.length; i++) {
+      const position = localPositions[i];
+      const py = position.y;
+      const pz = position.z;
+      position.z = py;
+      position.y = -pz;
     }
   }
 }
