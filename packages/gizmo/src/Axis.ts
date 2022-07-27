@@ -1,4 +1,4 @@
-import { Vector4, Component, Entity, MeshRenderer, Layer, Material, RenderQueueType, Color } from "oasis-engine";
+import { Vector4, Component, Entity, MeshRenderer, Material, RenderQueueType, Color } from "oasis-engine";
 
 import { AxisProps } from "./Type";
 import { utils } from "./Utils";

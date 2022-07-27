@@ -5,38 +5,35 @@ import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { utils } from "./Utils";
+import { GizmoState } from "./enums/GizmoState";
 
-export enum GizmoState {
-  rotate = "rotate",
-  translate = "translate",
-  scale = "scale"
-}
-
+/**
+ * Gizmo controls, including translate, rotate, scale
+ */
 export class GizmoControls extends Script {
   gizmoState: GizmoState = GizmoState.translate;
+
   private _isStarted = false;
   private _isHovered = false;
   private _scaleFactor = 0.05773502691896257;
-
-  private gizmoMap: {
-    [key: string]: { entity: Entity; component: GizmoComponent };
-  } = {};
+  private _gizmoMap: Record<string, { entity: Entity; component: GizmoComponent }> = {};
   private _entityTransformChangeFlag: any;
-  /** the scene camera  */
   private _editorCamera: Camera;
-  /** the selected entity  */
   private _selectedEntity: Entity;
-  /** current active axis name */
   private _selectedAxisName: string;
+
+  private _tempRay: Ray = new Ray();
+  private _tempRay2: Ray = new Ray();
 
   constructor(entity: Entity) {
     super(entity);
 
     utils.init(this.engine);
 
-    this._createGizmoControl("translate", TranslateControl);
-    this._createGizmoControl("scale", ScaleControl);
-    this._createGizmoControl("rotate", RotateControl);
+    this._createGizmoControl(GizmoState.translate, TranslateControl);
+    this._createGizmoControl(GizmoState.scale, ScaleControl);
+    this._createGizmoControl(GizmoState.rotate, RotateControl);
+
     this.onGizmoChange(this.gizmoState);
   }
 
@@ -46,29 +43,29 @@ export class GizmoControls extends Script {
    */
   initGizmoControl(camera: Camera) {
     this._editorCamera = camera;
-    Object.values(this.gizmoMap).forEach((gizmo) => gizmo.component.initCamera(camera));
+    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.initCamera(camera));
   }
   /**
    * toggle gizmo orientation mode
    * @param isGlobal - true if orientation is global, false if orientation is local
    */
   onToggleGizmoOrient(isGlobal: boolean) {
-    Object.values(this.gizmoMap).forEach(
+    Object.values(this._gizmoMap).forEach(
       (gizmo) => gizmo.component.toggleOrientation && gizmo.component.toggleOrientation(isGlobal)
     );
   }
 
   /**
    * toggle gizmo state
-   * @param currentState - gizmo new state
+   * @param targetState - gizmo new state
    */
-  onGizmoChange(currentState: GizmoState) {
-    Object.values(this.gizmoMap).forEach((gizmo) => (gizmo.entity.isActive = false));
-    this.gizmoState = currentState;
-    if (currentState) {
-      this.gizmoMap[currentState].entity.isActive = true;
+  onGizmoChange(targetState: GizmoState) {
+    Object.values(this._gizmoMap).forEach((gizmo) => (gizmo.entity.isActive = false));
+    this.gizmoState = targetState;
+    if (targetState) {
+      this._gizmoMap[targetState].entity.isActive = true;
       if (this._selectedEntity) {
-        Object.values(this.gizmoMap).forEach((gizmo) => gizmo.component.onSelected(this._selectedEntity));
+        Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(this._selectedEntity));
       }
     }
   }
@@ -86,7 +83,7 @@ export class GizmoControls extends Script {
       this._entityTransformChangeFlag = null;
       return;
     }
-    Object.values(this.gizmoMap).forEach((gizmo) => gizmo.component.onSelected(entity));
+    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(entity));
     this._entityTransformChangeFlag = entity.transform.registerWorldChangeFlag();
   }
 
@@ -97,7 +94,7 @@ export class GizmoControls extends Script {
   onGizmoHoverStart(axisName: string) {
     this._selectedAxisName = axisName;
     this._isHovered = true;
-    this.gizmoMap[this.gizmoState].component.onHoverStart(axisName);
+    this._gizmoMap[this.gizmoState].component.onHoverStart(axisName);
   }
 
   /**
@@ -105,7 +102,7 @@ export class GizmoControls extends Script {
    */
   onGizmoHoverEnd() {
     if (this._isHovered) {
-      this.gizmoMap[this.gizmoState].component.onHoverEnd();
+      this._gizmoMap[this.gizmoState].component.onHoverEnd();
       this._isHovered = false;
     }
   }
@@ -116,13 +113,12 @@ export class GizmoControls extends Script {
   triggerGizmoStart(axisName: string) {
     this._isStarted = true;
     this._selectedAxisName = axisName;
-
-    if (this._selectedEntity.engine.inputManager.pointers[0]) {
-      const x = this._selectedEntity.engine.inputManager.pointers[0].position.x;
-      const y = this._selectedEntity.engine.inputManager.pointers[0].position.y;
-      const ray = new Ray();
-      this._editorCamera.screenPointToRay(new Vector2(x, y), ray);
-      this.gizmoMap[this.gizmoState].component.onMoveStart(ray, this._selectedAxisName);
+    const pointer = this._selectedEntity.engine.inputManager.pointers[0];
+    if (pointer) {
+      const x = pointer.position.x;
+      const y = pointer.position.y;
+      this._editorCamera.screenPointToRay(new Vector2(x, y), this._tempRay);
+      this._gizmoMap[this.gizmoState].component.onMoveStart(this._tempRay, this._selectedAxisName);
     }
   }
   /**
@@ -130,12 +126,12 @@ export class GizmoControls extends Script {
    */
   onGizmoMove() {
     if (this._isStarted) {
-      if (this._selectedEntity.engine.inputManager.pointers[0]) {
-        const x = this._selectedEntity.engine.inputManager.pointers[0].position.x;
-        const y = this._selectedEntity.engine.inputManager.pointers[0].position.y;
-        const ray = new Ray();
-        this._editorCamera.screenPointToRay(new Vector2(x, y), ray);
-        this.gizmoMap[this.gizmoState].component.onMove(ray);
+      const pointer = this._selectedEntity.engine.inputManager.pointers[0];
+      if (pointer) {
+        const x = pointer.position.x;
+        const y = pointer.position.y;
+        this._editorCamera.screenPointToRay(new Vector2(x, y), this._tempRay2);
+        this._gizmoMap[this.gizmoState].component.onMove(this._tempRay2);
       }
     }
   }
@@ -145,7 +141,7 @@ export class GizmoControls extends Script {
    */
   triggerGizmoEnd() {
     if (this._isStarted) {
-      this.gizmoMap[this.gizmoState].component.onMoveEnd();
+      this._gizmoMap[this.gizmoState].component.onMoveEnd();
       this._isStarted = false;
     }
   }
@@ -157,9 +153,9 @@ export class GizmoControls extends Script {
     }
     if (this._entityTransformChangeFlag.flag) {
       this.entity.transform.worldPosition = this._selectedEntity.transform.worldPosition;
-      if (this.gizmoState === "rotate") {
+      if (this.gizmoState === GizmoState.rotate) {
         // @ts-ignore
-        this.gizmoMap[this.gizmoState].component.updateTransform();
+        this._gizmoMap[this.gizmoState].component.updateTransform();
       }
     }
 
@@ -172,11 +168,9 @@ export class GizmoControls extends Script {
     }
   }
 
-  /** setup gizmo control */
-  private _createGizmoControl(controlName: string, gizmoComponent: new (entity: Entity) => GizmoComponent) {
-    const entity = this.entity.createChild(controlName);
+  private _createGizmoControl(control: string, gizmoComponent: new (entity: Entity) => GizmoComponent) {
+    const entity = this.entity.createChild();
     const component = entity.addComponent(gizmoComponent);
-
-    this.gizmoMap[controlName] = { entity, component };
+    this._gizmoMap[control] = { entity, component };
   }
 }

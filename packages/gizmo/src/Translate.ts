@@ -4,16 +4,15 @@ import { Axis } from "./Axis";
 import { GizmoComponent, AxisProps, axisVector, axisIndices } from "./Type";
 import { utils } from "./Utils";
 
+  /** @internal */
 export class TranslateControl extends Component implements GizmoComponent {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
-  /** the scene camera  */
   private _camera: Camera = null;
-  /** the selected entity  */
   private _selectedEntity: Entity = null;
   private _isGlobalOrient = true;
-  private translateAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis };
-  private translateControlMap: {
+  private _translateAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis };
+  private _translateControlMap: {
     x: AxisProps;
     y: AxisProps;
     z: AxisProps;
@@ -22,17 +21,11 @@ export class TranslateControl extends Component implements GizmoComponent {
     yz: AxisProps;
   };
 
-  /** current active axis name */
   private _selectedAxisName: string;
-  /** initial world position of the selected entity */
   private _startPosition: Vector3 = new Vector3();
-  /** rotation quaternion of the selected entity */
   private _entityQuaternion: Quaternion = new Quaternion();
-  /** the start point on gizmo when move */
   private _startPoint: Vector3 = new Vector3();
-  /** the move point on gizmo when drag */
   private _movePoint = new Vector3();
-  /** the hit plane for current move */
   private _plane: Plane = new Plane();
 
   private _tempVec: Vector3 = new Vector3();
@@ -47,9 +40,9 @@ export class TranslateControl extends Component implements GizmoComponent {
     this._initAxis();
     this._createAxis(entity);
   }
-  /** init axis geometry */
+
   private _initAxis() {
-    this.translateControlMap = {
+    this._translateControlMap = {
       x: {
         name: "x",
         axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
@@ -101,7 +94,6 @@ export class TranslateControl extends Component implements GizmoComponent {
     };
   }
 
-  /** assemble axis */
   private _createAxis(entity: Entity) {
     this.gizmoEntity = entity.createChild("visible");
     this.gizmoHelperEntity = entity.createChild("invisible");
@@ -112,7 +104,7 @@ export class TranslateControl extends Component implements GizmoComponent {
     const axisXZ = this.gizmoEntity.createChild("xz");
     const axisYZ = this.gizmoEntity.createChild("yz");
 
-    this.translateAxisComponent = {
+    this._translateAxisComponent = {
       x: axisX.addComponent(Axis),
       y: axisY.addComponent(Axis),
       z: axisZ.addComponent(Axis),
@@ -121,12 +113,12 @@ export class TranslateControl extends Component implements GizmoComponent {
       xz: axisXZ.addComponent(Axis)
     };
 
-    this.translateAxisComponent.x.initAxis(this.translateControlMap.x);
-    this.translateAxisComponent.y.initAxis(this.translateControlMap.y);
-    this.translateAxisComponent.z.initAxis(this.translateControlMap.z);
-    this.translateAxisComponent.xy.initAxis(this.translateControlMap.xy);
-    this.translateAxisComponent.xz.initAxis(this.translateControlMap.xz);
-    this.translateAxisComponent.yz.initAxis(this.translateControlMap.yz);
+    this._translateAxisComponent.x.initAxis(this._translateControlMap.x);
+    this._translateAxisComponent.y.initAxis(this._translateControlMap.y);
+    this._translateAxisComponent.z.initAxis(this._translateControlMap.z);
+    this._translateAxisComponent.xy.initAxis(this._translateControlMap.xy);
+    this._translateAxisComponent.xz.initAxis(this._translateControlMap.xz);
+    this._translateAxisComponent.yz.initAxis(this._translateControlMap.yz);
   }
 
   initCamera(camera: Camera): void {
@@ -207,7 +199,6 @@ export class TranslateControl extends Component implements GizmoComponent {
       : this._selectedEntity.transform.rotationQuaternion;
   }
 
-  /** get hit plane for current move */
   private _getHitPlane() {
     // get endPoint for plane
     const currentAxis = axisVector[this._selectedAxisName];

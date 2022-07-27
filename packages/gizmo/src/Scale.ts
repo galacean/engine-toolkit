@@ -3,16 +3,16 @@ import { Camera, Component, Entity, Plane, Quaternion, Ray, Vector3 } from "oasi
 import { Axis } from "./Axis";
 import { GizmoComponent, AxisProps, axisVector, axisIndices } from "./Type";
 import { utils } from "./Utils";
-export class ScaleControl extends Component implements GizmoComponent {
+
+  /** @internal */
+  export class ScaleControl extends Component implements GizmoComponent {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
-  /** the scene camera  */
   private _camera: Camera = null;
-  /** the selected entity  */
   private _selectedEntity: Entity = null;
 
-  private scaleAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis; xyz: Axis };
-  private scaleControlMap: {
+  private _scaleAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis; xyz: Axis };
+  private _scaleControlMap: {
     x: AxisProps;
     y: AxisProps;
     z: AxisProps;
@@ -22,15 +22,10 @@ export class ScaleControl extends Component implements GizmoComponent {
     xyz: AxisProps;
   };
 
-  /** current active axis name */
   private _selectedAxisName: string;
-  /** initial world scale of the selected entity */
   private _startScale: Vector3 = new Vector3();
-  /** the start point on gizmo when move */
   private _startPoint: Vector3 = new Vector3();
-  /** the move point on gizmo when drag */
   private _movePoint = new Vector3();
-  /** the hit plane for current move */
   private _plane: Plane = new Plane();
 
   private _tempVec: Vector3 = new Vector3();
@@ -47,7 +42,7 @@ export class ScaleControl extends Component implements GizmoComponent {
 
   /** init axis geometry */
   private _initAxis() {
-    this.scaleControlMap = {
+    this._scaleControlMap = {
       x: {
         name: "x",
         axisMesh: [utils.lineMeshShort, utils.axisEndCubeMesh, utils.axisEndCubeMesh],
@@ -118,7 +113,7 @@ export class ScaleControl extends Component implements GizmoComponent {
     const axisYZ = this.gizmoEntity.createChild("yz");
     const axisXYZ = this.gizmoEntity.createChild("xyz");
 
-    this.scaleAxisComponent = {
+    this._scaleAxisComponent = {
       x: axisX.addComponent(Axis),
       y: axisY.addComponent(Axis),
       z: axisZ.addComponent(Axis),
@@ -128,13 +123,13 @@ export class ScaleControl extends Component implements GizmoComponent {
       xyz: axisXYZ.addComponent(Axis)
     };
 
-    this.scaleAxisComponent.x.initAxis(this.scaleControlMap.x);
-    this.scaleAxisComponent.y.initAxis(this.scaleControlMap.y);
-    this.scaleAxisComponent.z.initAxis(this.scaleControlMap.z);
-    this.scaleAxisComponent.xy.initAxis(this.scaleControlMap.xy);
-    this.scaleAxisComponent.yz.initAxis(this.scaleControlMap.yz);
-    this.scaleAxisComponent.xz.initAxis(this.scaleControlMap.xz);
-    this.scaleAxisComponent.xyz.initAxis(this.scaleControlMap.xyz);
+    this._scaleAxisComponent.x.initAxis(this._scaleControlMap.x);
+    this._scaleAxisComponent.y.initAxis(this._scaleControlMap.y);
+    this._scaleAxisComponent.z.initAxis(this._scaleControlMap.z);
+    this._scaleAxisComponent.xy.initAxis(this._scaleControlMap.xy);
+    this._scaleAxisComponent.yz.initAxis(this._scaleControlMap.yz);
+    this._scaleAxisComponent.xz.initAxis(this._scaleControlMap.xz);
+    this._scaleAxisComponent.xyz.initAxis(this._scaleControlMap.xyz);
   }
 
   initCamera(camera: Camera): void {
@@ -198,7 +193,6 @@ export class ScaleControl extends Component implements GizmoComponent {
     }
   }
 
-  /** calculate movement */
   private _addWithAxis(): Vector3 {
     const out = this._selectedEntity.transform.scale;
     Vector3.subtract(this._movePoint, this._startPoint, this._tempVec);
@@ -213,7 +207,6 @@ export class ScaleControl extends Component implements GizmoComponent {
     return out;
   }
 
-  /** get hit plane for current move */
   private _getHitPlane() {
     // get endPoint for plane
     const currentAxis = axisVector[this._selectedAxisName];

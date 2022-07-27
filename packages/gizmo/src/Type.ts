@@ -1,49 +1,24 @@
 import { Component, Entity, Ray, Vector3, Mesh, Material, Camera } from "oasis-engine";
 
 export abstract class GizmoComponent extends Component {
-  /** the visible gizmo entity */
   gizmoEntity: Entity;
-  /** the invisible gizmo entity  */
   gizmoHelperEntity: Entity;
 
-  /**
-   * Get scene camera when init gizmo.
-   * @param camera - The scene camera.
-   */
+  // Get scene camera when init gizmo.  
   initCamera?(camera: Camera): void;
-  /**
-   * Called when an entity is selected.
-   * @param entity - The selected entity.
-   */
+  // Called when an entity is selected.
   onSelected?(entity: Entity): void;
-  /**
-   * Called when pointer enters gizmo.
-   * @param axisName - The gizmo axis name.
-   */
+  // Called when pointer enters gizmo.
   onHoverStart?(axisName: string): void;
-  /**
-   * Called when pointer leaves gizmo.
-   */
+  // Called when pointer leaves gizmo.
   onHoverEnd?(): void;
-  /**
-   * Called when gizmo starts to move.
-   * @param ray - ray from the clicked pointer in screen.
-   * @param axisName - The gizmo axis name.
-   */
+  // Called when gizmo starts to move.
   onMoveStart?(ray: Ray, axisName: string): void;
-  /**
-   * Called when gizmo is moving.
-   * @param ray - ray from the dragging pointer in screen.
-   */
+  // Called when gizmo is moving.
   onMove?(ray: Ray): void;
-  /**
-   * Called when gizmo movement ends.
-   */
+  // Called when gizmo movement ends.
   onMoveEnd?(): void;
-  /**
-   * Called when gizmo orientation changes.
-   * @param isGlobal - global: true, local: false.
-   */
+  // Called when gizmo orientation changes.
   toggleOrientation?(isGlobal: boolean): void;
 }
 

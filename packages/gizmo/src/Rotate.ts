@@ -9,20 +9,19 @@ import {
   RenderQueueType,
   Vector3
 } from "oasis-engine";
-
 import { Axis } from "./Axis";
-import { ArcLineMesh, CircleMesh, LinesMesh } from "./Mesh";
+import { ArcLineMesh } from "./ArcLineMesh";
+import { CircleMesh } from "./CircleMesh";
+import { LinesMesh } from "./LineMesh";
 import { GizmoComponent, AxisProps, axisVector } from "./Type";
 import { utils } from "./Utils";
 
+/** @internal */
 export class RotateControl extends Component implements GizmoComponent {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
-  /** the scene camera */
   private _camera: Camera = null;
-  /** the selected entity */
   private _selectedEntity: Entity = null;
-  /** orientation mode */
   private _isGlobalOrient = true;
 
   private rotateAxisComponent: { x: Axis; y: Axis; z: Axis };
@@ -55,7 +54,6 @@ export class RotateControl extends Component implements GizmoComponent {
     z: this.zArcLineMesh
   };
 
-  /** rotate gizmo helper entity  */
   private _gizmoRotateHelperEntity: Entity;
 
   private _axisX: Entity;
@@ -84,24 +82,15 @@ export class RotateControl extends Component implements GizmoComponent {
   private _rotateHelperPlaneEntity: Entity;
   private rotateHelperPlaneMesh: CircleMesh = new CircleMesh({}, this.engine);
 
-  /** current active axis name */
   private _selectedAxisName: string;
-  /** initial world position of the selected entity */
   private _startPosition: Vector3 = new Vector3();
-  /** initial rotation quaternion of the selected entity */
   private _startQuaternion: Quaternion = new Quaternion();
-  /** initial rotation quaternion of gizmo */
   private _gizmoStartQuat = new Quaternion();
 
-  /** the rotate axis of gizmo */
   private _rotateAxis: Vector3 = new Vector3();
-  /** the start point on gizmo when move */
   private _startPoint: Vector3 = new Vector3();
-  /** the start point on gizmo rotate helper plane when move */
   private _startPointUnit: Vector3 = new Vector3();
-  /** the move point on gizmo when drag */
   private _movePoint = new Vector3();
-  /** the move point on gizmo rotate helper plane when drag */
   private _movePointUnit: Vector3 = new Vector3();
 
   private _tempVec: Vector3 = new Vector3();
@@ -147,7 +136,6 @@ export class RotateControl extends Component implements GizmoComponent {
       }
     };
   }
-  /** assemble axis */
   private _createAxis(entity: Entity) {
     // visible gizmo entity
     this.gizmoEntity = entity.createChild("visible");
@@ -333,7 +321,6 @@ export class RotateControl extends Component implements GizmoComponent {
     this._isGlobalOrient = isGlobal;
   }
 
-  /** gizmo look at camera */
   updateTransform() {
     this._eyeVector = this._camera.entity.transform.worldPosition.clone();
 
@@ -363,7 +350,6 @@ export class RotateControl extends Component implements GizmoComponent {
     this._helperAxisZ.transform.rotationQuaternion = this._tempQuat2;
   }
 
-  /** get hit point from ray */
   private _getRotateHitPointFromRay(ray: Ray) {
     // hit plane
     const plane = new Plane(
