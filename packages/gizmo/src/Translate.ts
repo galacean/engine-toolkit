@@ -1,14 +1,18 @@
-import { Camera, Component, Entity, Plane, Ray, Vector3 } from "oasis-engine";
+import { Camera, Component, Entity, Plane, Quaternion, Ray, Vector3 } from "oasis-engine";
+
 import { Axis } from "./Axis";
 import { GizmoComponent, AxisProps, axisVector, axisIndices } from "./Type";
 import { utils } from "./Utils";
+
+  /** @internal */
 export class TranslateControl extends Component implements GizmoComponent {
-  private translateAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis };
-  private currentAxisName: string;
-  private startPoint: Vector3 = new Vector3();
-  private startPosition: Vector3 = new Vector3();
-  private translateVector: Vector3 = new Vector3();
-  private translateControlMap: {
+  gizmoEntity: Entity;
+  gizmoHelperEntity: Entity;
+  private _camera: Camera = null;
+  private _selectedEntity: Entity = null;
+  private _isGlobalOrient = true;
+  private _translateAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis };
+  private _translateControlMap: {
     x: AxisProps;
     y: AxisProps;
     z: AxisProps;
@@ -16,24 +20,29 @@ export class TranslateControl extends Component implements GizmoComponent {
     xz: AxisProps;
     yz: AxisProps;
   };
-  private selectedEntity: Entity = null;
-  public gizmoEntity: Entity;
-  public gizmoHelperEntity: Entity;
-  private movePoint = new Vector3();
-  private _camera: Camera = null;
+
+  private _selectedAxisName: string;
+  private _startPosition: Vector3 = new Vector3();
+  private _entityQuaternion: Quaternion = new Quaternion();
+  private _startPoint: Vector3 = new Vector3();
+  private _movePoint = new Vector3();
   private _plane: Plane = new Plane();
+
   private _tempVec: Vector3 = new Vector3();
   private _tempVec1: Vector3 = new Vector3();
   private _tempVec2: Vector3 = new Vector3();
+  private _tempVec3: Vector3 = new Vector3();
+  private _endPoint: Vector3 = new Vector3();
+  private _topPoint: Vector3 = new Vector3();
 
   constructor(entity: Entity) {
     super(entity);
-    this.initAxis();
-    this.createAxis(entity);
+    this._initAxis();
+    this._createAxis(entity);
   }
 
-  initAxis() {
-    this.translateControlMap = {
+  private _initAxis() {
+    this._translateControlMap = {
       x: {
         name: "x",
         axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
@@ -85,7 +94,7 @@ export class TranslateControl extends Component implements GizmoComponent {
     };
   }
 
-  createAxis(entity: Entity) {
+  private _createAxis(entity: Entity) {
     this.gizmoEntity = entity.createChild("visible");
     this.gizmoHelperEntity = entity.createChild("invisible");
     const axisX = this.gizmoEntity.createChild("x");
@@ -95,7 +104,7 @@ export class TranslateControl extends Component implements GizmoComponent {
     const axisXZ = this.gizmoEntity.createChild("xz");
     const axisYZ = this.gizmoEntity.createChild("yz");
 
-    this.translateAxisComponent = {
+    this._translateAxisComponent = {
       x: axisX.addComponent(Axis),
       y: axisY.addComponent(Axis),
       z: axisZ.addComponent(Axis),
@@ -104,12 +113,12 @@ export class TranslateControl extends Component implements GizmoComponent {
       xz: axisXZ.addComponent(Axis)
     };
 
-    this.translateAxisComponent.x.initAxis(this.translateControlMap.x);
-    this.translateAxisComponent.y.initAxis(this.translateControlMap.y);
-    this.translateAxisComponent.z.initAxis(this.translateControlMap.z);
-    this.translateAxisComponent.xy.initAxis(this.translateControlMap.xy);
-    this.translateAxisComponent.xz.initAxis(this.translateControlMap.xz);
-    this.translateAxisComponent.yz.initAxis(this.translateControlMap.yz);
+    this._translateAxisComponent.x.initAxis(this._translateControlMap.x);
+    this._translateAxisComponent.y.initAxis(this._translateControlMap.y);
+    this._translateAxisComponent.z.initAxis(this._translateControlMap.z);
+    this._translateAxisComponent.xy.initAxis(this._translateControlMap.xy);
+    this._translateAxisComponent.xz.initAxis(this._translateControlMap.xz);
+    this._translateAxisComponent.yz.initAxis(this._translateControlMap.yz);
   }
 
   initCamera(camera: Camera): void {
@@ -117,37 +126,43 @@ export class TranslateControl extends Component implements GizmoComponent {
   }
 
   onSelected(entity: Entity) {
-    this.selectedEntity = entity;
+    this._selectedEntity = entity;
+    this._entityQuaternion = entity.transform.rotationQuaternion.clone();
+    this.entity.transform.rotationQuaternion = this._entityQuaternion;
   }
 
-  onHoverStart(axis: string) {
-    this.currentAxisName = axis;
-    const currEntity = this.gizmoEntity.findByName(axis);
+  onHoverStart(axisName: string) {
+    this._selectedAxisName = axisName;
+    // change color
+    const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent?.highLight && currComponent.highLight();
   }
 
   onHoverEnd() {
-    const currEntity = this.gizmoEntity.findByName(this.currentAxisName);
+    // recover axis color
+    const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent?.unLight && currComponent.unLight();
+
+    this._selectedAxisName = null;
   }
 
-  onMoveStart(ray: Ray, axis: string) {
-    this.currentAxisName = axis;
-    this.startPosition = this.selectedEntity.transform.worldPosition.clone();
+  onMoveStart(ray: Ray, axisName: string) {
+    this._selectedAxisName = axisName;
+    this._startPosition = this._selectedEntity.transform.worldPosition.clone();
 
-    this.getHitPlane();
+    // get start point
+    this._getHitPlane();
+    const tempDist = ray.intersectPlane(this._plane);
+    ray.getPoint(tempDist, this._startPoint);
 
-    let tempDist = ray.intersectPlane(this._plane);
-    ray.getPoint(tempDist, this.startPoint);
-
-    // 变色
+    // change axis color
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
       const currEntity = entityArray[i];
       const currComponent = currEntity.getComponent(Axis);
-      if (currEntity.name === this.currentAxisName) {
+      if (currEntity.name === this._selectedAxisName) {
         currComponent?.yellow && currComponent.yellow();
       } else {
         currComponent?.gray && currComponent.gray();
@@ -155,14 +170,16 @@ export class TranslateControl extends Component implements GizmoComponent {
     }
   }
   onMove(ray: Ray): void {
-    let tempDist = ray.intersectPlane(this._plane);
-    ray.getPoint(tempDist, this.movePoint);
-    Vector3.subtract(this.movePoint, this.startPoint, this.translateVector);
-    const currentPosition = this.selectedEntity.transform.worldPosition;
-    this.selectedEntity.transform.worldPosition = this.addWithAxis(this.currentAxisName, currentPosition);
+    // get move point
+    const tempDist = ray.intersectPlane(this._plane);
+    ray.getPoint(tempDist, this._movePoint);
+
+    // align movement
+    this._selectedEntity.transform.worldPosition = this._addWithAxis();
   }
 
   onMoveEnd() {
+    // recover axis cover
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
       const currEntity = entityArray[i];
@@ -171,28 +188,56 @@ export class TranslateControl extends Component implements GizmoComponent {
     }
   }
 
-  addWithAxis(axis: string, out: Vector3): Vector3 {
-    const currentAxisIndices = axisIndices[axis];
-    let i = currentAxisIndices.length - 1;
-    while (i >= 0) {
-      const elementIndex = currentAxisIndices[i];
-      out[elementIndex] = this.startPosition[elementIndex] + this.translateVector[elementIndex];
-      i--;
-    }
-    return out;
+  toggleOrientation(isGlobalOrient: boolean) {
+    this._isGlobalOrient = isGlobalOrient;
+
+    this.entity.transform.rotationQuaternion = isGlobalOrient
+      ? new Quaternion(0, 0, 0, 1)
+      : this._selectedEntity.transform.rotationQuaternion;
+    this._entityQuaternion = isGlobalOrient
+      ? new Quaternion(0, 0, 0, 1)
+      : this._selectedEntity.transform.rotationQuaternion;
   }
 
-  getHitPlane() {
-    const currentAxis = axisVector[this.currentAxisName];
-    const endPoint = new Vector3();
-    Vector3.transformToVec3(currentAxis, this.selectedEntity.transform.worldMatrix, endPoint);
-    const currentWorldPos = this.selectedEntity.transform.worldPosition;
+  private _getHitPlane() {
+    // get endPoint for plane
+    const currentAxis = axisVector[this._selectedAxisName];
+    Vector3.transformByQuat(currentAxis, this._entityQuaternion, this._tempVec3);
+    Vector3.transformToVec3(this._tempVec3, this._selectedEntity.transform.worldMatrix, this._endPoint);
+
+    // get topPoint for plane
+    const currentWorldPos = this._selectedEntity.transform.worldPosition;
     const cameraPos = this._camera.entity.transform.worldPosition;
-    Vector3.subtract(endPoint, currentWorldPos, this._tempVec);
+    Vector3.subtract(this._endPoint, currentWorldPos, this._tempVec);
     Vector3.subtract(cameraPos, currentWorldPos, this._tempVec1);
     Vector3.cross(this._tempVec, this._tempVec1, this._tempVec2);
-    const pointTop = new Vector3();
-    Vector3.add(currentWorldPos, this._tempVec2, pointTop);
-    Plane.fromPoints(pointTop, currentWorldPos, endPoint, this._plane);
+    Vector3.add(currentWorldPos, this._tempVec2, this._topPoint);
+
+    // get the hit plane
+    Plane.fromPoints(this._topPoint, currentWorldPos, this._endPoint, this._plane);
+  }
+
+  /** calculate movement */
+  private _addWithAxis(): Vector3 {
+    Vector3.subtract(this._movePoint, this._startPoint, this._tempVec);
+
+    const currentAxisIndices = axisIndices[this._selectedAxisName];
+    let i = currentAxisIndices.length - 1;
+    const c = new Vector3();
+    while (i >= 0) {
+      const elementIndex = currentAxisIndices[i];
+      const currentAxis = axisVector[elementIndex];
+      const currentRotateAxis = new Vector3();
+      Vector3.transformByQuat(currentAxis, this._entityQuaternion, currentRotateAxis);
+      // get move distance along this axis
+      const moveDist = Vector3.dot(this._tempVec, currentRotateAxis);
+      this._tempVec1 = currentRotateAxis.clone();
+      // get move vector
+      this._tempVec1.scale(moveDist);
+      Vector3.add(c, this._tempVec1, c);
+      i--;
+    }
+    Vector3.add(this._startPosition, c, this._tempVec2);
+    return this._tempVec2;
   }
 }
