@@ -22,7 +22,7 @@ export class RotateControl extends Component implements GizmoComponent {
   gizmoHelperEntity: Entity;
   private _camera: Camera = null;
   private _selectedEntity: Entity = null;
-  private _isGlobalOrient = true;
+  private _isGlobalOrient = false;
 
   private rotateAxisComponent: { x: Axis; y: Axis; z: Axis };
   private rotateControlMap: {

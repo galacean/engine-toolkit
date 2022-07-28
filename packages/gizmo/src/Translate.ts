@@ -4,13 +4,13 @@ import { Axis } from "./Axis";
 import { GizmoComponent, AxisProps, axisVector, axisIndices } from "./Type";
 import { utils } from "./Utils";
 
-  /** @internal */
+/** @internal */
 export class TranslateControl extends Component implements GizmoComponent {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
   private _camera: Camera = null;
   private _selectedEntity: Entity = null;
-  private _isGlobalOrient = true;
+  private _isGlobalOrient = false;
   private _translateAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis };
   private _translateControlMap: {
     x: AxisProps;
