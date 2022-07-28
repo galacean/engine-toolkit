@@ -1,14 +1,18 @@
-import { Camera, Component, Entity, Plane, Ray, Vector3 } from "oasis-engine";
+import { Camera, Component, Entity, Plane, Quaternion, Ray, Vector3 } from "oasis-engine";
+
 import { Axis } from "./Axis";
 import { GizmoComponent, AxisProps, axisVector, axisIndices } from "./Type";
 import { utils } from "./Utils";
-export class ScaleControl extends Component implements GizmoComponent {
-  private scaleAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis; xyz: Axis };
-  private currentAxisName: string;
-  private startPoint: Vector3 = new Vector3();
-  private startScale: Vector3 = new Vector3();
-  private translateVector: Vector3 = new Vector3();
-  private scaleControlMap: {
+
+  /** @internal */
+  export class ScaleControl extends Component implements GizmoComponent {
+  gizmoEntity: Entity;
+  gizmoHelperEntity: Entity;
+  private _camera: Camera = null;
+  private _selectedEntity: Entity = null;
+
+  private _scaleAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis; xyz: Axis };
+  private _scaleControlMap: {
     x: AxisProps;
     y: AxisProps;
     z: AxisProps;
@@ -17,25 +21,28 @@ export class ScaleControl extends Component implements GizmoComponent {
     yz: AxisProps;
     xyz: AxisProps;
   };
-  private selectedEntity: Entity = null;
-  public gizmoEntity: Entity;
-  public gizmoHelperEntity: Entity;
-  private movePoint = new Vector3();
 
-  private _camera: Camera = null;
+  private _selectedAxisName: string;
+  private _startScale: Vector3 = new Vector3();
+  private _startPoint: Vector3 = new Vector3();
+  private _movePoint = new Vector3();
   private _plane: Plane = new Plane();
+
   private _tempVec: Vector3 = new Vector3();
   private _tempVec1: Vector3 = new Vector3();
   private _tempVec2: Vector3 = new Vector3();
+  private _endPoint: Vector3 = new Vector3();
+  private _topPoint: Vector3 = new Vector3();
 
   constructor(entity: Entity) {
     super(entity);
-    this.initAxis();
-    this.createAxis(entity);
+    this._initAxis();
+    this._createAxis(entity);
   }
 
-  initAxis() {
-    this.scaleControlMap = {
+  /** init axis geometry */
+  private _initAxis() {
+    this._scaleControlMap = {
       x: {
         name: "x",
         axisMesh: [utils.lineMeshShort, utils.axisEndCubeMesh, utils.axisEndCubeMesh],
@@ -94,8 +101,8 @@ export class ScaleControl extends Component implements GizmoComponent {
       }
     };
   }
-
-  createAxis(entity: Entity) {
+  /** assemble axis */
+  private _createAxis(entity: Entity) {
     this.gizmoEntity = entity.createChild("visible");
     this.gizmoHelperEntity = entity.createChild("invisible");
     const axisX = this.gizmoEntity.createChild("x");
@@ -106,7 +113,7 @@ export class ScaleControl extends Component implements GizmoComponent {
     const axisYZ = this.gizmoEntity.createChild("yz");
     const axisXYZ = this.gizmoEntity.createChild("xyz");
 
-    this.scaleAxisComponent = {
+    this._scaleAxisComponent = {
       x: axisX.addComponent(Axis),
       y: axisY.addComponent(Axis),
       z: axisZ.addComponent(Axis),
@@ -116,63 +123,65 @@ export class ScaleControl extends Component implements GizmoComponent {
       xyz: axisXYZ.addComponent(Axis)
     };
 
-    this.scaleAxisComponent.x.initAxis(this.scaleControlMap.x);
-    this.scaleAxisComponent.y.initAxis(this.scaleControlMap.y);
-    this.scaleAxisComponent.z.initAxis(this.scaleControlMap.z);
-    this.scaleAxisComponent.xy.initAxis(this.scaleControlMap.xy);
-    this.scaleAxisComponent.yz.initAxis(this.scaleControlMap.yz);
-    this.scaleAxisComponent.xz.initAxis(this.scaleControlMap.xz);
-    this.scaleAxisComponent.xyz.initAxis(this.scaleControlMap.xyz);
+    this._scaleAxisComponent.x.initAxis(this._scaleControlMap.x);
+    this._scaleAxisComponent.y.initAxis(this._scaleControlMap.y);
+    this._scaleAxisComponent.z.initAxis(this._scaleControlMap.z);
+    this._scaleAxisComponent.xy.initAxis(this._scaleControlMap.xy);
+    this._scaleAxisComponent.yz.initAxis(this._scaleControlMap.yz);
+    this._scaleAxisComponent.xz.initAxis(this._scaleControlMap.xz);
+    this._scaleAxisComponent.xyz.initAxis(this._scaleControlMap.xyz);
   }
 
   initCamera(camera: Camera): void {
     this._camera = camera;
   }
   onSelected(entity: Entity) {
-    this.selectedEntity = entity;
+    this._selectedEntity = entity;
+    this.entity.transform.rotationQuaternion = entity.transform.rotationQuaternion;
   }
 
-  onHoverStart(axis: string) {
-    this.currentAxisName = axis;
-    const currEntity = this.gizmoEntity.findByName(axis);
+  onHoverStart(axisName: string) {
+    this._selectedAxisName = axisName;
+    const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent?.highLight && currComponent.highLight();
   }
 
   onHoverEnd() {
-    const currEntity = this.gizmoEntity.findByName(this.currentAxisName);
+    const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent?.unLight && currComponent.unLight();
   }
 
-  onMoveStart(ray: Ray, axis: string) {
-    this.currentAxisName = axis;
-    this.startScale = this.selectedEntity.transform.scale.clone();
-    this.getHitPlane();
+  onMoveStart(ray: Ray, axisName: string) {
+    this._selectedAxisName = axisName;
+    this._startScale = this._selectedEntity.transform.scale.clone();
 
-    let tempDist = ray.intersectPlane(this._plane);
-    ray.getPoint(tempDist, this.startPoint);
+    // get start point
+    this._getHitPlane();
+    const tempDist = ray.intersectPlane(this._plane);
+    ray.getPoint(tempDist, this._startPoint);
 
-    // 变色
+    // change axis color
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
       const currEntity = entityArray[i];
       const currComponent = currEntity.getComponent(Axis);
-      if (currEntity.name === this.currentAxisName) {
+      if (currEntity.name === this._selectedAxisName) {
         currComponent?.yellow && currComponent.yellow();
       } else {
         currComponent?.gray && currComponent.gray();
       }
     }
   }
-  onMove(ray: Ray): void {
-    let tempDist = ray.intersectPlane(this._plane);
-    ray.getPoint(tempDist, this.movePoint);
 
-    Vector3.subtract(this.movePoint, this.startPoint, this.translateVector);
-    // 增量
-    const currScale = this.selectedEntity.transform.scale;
-    this.selectedEntity.transform.scale = this.addWithAxis(this.currentAxisName, currScale);
+  onMove(ray: Ray): void {
+    // get move point
+    const tempDist = ray.intersectPlane(this._plane);
+    ray.getPoint(tempDist, this._movePoint);
+
+    // align movement
+    this._selectedEntity.transform.scale = this._addWithAxis();
   }
 
   onMoveEnd() {
@@ -184,28 +193,34 @@ export class ScaleControl extends Component implements GizmoComponent {
     }
   }
 
-  addWithAxis(axis: string, out: Vector3): Vector3 {
-    const currentAxisIndices = axisIndices[axis];
+  private _addWithAxis(): Vector3 {
+    const out = this._selectedEntity.transform.scale;
+    Vector3.subtract(this._movePoint, this._startPoint, this._tempVec);
+
+    const currentAxisIndices = axisIndices[this._selectedAxisName];
     let i = currentAxisIndices.length - 1;
     while (i >= 0) {
       const elementIndex = currentAxisIndices[i];
-      out[elementIndex] = this.startScale[elementIndex] + this.translateVector[elementIndex];
+      out[elementIndex] = this._startScale[elementIndex] + this._tempVec[elementIndex];
       i--;
     }
     return out;
   }
 
-  getHitPlane() {
-    const currentAxis = axisVector[this.currentAxisName];
-    const endPoint = new Vector3();
-    Vector3.transformToVec3(currentAxis, this.selectedEntity.transform.worldMatrix, endPoint);
-    const currentWorldPos = this.selectedEntity.transform.worldPosition;
+  private _getHitPlane() {
+    // get endPoint for plane
+    const currentAxis = axisVector[this._selectedAxisName];
+    Vector3.transformToVec3(currentAxis, this._selectedEntity.transform.worldMatrix, this._endPoint);
+
+    // get topPoint for plane
+    const currentWorldPos = this._selectedEntity.transform.worldPosition;
     const cameraPos = this._camera.entity.transform.worldPosition;
-    Vector3.subtract(endPoint, currentWorldPos, this._tempVec);
+    Vector3.subtract(this._endPoint, currentWorldPos, this._tempVec);
     Vector3.subtract(cameraPos, currentWorldPos, this._tempVec1);
     Vector3.cross(this._tempVec, this._tempVec1, this._tempVec2);
-    const pointTop = new Vector3();
-    Vector3.add(currentWorldPos, this._tempVec2, pointTop);
-    Plane.fromPoints(pointTop, currentWorldPos, endPoint, this._plane);
+    Vector3.add(currentWorldPos, this._tempVec2, this._topPoint);
+
+    // get the hit plane
+    Plane.fromPoints(this._topPoint, currentWorldPos, this._endPoint, this._plane);
   }
 }
