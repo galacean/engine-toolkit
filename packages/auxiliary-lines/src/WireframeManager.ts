@@ -1,25 +1,27 @@
 import {
+  BoolUpdateFlag,
   BoxColliderShape,
+  Camera,
   CapsuleColliderShape,
-  SphereColliderShape,
+  Collider,
+  dependentComponents,
+  DirectLight,
+  Entity,
   GLCapabilityType,
+  MathUtil,
+  Matrix,
   MeshRenderer,
   MeshTopology,
   ModelMesh,
-  Script,
-  UnlitMaterial,
-  Vector3,
-  Transform,
   PointLight,
-  Camera,
-  Matrix,
+  Script,
+  SphereColliderShape,
   SpotLight,
-  DirectLight,
-  Collider,
-  Entity,
-  dependentComponents,
-  BoolUpdateFlag
+  Transform,
+  UnlitMaterial,
+  Vector3
 } from "oasis-engine";
+
 import { WireframePrimitive } from "./WireframePrimitive";
 
 /**
@@ -186,7 +188,7 @@ export class WireframeManager extends Script {
    */
   addSpotLightWireframe(light: SpotLight): void {
     const height = light.distance;
-    const radius = Math.tan(light.angle) * height;
+    const radius = Math.tan(light.angle / 2) * height;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -203,6 +205,8 @@ export class WireframeManager extends Script {
       this._indicesCount
     );
     this._indicesCount += coneIndicesCount;
+    // rotation to default transform forward direction(-Z)
+    this._rotateToForward(positionsOffset);
 
     this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
@@ -243,6 +247,8 @@ export class WireframeManager extends Script {
     const indices = this._indices;
     WireframePrimitive.createUnboundCylinderWireframe(1, localPositions, positionsOffset, indices, this._indicesCount);
     this._indicesCount += unboundCylinderIndicesCount;
+    // rotation to default transform forward direction(-Z)
+    this._rotateToForward(positionsOffset);
 
     this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
@@ -361,6 +367,8 @@ export class WireframeManager extends Script {
     const renderer = this.entity.getComponent(MeshRenderer);
     const supportUint32Array = engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
 
+    // @ts-ignore
+    mesh._enableVAO = false;
     mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
     renderer.mesh = mesh;
     renderer.setMaterial(material);
@@ -440,14 +448,25 @@ export class WireframeManager extends Script {
     const indices = this._indices;
     const neededLength = this._indicesCount + length;
     if (neededLength > indices.length) {
-      const maxLength = this._supportUint32Array ? 65535 : 4294967295;
+      const maxLength = this._supportUint32Array ? 4294967295 : 65535;
       if (neededLength > maxLength) {
         throw Error("The vertex count is over limit.");
       }
 
-      const newIndices = this._supportUint32Array ? new Uint16Array(neededLength) : new Uint32Array(neededLength);
+      const newIndices = this._supportUint32Array ? new Uint32Array(neededLength) : new Uint16Array(neededLength);
       newIndices.set(indices);
       this._indices = newIndices;
+    }
+  }
+
+  private _rotateToForward(positionsOffset: number) {
+    const localPositions = this._localPositions;
+    for (let i = positionsOffset; i < localPositions.length; i++) {
+      const position = localPositions[i];
+      const py = position.y;
+      const pz = position.z;
+      position.z = py;
+      position.y = -pz;
     }
   }
 }

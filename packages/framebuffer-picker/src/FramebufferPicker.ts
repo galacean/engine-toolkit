@@ -38,8 +38,8 @@ export class FramebufferPicker extends Script {
 
   /**
    * Pick the object at the screen coordinate position.
-   * @param offsetX Relative X coordinate of the canvas
-   * @param offsetY Relative Y coordinate of the canvas
+   * @param offsetX - Relative X coordinate of the drawingBuffer
+   * @param offsetY - Relative Y coordinate of the drawingBuffer
    */
   pick(offsetX: number, offsetY: number): Promise<RenderElement> {
     if (this.enabled) {
