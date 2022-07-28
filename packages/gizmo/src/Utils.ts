@@ -111,7 +111,7 @@ class Utils {
 
     this.rotatePlaneMaterial = createMeshMaterial(
       {
-        color: new Vector4(1.0, 0.95, 0.0, 0.6),
+        color: new Vector4(1.0, 0.95, 0.0, 0.2),
         depthTest: false,
         blend: true,
         doubleSide: true
@@ -158,7 +158,7 @@ class Utils {
 
     this.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, 3.35);
     this.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
-    this.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.04, 6, 18, 180);
+    this.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 180);
   }
 }
 
