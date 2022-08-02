@@ -5,14 +5,21 @@
 import { LineCap, LineJoin } from "../constants";
 import wasmString from "./line.wasm";
 
-const wasmBuffer = Uint8Array.from(atob(wasmString), (c) => c.charCodeAt(0));
-
+console.log('newbuilder 1')
 type LineBuilderResult = {
   vertices: Float32Array;
   indices: Uint16Array;
 };
 
 class LineVertexBuilder {
+  private static _instance: LineVertexBuilder;
+  static get instance(): LineVertexBuilder {
+    if (!this._instance) {
+      this._instance = new LineVertexBuilder();
+    }
+    return this._instance;
+  }
+
   private _memory: ArrayBuffer;
   private _heap32: Float32Array;
   private _heap16: Int16Array;
@@ -21,6 +28,8 @@ class LineVertexBuilder {
   private _wasmInitPromise;
 
   constructor() {
+    const wasmBuffer = Uint8Array.from(atob(wasmString), (c) => c.charCodeAt(0));
+
     this._wasmInitPromise = new Promise<void>((resolve) => {
       WebAssembly.instantiate(wasmBuffer, {
         env: {
@@ -116,4 +125,4 @@ class LineVertexBuilder {
   }
 }
 
-export default new LineVertexBuilder();
+export { LineVertexBuilder };

@@ -13,7 +13,7 @@ import {
 } from "oasis-engine";
 import { LineMaterial } from "./material/LineMaterial";
 import { LineCap, LineJoin } from "./constants";
-import lineBuilder from "./vertexBuilder";
+import { LineVertexBuilder } from "./vertexBuilder";
 
 /**
  * Solid Line.
@@ -160,7 +160,7 @@ export class Line extends Script {
   }
 
   protected async _generateData() {
-    return await lineBuilder.solidLine(this._flattenPoints, this._join, this._cap, -1);
+    return await LineVertexBuilder.instance.solidLine(this._flattenPoints, this._join, this._cap, -1);
   }
 
   protected async _render() {

@@ -1,7 +1,7 @@
 import { Color, Vector2, Texture2D } from "oasis-engine";
 import { DashMaterial } from "./material/DashMaterial";
 import { Line } from "./Line";
-import lineBuilder from "./vertexBuilder";
+import { LineVertexBuilder } from "./vertexBuilder";
 
 /**
  * Dash Line.
@@ -33,7 +33,7 @@ export class DashLine extends Line {
    * @override
    */
   protected async _generateData() {
-    return await lineBuilder.dashLine(this._flattenPoints, this._join, this._cap, 0, -1);
+    return await LineVertexBuilder.instance.dashLine(this._flattenPoints, this._join, this._cap, 0, -1);
   }
 
   /**
