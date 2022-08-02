@@ -5,7 +5,6 @@
 import { LineCap, LineJoin } from "../constants";
 import wasmString from "./line.wasm";
 
-console.log('newbuilder 1')
 type LineBuilderResult = {
   vertices: Float32Array;
   indices: Uint16Array;
