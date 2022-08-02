@@ -4,6 +4,7 @@
 
 import { LineCap, LineJoin } from "../constants";
 import wasmString from "./line.wasm";
+import { atob as atobPolyfill } from "./atob";
 
 type LineBuilderResult = {
   vertices: Float32Array;
@@ -27,7 +28,9 @@ class LineVertexBuilder {
   private _wasmInitPromise;
 
   constructor() {
-    const wasmBuffer = Uint8Array.from(atob(wasmString), (c) => c.charCodeAt(0));
+    const wasmBuffer = Uint8Array.from(typeof atob === "undefined" ? atobPolyfill(wasmString) : atob(wasmString), (c) =>
+      c.charCodeAt(0)
+    );
 
     this._wasmInitPromise = new Promise<void>((resolve) => {
       WebAssembly.instantiate(wasmBuffer, {
