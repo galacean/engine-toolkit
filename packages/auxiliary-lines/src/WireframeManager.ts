@@ -134,7 +134,7 @@ export class WireframeManager extends Script {
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
-    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
 
     const ndcPosition = WireframeManager._ndcPosition;
     // front
@@ -208,7 +208,7 @@ export class WireframeManager extends Script {
     // rotation to default transform forward direction(-Z)
     this._rotateAroundX(positionsOffset);
 
-    this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(light.entity.transform, positionsOffset));
   }
 
   /**
@@ -231,7 +231,7 @@ export class WireframeManager extends Script {
     );
     this._indicesCount += sphereIndicesCount;
 
-    this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(light.entity.transform, positionsOffset));
   }
 
   /**
@@ -250,7 +250,7 @@ export class WireframeManager extends Script {
     // rotation to default transform forward direction(-Z)
     this._rotateAroundX(positionsOffset);
 
-    this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(light.entity.transform, positionsOffset));
   }
 
   /**
@@ -298,7 +298,7 @@ export class WireframeManager extends Script {
     this._localTranslate(positionsOffset, shape.position);
 
     this._indicesCount += cuboidIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
   }
 
   /**
@@ -326,7 +326,7 @@ export class WireframeManager extends Script {
     this._localTranslate(positionsOffset, shape.position);
 
     this._indicesCount += sphereIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
   }
 
   /**
@@ -365,7 +365,7 @@ export class WireframeManager extends Script {
     this._localTranslate(positionsOffset, shape.position);
 
     this._indicesCount += capsuleIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
   }
 
   /**
@@ -425,13 +425,8 @@ export class WireframeManager extends Script {
       const endIndex = i < n - 1 ? wireframeElements[i + 1].transformRanges : localPositionLength;
       if (wireframeElement.updateFlag.flag) {
         const transform = wireframeElement.transform;
-        let worldMatrix: Matrix;
-        if (wireframeElement.transformNoScale) {
-          worldMatrix = WireframeManager._tempMatrix;
-          Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
-        } else {
-          worldMatrix = transform.worldMatrix;
-        }
+        const worldMatrix = WireframeManager._tempMatrix;
+        Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
 
         for (let j = beginIndex; j < endIndex; j++) {
           const localPosition = localPositions[positionIndex];
@@ -470,7 +465,7 @@ export class WireframeManager extends Script {
     }
   }
 
-  private _localTranslate(positionsOffset:number, offset:Vector3) {
+  private _localTranslate(positionsOffset: number, offset: Vector3) {
     const localPositions = this._localPositions;
     for (let i = positionsOffset; i < localPositions.length; i++) {
       const position = localPositions[i];
@@ -508,7 +503,7 @@ export class WireframeManager extends Script {
 class WireframeElement {
   updateFlag: BoolUpdateFlag;
 
-  constructor(public transform: Transform, public transformNoScale: boolean, public transformRanges: number) {
+  constructor(public transform: Transform, public transformRanges: number) {
     this.updateFlag = transform.registerWorldChangeFlag();
   }
 }
