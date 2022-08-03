@@ -4,11 +4,11 @@ import {
   Camera,
   CapsuleColliderShape,
   Collider,
+  ColliderShapeUpAxis,
   dependentComponents,
   DirectLight,
   Entity,
   GLCapabilityType,
-  MathUtil,
   Matrix,
   MeshRenderer,
   MeshTopology,
@@ -42,7 +42,7 @@ export class WireframeManager extends Script {
   private _localPositions: Vector3[] = [];
   private _globalPositions: Vector3[] = [];
   private _indices: Uint16Array | Uint32Array = null;
-  private _indicesCount: number = 0;
+  private _indicesCount = 0;
   private _supportUint32Array: boolean;
 
   private _wireframeElements: WireframeElement[] = [];
@@ -78,7 +78,7 @@ export class WireframeManager extends Script {
    * @param entity - The entity
    * @param includeChildren - whether include child entity(default is true)
    */
-  addEntityWireframe(entity: Entity, includeChildren: boolean = true): void {
+  addEntityWireframe(entity: Entity, includeChildren = true): void {
     if (includeChildren) {
       const components = new Array<Camera | SpotLight | DirectLight | PointLight | Collider>();
       entity.getComponentsIncludeChildren(Camera, components);
@@ -206,7 +206,7 @@ export class WireframeManager extends Script {
     );
     this._indicesCount += coneIndicesCount;
     // rotation to default transform forward direction(-Z)
-    this._rotateToForward(positionsOffset);
+    this._rotateAroundX(positionsOffset);
 
     this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
@@ -248,7 +248,7 @@ export class WireframeManager extends Script {
     WireframePrimitive.createUnboundCylinderWireframe(1, localPositions, positionsOffset, indices, this._indicesCount);
     this._indicesCount += unboundCylinderIndicesCount;
     // rotation to default transform forward direction(-Z)
-    this._rotateToForward(positionsOffset);
+    this._rotateAroundX(positionsOffset);
 
     this._wireframeElements.push(new WireframeElement(light.entity.transform, true, positionsOffset));
   }
@@ -295,9 +295,10 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    this._indicesCount += cuboidIndicesCount;
+    this._localTranslate(positionsOffset, shape.position);
 
-    this._wireframeElements.push(new WireframeElement(transform, false, positionsOffset));
+    this._indicesCount += cuboidIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
   }
 
   /**
@@ -322,9 +323,10 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    this._indicesCount += sphereIndicesCount;
+    this._localTranslate(positionsOffset, shape.position);
 
-    this._wireframeElements.push(new WireframeElement(transform, false, positionsOffset));
+    this._indicesCount += sphereIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
   }
 
   /**
@@ -337,6 +339,7 @@ export class WireframeManager extends Script {
     const maxScale = Math.max(worldScale.x, worldScale.y, worldScale.z);
     const radius = shape.radius;
     const height = shape.height;
+    const upAxis = shape.upAxis;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -352,9 +355,17 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    this._indicesCount += capsuleIndicesCount;
+    switch (upAxis) {
+      case ColliderShapeUpAxis.X:
+        this._rotateAroundZ(positionsOffset);
+        break;
+      case ColliderShapeUpAxis.Z:
+        this._rotateAroundX(positionsOffset);
+    }
+    this._localTranslate(positionsOffset, shape.position);
 
-    this._wireframeElements.push(new WireframeElement(transform, false, positionsOffset));
+    this._indicesCount += capsuleIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, true, positionsOffset));
   }
 
   /**
@@ -459,7 +470,15 @@ export class WireframeManager extends Script {
     }
   }
 
-  private _rotateToForward(positionsOffset: number) {
+  private _localTranslate(positionsOffset:number, offset:Vector3) {
+    const localPositions = this._localPositions;
+    for (let i = positionsOffset; i < localPositions.length; i++) {
+      const position = localPositions[i];
+      position.add(offset);
+    }
+  }
+
+  private _rotateAroundX(positionsOffset: number) {
     const localPositions = this._localPositions;
     for (let i = positionsOffset; i < localPositions.length; i++) {
       const position = localPositions[i];
@@ -467,6 +486,17 @@ export class WireframeManager extends Script {
       const pz = position.z;
       position.z = py;
       position.y = -pz;
+    }
+  }
+
+  private _rotateAroundZ(positionsOffset: number) {
+    const localPositions = this._localPositions;
+    for (let i = positionsOffset; i < localPositions.length; i++) {
+      const position = localPositions[i];
+      const px = position.x;
+      const py = position.y;
+      position.y = px;
+      position.x = -py;
     }
   }
 }
