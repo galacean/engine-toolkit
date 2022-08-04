@@ -7,6 +7,7 @@ import {
   dependentComponents,
   Entity,
   Material,
+  Matrix,
   MeshRenderer,
   PrimitiveMesh,
   RenderTarget,
@@ -40,6 +41,16 @@ export class OutlineManager extends Script {
   private _outlineColor: Color = new Color(0, 0, 0, 1);
   private _replaceColor: Color = new Color(1, 0, 0, 1);
   private _outlineEntities: Entity[] = [];
+
+  private _entityMap = new Map<
+    Entity,
+    {
+      parent: Entity;
+      worldMatrix: Matrix;
+    }
+  >();
+  private _materialMap = new Map<MeshRenderer, Material>();
+  private _renderers: MeshRenderer[] = [];
 
   /** outline color. */
   get color(): Color {
@@ -114,7 +125,9 @@ export class OutlineManager extends Script {
    * @param entity - The entity you wanna add.
    */
   addEntity(entity: Entity) {
-    this._outlineEntities.push(entity);
+    if (this._outlineEntities.indexOf(entity) === -1) {
+      this._outlineEntities.push(entity);
+    }
   }
 
   /** @internal */
@@ -126,16 +139,28 @@ export class OutlineManager extends Script {
     const originalSolidColor = scene.background.solidColor;
     const originalBackgroundMode = scene.background.mode;
     const originalScene = this.engine.sceneManager.activeScene;
-    const parentMap = new Map<Entity, Entity>();
-    const materialMap = new Map<MeshRenderer, Material>();
+
+    const renderers = this._renderers;
+    const materialMap = this._materialMap;
+    const entityMap = this._entityMap;
+    materialMap.clear();
+    entityMap.clear();
 
     for (let i = 0, length = this._outlineEntities.length; i < length; i++) {
       const entity = this._outlineEntities[i];
-      const renderers: MeshRenderer[] = [];
-      entity.getComponentsIncludeChildren(MeshRenderer, renderers);
-      parentMap.set(entity, entity.parent);
-      this._outlineRoot.addChild(entity);
+      const originalWorldMatrix = entity.transform.worldMatrix.clone();
+      const originalParent = entity.parent;
 
+      this._outlineRoot.addChild(entity);
+      entity.transform.worldMatrix = originalWorldMatrix;
+
+      entityMap.set(entity, {
+        parent: originalParent,
+        worldMatrix: originalWorldMatrix
+      });
+
+      renderers.length = 0;
+      entity.getComponentsIncludeChildren(MeshRenderer, renderers);
       for (let j = 0; j < renderers.length; j++) {
         const renderer = renderers[j];
         materialMap.set(renderer, renderer.getMaterial());
@@ -165,12 +190,13 @@ export class OutlineManager extends Script {
     scene.background.solidColor = originalSolidColor;
     scene.background.mode = originalBackgroundMode;
 
-    parentMap.forEach((parent, entity) => {
+    entityMap.forEach(({ parent, worldMatrix }, entity) => {
       if (!parent) {
         scene.addRootEntity(entity);
       } else {
         parent.addChild(entity);
       }
+      entity.transform.worldMatrix = worldMatrix;
     });
     materialMap.forEach((material, renderer) => {
       renderer.setMaterial(material);
@@ -179,10 +205,12 @@ export class OutlineManager extends Script {
 
   /** @internal */
   onDestroy() {
-    this._outlineRoot.destroy();
-    this._screenEntity.destroy();
+    this._outlineScene.destroy();
     this._renderTarget.getColorTexture().destroy(true);
     this._renderTarget.destroy();
+    this._renderers = null;
+    this._entityMap = null;
+    this._materialMap = null;
   }
 }
 
