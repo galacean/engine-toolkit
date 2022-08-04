@@ -32,13 +32,23 @@ import { WireframePrimitive } from "./WireframePrimitive";
 export class WireframeManager extends Script {
   private static _positionPool: Vector3[] = [];
   private static _ndcPosition: Vector3[] = [
-    new Vector3(-1, 1, 0),
-    new Vector3(1, 1, 0),
-    new Vector3(1, -1, 0),
-    new Vector3(-1, -1, 0)
+    new Vector3(-1, 1, -1),
+    new Vector3(1, 1, -1),
+    new Vector3(1, -1, -1),
+    new Vector3(-1, -1, -1)
   ];
   private static _tempMatrix: Matrix = new Matrix();
 
+  private _cameraPositions = [
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+    new Vector3()
+  ];
   private _localPositions: Vector3[] = [];
   private _globalPositions: Vector3[] = [];
   private _indices: Uint16Array | Uint32Array = null;
@@ -139,16 +149,16 @@ export class WireframeManager extends Script {
     const ndcPosition = WireframeManager._ndcPosition;
     // front
     for (let i = 0; i < 4; i++) {
-      const position = ndcPosition[i];
-      const newPosition = position.clone();
+      const newPosition = this._cameraPositions[i];
+      newPosition.copyFrom(ndcPosition[i]);
       newPosition.transformCoordinate(inverseProj);
       localPositions.push(newPosition);
     }
 
     // back
     for (let i = 0; i < 4; i++) {
-      const position = ndcPosition[i];
-      const newPosition = position.clone();
+      const newPosition = this._cameraPositions[i + 4];
+      newPosition.copyFrom(ndcPosition[i]);
       newPosition.z = 1;
       newPosition.transformCoordinate(inverseProj);
       localPositions.push(newPosition);
