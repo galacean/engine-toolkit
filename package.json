@@ -1,5 +1,5 @@
 {
-  "name": "oasis-engine-toolkit",
+  "name": "oasis-engine-toolkit-root",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
