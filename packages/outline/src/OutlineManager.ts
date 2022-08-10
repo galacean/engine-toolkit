@@ -15,6 +15,7 @@ import {
   Script,
   Shader,
   Texture2D,
+  TextureWrapMode,
   UnlitMaterial,
   Vector2
 } from "oasis-engine";
@@ -79,7 +80,7 @@ export class OutlineManager extends Script {
 
     this._material.shaderData.setTexture("u_texture", renderColorTexture);
     this._material.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / offWidth, 1 / offHeight));
-
+    renderColorTexture.wrapModeU = renderColorTexture.wrapModeV = TextureWrapMode.Clamp;
     this._renderTarget = renderTarget;
   }
 
