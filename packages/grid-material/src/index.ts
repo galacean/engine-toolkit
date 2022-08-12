@@ -1,1 +1,1 @@
-export { GridMaterial } from "./GridMaterial";
+export { GridMaterial, createGridPlane } from "./GridMaterial";

@@ -1,5 +1,28 @@
-import { BaseMaterial, Engine, Shader } from "oasis-engine";
+import { BaseMaterial, Engine, ModelMesh, Shader, Vector3 } from "oasis-engine";
 
+/**
+ * Create Mesh with position in clipped space.
+ * @param engine Engine
+ */
+export function createGridPlane(engine: Engine): ModelMesh {
+  const positions: Vector3[] = new Array(6);
+  positions[0] = new Vector3(1, 1, 0);
+  positions[1] = new Vector3(-1, -1, 0);
+  positions[2] = new Vector3(-1, 1, 0);
+  positions[3] = new Vector3(-1, -1, 0);
+  positions[4] = new Vector3(1, 1, 0);
+  positions[5] = new Vector3(1, -1, 0);
+
+  const mesh = new ModelMesh(engine);
+  mesh.setPositions(positions);
+  mesh.uploadData(true);
+  mesh.addSubMesh(0, 6);
+  return mesh;
+}
+
+/**
+ * Grid Material.
+ */
 export class GridMaterial extends BaseMaterial {
   constructor(engine: Engine) {
     super(engine, Shader.find("grid"));
@@ -13,12 +36,6 @@ Shader.create(
   
 varying vec3 nearPoint;
 varying vec3 farPoint;
-  
-  // Grid position are in clipped space
-vec3 gridPlane[6] = vec3[] (
-    vec3(1, 1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
-    vec3(-1, -1, 0), vec3(1, 1, 0), vec3(1, -1, 0)
-);
 
 vec3 UnprojectPoint(float x, float y, float z, mat4 view, mat4 projection) {
     mat4 viewInv = inverse(view);
@@ -28,9 +45,8 @@ vec3 UnprojectPoint(float x, float y, float z, mat4 view, mat4 projection) {
 }
 
 void main() {
-    vec3 p = gridPlane[gl_VertexIndex].xyz;
-    nearPoint = UnprojectPoint(p.x, p.y, 0.0, view_mat, proj_mat).xyz;// unprojecting on the near plane
-    farPoint = UnprojectPoint(p.x, p.y, 1.0, view_mat, proj_mat).xyz;// unprojecting on the far plane
+    nearPoint = UnprojectPoint(POSITION.x, POSITION.y, 0.0, view_mat, proj_mat).xyz;// unprojecting on the near plane
+    farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, view_mat, proj_mat).xyz;// unprojecting on the far plane
     gl_Position = vec4(p, 1.0);// using directly the clipped coordinates
 }`,
   `
