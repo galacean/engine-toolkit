@@ -102,6 +102,9 @@ export class RotateControl extends Component implements GizmoComponent {
   private _eyeVector: Vector3 = new Vector3();
   private _alignVector: Vector3 = new Vector3();
 
+  private _previousRad: number = 0;
+  private _finalRad: number = 0;
+
   constructor(entity: Entity) {
     super(entity);
     this._initAxis();
@@ -256,11 +259,6 @@ export class RotateControl extends Component implements GizmoComponent {
     // init helper plane
     this._rotateHelperPlaneEntity.isActive = true;
     this._rotateHelperPlaneEntity.transform.worldPosition = this._startPosition;
-    this.rotateHelperPlaneMesh.update({
-      startPoint: this._startPointUnit,
-      normal: this._rotateAxis,
-      thetaLength: 2 * Math.PI
-    });
   }
 
   onMove(ray: Ray): void {
@@ -273,16 +271,31 @@ export class RotateControl extends Component implements GizmoComponent {
     const dot = Vector3.dot(this._startPointUnit, this._movePointUnit);
     Vector3.cross(this._startPointUnit, this._movePointUnit, this._tempVec);
     const direction = Vector3.dot(this._tempVec, this._rotateAxis);
-    const rad = Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
+    const currentRad = Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
+    const incrementRad = currentRad - this._previousRad;
+
+    if (this._previousRad * currentRad < 0) {
+      Math.abs(currentRad) < Math.PI / 2
+        ? (this._finalRad += incrementRad)
+        : (this._finalRad += -Math.sign(incrementRad) * (2 * Math.PI - Math.abs(incrementRad)));
+    } else {
+      this._finalRad += incrementRad;
+    }
+    this._previousRad = currentRad;
 
     // update end line
     this.endLineMesh.update([
       [0, 0, 0],
       [this._movePointUnit.x, this._movePointUnit.y, this._movePointUnit.z]
     ]);
-
+    // update plane
+    this.rotateHelperPlaneMesh.update({
+      startPoint: this._startPointUnit,
+      normal: this._rotateAxis,
+      thetaLength: this._finalRad
+    });
     // update gizmo position
-    Quaternion.rotationAxisAngle(this._rotateAxis, rad, this._tempQuat);
+    Quaternion.rotationAxisAngle(this._rotateAxis, this._finalRad, this._tempQuat);
     this.gizmoEntity.transform.rotationQuaternion = this._tempQuat;
 
     // align selected entity
@@ -314,7 +327,16 @@ export class RotateControl extends Component implements GizmoComponent {
       [0, 0, 0],
       [0, 0, 0]
     ]);
+
+    this.rotateHelperPlaneMesh.update({
+      startPoint: this._startPointUnit,
+      normal: this._rotateAxis,
+      thetaLength: 0
+    });
     this._rotateHelperPlaneEntity.isActive = false;
+
+    this._finalRad = 0;
+    this._previousRad = 0;
   }
 
   toggleOrientation(isGlobal: boolean) {
