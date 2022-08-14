@@ -13,7 +13,7 @@ export class Axis extends Component {
   /** setup axis geometry */
   initAxis(value: AxisProps) {
     this._material = value.axisMaterial;
-    this._material.renderQueueType = RenderQueueType.Transparent;
+    this._material.renderState.renderQueueType = RenderQueueType.Transparent;
     this._color = value.axisMaterial.shaderData.getColor("u_color");
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {

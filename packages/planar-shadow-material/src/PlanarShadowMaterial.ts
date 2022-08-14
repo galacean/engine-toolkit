@@ -1,11 +1,22 @@
-import { BlendFactor, Color, CompareFunction, Engine, PBRMaterial, RenderQueueType, Shader, StencilOperation, Vector3 } from "oasis-engine";
+import {
+  BlendFactor,
+  BlendOperation,
+  Color,
+  CompareFunction,
+  Engine,
+  PBRMaterial,
+  RenderQueueType,
+  Shader,
+  ShaderPass,
+  StencilOperation,
+  Vector3
+} from "oasis-engine";
 
 export class PlanarShadowMaterial extends PBRMaterial {
-  static _lightDirProp = Shader.getPropertyByName("u_lightDir");
-
-  static _planarHeightProp = Shader.getPropertyByName("u_planarHeight");
-  static _shadowColorProp = Shader.getPropertyByName("u_planarShadowColor");
-  static _shadowFalloffProp = Shader.getPropertyByName("u_planarShadowFalloff");
+  private static _lightDirProp = Shader.getPropertyByName("u_lightDir");
+  private static _planarHeightProp = Shader.getPropertyByName("u_planarHeight");
+  private static _shadowColorProp = Shader.getPropertyByName("u_planarShadowColor");
+  private static _shadowFalloffProp = Shader.getPropertyByName("u_planarShadowFalloff");
 
   /**
    * Planar height
