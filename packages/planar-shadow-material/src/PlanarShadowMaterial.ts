@@ -1,13 +1,11 @@
-import { BaseMaterial, Color, CompareFunction, Engine, Shader, StencilOperation, Vector3 } from "oasis-engine";
+import { BlendFactor, Color, CompareFunction, Engine, PBRMaterial, RenderQueueType, Shader, StencilOperation, Vector3 } from "oasis-engine";
 
-/**
- * Planar Shadow
- */
-export class PlanarShadowMaterial extends BaseMaterial {
-  private static _lightDirProp = Shader.getPropertyByName("u_lightDir");
-  private static _planarHeightProp = Shader.getPropertyByName("u_planarHeight");
-  private static _shadowColorProp = Shader.getPropertyByName("u_planarShadowColor");
-  private static _shadowFalloffProp = Shader.getPropertyByName("u_planarShadowFalloff");
+export class PlanarShadowMaterial extends PBRMaterial {
+  static _lightDirProp = Shader.getPropertyByName("u_lightDir");
+
+  static _planarHeightProp = Shader.getPropertyByName("u_planarHeight");
+  static _shadowColorProp = Shader.getPropertyByName("u_planarShadowColor");
+  static _shadowFalloffProp = Shader.getPropertyByName("u_planarShadowFalloff");
 
   /**
    * Planar height
@@ -62,10 +60,23 @@ export class PlanarShadowMaterial extends BaseMaterial {
   }
 
   constructor(engine: Engine) {
-    super(engine, Shader.find("planar-shadow-material"));
+    super(engine);
+    this.shader = Shader.find("planarShadowShader");
 
-    this.isTransparent = true;
-    const { stencilState } = this.renderState;
+    const shadowRenderState = this.renderStates[1];
+
+    shadowRenderState.depthState.writeEnabled = false;
+
+    const { targetBlendState } = shadowRenderState.blendState;
+    targetBlendState.enabled = true;
+    targetBlendState.sourceColorBlendFactor = BlendFactor.SourceAlpha;
+    targetBlendState.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+    targetBlendState.sourceAlphaBlendFactor = BlendFactor.One;
+    targetBlendState.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+    targetBlendState.colorBlendOperation = targetBlendState.alphaBlendOperation = BlendOperation.Add;
+    shadowRenderState.renderQueueType = RenderQueueType.Transparent;
+
+    const { stencilState } = shadowRenderState;
     stencilState.enabled = true;
     stencilState.referenceValue = 0;
     stencilState.compareFunctionFront = CompareFunction.Equal;
@@ -85,8 +96,7 @@ export class PlanarShadowMaterial extends BaseMaterial {
   }
 }
 
-Shader.create(
-  "planar-shadow-material",
+const planarShadow = new ShaderPass(
   `
     attribute vec4 POSITION;
     varying vec4 color;
@@ -178,3 +188,4 @@ Shader.create(
     }
     `
 );
+Shader.create("planarShadowShader", [Shader.find("pbr").shaderPasses[0], planarShadow]);
