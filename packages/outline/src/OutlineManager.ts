@@ -43,7 +43,7 @@ export class OutlineManager extends Script {
   private _replaceColor: Color = new Color(1, 0, 0, 1);
   private _outlineEntities: Entity[] = [];
 
-  private _entityMap: Array<{ entity: Entity; parent: Entity; worldMatrix: Matrix }> = [];
+  private _entityMap: Array<{ entity: Entity; parent: Entity; localMatrix: Matrix }> = [];
   private _materialMap: Array<{ renderer: MeshRenderer; material: Material }> = [];
   private _renderers: MeshRenderer[] = [];
 
@@ -143,16 +143,18 @@ export class OutlineManager extends Script {
 
     for (let i = 0, length = this._outlineEntities.length; i < length; i++) {
       const entity = this._outlineEntities[i];
-      const originalWorldMatrix = entity.transform.worldMatrix.clone();
+      const transform = entity.transform;
+      const originalWorldMatrix = transform.worldMatrix.clone();
+      const originalLocalMatrix = transform.localMatrix.clone();
       const originalParent = entity.parent;
 
       this._outlineRoot.addChild(entity);
-      entity.transform.worldMatrix = originalWorldMatrix;
+      transform.worldMatrix = originalWorldMatrix;
 
       entityMap.push({
         entity,
         parent: originalParent,
-        worldMatrix: originalWorldMatrix
+        localMatrix: originalLocalMatrix
       });
 
       renderers.length = 0;
@@ -186,13 +188,13 @@ export class OutlineManager extends Script {
     scene.background.solidColor = originalSolidColor;
     scene.background.mode = originalBackgroundMode;
 
-    entityMap.forEach(({ entity, parent, worldMatrix }) => {
+    entityMap.forEach(({ entity, parent, localMatrix }) => {
       if (!parent) {
         scene.addRootEntity(entity);
       } else {
         parent.addChild(entity);
       }
-      entity.transform.worldMatrix = worldMatrix;
+      entity.transform.localMatrix = localMatrix;
     });
     materialMap.forEach(({ material, renderer }) => {
       renderer.setMaterial(material);
