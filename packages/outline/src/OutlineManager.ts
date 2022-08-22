@@ -98,6 +98,7 @@ export class OutlineManager extends Script {
 
     replaceMaterial.baseColor = this._replaceColor;
     screenEntity.layer = this._layer;
+    screenEntity.isActive = false;
     screenRenderer.mesh = PrimitiveMesh.createPlane(engine, 2, 2);
     screenRenderer.setMaterial(outlineMaterial);
     outlineMaterial.isTransparent = true;
