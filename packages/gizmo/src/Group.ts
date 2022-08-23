@@ -1,4 +1,4 @@
-import { BoundingBox, ListenerUpdateFlag, Renderer, Vector3, Quaternion, Matrix, Entity } from "oasis-engine";
+import { BoundingBox, Renderer, Vector3, Quaternion, Matrix, Entity } from "oasis-engine";
 
 export enum AnchorType {
   Pivot,
@@ -19,21 +19,20 @@ export class Group {
   private static _tempVec30: Vector3 = new Vector3();
   private static _tempVec31: Vector3 = new Vector3();
   private static _tempQuat: Quaternion = new Quaternion();
-  private static _tempMat: Matrix = new Matrix();
+  private static _tempMat0: Matrix = new Matrix();
   private static _tempMat1: Matrix = new Matrix();
   private static _tempBoundBox: BoundingBox = new BoundingBox();
 
-  private _anchorType: AnchorType = AnchorType.Pivot;
-  private _coordinateType: CoordinateType = CoordinateType.Local;
-  private _dirtyFlag: GroupDirtyFlag = GroupDirtyFlag.All;
-  // 组内节点数组
+  // Group 内 Entity 数组
   private _entities: Entity[] = [];
-  // 组内节点的 local 矩阵映射
-  private _localMatrixMap: Record<number, Matrix> = {};
-  private _worldDirtyListenerMap: Record<number, ListenerUpdateFlag> = {};
-  // 该组的世界矩阵
+  // Group 的世界矩阵
   private _worldMatrix: Matrix = new Matrix();
-  private _worldPosition: Vector3 = new Vector3();
+  // 锚点类(Pivot, Center)
+  private _anchorType: AnchorType = AnchorType.Pivot;
+  // 坐标系类型(Local, Global)
+  private _coordinateType: CoordinateType = CoordinateType.Local;
+
+  private _dirtyFlag: GroupDirtyFlag = GroupDirtyFlag.All;
 
   /**
    * 获取锚点类型
@@ -64,108 +63,71 @@ export class Group {
   }
 
   /**
-   * 获取组的位姿信息
+   * 获取 group 在世界空间的位姿
+   * @param out
+   * @returns
    */
-  public get worldMatrix(): Matrix {
+  public getWorldMatrix(out?: Matrix): Boolean {
     const { _entities: entities } = this;
     if (entities.length <= 0) {
-      return this._worldMatrix;
+      console.log("No entity in group");
+      return false;
     } else {
       /** Update anchor. */
-      const { _worldMatrix: worldMatrix } = this;
-      if (this._dirtyFlag & GroupDirtyFlag.AnchorDirty) {
-        const { _tempVec30: tempVec3 } = Group;
-        const { elements: e } = worldMatrix;
-        // 更新锚点
-        switch (this._anchorType) {
-          case AnchorType.Center:
-            // 计算得到中点的世界坐标
-            this.getCenter(tempVec3);
-            (e[12] = tempVec3.x), (e[13] = tempVec3.y), (e[14] = tempVec3.z);
-            break;
-          case AnchorType.Pivot:
-            // 与 unity 操作相同，以第一个 entity 为参照
-            const worldE = entities[0].transform.worldMatrix.elements;
-            (e[12] = worldE[12]), (e[13] = worldE[13]), (e[14] = worldE[14]);
-          default:
-            break;
-        }
-      }
-
+      this._updateAnchor();
       /** Update coordinate. */
-      if (this._dirtyFlag & GroupDirtyFlag.CoordinateDirty) {
-        const { elements: e } = worldMatrix;
-        switch (this._coordinateType) {
-          case CoordinateType.Local:
-            // 与 unity 操作相同，以第一个 entity 为参照
-            const worldE = entities[0].transform.worldMatrix.elements;
-            (e[0] = worldE[0]), (e[4] = worldE[4]), (e[8] = worldE[8]);
-            (e[1] = worldE[1]), (e[5] = worldE[5]), (e[9] = worldE[9]);
-            (e[2] = worldE[2]), (e[6] = worldE[6]), (e[10] = worldE[10]);
-            break;
-          case CoordinateType.Global:
-            (e[0] = 1), (e[4] = 0), (e[8] = 0);
-            (e[1] = 0), (e[5] = 1), (e[9] = 0);
-            (e[2] = 0), (e[6] = 0), (e[10] = 1);
-            break;
-          default:
-            break;
-        }
-      }
+      this._updateCoordinate();
+      out && out.copyFrom(this._worldMatrix);
+      return true;
+    }
+  }
 
-      /** Update dirty flag. */
-      if (this._dirtyFlag !== GroupDirtyFlag.None) {
-        const { _tempMat: tempMat } = Group;
-        // 世界矩阵的逆，用来求 local 矩阵
-        Matrix.invert(worldMatrix, tempMat);
-        const { _localMatrixMap: localMatrixMap } = this;
+  /**
+   * 设置 group 在世界空间中的位姿
+   * @param value
+   */
+  public setWorldMatrix(value: Matrix) {
+    if (this.getWorldMatrix()) {
+      const { _worldMatrix: worldMatrix } = this;
+      if (!Matrix.equals(worldMatrix, value)) {
+        // Old worldMatrix.
+        const { _tempMat0: groupWorldInvMat, _tempMat1: nodeMat } = Group;
+        Matrix.invert(worldMatrix, groupWorldInvMat);
+        // New worldMatrix.
+        worldMatrix.copyFrom(value);
+        const { _entities: entities } = this;
         // 更新 entities 内所有物体的坐标
         for (let i = entities.length - 1; i >= 0; i--) {
-          const entity = entities[i];
-          const entityInstanceID = entity.instanceId;
-          if (!localMatrixMap[entityInstanceID]) {
-            localMatrixMap[entityInstanceID] = new Matrix();
-          }
-          Matrix.multiply(tempMat, entity.transform.worldMatrix, localMatrixMap[entityInstanceID]);
+          const nodeTrans = entities[i].transform;
+          // Get entity's localMatrix.
+          Matrix.multiply(groupWorldInvMat, nodeTrans.worldMatrix, nodeMat);
+          // Update entity's worldMatrix.
+          Matrix.multiply(worldMatrix, nodeMat, nodeMat);
+          nodeTrans.worldMatrix = nodeMat;
         }
-        this._dirtyFlag = GroupDirtyFlag.None;
       }
-      return worldMatrix;
+      /** 主动设置的时候，清理脏标记 */
+      this._dirtyFlag = GroupDirtyFlag.None;
     }
   }
 
-  public set worldQuat(value: Quaternion) {
-    const { _tempVec30, _tempVec31 } = Group;
-    const tempMat = this.worldMatrix.clone();
-    tempMat.decompose(_tempVec30, Group._tempQuat, _tempVec31);
-    Matrix.affineTransformation(_tempVec31, value, _tempVec30, tempMat);
-    this.worldMatrix = tempMat;
+  public setTranslation(value: Vector3) {
+    if (this.getWorldMatrix()) {
+    }
   }
 
-  public set worldMatrix(value: Matrix) {
-    const { _tempMat: tempMat, _tempMat1: tempMat1 } = Group;
-    const { _worldMatrix: worldMatrix } = this;
-    if (worldMatrix === value || !Matrix.equals(worldMatrix, value)) {
-      if (worldMatrix !== value) {
-        worldMatrix.copyFrom(value);
-      }
-
-      const { _entities: entities, _localMatrixMap: localMatrixMap } = this;
-      // 更新 entities 内所有物体的坐标
-      for (let i = entities.length - 1; i >= 0; i--) {
-        const entity = entities[i];
-        const entityInstanceID = entity.instanceId;
-        const localMatrix = localMatrixMap[entityInstanceID];
-        if (localMatrix) {
-          Matrix.multiply(worldMatrix, localMatrix, tempMat);
-          entity.transform.worldMatrix = tempMat;
-        } else {
-          console.log("Cant find localMatrix.");
-        }
-      }
+  public setWorldQuat(value: Quaternion) {
+    const { _tempVec30, _tempVec31, _tempMat0 } = Group;
+    if (this.getWorldMatrix(_tempMat0)) {
+      const newMat = new Matrix();
+      Matrix.affineTransformation(
+        _tempMat0.getScaling(_tempVec30),
+        value,
+        _tempMat0.getTranslation(_tempVec31),
+        newMat
+      );
+      this.setWorldMatrix(newMat);
     }
-    /** 主动设置的时候，清理脏标记 */
-    this._dirtyFlag = GroupDirtyFlag.None;
   }
 
   /**
@@ -173,7 +135,7 @@ export class Group {
    * @param addEntities
    */
   public addEntity(addEntities: Entity[]): void {
-    const { _entities: entities, _localMatrixMap: localMatrixMap } = this;
+    const { _entities: entities } = this;
     for (let i = addEntities.length - 1; i >= 0; i--) {
       // 1.不存在已有的组内
       // 2.不是任意点的子节点
@@ -200,32 +162,6 @@ export class Group {
       }
       if (canAdd) {
         entities.push(entity);
-        // entity 的坐标发生改变的时候 更新 localMatrix
-        const listener = entity.transform._registerWorldChangeListenser();
-        listener.listener = () => {
-          ((e: Entity) => {
-            const entityInstanceID = e.instanceId;
-            const localMatrix = localMatrixMap[entityInstanceID];
-            if (localMatrix) {
-              const { _tempMat: tempMat } = Group;
-              Matrix.invert(this.worldMatrix, tempMat);
-              Matrix.multiply(tempMat, entity.transform.worldMatrix, localMatrix);
-              switch (this._anchorType) {
-                case AnchorType.Center:
-                  this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
-                  break;
-                case AnchorType.Pivot:
-                  if (this._entities.indexOf(entity) === 0) {
-                    this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
-                  }
-                  break;
-                default:
-                  break;
-              }
-            }
-          })(entity);
-        };
-        this._worldDirtyListenerMap[entity.instanceId] = listener;
         switch (this._anchorType) {
           case AnchorType.Center:
             this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
@@ -243,20 +179,16 @@ export class Group {
   }
 
   /**
-   * 移除节点
+   * 移除 group 中的 entity
    * @param delEntities
    */
   public delEntity(delEntities: Entity[]): void {
-    const { _entities: entities, _worldDirtyListenerMap } = this;
+    const { _entities: entities } = this;
     for (let i = delEntities.length - 1; i >= 0; i--) {
       const delEntity = delEntities[i];
       const index = entities.indexOf(delEntity);
       if (index >= 0) {
         entities.splice(index, 1);
-        if (_worldDirtyListenerMap[delEntity.instanceId]) {
-          _worldDirtyListenerMap[delEntity.instanceId].destroy();
-          delete _worldDirtyListenerMap[delEntity.instanceId];
-        }
         switch (this._anchorType) {
           case AnchorType.Center:
             this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
@@ -273,50 +205,41 @@ export class Group {
     }
   }
 
-  public getNormalizedMatrix(out: Matrix, s: number = 1): void {
-    const { elements: ele } = this.worldMatrix;
-    const { elements: gE } = out;
-    let fs = s / Math.sqrt(ele[0] * ele[0] + ele[1] * ele[1] + ele[2] * ele[2]);
-    (gE[0] = ele[0] * fs), (gE[1] = ele[1] * fs), (gE[2] = ele[2] * fs);
-    fs = s / Math.sqrt(ele[4] * ele[4] + ele[5] * ele[5] + ele[6] * ele[6]);
-    (gE[4] = ele[4] * fs), (gE[5] = ele[5] * fs), (gE[6] = ele[6] * fs);
-    fs = s / Math.sqrt(ele[8] * ele[8] + ele[9] * ele[9] + ele[10] * ele[10]);
-    (gE[8] = ele[8] * fs), (gE[9] = ele[9] * fs), (gE[10] = ele[10] * fs);
-    (gE[12] = ele[12]), (gE[13] = ele[13]), (gE[14] = ele[14]);
-  }
-
   /**
-   * 获取中点的世界坐标
-   * ps: 计算量较大
-   * @param out - 中心点的世界坐标
+   * 拿到 group 在世界空间中的旋转和位移，并增加一个缩放
+   * @param out
+   * @param s
    */
-  public getCenter(out: Vector3): void {
-    // 拿所有 entity 形成的包围盒的中点
-    const { _tempBoundBox: tempBoundBox } = Group;
-    tempBoundBox.min.set(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
-    tempBoundBox.max.set(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
-    const { _entities: entities } = this;
-    for (let i = entities.length - 1; i >= 0; i--) {
-      const entity = entities[i];
-      const renderers = entity.getComponentsIncludeChildren(Renderer, []);
-      for (let j = renderers.length - 1; j >= 0; j--) {
-        const renderer = renderers[j];
-        if (renderer.entity.isActiveInHierarchy) {
-          BoundingBox.merge(tempBoundBox, renderers[j].bounds, tempBoundBox);
-        }
-      }
+  public getNormalizedMatrix(out: Matrix, s: number = 1): boolean {
+    /** Update worldMatrix. */
+    if (this.getWorldMatrix()) {
+      const { elements: ele } = this._worldMatrix;
+      const { elements: gE } = out;
+      let fs = s / Math.sqrt(ele[0] * ele[0] + ele[1] * ele[1] + ele[2] * ele[2]);
+      (gE[0] = ele[0] * fs), (gE[1] = ele[1] * fs), (gE[2] = ele[2] * fs);
+      fs = s / Math.sqrt(ele[4] * ele[4] + ele[5] * ele[5] + ele[6] * ele[6]);
+      (gE[4] = ele[4] * fs), (gE[5] = ele[5] * fs), (gE[6] = ele[6] * fs);
+      fs = s / Math.sqrt(ele[8] * ele[8] + ele[9] * ele[9] + ele[10] * ele[10]);
+      (gE[8] = ele[8] * fs), (gE[9] = ele[9] * fs), (gE[10] = ele[10] * fs);
+      (gE[12] = ele[12]), (gE[13] = ele[13]), (gE[14] = ele[14]);
+      return true;
+    } else {
+      return false;
     }
-    tempBoundBox.getCenter(out);
   }
 
   /**
-   * 获取组的世界坐标
+   * 获取 Group 在世界空间中的位移
    */
-  public get worldPosition(): Vector3 {
-    const { _worldPosition: WP } = this;
-    const { elements: e } = this.worldMatrix;
-    (WP.x = e[12]), (WP.y = e[13]), (WP.z = e[14]);
-    return WP;
+  public getWorldPosition(out: Vector3): boolean {
+    if (this.getWorldMatrix()) {
+      const { elements: e } = this._worldMatrix;
+      (out.x = e[12]), (out.y = e[13]), (out.z = e[14]);
+      return true;
+    } else {
+      console.log("No entity in group");
+      return false;
+    }
   }
 
   /**
@@ -342,6 +265,72 @@ export class Group {
       }
     }
     return false;
+  }
+
+  private _updateAnchor() {
+    if (this._dirtyFlag & GroupDirtyFlag.AnchorDirty) {
+      const { _worldMatrix: worldMatrix } = this;
+      const { _tempVec30: tempVec3 } = Group;
+      const { elements: e } = worldMatrix;
+      // 更新锚点
+      switch (this._anchorType) {
+        case AnchorType.Center:
+          // 计算得到中点的世界坐标
+          this._getCenter(tempVec3);
+          (e[12] = tempVec3.x), (e[13] = tempVec3.y), (e[14] = tempVec3.z);
+          break;
+        case AnchorType.Pivot:
+          // 与 unity 操作相同，以第一个 entity 为参照
+          const worldE = this._entities[0].transform.worldMatrix.elements;
+          (e[12] = worldE[12]), (e[13] = worldE[13]), (e[14] = worldE[14]);
+        default:
+          break;
+      }
+      this._dirtyFlag &= ~GroupDirtyFlag.AnchorDirty;
+    }
+  }
+
+  private _updateCoordinate() {
+    /** Update coordinate. */
+    if (this._dirtyFlag & GroupDirtyFlag.CoordinateDirty) {
+      const { elements: e } = this._worldMatrix;
+      switch (this._coordinateType) {
+        case CoordinateType.Local:
+          // 与 unity 操作相同，以第一个 entity 为参照
+          const worldE = this._entities[0].transform.worldMatrix.elements;
+          (e[0] = worldE[0]), (e[4] = worldE[4]), (e[8] = worldE[8]);
+          (e[1] = worldE[1]), (e[5] = worldE[5]), (e[9] = worldE[9]);
+          (e[2] = worldE[2]), (e[6] = worldE[6]), (e[10] = worldE[10]);
+          break;
+        case CoordinateType.Global:
+          (e[0] = 1), (e[4] = 0), (e[8] = 0);
+          (e[1] = 0), (e[5] = 1), (e[9] = 0);
+          (e[2] = 0), (e[6] = 0), (e[10] = 1);
+          break;
+        default:
+          break;
+      }
+      this._dirtyFlag &= ~GroupDirtyFlag.CoordinateDirty;
+    }
+  }
+
+  private _getCenter(out: Vector3): void {
+    // 拿所有 entity 形成的包围盒的中点
+    const { _tempBoundBox: tempBoundBox } = Group;
+    tempBoundBox.min.set(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+    tempBoundBox.max.set(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+    const { _entities: entities } = this;
+    for (let i = entities.length - 1; i >= 0; i--) {
+      const entity = entities[i];
+      const renderers = entity.getComponentsIncludeChildren(Renderer, []);
+      for (let j = renderers.length - 1; j >= 0; j--) {
+        const renderer = renderers[j];
+        if (renderer.entity.isActiveInHierarchy) {
+          BoundingBox.merge(tempBoundBox, renderers[j].bounds, tempBoundBox);
+        }
+      }
+    }
+    tempBoundBox.getCenter(out);
   }
 }
 

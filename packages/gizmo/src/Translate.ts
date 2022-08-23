@@ -9,8 +9,8 @@ import { utils } from "./Utils";
 export class TranslateControl extends Component implements GizmoComponent {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
-  private _camera: Camera = null;
-  private _group: Group = null;
+  private _camera: Camera;
+  private _group: Group;
   private _translateAxisComponent: {
     x: Axis;
     y: Axis;
@@ -37,6 +37,7 @@ export class TranslateControl extends Component implements GizmoComponent {
   private _tempVec: Vector3 = new Vector3();
   private _tempVec1: Vector3 = new Vector3();
   private _tempVec2: Vector3 = new Vector3();
+  private _tempMat: Matrix = new Matrix();
 
   private _planePoint1: Vector3 = new Vector3();
   private _planePoint2: Vector3 = new Vector3();
@@ -156,7 +157,7 @@ export class TranslateControl extends Component implements GizmoComponent {
   onMoveStart(ray: Ray, axisName: string) {
     this._selectedAxisName = axisName;
     // get gizmo start worldPosition
-    this._startPosition.copyFrom(this._group.worldPosition);
+    this._group.getWorldPosition(this._startPosition);
 
     // get start point
     this._getHitPlane();
@@ -180,12 +181,13 @@ export class TranslateControl extends Component implements GizmoComponent {
     ray.getPoint(tempDist, this._movePoint);
 
     // align movement
-    const matrix = this._group.worldMatrix;
-    const translation = this._addWithAxis();
-    matrix.elements[12] = translation.x;
-    matrix.elements[13] = translation.y;
-    matrix.elements[14] = translation.z;
-    this._group.worldMatrix = matrix;
+    const { _tempMat: groupWorldMat } = this;
+    if (this._group.getWorldMatrix(groupWorldMat)) {
+      const { elements: e } = groupWorldMat;
+      const trans = this._addWithAxis();
+      (e[12] = trans.x), (e[13] = trans.y), (e[14] = trans.z);
+      this._group.setWorldMatrix(groupWorldMat);
+    }
   }
 
   onMoveEnd() {
@@ -199,13 +201,13 @@ export class TranslateControl extends Component implements GizmoComponent {
   }
 
   private _getHitPlane() {
-    const worldMatrix = this._group.worldMatrix;
-    const { _planePoint1, _planePoint2, _planePoint3 } = this;
-    _planePoint1.copyFrom(this._group.worldPosition);
+    const { _planePoint1, _planePoint2, _planePoint3, _tempMat } = this;
+    this._group.getWorldMatrix(_tempMat);
+    this._group.getWorldPosition(_planePoint1);
 
     // get endPoint for plane
     const currentAxis = axisVector[this._selectedAxisName];
-    Vector3.transformToVec3(currentAxis, worldMatrix, _planePoint2);
+    Vector3.transformToVec3(currentAxis, _tempMat, _planePoint2);
 
     // get topPoint for plane
     const cameraPos = this._camera.entity.transform.worldPosition;
@@ -220,15 +222,15 @@ export class TranslateControl extends Component implements GizmoComponent {
 
   /** calculate movement */
   private _addWithAxis(): Vector3 {
-    const { _tempVec, _tempVec1, _tempVec2 } = this;
+    const { _tempVec, _tempVec1, _tempVec2, _tempMat } = this;
     Vector3.subtract(this._movePoint, this._startPoint, _tempVec);
     const currentAxisIndices = axisIndices[this._selectedAxisName];
     _tempVec1.set(0, 0, 0);
-    const worldMatrix = this._group.worldMatrix;
+    this._group.getWorldMatrix(_tempMat);
     for (let i = currentAxisIndices.length - 1; i >= 0; i--) {
       const elementIndex = currentAxisIndices[i];
       const currentAxis = axisVector[elementIndex];
-      Vector3.transformNormal(currentAxis, worldMatrix, _tempVec2);
+      Vector3.transformNormal(currentAxis, _tempMat, _tempVec2);
       // get move distance along this axis
       const moveDist = Vector3.dot(_tempVec, _tempVec2);
       _tempVec2.normalize().scale(moveDist);

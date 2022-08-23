@@ -34,6 +34,7 @@ export class ScaleControl extends Component implements GizmoComponent {
   private _selectedAxisName: string;
   private _startMatrix: Matrix = new Matrix();
   private _startPoint: Vector3 = new Vector3();
+  private _tempMat: Matrix = new Matrix();
   private _movePoint = new Vector3();
   private _plane: Plane = new Plane();
 
@@ -165,7 +166,7 @@ export class ScaleControl extends Component implements GizmoComponent {
 
   onMoveStart(ray: Ray, axisName: string) {
     this._selectedAxisName = axisName;
-    this._startMatrix.copyFrom(this._group.worldMatrix);
+    this._group.getWorldMatrix(this._startMatrix);
 
     // get start point
     this._getHitPlane();
@@ -199,7 +200,7 @@ export class ScaleControl extends Component implements GizmoComponent {
     // align movement
     const matrix = this._startMatrix;
     Matrix.multiply(matrix, mat, mat);
-    this._group.worldMatrix = mat;
+    this._group.setWorldMatrix(mat);
   }
 
   onMoveEnd() {
@@ -223,13 +224,14 @@ export class ScaleControl extends Component implements GizmoComponent {
   }
 
   private _getHitPlane() {
-    const worldMatrix = this._group.worldMatrix;
+    this._group.getWorldMatrix(this._tempMat);
+
     const { _planePoint1, _planePoint2, _planePoint3 } = this;
-    _planePoint1.copyFrom(this._group.worldPosition);
+    this._group.getWorldPosition(_planePoint1);
 
     // get endPoint for plane
     const currentAxis = axisVector[this._selectedAxisName];
-    Vector3.transformToVec3(currentAxis, worldMatrix, _planePoint2);
+    Vector3.transformToVec3(currentAxis, this._tempMat, _planePoint2);
 
     // get topPoint for plane
     const cameraPos = this._camera.entity.transform.worldPosition;

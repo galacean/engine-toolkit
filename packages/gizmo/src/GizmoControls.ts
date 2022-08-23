@@ -1,5 +1,4 @@
-import { Camera, Entity, Matrix, Ray, MathUtil, Component, Vector3 } from "oasis-engine";
-
+import { Camera, Entity, Matrix, Ray, Component, Vector3 } from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
@@ -159,13 +158,8 @@ export class GizmoControls extends Component {
       const currentPosition = this.entity.transform.position;
       s = Vector3.distance(cameraPosition, currentPosition) * this._scaleFactor;
     }
-    if (MathUtil.equals(this._s, s)) {
-      s = this._s;
-    } else {
-      this._s = s;
-    }
     // 需要 group 归一化后的世界矩阵
-    this._group.getNormalizedMatrix(this._tempMatrix);
+    this._group.getNormalizedMatrix(this._tempMatrix, s);
     this.entity.transform.worldMatrix = this._tempMatrix;
     if (this._isStarted && this.gizmoState === GizmoState.rotate) {
       this._gizmoMap[GizmoState.rotate].component.onMyLateUpdate();

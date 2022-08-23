@@ -202,21 +202,19 @@ export class RotateControl extends Component implements GizmoComponent {
     const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent?.unLight && currComponent.unLight();
-
     this._selectedAxisName = null;
   }
 
   onMoveStart(ray: Ray, axisName: string) {
     this._selectedAxisName = axisName;
-    const { worldPosition, worldMatrix } = this._group;
-    this._startMatrix.copyFrom(worldMatrix);
-    this._rotateAxis.copyFrom(axisVector[axisName]);
-    this._group.getNormalizedMatrix(this._startNormalizedMatrix);
+    const { _group, _rotateAxis, _startQuat, _startPointUnit } = this;
+    _group.getWorldMatrix(this._startMatrix);
+    _group.getWorldPosition(this._startPosition);
+    _group.getNormalizedMatrix(this._startNormalizedMatrix);
+    _rotateAxis.copyFrom(axisVector[axisName]);
     // rotate axis normal
-    this._startNormalizedMatrix.getRotation(this._startQuat);
-    Vector3.transformByQuat(this._rotateAxis, this._startQuat, this._rotateAxis);
-    // selected entity position & rotation when start
-    this._startPosition.copyFrom(worldPosition);
+    this._startNormalizedMatrix.getRotation(_startQuat);
+    Vector3.transformByQuat(_rotateAxis, _startQuat, _rotateAxis);
 
     // selected gizmo axis change into full circle
     this.rotateControlMap[axisName].axisMaterial.posCutOff = false;
@@ -230,12 +228,11 @@ export class RotateControl extends Component implements GizmoComponent {
       }
     }
 
-    const { _startPointUnit: startPointUnit } = this;
     // get start point
-    this._getRotateHitPointFromRay(ray, startPointUnit);
+    this._getRotateHitPointFromRay(ray, _startPointUnit);
     const tempMat = this._startNormalizedMatrix.clone();
-    startPointUnit.transformToVec3(tempMat.invert());
-    startPointUnit.normalize().scale(utils.rotateCircleRadius);
+    _startPointUnit.transformToVec3(tempMat.invert());
+    _startPointUnit.normalize().scale(utils.rotateCircleRadius);
 
     // init line and plane
     this._startLineHelperEntity.isActive = true;
@@ -244,14 +241,14 @@ export class RotateControl extends Component implements GizmoComponent {
 
     this.startLineMesh.update([
       [0, 0, 0],
-      [startPointUnit.x, startPointUnit.y, startPointUnit.z]
+      [_startPointUnit.x, _startPointUnit.y, _startPointUnit.z]
     ]);
     this.endLineMesh.update([
       [0, 0, 0],
-      [startPointUnit.x, startPointUnit.y, startPointUnit.z]
+      [_startPointUnit.x, _startPointUnit.y, _startPointUnit.z]
     ]);
     this.rotateHelperPlaneMesh.update({
-      startPoint: this._startPointUnit,
+      startPoint: _startPointUnit,
       normal: axisVector[axisName],
       thetaLength: 0
     });
@@ -292,14 +289,12 @@ export class RotateControl extends Component implements GizmoComponent {
     const _tempQuat = new Quaternion();
     Matrix.rotateAxisAngle(this._startNormalizedMatrix, localAxis, this._finalRad, _tempMat);
     _tempMat.getRotation(_tempQuat);
-    // Matrix.rotateAxisAngle(this._startMatrix, localAxis, this._finalRad, _tempMat);
-    this._group.worldQuat = _tempQuat;
+    this._group.setWorldQuat(_tempQuat);
   }
 
   onMyLateUpdate() {
-    this._startLineHelperEntity.transform.worldMatrix = this._startNormalizedMatrix;
-    // this._startLineHelperEntity.transform.worldRotationQuaternion =
-    this._rotateHelperPlaneEntity.transform.worldMatrix = this._startNormalizedMatrix;
+    this._startLineHelperEntity.transform.worldRotationQuaternion = this._startQuat;
+    this._rotateHelperPlaneEntity.transform.worldRotationQuaternion = this._startQuat;
   }
 
   onMoveEnd() {
