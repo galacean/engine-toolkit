@@ -70,7 +70,6 @@ export class Group {
   public getWorldMatrix(out?: Matrix): Boolean {
     const { _entities: entities } = this;
     if (entities.length <= 0) {
-      console.log("No entity in group");
       return false;
     } else {
       /** Update anchor. */
@@ -237,7 +236,6 @@ export class Group {
       (out.x = e[12]), (out.y = e[13]), (out.z = e[14]);
       return true;
     } else {
-      console.log("No entity in group");
       return false;
     }
   }

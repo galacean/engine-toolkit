@@ -150,7 +150,6 @@ export class GizmoControls extends Component {
     }
   }
 
-  private _s: number = 1;
   private update(): void {
     let s: number = 1;
     if (this._editorCamera) {
@@ -162,7 +161,7 @@ export class GizmoControls extends Component {
     this._group.getNormalizedMatrix(this._tempMatrix, s);
     this.entity.transform.worldMatrix = this._tempMatrix;
     if (this._isStarted && this.gizmoState === GizmoState.rotate) {
-      this._gizmoMap[GizmoState.rotate].component.onMyLateUpdate();
+      (this._gizmoMap[GizmoState.rotate].component as RotateControl).onLateUpdate();
     }
   }
 

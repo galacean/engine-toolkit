@@ -1,4 +1,4 @@
-import { Component, Entity, Ray, Vector3, Mesh, Material, Camera } from "oasis-engine";
+import { Component, Entity, Ray, Vector3, Mesh, Material, Camera, Plane } from "oasis-engine";
 
 export abstract class GizmoComponent extends Component {
   gizmoEntity: Entity;
@@ -28,6 +28,12 @@ export const axisVector: { [key: string]: Vector3 } = {
   yz: new Vector3(0, 1, 1),
   xz: new Vector3(1, 0, 1),
   xyz: new Vector3(1, 1, 1)
+};
+
+export const axisPlane: { [key: string]: Plane } = {
+  x: new Plane(new Vector3(1, 0, 0), 0),
+  y: new Plane(new Vector3(0, 1, 0), 0),
+  z: new Plane(new Vector3(0, 0, 1), 0)
 };
 
 export const axisIndices: { [key: string]: Array<string> } = {
