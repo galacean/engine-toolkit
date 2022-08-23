@@ -2,6 +2,7 @@ import {
   Camera,
   Component,
   Entity,
+  Matrix,
   MeshRenderer,
   Plane,
   Quaternion,
@@ -15,14 +16,14 @@ import { CircleMesh } from "./CircleMesh";
 import { LinesMesh } from "./LineMesh";
 import { GizmoComponent, AxisProps, axisVector } from "./Type";
 import { utils } from "./Utils";
+import { Group } from "./Group";
+import { GizmoMaterial } from "./GizmoMaterial";
 
 /** @internal */
 export class RotateControl extends Component implements GizmoComponent {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
-  private _camera: Camera = null;
-  private _selectedEntity: Entity = null;
-  private _isGlobalOrient = false;
+  private _group: Group;
 
   private rotateAxisComponent: { x: Axis; y: Axis; z: Axis };
   private rotateControlMap: {
@@ -32,20 +33,20 @@ export class RotateControl extends Component implements GizmoComponent {
   };
   private xArcLineMesh = new ArcLineMesh(this.engine, {
     radius: 1.6,
-    radialSegments: 48,
-    arc: 180
+    radialSegments: 96,
+    arc: 360
   });
 
   private yArcLineMesh = new ArcLineMesh(this.engine, {
     radius: 1.6,
-    radialSegments: 48,
-    arc: 180
+    radialSegments: 96,
+    arc: 360
   });
 
   private zArcLineMesh = new ArcLineMesh(this.engine, {
     radius: 1.6,
-    radialSegments: 48,
-    arc: 180
+    radialSegments: 96,
+    arc: 360
   });
 
   private arcLineMesh = {
@@ -84,23 +85,18 @@ export class RotateControl extends Component implements GizmoComponent {
 
   private _selectedAxisName: string;
   private _startPosition: Vector3 = new Vector3();
-  private _startQuaternion: Quaternion = new Quaternion();
-  private _gizmoStartQuat = new Quaternion();
+  private _startMatrix: Matrix = new Matrix();
+  private _startNormalizedMatrix: Matrix = new Matrix();
+  private _startQuat: Quaternion = new Quaternion();
 
   private _rotateAxis: Vector3 = new Vector3();
-  private _startPoint: Vector3 = new Vector3();
   private _startPointUnit: Vector3 = new Vector3();
-  private _movePoint = new Vector3();
   private _movePointUnit: Vector3 = new Vector3();
 
   private _tempVec: Vector3 = new Vector3();
-  private _tempVec1: Quaternion = new Quaternion();
-  private _tempVec2: Vector3 = new Vector3();
-  private _tempQuat: Quaternion = new Quaternion();
-  private _tempQuat1: Quaternion = new Quaternion();
-  private _tempQuat2: Quaternion = new Quaternion();
-  private _eyeVector: Vector3 = new Vector3();
-  private _alignVector: Vector3 = new Vector3();
+
+  private _previousRad: number = 0;
+  private _finalRad: number = 0;
 
   constructor(entity: Entity) {
     super(entity);
@@ -113,7 +109,7 @@ export class RotateControl extends Component implements GizmoComponent {
       x: {
         name: "x",
         axisMesh: [this.arcLineMesh.x],
-        axisMaterial: utils.redMaterial,
+        axisMaterial: utils.redArcMaterial,
         axisHelperMesh: [utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(0, 90, 90)],
         axisTranslation: [new Vector3(0, 0, 0)]
@@ -121,7 +117,7 @@ export class RotateControl extends Component implements GizmoComponent {
       y: {
         name: "y",
         axisMesh: [this.arcLineMesh.y],
-        axisMaterial: utils.greenMaterial,
+        axisMaterial: utils.greenArcMaterial,
         axisHelperMesh: [utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(90, 0, 0)],
         axisTranslation: [new Vector3(0, 0, 0)]
@@ -129,7 +125,7 @@ export class RotateControl extends Component implements GizmoComponent {
       z: {
         name: "z",
         axisMesh: [this.arcLineMesh.z],
-        axisMaterial: utils.blueMaterial,
+        axisMaterial: utils.blueArcMaterial,
         axisHelperMesh: [utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(0, 0, -90)],
         axisTranslation: [new Vector3(0, 0, 0)]
@@ -164,13 +160,13 @@ export class RotateControl extends Component implements GizmoComponent {
     this._gizmoRotateHelperEntity = entity.createChild("helper");
 
     // rotate start line
-    this._startLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelper");
+    this._startLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperS");
     const startHelperRenderer = this._startLineHelperEntity.addComponent(MeshRenderer);
     startHelperRenderer.mesh = this.startLineMesh;
     startHelperRenderer.setMaterial(utils.yellowMaterial);
 
     // rotate end line
-    this._endLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelper");
+    this._endLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperE");
     const endHelperRenderer = this._endLineHelperEntity.addComponent(MeshRenderer);
     endHelperRenderer.mesh = this.endLineMesh;
     endHelperRenderer.setMaterial(utils.yellowMaterial);
@@ -184,12 +180,13 @@ export class RotateControl extends Component implements GizmoComponent {
     this._rotateHelperPlaneEntity.isActive = false;
   }
 
-  initCamera(camera: Camera): void {
-    this._camera = camera;
-  }
+  initCamera(camera: Camera): void {}
 
-  onSelected(entity: Entity) {
-    this._selectedEntity = entity;
+  onSelected(value: Group) {
+    this._group = value;
+    (this.rotateControlMap["x"].axisMaterial as GizmoMaterial).posCutOff = true;
+    (this.rotateControlMap["y"].axisMaterial as GizmoMaterial).posCutOff = true;
+    (this.rotateControlMap["z"].axisMaterial as GizmoMaterial).posCutOff = true;
   }
 
   onHoverStart(axisName: string) {
@@ -211,89 +208,101 @@ export class RotateControl extends Component implements GizmoComponent {
 
   onMoveStart(ray: Ray, axisName: string) {
     this._selectedAxisName = axisName;
+    const { worldPosition, worldMatrix } = this._group;
+    this._startMatrix.copyFrom(worldMatrix);
+    this._rotateAxis.copyFrom(axisVector[axisName]);
+    this._group.getNormalizedMatrix(this._startNormalizedMatrix);
     // rotate axis normal
-    this._rotateAxis = axisVector[this._selectedAxisName].clone();
-    if (!this._isGlobalOrient) {
-      Vector3.transformByQuat(this._rotateAxis, this._selectedEntity.transform.rotationQuaternion, this._rotateAxis);
-    }
-
-    // gizmo position when start
-    this._gizmoStartQuat = this.gizmoEntity.transform.rotationQuaternion.clone();
-
+    this._startNormalizedMatrix.getRotation(this._startQuat);
+    Vector3.transformByQuat(this._rotateAxis, this._startQuat, this._rotateAxis);
     // selected entity position & rotation when start
-    this._startPosition = this._selectedEntity.transform.worldPosition.clone();
-    this._startQuaternion = this._selectedEntity.transform.rotationQuaternion.clone();
+    this._startPosition.copyFrom(worldPosition);
 
     // selected gizmo axis change into full circle
-    this.arcLineMesh[this._selectedAxisName].update(360);
+    this.rotateControlMap[axisName].axisMaterial.posCutOff = false;
     // change color
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
       const currEntity = entityArray[i];
       const currComponent = currEntity.getComponent(Axis);
-      if (currEntity.name === this._selectedAxisName) {
+      if (currEntity.name === axisName) {
         currComponent?.yellow && currComponent.yellow();
       }
     }
 
+    const { _startPointUnit: startPointUnit } = this;
     // get start point
-    this._startPoint = this._getRotateHitPointFromRay(ray);
-    Vector3.subtract(this._startPoint, this._startPosition, this._startPointUnit);
-    this._startPointUnit.normalize().scale(utils.rotateCircleRadius);
+    this._getRotateHitPointFromRay(ray, startPointUnit);
+    const tempMat = this._startNormalizedMatrix.clone();
+    startPointUnit.transformToVec3(tempMat.invert());
+    startPointUnit.normalize().scale(utils.rotateCircleRadius);
 
-    // init start line
+    // init line and plane
+    this._startLineHelperEntity.isActive = true;
+    this._endLineHelperEntity.isActive = true;
+    this._rotateHelperPlaneEntity.isActive = true;
+
     this.startLineMesh.update([
       [0, 0, 0],
-      [this._startPointUnit.x, this._startPointUnit.y, this._startPointUnit.z]
+      [startPointUnit.x, startPointUnit.y, startPointUnit.z]
     ]);
-
-    // init end line
     this.endLineMesh.update([
       [0, 0, 0],
-      [this._startPointUnit.x, this._startPointUnit.y, this._startPointUnit.z]
+      [startPointUnit.x, startPointUnit.y, startPointUnit.z]
     ]);
-
-    // init helper plane
-    this._rotateHelperPlaneEntity.isActive = true;
-    this._rotateHelperPlaneEntity.transform.worldPosition = this._startPosition;
     this.rotateHelperPlaneMesh.update({
       startPoint: this._startPointUnit,
-      normal: this._rotateAxis,
-      thetaLength: 2 * Math.PI
+      normal: axisVector[axisName],
+      thetaLength: 0
     });
   }
 
   onMove(ray: Ray): void {
-    // get move point
-    this._movePoint = this._getRotateHitPointFromRay(ray);
-    Vector3.subtract(this._movePoint, this._startPosition, this._movePointUnit);
+    // 点击点的世界坐标
+    this._getRotateHitPointFromRay(ray, this._movePointUnit);
+    const tempMat = this._startNormalizedMatrix.clone().invert();
+    const localAxis = axisVector[this._selectedAxisName];
+    // 转到局部坐标
+    this._movePointUnit.transformToVec3(tempMat);
     this._movePointUnit.normalize().scale(utils.rotateCircleRadius);
-
-    // radian between start point and move point
+    // 起始点与重点之间的角度
     const dot = Vector3.dot(this._startPointUnit, this._movePointUnit);
     Vector3.cross(this._startPointUnit, this._movePointUnit, this._tempVec);
-    const direction = Vector3.dot(this._tempVec, this._rotateAxis);
-    const rad = Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
+    const direction = Vector3.dot(this._tempVec, localAxis);
+    const currentRad = Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
+    const incrementRad = currentRad - this._previousRad;
 
-    // update end line
-    this.endLineMesh.update([
-      [0, 0, 0],
-      [this._movePointUnit.x, this._movePointUnit.y, this._movePointUnit.z]
-    ]);
+    if (this._previousRad * currentRad < 0) {
+      Math.abs(currentRad) < Math.PI / 2
+        ? (this._finalRad += incrementRad)
+        : (this._finalRad += -Math.sign(incrementRad) * (2 * Math.PI - Math.abs(incrementRad)));
+    } else {
+      this._finalRad += incrementRad;
+    }
+    this._previousRad = currentRad;
 
-    // update gizmo position
-    Quaternion.rotationAxisAngle(this._rotateAxis, rad, this._tempQuat);
-    this.gizmoEntity.transform.rotationQuaternion = this._tempQuat;
+    // update plane
+    this.rotateHelperPlaneMesh.update({
+      startPoint: this._startPointUnit,
+      normal: localAxis,
+      thetaLength: this._finalRad
+    });
 
-    // align selected entity
-    Quaternion.multiply(this._tempQuat, this._startQuaternion, this._tempVec1);
-    this._selectedEntity.transform.rotationQuaternion = this._tempVec1;
+    const _tempMat = new Matrix();
+    const _tempQuat = new Quaternion();
+    Matrix.rotateAxisAngle(this._startNormalizedMatrix, localAxis, this._finalRad, _tempMat);
+    _tempMat.getRotation(_tempQuat);
+    // Matrix.rotateAxisAngle(this._startMatrix, localAxis, this._finalRad, _tempMat);
+    this._group.worldQuat = _tempQuat;
+  }
+
+  onMyLateUpdate() {
+    this._startLineHelperEntity.transform.worldMatrix = this._startNormalizedMatrix;
+    // this._startLineHelperEntity.transform.worldRotationQuaternion =
+    this._rotateHelperPlaneEntity.transform.worldMatrix = this._startNormalizedMatrix;
   }
 
   onMoveEnd() {
-    // gizmo return to initial position
-    this.gizmoEntity.transform.rotationQuaternion = this._gizmoStartQuat;
-
     // recover axis color
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
@@ -303,62 +312,23 @@ export class RotateControl extends Component implements GizmoComponent {
     }
 
     // recover arc line
-    this.arcLineMesh[this._selectedAxisName].update(180);
+    this.rotateControlMap[this._selectedAxisName].axisMaterial.posCutOff = true;
 
     // hide helper entity
-    this.startLineMesh.update([
-      [0, 0, 0],
-      [0, 0, 0]
-    ]);
-    this.endLineMesh.update([
-      [0, 0, 0],
-      [0, 0, 0]
-    ]);
+    this._endLineHelperEntity.isActive = false;
+    this._startLineHelperEntity.isActive = false;
     this._rotateHelperPlaneEntity.isActive = false;
+
+    this._finalRad = 0;
+    this._previousRad = 0;
   }
 
-  toggleOrientation(isGlobal: boolean) {
-    this._isGlobalOrient = isGlobal;
-  }
-
-  updateTransform() {
-    this._eyeVector = this._camera.entity.transform.worldPosition.clone();
-
-    if (this._isGlobalOrient) {
-      this._tempQuat1 = this.gizmoEntity.transform.rotationQuaternion;
-      Vector3.transformByQuat(this._eyeVector, this._tempQuat1, this._alignVector);
-    } else {
-      this._tempQuat1 = this._selectedEntity.transform.worldRotationQuaternion.clone();
-      this._tempQuat2 = this._selectedEntity.transform.worldRotationQuaternion.clone();
-      Quaternion.invert(this._tempQuat2, this._tempQuat2);
-      Vector3.transformByQuat(this._eyeVector, this._tempQuat2, this._alignVector);
-    }
-
-    Quaternion.rotationX(Math.atan2(-this._alignVector.y, this._alignVector.z), this._tempQuat2);
-    Quaternion.multiply(this._tempQuat1, this._tempQuat2, this._tempQuat2);
-    this._axisX.transform.rotationQuaternion = this._tempQuat2;
-    this._helperAxisX.transform.rotationQuaternion = this._tempQuat2;
-
-    Quaternion.rotationY(Math.atan2(this._alignVector.x, this._alignVector.z), this._tempQuat2);
-    Quaternion.multiply(this._tempQuat1, this._tempQuat2, this._tempQuat2);
-    this._axisY.transform.rotationQuaternion = this._tempQuat2;
-    this._helperAxisY.transform.rotationQuaternion = this._tempQuat2;
-
-    Quaternion.rotationZ(Math.atan2(this._alignVector.y, this._alignVector.x), this._tempQuat2);
-    Quaternion.multiply(this._tempQuat1, this._tempQuat2, this._tempQuat2);
-    this._axisZ.transform.rotationQuaternion = this._tempQuat2;
-    this._helperAxisZ.transform.rotationQuaternion = this._tempQuat2;
-  }
-
-  private _getRotateHitPointFromRay(ray: Ray) {
+  private _getRotateHitPointFromRay(ray: Ray, out: Vector3) {
     // hit plane
     const plane = new Plane(
       this._rotateAxis,
       -Vector3.dot(this._rotateAxis, this._startPosition) / this._rotateAxis.length()
     );
-
-    const tempDist = ray.intersectPlane(plane);
-    ray.getPoint(tempDist, this._tempVec2);
-    return this._tempVec2;
+    ray.getPoint(ray.intersectPlane(plane), out);
   }
 }

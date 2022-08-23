@@ -1,4 +1,4 @@
-import { Camera, Entity, Ray, Script, Vector2, Vector3 } from "oasis-engine";
+import { Camera, Entity, Matrix, Ray, MathUtil, Component, Vector3 } from "oasis-engine";
 
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -6,24 +6,24 @@ import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { utils } from "./Utils";
 import { GizmoState } from "./enums/GizmoState";
+import { AnchorType, CoordinateType, Group } from "./Group";
 
 /**
  * Gizmo controls, including translate, rotate, scale
  */
-export class GizmoControls extends Script {
+export class GizmoControls extends Component {
   gizmoState: GizmoState = GizmoState.translate;
 
   private _isStarted = false;
   private _isHovered = false;
   private _scaleFactor = 0.05773502691896257;
   private _gizmoMap: Record<string, { entity: Entity; component: GizmoComponent }> = {};
-  private _entityTransformChangeFlag: any;
   private _editorCamera: Camera;
-  private _selectedEntity: Entity;
   private _selectedAxisName: string;
-
+  private _group: Group = new Group();
   private _tempRay: Ray = new Ray();
   private _tempRay2: Ray = new Ray();
+  private _tempMatrix: Matrix = new Matrix();
 
   constructor(entity: Entity) {
     super(entity);
@@ -46,13 +46,19 @@ export class GizmoControls extends Script {
     Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.initCamera(camera));
   }
   /**
-   * toggle gizmo orientation mode
+   * toggle gizmo orientation type
    * @param isGlobal - true if orientation is global, false if orientation is local
    */
   onToggleGizmoOrient(isGlobal: boolean) {
-    Object.values(this._gizmoMap).forEach(
-      (gizmo) => gizmo.component.toggleOrientation && gizmo.component.toggleOrientation(isGlobal)
-    );
+    this._group.coordinateType = isGlobal ? CoordinateType.Global : CoordinateType.Local;
+  }
+
+  /**
+   * toggle gizmo anchor type
+   * @param isGlobal - true if anchor is center, false if anchor is pivot
+   */
+  onToggleGizmoAnchor(isCenter: boolean) {
+    this._group.anchorType = isCenter ? AnchorType.Center : AnchorType.Pivot;
   }
 
   /**
@@ -60,13 +66,12 @@ export class GizmoControls extends Script {
    * @param targetState - gizmo new state
    */
   onGizmoChange(targetState: GizmoState) {
-    Object.values(this._gizmoMap).forEach((gizmo) => (gizmo.entity.isActive = false));
     this.gizmoState = targetState;
-    if (targetState) {
-      this._gizmoMap[targetState].entity.isActive = true;
-      if (this._selectedEntity) {
-        Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(this._selectedEntity));
-      }
+    const { _gizmoMap: gizmoMap } = this;
+    const states = Object.keys(gizmoMap);
+    for (let i = states.length - 1; i >= 0; i--) {
+      const state = states[i];
+      gizmoMap[state].entity.isActive = targetState === state;
     }
   }
 
@@ -75,16 +80,14 @@ export class GizmoControls extends Script {
    * @param entity - the selected entity, could be empty
    */
   onEntitySelected(entity: Entity | null) {
-    if (this._entityTransformChangeFlag) {
-      this._entityTransformChangeFlag.destroy();
-    }
-    this._selectedEntity = entity;
+    /** 目前是单选，所以清空之前选中的物体 */
+    const { _group: group } = this;
+    group.reset();
     if (!entity) {
-      this._entityTransformChangeFlag = null;
       return;
     }
-    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(entity));
-    this._entityTransformChangeFlag = entity.transform.registerWorldChangeFlag();
+    group.addEntity([entity]);
+    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(group));
   }
 
   /**
@@ -113,12 +116,11 @@ export class GizmoControls extends Script {
   triggerGizmoStart(axisName: string) {
     this._isStarted = true;
     this._selectedAxisName = axisName;
-    const pointer = this._selectedEntity.engine.inputManager.pointers[0];
-    if (pointer) {
-      const x = pointer.position.x;
-      const y = pointer.position.y;
-      this._editorCamera.screenPointToRay(new Vector2(x, y), this._tempRay);
-      this._gizmoMap[this.gizmoState].component.onMoveStart(this._tempRay, this._selectedAxisName);
+    const pointerPosition = this.engine.inputManager.pointerPosition;
+    if (pointerPosition) {
+      const { _tempRay } = this;
+      this._editorCamera.screenPointToRay(pointerPosition, _tempRay);
+      this._gizmoMap[this.gizmoState].component.onMoveStart(_tempRay, this._selectedAxisName);
     }
   }
   /**
@@ -126,11 +128,9 @@ export class GizmoControls extends Script {
    */
   onGizmoMove() {
     if (this._isStarted) {
-      const pointer = this._selectedEntity.engine.inputManager.pointers[0];
-      if (pointer) {
-        const x = pointer.position.x;
-        const y = pointer.position.y;
-        this._editorCamera.screenPointToRay(new Vector2(x, y), this._tempRay2);
+      const pointerPosition = this.engine.inputManager.pointerPosition;
+      if (pointerPosition) {
+        this._editorCamera.screenPointToRay(pointerPosition, this._tempRay2);
         this._gizmoMap[this.gizmoState].component.onMove(this._tempRay2);
       }
     }
@@ -142,29 +142,33 @@ export class GizmoControls extends Script {
   triggerGizmoEnd() {
     if (this._isStarted) {
       this._gizmoMap[this.gizmoState].component.onMoveEnd();
+      if (this.gizmoState === GizmoState.rotate && this._group.coordinateType === CoordinateType.Global) {
+        // 如果是旋转且为世界参考坐标，需要更新一下
+        this._group.coordinateType = CoordinateType.Local;
+        this._group.coordinateType = CoordinateType.Global;
+      }
       this._isStarted = false;
     }
   }
 
-  /** @internal */
-  onUpdate(deltaTime: number): void {
-    if (!this._entityTransformChangeFlag) {
-      return;
-    }
-    if (this._entityTransformChangeFlag.flag) {
-      this.entity.transform.worldPosition = this._selectedEntity.transform.worldPosition;
-      if (this.gizmoState === GizmoState.rotate) {
-        // @ts-ignore
-        this._gizmoMap[this.gizmoState].component.updateTransform();
-      }
-    }
-
+  private _s: number = 1;
+  private update(): void {
+    let s: number = 1;
     if (this._editorCamera) {
       const cameraPosition = this._editorCamera.entity.transform.position;
       const currentPosition = this.entity.transform.position;
-      const len = Vector3.distance(cameraPosition, currentPosition);
-      const scale = len * this._scaleFactor;
-      this.entity.transform.setScale(scale, scale, scale);
+      s = Vector3.distance(cameraPosition, currentPosition) * this._scaleFactor;
+    }
+    if (MathUtil.equals(this._s, s)) {
+      s = this._s;
+    } else {
+      this._s = s;
+    }
+    // 需要 group 归一化后的世界矩阵
+    this._group.getNormalizedMatrix(this._tempMatrix);
+    this.entity.transform.worldMatrix = this._tempMatrix;
+    if (this._isStarted && this.gizmoState === GizmoState.rotate) {
+      this._gizmoMap[GizmoState.rotate].component.onMyLateUpdate();
     }
   }
 

@@ -4,10 +4,10 @@ export abstract class GizmoComponent extends Component {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
 
-  // Get scene camera when init gizmo.  
+  // Get scene camera when init gizmo.
   initCamera?(camera: Camera): void;
   // Called when an entity is selected.
-  onSelected?(entity: Entity): void;
+  onSelected?(entity: Entity | any): void;
   // Called when pointer enters gizmo.
   onHoverStart?(axisName: string): void;
   // Called when pointer leaves gizmo.
@@ -18,8 +18,6 @@ export abstract class GizmoComponent extends Component {
   onMove?(ray: Ray): void;
   // Called when gizmo movement ends.
   onMoveEnd?(): void;
-  // Called when gizmo orientation changes.
-  toggleOrientation?(isGlobal: boolean): void;
 }
 
 export const axisVector: { [key: string]: Vector3 } = {

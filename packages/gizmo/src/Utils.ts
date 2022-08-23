@@ -1,15 +1,18 @@
 import { Material, Mesh, Engine, Vector4, PrimitiveMesh } from "oasis-engine";
 import { ArcLineMesh } from "./ArcLineMesh";
+import { GizmoMaterial } from "./GizmoMaterial";
 import { LinesMesh } from "./LineMesh";
-import { createMeshMaterial } from "./MeshMaterial";
 
 class Utils {
   public redMaterial: Material;
   public lightRedMaterial: Material;
+  public redArcMaterial: Material;
   public greenMaterial: Material;
   public lightGreenMaterial: Material;
+  public greenArcMaterial: Material;
   public blueMaterial: Material;
   public lightBlueMaterial: Material;
+  public blueArcMaterial: Material;
   public yellowMaterial: Material;
 
   public greyMaterial: Material;
@@ -38,95 +41,81 @@ class Utils {
   public axisEndCubeMesh: Mesh;
 
   init(engine: Engine) {
-    this.redMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.25, 0.25, 1.0),
-        depthTest: false,
-        doubleSide: true,
-        blend: true
-      },
-      engine
-    );
-    this.lightRedMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.25, 0.25, 0.9),
-        depthTest: false,
-        doubleSide: true,
-        blend: true
-      },
-      engine
-    );
-    this.greenMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.5, 0.8, 0.2, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    this.redMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(1.0, 0.25, 0.25, 1.0),
+      depthTest: false,
+      doubleSide: true,
+      blend: true
+    });
+    this.lightRedMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(1.0, 0.25, 0.25, 0.9),
+      depthTest: false,
+      doubleSide: true,
+      blend: true
+    });
+    this.redArcMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(1.0, 0.25, 0.25, 1.0),
+      depthTest: false,
+      doubleSide: true,
+      blend: true
+    });
 
-    this.lightGreenMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.5, 0.8, 0.2, 0.9),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
-    this.blueMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.3, 0.5, 1.0, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    this.greenMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.5, 0.8, 0.2, 1.0),
+      depthTest: false,
+      blend: true
+    });
+    this.lightGreenMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.5, 0.8, 0.2, 0.9),
+      depthTest: false,
+      blend: true
+    });
+    this.greenArcMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.5, 0.8, 0.2, 1.0),
+      depthTest: false,
+      blend: true
+    });
 
-    this.yellowMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.95, 0.0, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    this.blueMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.3, 0.5, 1.0, 1.0),
+      depthTest: false,
+      blend: true
+    });
+    this.yellowMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(1.0, 0.95, 0.0, 1.0),
+      depthTest: false,
+      blend: true
+    });
+    this.blueArcMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.3, 0.5, 1.0, 1.0),
+      depthTest: false,
+      blend: true
+    });
 
-    this.lightBlueMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.3, 0.5, 1.0, 0.9),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    this.lightBlueMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.3, 0.5, 1.0, 0.9),
+      depthTest: false,
+      blend: true
+    });
 
-    this.greyMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.75, 0.75, 0.75, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    this.greyMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.75, 0.75, 0.75, 1.0),
+      depthTest: false,
+      blend: true
+    });
 
-    this.rotatePlaneMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.95, 0.0, 0.2),
-        depthTest: false,
-        blend: true,
-        doubleSide: true
-      },
-      engine
-    );
+    this.rotatePlaneMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(1.0, 0.95, 0.0, 0.2),
+      depthTest: false,
+      blend: true,
+      doubleSide: true
+    });
 
-    this.invisibleMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.0, 0.0, 0.0, 0.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    this.invisibleMaterial = new GizmoMaterial(engine, {
+      color: new Vector4(0.0, 0.0, 0.0, 0.0),
+      depthTest: false,
+      blend: true
+    });
 
     this.lineMesh = new LinesMesh(engine, {
       points: [

@@ -1,17 +1,26 @@
-import { Camera, Component, Entity, Plane, Quaternion, Ray, Vector3 } from "oasis-engine";
+import { Camera, Component, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 
 import { Axis } from "./Axis";
+import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisIndices } from "./Type";
 import { utils } from "./Utils";
 
-  /** @internal */
-  export class ScaleControl extends Component implements GizmoComponent {
+/** @internal */
+export class ScaleControl extends Component implements GizmoComponent {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
-  private _camera: Camera = null;
-  private _selectedEntity: Entity = null;
+  private _camera: Camera;
+  private _group: Group;
 
-  private _scaleAxisComponent: { x: Axis; y: Axis; z: Axis; xy: Axis; xz: Axis; yz: Axis; xyz: Axis };
+  private _scaleAxisComponent: {
+    x: Axis;
+    y: Axis;
+    z: Axis;
+    xy: Axis;
+    xz: Axis;
+    yz: Axis;
+    xyz: Axis;
+  };
   private _scaleControlMap: {
     x: AxisProps;
     y: AxisProps;
@@ -23,7 +32,7 @@ import { utils } from "./Utils";
   };
 
   private _selectedAxisName: string;
-  private _startScale: Vector3 = new Vector3();
+  private _startMatrix: Matrix = new Matrix();
   private _startPoint: Vector3 = new Vector3();
   private _movePoint = new Vector3();
   private _plane: Plane = new Plane();
@@ -31,8 +40,10 @@ import { utils } from "./Utils";
   private _tempVec: Vector3 = new Vector3();
   private _tempVec1: Vector3 = new Vector3();
   private _tempVec2: Vector3 = new Vector3();
-  private _endPoint: Vector3 = new Vector3();
-  private _topPoint: Vector3 = new Vector3();
+
+  private _planePoint1: Vector3 = new Vector3();
+  private _planePoint2: Vector3 = new Vector3();
+  private _planePoint3: Vector3 = new Vector3();
 
   constructor(entity: Entity) {
     super(entity);
@@ -135,9 +146,8 @@ import { utils } from "./Utils";
   initCamera(camera: Camera): void {
     this._camera = camera;
   }
-  onSelected(entity: Entity) {
-    this._selectedEntity = entity;
-    this.entity.transform.rotationQuaternion = entity.transform.rotationQuaternion;
+  onSelected(value: Group) {
+    this._group = value;
   }
 
   onHoverStart(axisName: string) {
@@ -155,7 +165,7 @@ import { utils } from "./Utils";
 
   onMoveStart(ray: Ray, axisName: string) {
     this._selectedAxisName = axisName;
-    this._startScale = this._selectedEntity.transform.scale.clone();
+    this._startMatrix.copyFrom(this._group.worldMatrix);
 
     // get start point
     this._getHitPlane();
@@ -181,7 +191,15 @@ import { utils } from "./Utils";
     ray.getPoint(tempDist, this._movePoint);
 
     // align movement
-    this._selectedEntity.transform.scale = this._addWithAxis();
+    const scaleVec3 = this._addWithAxis();
+    const mat = new Matrix();
+    const { elements: ele } = mat;
+    (ele[0] = scaleVec3.x), (ele[5] = scaleVec3.y), (ele[10] = scaleVec3.z);
+
+    // align movement
+    const matrix = this._startMatrix;
+    Matrix.multiply(matrix, mat, mat);
+    this._group.worldMatrix = mat;
   }
 
   onMoveEnd() {
@@ -194,33 +212,33 @@ import { utils } from "./Utils";
   }
 
   private _addWithAxis(): Vector3 {
-    const out = this._selectedEntity.transform.scale;
+    const scaleVec3 = new Vector3(1, 1, 1);
     Vector3.subtract(this._movePoint, this._startPoint, this._tempVec);
-
     const currentAxisIndices = axisIndices[this._selectedAxisName];
-    let i = currentAxisIndices.length - 1;
-    while (i >= 0) {
+    for (let i = currentAxisIndices.length - 1; i >= 0; i--) {
       const elementIndex = currentAxisIndices[i];
-      out[elementIndex] = this._startScale[elementIndex] + this._tempVec[elementIndex];
-      i--;
+      scaleVec3[elementIndex] = 1 + this._tempVec[elementIndex];
     }
-    return out;
+    return scaleVec3;
   }
 
   private _getHitPlane() {
+    const worldMatrix = this._group.worldMatrix;
+    const { _planePoint1, _planePoint2, _planePoint3 } = this;
+    _planePoint1.copyFrom(this._group.worldPosition);
+
     // get endPoint for plane
     const currentAxis = axisVector[this._selectedAxisName];
-    Vector3.transformToVec3(currentAxis, this._selectedEntity.transform.worldMatrix, this._endPoint);
+    Vector3.transformToVec3(currentAxis, worldMatrix, _planePoint2);
 
     // get topPoint for plane
-    const currentWorldPos = this._selectedEntity.transform.worldPosition;
     const cameraPos = this._camera.entity.transform.worldPosition;
-    Vector3.subtract(this._endPoint, currentWorldPos, this._tempVec);
-    Vector3.subtract(cameraPos, currentWorldPos, this._tempVec1);
+    Vector3.subtract(_planePoint2, _planePoint1, this._tempVec);
+    Vector3.subtract(cameraPos, _planePoint1, this._tempVec1);
     Vector3.cross(this._tempVec, this._tempVec1, this._tempVec2);
-    Vector3.add(currentWorldPos, this._tempVec2, this._topPoint);
+    Vector3.add(_planePoint1, this._tempVec2, _planePoint3);
 
     // get the hit plane
-    Plane.fromPoints(this._topPoint, currentWorldPos, this._endPoint, this._plane);
+    Plane.fromPoints(_planePoint3, _planePoint1, _planePoint2, this._plane);
   }
 }
