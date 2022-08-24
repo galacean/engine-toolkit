@@ -150,10 +150,6 @@ export class OrbitControl extends Script {
       }
     }
     const { _sphericalDump, _sphericalDelta } = this;
-    if (this.autoRotate) {
-      const rotateAngle = (this.autoRotateSpeed / 1000) * deltaTime;
-      this._sphericalDelta.theta -= rotateAngle;
-    }
     if (this.enableDamping) {
       if (enableHandler & ControlHandlerType.ZOOM && curHandlerType ^ ControlHandlerType.ZOOM) {
         this._zoomFrag *= 1 - this.zoomFactor;
@@ -162,6 +158,10 @@ export class OrbitControl extends Script {
         _sphericalDelta.theta = _sphericalDump.theta *= 1 - this.dampingFactor;
         _sphericalDelta.phi = _sphericalDump.phi *= 1 - this.dampingFactor;
       }
+    }
+    if (this.autoRotate) {
+      const rotateAngle = (this.autoRotateSpeed / 1000) * deltaTime;
+      _sphericalDelta.theta -= rotateAngle;
     }
   }
 
