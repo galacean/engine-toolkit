@@ -33,7 +33,10 @@ export const axisVector: { [key: string]: Vector3 } = {
 export const axisPlane: { [key: string]: Plane } = {
   x: new Plane(new Vector3(1, 0, 0), 0),
   y: new Plane(new Vector3(0, 1, 0), 0),
-  z: new Plane(new Vector3(0, 0, 1), 0)
+  z: new Plane(new Vector3(0, 0, 1), 0),
+  xy: new Plane(new Vector3(0, 0, 1), 0),
+  yz: new Plane(new Vector3(1, 0, 0), 0),
+  xz: new Plane(new Vector3(0, 1, 0), 0)
 };
 
 export const axisIndices: { [key: string]: Array<string> } = {

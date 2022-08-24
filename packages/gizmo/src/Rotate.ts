@@ -4,7 +4,6 @@ import {
   Entity,
   Matrix,
   MeshRenderer,
-  Plane,
   Quaternion,
   Ray,
   RenderQueueType,

@@ -2,7 +2,7 @@ import { Camera, Component, Entity, Plane, Ray, Vector3, Matrix } from "oasis-en
 
 import { Axis } from "./Axis";
 import { Group } from "./Group";
-import { GizmoComponent, AxisProps, axisVector, axisIndices } from "./Type";
+import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { utils } from "./Utils";
 
 /** @internal */
@@ -29,19 +29,17 @@ export class TranslateControl extends Component implements GizmoComponent {
   };
 
   private _selectedAxisName: string;
-  private _startPosition: Vector3 = new Vector3();
+  private _startGroupMatrix: Matrix = new Matrix();
+  private _startGizmoMatrix: Matrix = new Matrix();
+  private _startInvMatrix: Matrix = new Matrix();
   private _startPoint: Vector3 = new Vector3();
-  private _movePoint = new Vector3();
+  private _currPoint = new Vector3();
   private _plane: Plane = new Plane();
 
-  private _tempVec: Vector3 = new Vector3();
+  private _tempVec0: Vector3 = new Vector3();
   private _tempVec1: Vector3 = new Vector3();
   private _tempVec2: Vector3 = new Vector3();
   private _tempMat: Matrix = new Matrix();
-
-  private _planePoint1: Vector3 = new Vector3();
-  private _planePoint2: Vector3 = new Vector3();
-  private _planePoint3: Vector3 = new Vector3();
 
   constructor(entity: Entity) {
     super(entity);
@@ -157,11 +155,13 @@ export class TranslateControl extends Component implements GizmoComponent {
   onMoveStart(ray: Ray, axisName: string) {
     this._selectedAxisName = axisName;
     // get gizmo start worldPosition
-    this._group.getWorldPosition(this._startPosition);
+    this._group.getWorldMatrix(this._startGroupMatrix);
+    this._group.getNormalizedMatrix(this._startGizmoMatrix);
+    Matrix.invert(this._startGizmoMatrix, this._startInvMatrix);
 
     // get start point
     this._getHitPlane();
-    ray.getPoint(ray.intersectPlane(this._plane), this._startPoint);
+    this._calRayIntersection(ray, this._startPoint);
 
     // change axis color
     const entityArray = this.gizmoEntity.children;
@@ -176,18 +176,19 @@ export class TranslateControl extends Component implements GizmoComponent {
     }
   }
   onMove(ray: Ray): void {
-    // get move point
-    const tempDist = ray.intersectPlane(this._plane);
-    ray.getPoint(tempDist, this._movePoint);
+    // 计算局部射线
+    this._calRayIntersection(ray, this._currPoint);
 
+    const { _tempMat: mat, _tempVec0: subVec } = this;
+    Vector3.subtract(this._currPoint, this._startPoint, subVec);
+    const localAxis = axisVector[this._selectedAxisName];
+    mat.identity();
+    mat.elements[12] = subVec.x * localAxis.x;
+    mat.elements[13] = subVec.y * localAxis.y;
+    mat.elements[14] = subVec.z * localAxis.z;
     // align movement
-    const { _tempMat: groupWorldMat } = this;
-    if (this._group.getWorldMatrix(groupWorldMat)) {
-      const { elements: e } = groupWorldMat;
-      const trans = this._addWithAxis();
-      (e[12] = trans.x), (e[13] = trans.y), (e[14] = trans.z);
-      this._group.setWorldMatrix(groupWorldMat);
-    }
+    Matrix.multiply(this._startGroupMatrix, mat, mat);
+    this._group.setWorldMatrix(mat);
   }
 
   onMoveEnd() {
@@ -201,42 +202,37 @@ export class TranslateControl extends Component implements GizmoComponent {
   }
 
   private _getHitPlane() {
-    const { _planePoint1, _planePoint2, _planePoint3, _tempMat } = this;
-    this._group.getWorldMatrix(_tempMat);
-    this._group.getWorldPosition(_planePoint1);
-
-    // get endPoint for plane
-    const currentAxis = axisVector[this._selectedAxisName];
-    Vector3.transformToVec3(currentAxis, _tempMat, _planePoint2);
-
-    // get topPoint for plane
-    const cameraPos = this._camera.entity.transform.worldPosition;
-    Vector3.subtract(_planePoint2, _planePoint1, this._tempVec);
-    Vector3.subtract(cameraPos, _planePoint1, this._tempVec1);
-    Vector3.cross(this._tempVec, this._tempVec1, this._tempVec2);
-    Vector3.add(_planePoint1, this._tempVec2, _planePoint3);
-
-    // get the hit plane
-    Plane.fromPoints(_planePoint3, _planePoint1, _planePoint2, this._plane);
+    switch (this._selectedAxisName) {
+      case "x":
+      case "y":
+      case "z":
+      case "xyz":
+        const { _tempVec0: centerP, _tempVec1: crossP, _tempVec2: cameraP } = this;
+        // 原点 ---> 相机
+        cameraP.copyFrom(this._camera.entity.transform.worldPosition);
+        cameraP.transformToVec3(this._startInvMatrix);
+        // 原点 ---> 缩放轴
+        const localAxis = axisVector[this._selectedAxisName];
+        // 垂直于上方两个向量的 cross 向量
+        Vector3.cross(cameraP, localAxis, crossP);
+        Plane.fromPoints(localAxis, centerP.set(0, 0, 0), crossP, this._plane);
+        break;
+      case "xy":
+      case "yz":
+      case "xz":
+        this._plane.copyFrom(axisPlane[this._selectedAxisName]);
+        break;
+      default:
+        break;
+    }
   }
 
-  /** calculate movement */
-  private _addWithAxis(): Vector3 {
-    const { _tempVec, _tempVec1, _tempVec2, _tempMat } = this;
-    Vector3.subtract(this._movePoint, this._startPoint, _tempVec);
-    const currentAxisIndices = axisIndices[this._selectedAxisName];
-    _tempVec1.set(0, 0, 0);
-    this._group.getWorldMatrix(_tempMat);
-    for (let i = currentAxisIndices.length - 1; i >= 0; i--) {
-      const elementIndex = currentAxisIndices[i];
-      const currentAxis = axisVector[elementIndex];
-      Vector3.transformNormal(currentAxis, _tempMat, _tempVec2);
-      // get move distance along this axis
-      const moveDist = Vector3.dot(_tempVec, _tempVec2);
-      _tempVec2.normalize().scale(moveDist);
-      _tempVec1.add(_tempVec2);
-    }
-    Vector3.add(this._startPosition, _tempVec1, _tempVec2);
-    return _tempVec2;
+  private _calRayIntersection(ray: Ray, out: Vector3) {
+    // 将世界射线转为局部射线
+    const worldToLocal = this._startInvMatrix;
+    Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
+    Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
+    // 取与面的交点
+    ray.getPoint(ray.intersectPlane(this._plane), out);
   }
 }
