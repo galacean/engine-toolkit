@@ -19,6 +19,9 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - ⭕️  &nbsp;**Outline** - Show outline of mesh renderers
 - 📐  &nbsp;**Lines** - 2D Solid Line & Dash Line
 
+- 🗳  &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
+- 🍡  &nbsp;**CSSM Visual Material** - Visualization of cascaded stable shadow material
+
 ## npm
 
 The toolkit is published on npm with full typing support. To install, use:
