@@ -153,10 +153,12 @@ export class GizmoControls extends Component {
   private update(): void {
     let s: number = 1;
     if (this._editorCamera) {
-      const cameraPosition = this._editorCamera.entity.transform.position;
-      const currentPosition = this.entity.transform.position;
+      const cameraPosition = this._editorCamera.entity.transform.worldPosition;
+      const currentPosition = this.entity.transform.worldPosition;
       s = Vector3.distance(cameraPosition, currentPosition) * this._scaleFactor;
     }
+    // hack 操作，记录下当前 gizmo 显示的缩放
+    window.gizmoScale = s;
     // 需要 group 归一化后的世界矩阵
     this._group.getNormalizedMatrix(this._tempMatrix, s);
     this.entity.transform.worldMatrix = this._tempMatrix;

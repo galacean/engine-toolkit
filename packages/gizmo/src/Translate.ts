@@ -32,6 +32,7 @@ export class TranslateControl extends Component implements GizmoComponent {
   private _startGroupMatrix: Matrix = new Matrix();
   private _startGizmoMatrix: Matrix = new Matrix();
   private _startInvMatrix: Matrix = new Matrix();
+  private _startScale: number = 1;
   private _startPoint: Vector3 = new Vector3();
   private _currPoint = new Vector3();
   private _plane: Plane = new Plane();
@@ -159,6 +160,8 @@ export class TranslateControl extends Component implements GizmoComponent {
     this._group.getNormalizedMatrix(this._startGizmoMatrix);
     Matrix.invert(this._startGizmoMatrix, this._startInvMatrix);
 
+    this._startScale = window.gizmoScale;
+
     // get start point
     this._getHitPlane();
     this._calRayIntersection(ray, this._startPoint);
@@ -178,9 +181,13 @@ export class TranslateControl extends Component implements GizmoComponent {
   onMove(ray: Ray): void {
     // 计算局部射线
     this._calRayIntersection(ray, this._currPoint);
+    const currScale = window.gizmoScale;
+    const { _tempMat: mat, _tempVec0: subVec, _startScale } = this;
+    // 换算一下缩放，两次的缩放是不一样的，所以用原点计算
+    subVec.x = this._currPoint.x - (this._startPoint.x / _startScale) * currScale;
+    subVec.y = this._currPoint.y - (this._startPoint.y / _startScale) * currScale;
+    subVec.z = this._currPoint.z - (this._startPoint.z / _startScale) * currScale;
 
-    const { _tempMat: mat, _tempVec0: subVec } = this;
-    Vector3.subtract(this._currPoint, this._startPoint, subVec);
     const localAxis = axisVector[this._selectedAxisName];
     mat.identity();
     mat.elements[12] = subVec.x * localAxis.x;
