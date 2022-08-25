@@ -172,13 +172,14 @@ export class RotateControl extends Component implements GizmoComponent {
     // rotate plane
     this._rotateHelperPlaneEntity = this._gizmoRotateHelperEntity.createChild("rotateHelperPlane");
     const planeHelperRenderer = this._rotateHelperPlaneEntity.addComponent(MeshRenderer);
-    planeHelperRenderer.mesh = this._rotateHelperPlaneMesh;
+    planeHelperRenderer.mesh = this._rotateHelperPlaneMesh.modelMesh;
+    // TODO remove after VAO fix
+    // @ts-ignore
+    this._rotateHelperPlaneMesh.modelMesh._enableVAO = false;
     planeHelperRenderer.setMaterial(utils.rotatePlaneMaterial);
     utils.rotatePlaneMaterial.renderQueueType = RenderQueueType.Transparent;
     this._rotateHelperPlaneEntity.isActive = false;
   }
-
-  initCamera(camera: Camera): void {}
 
   onSelected(value: Group) {
     this._group = value;
@@ -232,6 +233,8 @@ export class RotateControl extends Component implements GizmoComponent {
     this._endLineHelperEntity.isActive = true;
     this._rotateHelperPlaneEntity.isActive = true;
   }
+
+  initCamera() {}
 
   onMove(ray: Ray): void {
     const { _startPointUnit: startP, _currPointUnit: currP } = this;

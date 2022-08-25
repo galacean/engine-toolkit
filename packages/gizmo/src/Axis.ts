@@ -21,7 +21,7 @@ export class Axis extends Component {
       axisEntity.transform.rotate(value.axisRotation[i]);
       axisEntity.transform.translate(value.axisTranslation[i], false);
       const axisRenderer = axisEntity.addComponent(MeshRenderer);
-      axisRenderer.priority = 100;
+      axisRenderer.priority = value.priority ? value.priority : 100;
       axisRenderer.mesh = value.axisMesh[i];
       axisRenderer.setMaterial(this._material);
     }

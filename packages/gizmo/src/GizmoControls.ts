@@ -16,12 +16,11 @@ import {
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
-import { axisVector, GizmoComponent } from "./Type";
+import { GizmoComponent } from "./Type";
 import { utils } from "./Utils";
 import { GizmoState } from "./enums/GizmoState";
 import { AnchorType, CoordinateType, Group } from "./Group";
 import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
-import { Axis } from "./Axis";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
@@ -83,6 +82,7 @@ export class GizmoControls extends Script {
    */
   initGizmoControl(camera: Camera) {
     this._editorCamera = camera;
+    this._framebufferPicker.camera = camera;
     Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.initCamera(camera));
   }
   /**

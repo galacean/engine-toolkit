@@ -26,7 +26,7 @@ class Utils {
   public arcLineMesh: ArcLineMesh;
 
   public axisHelpertorusMesh: Mesh;
-
+  public axisHelperCubeMesh: Mesh;
   public torusColliderMesh: Mesh;
 
   public rotateCircleRadius = 1.6;
@@ -141,11 +141,12 @@ class Utils {
 
     this.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.06, 0.24);
     this.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
-    this.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
+    this.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.3, 0.3, 0.3);
     this.axisSphereMesh = PrimitiveMesh.createSphere(engine, 0.2);
     this.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
 
     this.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, 3.35);
+    this.axisHelperCubeMesh = PrimitiveMesh.createCuboid(engine, 0.4, 0.4, 0.4);
     this.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
     this.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 180);
   }

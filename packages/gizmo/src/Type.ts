@@ -56,4 +56,5 @@ export interface AxisProps {
   axisHelperMesh: Array<Mesh>;
   axisRotation: Array<Vector3> | null;
   axisTranslation: Array<Vector3> | null;
+  priority?: number;
 }

@@ -18,18 +18,12 @@ export class ScaleControl extends Component implements GizmoComponent {
     x: Axis;
     y: Axis;
     z: Axis;
-    xy: Axis;
-    xz: Axis;
-    yz: Axis;
     xyz: Axis;
   };
   private _scaleControlMap: {
     x: AxisProps;
     y: AxisProps;
     z: AxisProps;
-    xy: AxisProps;
-    xz: AxisProps;
-    yz: AxisProps;
     xyz: AxisProps;
   };
 
@@ -80,37 +74,14 @@ export class ScaleControl extends Component implements GizmoComponent {
         axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90), new Vector3(0, -90, 90)],
         axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
       },
-      xy: {
-        name: "xy",
-        axisMesh: [utils.axisPlaneMesh],
-        axisMaterial: utils.lightRedMaterial,
-        axisHelperMesh: [utils.axisHelperPlaneMesh],
-        axisRotation: [new Vector3(0, 90, 90)],
-        axisTranslation: [new Vector3(0.5, 0.5, 0)]
-      },
-      yz: {
-        name: "yz",
-        axisMesh: [utils.axisPlaneMesh],
-        axisMaterial: utils.lightGreenMaterial,
-        axisHelperMesh: [utils.axisHelperPlaneMesh],
-        axisRotation: [new Vector3(90, 90, 0)],
-        axisTranslation: [new Vector3(0, 0.5, 0.5)]
-      },
-      xz: {
-        name: "xz",
-        axisMesh: [utils.axisPlaneMesh],
-        axisMaterial: utils.lightBlueMaterial,
-        axisHelperMesh: [utils.axisHelperPlaneMesh],
-        axisRotation: [new Vector3(0, 0, 0)],
-        axisTranslation: [new Vector3(0.5, 0, 0.5)]
-      },
       xyz: {
         name: "xyz",
         axisMesh: [utils.axisCubeMesh],
         axisMaterial: utils.greyMaterial,
         axisHelperMesh: [utils.axisCubeMesh],
         axisRotation: [new Vector3(0, 0, 0)],
-        axisTranslation: [new Vector3(0, 0, 0)]
+        axisTranslation: [new Vector3(0, 0, 0)],
+        priority: 102
       }
     };
   }
@@ -121,27 +92,18 @@ export class ScaleControl extends Component implements GizmoComponent {
     const axisX = this.gizmoEntity.createChild("x");
     const axisY = this.gizmoEntity.createChild("y");
     const axisZ = this.gizmoEntity.createChild("z");
-    const axisXY = this.gizmoEntity.createChild("xy");
-    const axisXZ = this.gizmoEntity.createChild("xz");
-    const axisYZ = this.gizmoEntity.createChild("yz");
     const axisXYZ = this.gizmoEntity.createChild("xyz");
 
     this._scaleAxisComponent = {
       x: axisX.addComponent(Axis),
       y: axisY.addComponent(Axis),
       z: axisZ.addComponent(Axis),
-      xy: axisXY.addComponent(Axis),
-      yz: axisYZ.addComponent(Axis),
-      xz: axisXZ.addComponent(Axis),
       xyz: axisXYZ.addComponent(Axis)
     };
 
     this._scaleAxisComponent.x.initAxis(this._scaleControlMap.x);
     this._scaleAxisComponent.y.initAxis(this._scaleControlMap.y);
     this._scaleAxisComponent.z.initAxis(this._scaleControlMap.z);
-    this._scaleAxisComponent.xy.initAxis(this._scaleControlMap.xy);
-    this._scaleAxisComponent.yz.initAxis(this._scaleControlMap.yz);
-    this._scaleAxisComponent.xz.initAxis(this._scaleControlMap.xz);
     this._scaleAxisComponent.xyz.initAxis(this._scaleControlMap.xyz);
   }
 
@@ -202,9 +164,18 @@ export class ScaleControl extends Component implements GizmoComponent {
     // 计算开始交点与当前交点的差，得到缩放比例
     const { _factorVec: factorVec, _tempVec0: scaleVec, _tempMat: mat } = this;
     Vector3.subtract(this._currPoint, this._startPoint, scaleVec);
-    scaleVec.x = scaleVec.x * factorVec.x + 1;
-    scaleVec.y = scaleVec.y * factorVec.y + 1;
-    scaleVec.z = scaleVec.z * factorVec.z + 1;
+
+    switch (this._selectedAxisName) {
+      case "x":
+      case "y":
+      case "z":
+      case "xyz":
+        scaleVec.x = scaleVec.x * factorVec.x + 1;
+        scaleVec.y = scaleVec.y * factorVec.y + 1;
+        scaleVec.z = scaleVec.z * factorVec.z + 1;
+        break;
+    }
+
     Matrix.scale(this._startGroupMatrix, scaleVec, mat);
     this._group.setWorldMatrix(mat);
   }
@@ -233,11 +204,6 @@ export class ScaleControl extends Component implements GizmoComponent {
         // 垂直于上方两个向量的 cross 向量
         Vector3.cross(cameraP, localAxis, crossP);
         Plane.fromPoints(localAxis, centerP.set(0, 0, 0), crossP, this._plane);
-        break;
-      case "xy":
-      case "yz":
-      case "xz":
-        this._plane.copyFrom(axisPlane[this._selectedAxisName]);
         break;
       default:
         break;
