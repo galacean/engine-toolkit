@@ -1,16 +1,31 @@
-import { Camera, Entity, Matrix, Ray, Component, Vector3 } from "oasis-engine";
+import {
+  Camera,
+  Entity,
+  Matrix,
+  Ray,
+  Component,
+  Vector3,
+  Layer,
+  RenderTarget,
+  Texture2D,
+  Script,
+  PointerButton,
+  SphereColliderShape,
+  StaticCollider
+} from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
-import { GizmoComponent } from "./Type";
+import { axisVector, GizmoComponent } from "./Type";
 import { utils } from "./Utils";
 import { GizmoState } from "./enums/GizmoState";
 import { AnchorType, CoordinateType, Group } from "./Group";
-
+import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
+import { Axis } from "./Axis";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
-export class GizmoControls extends Component {
+export class GizmoControls extends Script {
   gizmoState: GizmoState = GizmoState.translate;
 
   private _isStarted = false;
@@ -24,6 +39,12 @@ export class GizmoControls extends Component {
   private _tempRay2: Ray = new Ray();
   private _tempMatrix: Matrix = new Matrix();
 
+  private _framebufferPicker: FramebufferPicker;
+  private _gizmoLayer: Layer = Layer.Layer22;
+  private isGizmoStarted = false;
+  private _ray: Ray = new Ray();
+  private _hit: any = null;
+
   constructor(entity: Entity) {
     super(entity);
 
@@ -34,6 +55,26 @@ export class GizmoControls extends Component {
     this._createGizmoControl(GizmoState.rotate, RotateControl);
 
     this.onGizmoChange(this.gizmoState);
+
+    // framebuffer picker
+    this._framebufferPicker = entity.addComponent(FramebufferPicker);
+    this._framebufferPicker.colorRenderPass.mask = this._gizmoLayer;
+    this._framebufferPicker.colorRenderTarget = new RenderTarget(
+      this.engine,
+      128,
+      128,
+      new Texture2D(this.engine, 128, 128)
+    );
+
+    // gizmo collider
+    const sphereCollider = this.entity.addComponent(StaticCollider);
+    const colliderShape = new SphereColliderShape();
+    colliderShape.radius = 2;
+    sphereCollider.addShape(colliderShape);
+
+    // default add gizmo to its parent entity
+    this._group.addEntity([this.entity]);
+    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(this._group));
   }
 
   /**
@@ -148,6 +189,69 @@ export class GizmoControls extends Component {
       }
       this._isStarted = false;
     }
+  }
+
+  _selectHandler(result) {
+    const selectedEntity = result?.component?.entity;
+    switch (selectedEntity?.layer) {
+      case this._gizmoLayer:
+        this.isGizmoStarted = true;
+        this.triggerGizmoStart(selectedEntity.name);
+        break;
+    }
+  }
+
+  _dragHandler(result) {
+    const hoverEntity = result?.component?.entity;
+    if (hoverEntity?.layer === this._gizmoLayer) {
+      this.onGizmoHoverEnd();
+      this.onGizmoHoverStart(hoverEntity.name);
+    } else {
+      this.onGizmoHoverEnd();
+    }
+  }
+
+  /** @internal */
+  onUpdate() {
+    const { engine } = this;
+    const { inputManager } = engine;
+
+    // Handle select.
+    if (inputManager.isPointerDown(PointerButton.Primary)) {
+      const pointerPosition = inputManager.pointerPosition;
+      this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+        this._selectHandler(result);
+      });
+    }
+
+    if (inputManager.isPointerUp(PointerButton.Primary)) {
+      if (this.isGizmoStarted) {
+        this.isGizmoStarted = false;
+        this.triggerGizmoEnd();
+      }
+    }
+
+    // Handler drag.
+    const pointerMovingDelta = inputManager.pointerMovingDelta;
+    if (pointerMovingDelta.x !== 0 || pointerMovingDelta.y !== 0) {
+      if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
+        if (this.isGizmoStarted) {
+          this.onGizmoMove();
+        }
+      } else {
+        const pointerPosition = inputManager.pointerPosition;
+        const ray = this._ray;
+        const hit = this._hit;
+        this._editorCamera.screenPointToRay(inputManager.pointerPosition, ray);
+        const result = engine.physicsManager.raycast(ray, Number.MAX_VALUE, this._gizmoLayer, hit);
+        if (result) {
+          this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+            this._dragHandler(result);
+          });
+        }
+      }
+    }
+    this.update();
   }
 
   private update(): void {
