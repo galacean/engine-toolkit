@@ -11,7 +11,6 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 
 - 🛸  &nbsp;**Controls** - Some camera controllers
 - 🫧  &nbsp;**FrameBufferPicker** - Pixel-based object picking
-- 📊  &nbsp;**Stats** - Statistics rendering data
 - 🖇  &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
 - 🗳  &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
 - 🧍🏼  &nbsp;**Skeleton Helper** - Skeleton visualization
@@ -36,7 +35,7 @@ import * as TOOLKIT from "oasis-engine-toolkit";
 or individual classes using:
 
 ```javascript
-import { OrbitControl, FramebufferPicker, Stats } from "oasis-engine-toolkit";
+import { OrbitControl, FramebufferPicker } from "oasis-engine-toolkit";
 ```
 
 ## Contributing
