@@ -1,4 +1,4 @@
-import { Camera, Entity, RenderElement, RenderTarget, Script, Texture2D } from "oasis-engine";
+import { Camera, Entity, RenderTarget, Script, Texture2D } from "oasis-engine";
 import { ColorRenderPass } from "./ColorRenderPass";
 
 /**
@@ -41,7 +41,7 @@ export class FramebufferPicker extends Script {
    * @param offsetX - Relative X coordinate of the drawingBuffer
    * @param offsetY - Relative Y coordinate of the drawingBuffer
    */
-  pick(offsetX: number, offsetY: number): Promise<RenderElement> {
+  pick(offsetX: number, offsetY: number): Promise<any> {
     if (this.enabled) {
       this._needPick = true;
       this._pickPos = [offsetX, offsetY];

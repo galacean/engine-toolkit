@@ -1,13 +1,11 @@
 import { Component, Entity, Ray, Vector3, Mesh, Material, Camera, Plane } from "oasis-engine";
+import { Group } from "./Group";
 
 export abstract class GizmoComponent extends Component {
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
-
-  // Get scene camera when init gizmo.
-  initCamera?(camera: Camera): void;
-  // Called when an entity is selected.
-  onSelected?(entity: Entity | any): void;
+  // Get group when init gizmo.
+  init?(camera: Camera, group: Group): void;
   // Called when pointer enters gizmo.
   onHoverStart?(axisName: string): void;
   // Called when pointer leaves gizmo.
@@ -18,6 +16,8 @@ export abstract class GizmoComponent extends Component {
   onMove?(ray: Ray): void;
   // Called when gizmo movement ends.
   onMoveEnd?(): void;
+  // Called when gizmo's transform is dirty.
+  onGizmoRedraw?(): void;
 }
 
 export const axisVector: { [key: string]: Vector3 } = {

@@ -1,14 +1,13 @@
 import { Camera, Component, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 
 import { Axis } from "./Axis";
+import { GizmoControls } from "./GizmoControls";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { utils } from "./Utils";
 
 /** @internal */
-export class ScaleControl extends Component implements GizmoComponent {
-  gizmoEntity: Entity;
-  gizmoHelperEntity: Entity;
+export class ScaleControl extends GizmoComponent {
   private _camera: Camera;
   private _group: Group;
   // 可以控制缩放力度
@@ -29,7 +28,6 @@ export class ScaleControl extends Component implements GizmoComponent {
 
   private _selectedAxisName: string;
   private _startGroupMatrix: Matrix = new Matrix();
-  private _startGizmoMatrix: Matrix = new Matrix();
   private _startInvMatrix: Matrix = new Matrix();
   private _startPoint: Vector3 = new Vector3();
   private _factorVec: Vector3 = new Vector3();
@@ -45,6 +43,98 @@ export class ScaleControl extends Component implements GizmoComponent {
     super(entity);
     this._initAxis();
     this._createAxis(entity);
+  }
+
+  init(camera: Camera, group: Group) {
+    this._camera = camera;
+    this._group = group;
+  }
+
+  onHoverStart(axisName: string) {
+    this._selectedAxisName = axisName;
+    const currEntity = this.gizmoEntity.findByName(axisName);
+    const currComponent = currEntity.getComponent(Axis);
+    currComponent?.highLight && currComponent.highLight();
+  }
+
+  onHoverEnd() {
+    const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
+    const currComponent = currEntity.getComponent(Axis);
+    currComponent?.unLight && currComponent.unLight();
+  }
+
+  onMoveStart(ray: Ray, axisName: string) {
+    this._selectedAxisName = axisName;
+    // get gizmo start worldPosition
+    this._group.getWorldMatrix(this._startGroupMatrix);
+    Matrix.invert(this._startGroupMatrix, this._startInvMatrix);
+    const { _startPoint, _scaleFactor } = this;
+
+    // get start point
+    this._getHitPlane();
+    this._calRayIntersection(ray, this._startPoint);
+    const localAxis = axisVector[this._selectedAxisName];
+    this._factorVec.set(
+      _startPoint.x === 0 ? 0 : (_scaleFactor * localAxis.x) / _startPoint.x,
+      _startPoint.y === 0 ? 0 : (_scaleFactor * localAxis.y) / _startPoint.y,
+      _startPoint.z === 0 ? 0 : (_scaleFactor * localAxis.z) / _startPoint.z
+    );
+
+    // change axis color
+    const entityArray = this.gizmoEntity.children;
+    for (let i = 0; i < entityArray.length; i++) {
+      const currEntity = entityArray[i];
+      const currComponent = currEntity.getComponent(Axis);
+      if (currEntity.name === this._selectedAxisName) {
+        currComponent?.yellow && currComponent.yellow();
+      } else {
+        currComponent?.gray && currComponent.gray();
+      }
+    }
+  }
+
+  onMove(ray: Ray): void {
+    // 计算局部射线与面的交点
+    this._calRayIntersection(ray, this._currPoint);
+    // 计算开始交点与当前交点的差，得到缩放比例
+    const { _factorVec: factorVec, _tempVec0: scaleVec, _tempMat: mat } = this;
+    Vector3.subtract(this._currPoint, this._startPoint, scaleVec);
+
+    switch (this._selectedAxisName) {
+      case "x":
+      case "y":
+      case "z":
+      case "xyz":
+        scaleVec.x = scaleVec.x * factorVec.x + 1;
+        scaleVec.y = scaleVec.y * factorVec.y + 1;
+        scaleVec.z = scaleVec.z * factorVec.z + 1;
+        break;
+    }
+
+    Matrix.scale(this._startGroupMatrix, scaleVec, mat);
+    this._group.setWorldMatrix(mat);
+  }
+
+  onMoveEnd() {
+    const entityArray = this.gizmoEntity.children;
+    for (let i = 0; i < entityArray.length; i++) {
+      const currEntity = entityArray[i];
+      const currComponent = currEntity.getComponent(Axis);
+      currComponent?.recover && currComponent.recover();
+    }
+  }
+
+  onGizmoRedraw() {
+    const { _tempVec0, _tempMat } = this;
+    const cameraPosition = this._camera.entity.transform.worldPosition;
+    this._group.getWorldMatrix(_tempMat);
+    const { elements: ele } = _tempMat;
+    _tempVec0.set(ele[12], ele[13], ele[14]);
+    const s = Vector3.distance(cameraPosition, _tempVec0) * GizmoControls._scaleFactor;
+    const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
+    const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
+    const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
+    this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(sx, sy, sz));
   }
 
   /** init axis geometry */
@@ -105,88 +195,6 @@ export class ScaleControl extends Component implements GizmoComponent {
     this._scaleAxisComponent.y.initAxis(this._scaleControlMap.y);
     this._scaleAxisComponent.z.initAxis(this._scaleControlMap.z);
     this._scaleAxisComponent.xyz.initAxis(this._scaleControlMap.xyz);
-  }
-
-  initCamera(camera: Camera): void {
-    this._camera = camera;
-  }
-  onSelected(value: Group) {
-    this._group = value;
-  }
-
-  onHoverStart(axisName: string) {
-    this._selectedAxisName = axisName;
-    const currEntity = this.gizmoEntity.findByName(axisName);
-    const currComponent = currEntity.getComponent(Axis);
-    currComponent?.highLight && currComponent.highLight();
-  }
-
-  onHoverEnd() {
-    const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
-    const currComponent = currEntity.getComponent(Axis);
-    currComponent?.unLight && currComponent.unLight();
-  }
-
-  onMoveStart(ray: Ray, axisName: string) {
-    this._selectedAxisName = axisName;
-    // get gizmo start worldPosition
-    this._group.getWorldMatrix(this._startGroupMatrix);
-    this._group.getNormalizedMatrix(this._startGizmoMatrix);
-    Matrix.invert(this._startGizmoMatrix, this._startInvMatrix);
-    const { _startPoint, _scaleFactor } = this;
-
-    // get start point
-    this._getHitPlane();
-    this._calRayIntersection(ray, this._startPoint);
-    const localAxis = axisVector[this._selectedAxisName];
-    this._factorVec.set(
-      _startPoint.x === 0 ? 0 : (_scaleFactor * localAxis.x) / _startPoint.x,
-      _startPoint.y === 0 ? 0 : (_scaleFactor * localAxis.y) / _startPoint.y,
-      _startPoint.z === 0 ? 0 : (_scaleFactor * localAxis.z) / _startPoint.z
-    );
-
-    // change axis color
-    const entityArray = this.gizmoEntity.children;
-    for (let i = 0; i < entityArray.length; i++) {
-      const currEntity = entityArray[i];
-      const currComponent = currEntity.getComponent(Axis);
-      if (currEntity.name === this._selectedAxisName) {
-        currComponent?.yellow && currComponent.yellow();
-      } else {
-        currComponent?.gray && currComponent.gray();
-      }
-    }
-  }
-
-  onMove(ray: Ray): void {
-    // 计算局部射线与面的交点
-    this._calRayIntersection(ray, this._currPoint);
-    // 计算开始交点与当前交点的差，得到缩放比例
-    const { _factorVec: factorVec, _tempVec0: scaleVec, _tempMat: mat } = this;
-    Vector3.subtract(this._currPoint, this._startPoint, scaleVec);
-
-    switch (this._selectedAxisName) {
-      case "x":
-      case "y":
-      case "z":
-      case "xyz":
-        scaleVec.x = scaleVec.x * factorVec.x + 1;
-        scaleVec.y = scaleVec.y * factorVec.y + 1;
-        scaleVec.z = scaleVec.z * factorVec.z + 1;
-        break;
-    }
-
-    Matrix.scale(this._startGroupMatrix, scaleVec, mat);
-    this._group.setWorldMatrix(mat);
-  }
-
-  onMoveEnd() {
-    const entityArray = this.gizmoEntity.children;
-    for (let i = 0; i < entityArray.length; i++) {
-      const currEntity = entityArray[i];
-      const currComponent = currEntity.getComponent(Axis);
-      currComponent?.recover && currComponent.recover();
-    }
   }
 
   private _getHitPlane() {

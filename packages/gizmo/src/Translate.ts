@@ -1,14 +1,14 @@
-import { Camera, Component, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
+import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 
 import { Axis } from "./Axis";
+import { GizmoControls } from "./GizmoControls";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { utils } from "./Utils";
 
 /** @internal */
-export class TranslateControl extends Component implements GizmoComponent {
-  gizmoEntity: Entity;
-  gizmoHelperEntity: Entity;
+export class TranslateControl extends GizmoComponent {
+  private _scale: number = 1;
   private _camera: Camera;
   private _group: Group;
   private _translateAxisComponent: {
@@ -30,7 +30,6 @@ export class TranslateControl extends Component implements GizmoComponent {
 
   private _selectedAxisName: string;
   private _startGroupMatrix: Matrix = new Matrix();
-  private _startGizmoMatrix: Matrix = new Matrix();
   private _startInvMatrix: Matrix = new Matrix();
   private _startScale: number = 1;
   private _startPoint: Vector3 = new Vector3();
@@ -46,6 +45,94 @@ export class TranslateControl extends Component implements GizmoComponent {
     super(entity);
     this._initAxis();
     this._createAxis(entity);
+  }
+
+  init(camera: Camera, group: Group) {
+    this._camera = camera;
+    this._group = group;
+  }
+
+  onHoverStart(axisName: string) {
+    this._selectedAxisName = axisName;
+    // change color
+    const currEntity = this.gizmoEntity.findByName(axisName);
+    const currComponent = currEntity.getComponent(Axis);
+    currComponent?.highLight && currComponent.highLight();
+  }
+
+  onHoverEnd() {
+    // recover axis color
+    const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
+    const currComponent = currEntity.getComponent(Axis);
+    currComponent?.unLight && currComponent.unLight();
+
+    this._selectedAxisName = null;
+  }
+
+  onMoveStart(ray: Ray, axisName: string) {
+    this._selectedAxisName = axisName;
+    // get gizmo start worldPosition
+    this._group.getWorldMatrix(this._startGroupMatrix);
+    Matrix.invert(this._startGroupMatrix, this._startInvMatrix);
+
+    // get start scale
+    this._startScale = this._scale;
+
+    // get start point
+    this._getHitPlane();
+    this._calRayIntersection(ray, this._startPoint);
+
+    // change axis color
+    const entityArray = this.gizmoEntity.children;
+    for (let i = 0; i < entityArray.length; i++) {
+      const currEntity = entityArray[i];
+      const currComponent = currEntity.getComponent(Axis);
+      if (currEntity.name === this._selectedAxisName) {
+        currComponent?.yellow && currComponent.yellow();
+      } else {
+        currComponent?.gray && currComponent.gray();
+      }
+    }
+  }
+
+  onMove(ray: Ray): void {
+    // 计算局部射线
+    this._calRayIntersection(ray, this._currPoint);
+    const currScale = this._scale;
+    const { _tempMat: mat, _tempVec0: subVec, _startScale } = this;
+    // 换算一下缩放，两次的缩放是不一样的，所以用原点计算
+    subVec.x = this._currPoint.x - (this._startPoint.x / _startScale) * currScale;
+    subVec.y = this._currPoint.y - (this._startPoint.y / _startScale) * currScale;
+    subVec.z = this._currPoint.z - (this._startPoint.z / _startScale) * currScale;
+
+    const localAxis = axisVector[this._selectedAxisName];
+    mat.identity();
+    mat.elements[12] = subVec.x * localAxis.x;
+    mat.elements[13] = subVec.y * localAxis.y;
+    mat.elements[14] = subVec.z * localAxis.z;
+    // align movement
+    Matrix.multiply(this._startGroupMatrix, mat, mat);
+    // 更新组内所有 entity 的位置
+    this._group.setWorldMatrix(mat);
+  }
+
+  onMoveEnd() {
+    // recover axis cover
+    const entityArray = this.gizmoEntity.children;
+    for (let i = 0; i < entityArray.length; i++) {
+      const currEntity = entityArray[i];
+      const currComponent = currEntity.getComponent(Axis);
+      currComponent?.recover && currComponent.recover();
+    }
+  }
+
+  onGizmoRedraw() {
+    const { _tempMat, _tempVec0 } = this;
+    const cameraPosition = this._camera.entity.transform.worldPosition;
+    this._group.getWorldMatrix(_tempMat);
+    _tempVec0.set(_tempMat.elements[12], _tempMat.elements[13], _tempMat.elements[14]);
+    const s = (this._scale = Vector3.distance(cameraPosition, _tempVec0) * GizmoControls._scaleFactor);
+    this.gizmoEntity.transform.worldMatrix = _tempMat.scale(_tempVec0.set(s, s, s));
   }
 
   private _initAxis() {
@@ -128,86 +215,6 @@ export class TranslateControl extends Component implements GizmoComponent {
     this._translateAxisComponent.yz.initAxis(this._translateControlMap.yz);
   }
 
-  initCamera(camera: Camera): void {
-    this._camera = camera;
-  }
-
-  onSelected(group: Group) {
-    this._group = group;
-  }
-
-  onHoverStart(axisName: string) {
-    this._selectedAxisName = axisName;
-    // change color
-    const currEntity = this.gizmoEntity.findByName(axisName);
-    const currComponent = currEntity.getComponent(Axis);
-    currComponent?.highLight && currComponent.highLight();
-  }
-
-  onHoverEnd() {
-    // recover axis color
-    const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
-    const currComponent = currEntity.getComponent(Axis);
-    currComponent?.unLight && currComponent.unLight();
-
-    this._selectedAxisName = null;
-  }
-
-  onMoveStart(ray: Ray, axisName: string) {
-    this._selectedAxisName = axisName;
-    // get gizmo start worldPosition
-    this._group.getWorldMatrix(this._startGroupMatrix);
-    this._group.getNormalizedMatrix(this._startGizmoMatrix);
-    Matrix.invert(this._startGizmoMatrix, this._startInvMatrix);
-
-    this._startScale = window.gizmoScale;
-
-    // get start point
-    this._getHitPlane();
-    this._calRayIntersection(ray, this._startPoint);
-
-    // change axis color
-    const entityArray = this.gizmoEntity.children;
-    for (let i = 0; i < entityArray.length; i++) {
-      const currEntity = entityArray[i];
-      const currComponent = currEntity.getComponent(Axis);
-      if (currEntity.name === this._selectedAxisName) {
-        currComponent?.yellow && currComponent.yellow();
-      } else {
-        currComponent?.gray && currComponent.gray();
-      }
-    }
-  }
-  onMove(ray: Ray): void {
-    // 计算局部射线
-    this._calRayIntersection(ray, this._currPoint);
-    const currScale = window.gizmoScale;
-    const { _tempMat: mat, _tempVec0: subVec, _startScale } = this;
-    // 换算一下缩放，两次的缩放是不一样的，所以用原点计算
-    subVec.x = this._currPoint.x - (this._startPoint.x / _startScale) * currScale;
-    subVec.y = this._currPoint.y - (this._startPoint.y / _startScale) * currScale;
-    subVec.z = this._currPoint.z - (this._startPoint.z / _startScale) * currScale;
-
-    const localAxis = axisVector[this._selectedAxisName];
-    mat.identity();
-    mat.elements[12] = subVec.x * localAxis.x;
-    mat.elements[13] = subVec.y * localAxis.y;
-    mat.elements[14] = subVec.z * localAxis.z;
-    // align movement
-    Matrix.multiply(this._startGroupMatrix, mat, mat);
-    this._group.setWorldMatrix(mat);
-  }
-
-  onMoveEnd() {
-    // recover axis cover
-    const entityArray = this.gizmoEntity.children;
-    for (let i = 0; i < entityArray.length; i++) {
-      const currEntity = entityArray[i];
-      const currComponent = currEntity.getComponent(Axis);
-      currComponent?.recover && currComponent.recover();
-    }
-  }
-
   private _getHitPlane() {
     switch (this._selectedAxisName) {
       case "x":
@@ -215,10 +222,8 @@ export class TranslateControl extends Component implements GizmoComponent {
       case "z":
       case "xyz":
         const { _tempVec0: centerP, _tempVec1: crossP, _tempVec2: cameraP } = this;
-        // 原点 ---> 相机
         cameraP.copyFrom(this._camera.entity.transform.worldPosition);
         cameraP.transformToVec3(this._startInvMatrix);
-        // 原点 ---> 缩放轴
         const localAxis = axisVector[this._selectedAxisName];
         // 垂直于上方两个向量的 cross 向量
         Vector3.cross(cameraP, localAxis, crossP);

@@ -1,4 +1,4 @@
-import { BoundingBox, Renderer, Vector3, Quaternion, Matrix, Entity } from "oasis-engine";
+import { BoundingBox, Renderer, Vector3, Matrix, Entity, ListenerUpdateFlag } from "oasis-engine";
 
 export enum AnchorType {
   Pivot,
@@ -17,21 +17,22 @@ export enum CoordinateType {
 export class Group {
   // 临时变量
   private static _tempVec30: Vector3 = new Vector3();
-  private static _tempVec31: Vector3 = new Vector3();
-  private static _tempQuat: Quaternion = new Quaternion();
   private static _tempMat0: Matrix = new Matrix();
   private static _tempMat1: Matrix = new Matrix();
   private static _tempBoundBox: BoundingBox = new BoundingBox();
 
+  // @internal
+  _gizmoTransformDirty: boolean = true;
+
   // Group 内 Entity 数组
   private _entities: Entity[] = [];
+  private _listeners: ListenerUpdateFlag[] = [];
   // Group 的世界矩阵
   private _worldMatrix: Matrix = new Matrix();
   // 锚点类(Pivot, Center)
   private _anchorType: AnchorType = AnchorType.Pivot;
   // 坐标系类型(Local, Global)
   private _coordinateType: CoordinateType = CoordinateType.Local;
-
   private _dirtyFlag: GroupDirtyFlag = GroupDirtyFlag.All;
 
   /**
@@ -44,7 +45,7 @@ export class Group {
   public set anchorType(value: AnchorType) {
     if (this._anchorType !== value) {
       this._anchorType = value;
-      this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
+      this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
     }
   }
 
@@ -58,8 +59,15 @@ export class Group {
   public set coordinateType(value: CoordinateType) {
     if (this._coordinateType !== value) {
       this._coordinateType = value;
-      this._dirtyFlag |= GroupDirtyFlag.CoordinateDirty;
+      this.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     }
+  }
+
+  /**
+   * 强制更新某个标记
+   */
+  public forceUpdate(flag: GroupDirtyFlag) {
+    this._dirtyFlag |= flag;
   }
 
   /**
@@ -68,8 +76,7 @@ export class Group {
    * @returns
    */
   public getWorldMatrix(out?: Matrix): Boolean {
-    const { _entities: entities } = this;
-    if (entities.length <= 0) {
+    if (this._entities.length <= 0) {
       return false;
     } else {
       /** Update anchor. */
@@ -78,6 +85,18 @@ export class Group {
       this._updateCoordinate();
       out && out.copyFrom(this._worldMatrix);
       return true;
+    }
+  }
+
+  /**
+   * 获取 group 在世界空间的位置
+   * @param out
+   * @returns
+   */
+  public getWorldPosition(out?: Vector3): void {
+    if (this.getWorldMatrix()) {
+      const { elements: ele } = this._worldMatrix;
+      out.set(ele[12], ele[13], ele[14]);
     }
   }
 
@@ -110,25 +129,6 @@ export class Group {
     }
   }
 
-  public setTranslation(value: Vector3) {
-    if (this.getWorldMatrix()) {
-    }
-  }
-
-  public setWorldQuat(value: Quaternion) {
-    const { _tempVec30, _tempVec31, _tempMat0 } = Group;
-    if (this.getWorldMatrix(_tempMat0)) {
-      const newMat = new Matrix();
-      Matrix.affineTransformation(
-        _tempMat0.getScaling(_tempVec30),
-        value,
-        _tempMat0.getTranslation(_tempVec31),
-        newMat
-      );
-      this.setWorldMatrix(newMat);
-    }
-  }
-
   /**
    * 添加节点
    * @param addEntities
@@ -148,7 +148,7 @@ export class Group {
           // 完全相等
           canAdd = false;
           break;
-        } else if (this.hasRelationship(compareEntity, entity)) {
+        } else if (this._hasRelationship(compareEntity, entity)) {
           // 如果希望添加的 entity 是已有节点的子节点，那么就没有必要加进这个 group
           canAdd = false;
           break;
@@ -156,25 +156,73 @@ export class Group {
           // 如果希望添加的 entity 是已有节点的子节点
           // 1. 删除已有节点
           // 2. 还要继续判断是否有其他子节点
-          entities.splice(j, 1);
+          this._applyDel(j);
         }
       }
       if (canAdd) {
-        entities.push(entity);
-        switch (this._anchorType) {
-          case AnchorType.Center:
-            this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
-            break;
-          case AnchorType.Pivot:
-            if (entities.length === 1) {
-              this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
-            }
-            break;
-          default:
-            break;
-        }
+        this._applyAdd(entity);
       }
     }
+  }
+
+  public setDirtyFlagTrue(flag: GroupDirtyFlag) {
+    this._dirtyFlag |= flag;
+    this._gizmoTransformDirty = true;
+  }
+
+  /** 添加一个节点的连锁操作 */
+  private _applyAdd(entity: Entity) {
+    this._entities.push(entity);
+    const listener = entity.transform._registerWorldChangeListenser();
+    this._listeners.push(listener);
+    const fun = this._onEntityWorldTransformChange(entity);
+    listener.listener = fun;
+    // 第一次加入的时候，会调用一次
+    fun();
+  }
+
+  /** 移除一个节点的连锁操作 */
+  private _applyDel(value: Entity | number) {
+    const index = typeof value === "number" ? value : this._entities.indexOf(value);
+    if (index === 0) {
+      if (this._coordinateType === CoordinateType.Local) {
+        // Local 模式下需要更新旋转，缩放和位移
+        this.setDirtyFlagTrue(GroupDirtyFlag.All);
+      } else {
+        this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
+      }
+      this._entities.splice(index, 1);
+      this._listeners[index].destroy();
+      this._listeners.splice(index, 1);
+    } else if (index > 0) {
+      if (this._anchorType === AnchorType.Center) {
+        this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
+      }
+      this._entities.splice(index, 1);
+      this._listeners[index].destroy();
+      this._listeners.splice(index, 1);
+    }
+  }
+
+  /**
+   * 监听的子节点全局坐标发生改变
+   */
+  private _onEntityWorldTransformChange(entity: Entity): () => void {
+    return () => {
+      if (this._entities.indexOf(entity) === 0) {
+        // 如果这个 entity 是参考节点
+        if (this._coordinateType === CoordinateType.Local) {
+          // Local 模式下需要更新旋转，缩放和位移
+          this.setDirtyFlagTrue(GroupDirtyFlag.All);
+        } else {
+          this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
+        }
+      } else {
+        if (this._anchorType === AnchorType.Center) {
+          this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
+        }
+      }
+    };
   }
 
   /**
@@ -182,61 +230,8 @@ export class Group {
    * @param delEntities
    */
   public delEntity(delEntities: Entity[]): void {
-    const { _entities: entities } = this;
     for (let i = delEntities.length - 1; i >= 0; i--) {
-      const delEntity = delEntities[i];
-      const index = entities.indexOf(delEntity);
-      if (index >= 0) {
-        entities.splice(index, 1);
-        switch (this._anchorType) {
-          case AnchorType.Center:
-            this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
-            break;
-          case AnchorType.Pivot:
-            if (index === 0) {
-              this._dirtyFlag |= GroupDirtyFlag.AnchorDirty;
-            }
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  }
-
-  /**
-   * 拿到 group 在世界空间中的旋转和位移，并增加一个缩放
-   * @param out
-   * @param s
-   */
-  public getNormalizedMatrix(out: Matrix, s: number = 1): boolean {
-    /** Update worldMatrix. */
-    if (this.getWorldMatrix()) {
-      const { elements: ele } = this._worldMatrix;
-      const { elements: gE } = out;
-      let fs = s / Math.sqrt(ele[0] * ele[0] + ele[1] * ele[1] + ele[2] * ele[2]);
-      (gE[0] = ele[0] * fs), (gE[1] = ele[1] * fs), (gE[2] = ele[2] * fs);
-      fs = s / Math.sqrt(ele[4] * ele[4] + ele[5] * ele[5] + ele[6] * ele[6]);
-      (gE[4] = ele[4] * fs), (gE[5] = ele[5] * fs), (gE[6] = ele[6] * fs);
-      fs = s / Math.sqrt(ele[8] * ele[8] + ele[9] * ele[9] + ele[10] * ele[10]);
-      (gE[8] = ele[8] * fs), (gE[9] = ele[9] * fs), (gE[10] = ele[10] * fs);
-      (gE[12] = ele[12]), (gE[13] = ele[13]), (gE[14] = ele[14]);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * 获取 Group 在世界空间中的位移
-   */
-  public getWorldPosition(out: Vector3): boolean {
-    if (this.getWorldMatrix()) {
-      const { elements: e } = this._worldMatrix;
-      (out.x = e[12]), (out.y = e[13]), (out.z = e[14]);
-      return true;
-    } else {
-      return false;
+      this._applyDel(delEntities[i]);
     }
   }
 
@@ -245,6 +240,11 @@ export class Group {
    */
   public reset() {
     this._entities.length = 0;
+    const { _listeners: listeners } = this;
+    for (let i = listeners.length - 1; i >= 0; i--) {
+      listeners[i].destroy();
+    }
+    listeners.length = 0;
     this._dirtyFlag = GroupDirtyFlag.All;
   }
 
@@ -254,7 +254,7 @@ export class Group {
    * @param compareChild
    * @returns
    */
-  private hasRelationship(parent: Entity, compareChild: Entity): boolean {
+  private _hasRelationship(parent: Entity, compareChild: Entity): boolean {
     while (compareChild.parent) {
       if (parent === compareChild.parent) {
         return true;
@@ -295,10 +295,13 @@ export class Group {
       switch (this._coordinateType) {
         case CoordinateType.Local:
           // 与 unity 操作相同，以第一个 entity 为参照
-          const worldE = this._entities[0].transform.worldMatrix.elements;
-          (e[0] = worldE[0]), (e[4] = worldE[4]), (e[8] = worldE[8]);
-          (e[1] = worldE[1]), (e[5] = worldE[5]), (e[9] = worldE[9]);
-          (e[2] = worldE[2]), (e[6] = worldE[6]), (e[10] = worldE[10]);
+          const wE = this._entities[0].transform.worldMatrix.elements;
+          const sx = 1 / Math.sqrt(wE[0] ** 2 + wE[1] ** 2 + wE[2] ** 2);
+          const sy = 1 / Math.sqrt(wE[4] ** 2 + wE[5] ** 2 + wE[6] ** 2);
+          const sz = 1 / Math.sqrt(wE[8] ** 2 + wE[9] ** 2 + wE[10] ** 2);
+          (e[0] = wE[0] * sx), (e[4] = wE[4] * sy), (e[8] = wE[8] * sz);
+          (e[1] = wE[1] * sx), (e[5] = wE[5] * sy), (e[9] = wE[9] * sz);
+          (e[2] = wE[2] * sx), (e[6] = wE[6] * sy), (e[10] = wE[10] * sz);
           break;
         case CoordinateType.Global:
           (e[0] = 1), (e[4] = 0), (e[8] = 0);
@@ -332,7 +335,7 @@ export class Group {
   }
 }
 
-enum GroupDirtyFlag {
+export enum GroupDirtyFlag {
   None = 0,
   AnchorDirty = 1,
   CoordinateDirty = 2,

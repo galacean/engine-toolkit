@@ -1,17 +1,17 @@
 import {
   Camera,
   Entity,
-  Matrix,
   Ray,
-  Component,
-  Vector3,
   Layer,
   RenderTarget,
   Texture2D,
-  Script,
   PointerButton,
   SphereColliderShape,
-  StaticCollider
+  StaticCollider,
+  BoolUpdateFlag,
+  Vector3,
+  MathUtil,
+  Script
 } from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -19,61 +19,54 @@ import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { utils } from "./Utils";
 import { GizmoState } from "./enums/GizmoState";
-import { AnchorType, CoordinateType, Group } from "./Group";
+import { AnchorType, CoordinateType, Group, GroupDirtyFlag } from "./Group";
 import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
 export class GizmoControls extends Script {
-  gizmoState: GizmoState = GizmoState.translate;
+  static _scaleFactor = 0.05773502691896257;
 
+  public gizmoState: GizmoState;
+  private _initialized = false;
   private _isStarted = false;
   private _isHovered = false;
-  private _scaleFactor = 0.05773502691896257;
-  private _gizmoMap: Record<string, { entity: Entity; component: GizmoComponent }> = {};
+  private _gizmoLayer: Layer = Layer.Layer22;
+  private _gizmoMap: Record<string, GizmoComponent> = {};
   private _editorCamera: Camera;
-  private _selectedAxisName: string;
+  private _gizmoControl: GizmoComponent;
   private _group: Group = new Group();
+  private _framebufferPicker: FramebufferPicker;
+  private _lastDistance: number = -1;
+  private _tempVec: Vector3 = new Vector3();
   private _tempRay: Ray = new Ray();
   private _tempRay2: Ray = new Ray();
-  private _tempMatrix: Matrix = new Matrix();
 
-  private _framebufferPicker: FramebufferPicker;
-  private _gizmoLayer: Layer = Layer.Layer22;
-  private isGizmoStarted = false;
-  private _ray: Ray = new Ray();
-  private _hit: any = null;
+  private _cameraTransformChangeFlag: BoolUpdateFlag;
 
   constructor(entity: Entity) {
     super(entity);
 
     utils.init(this.engine);
-
     this._createGizmoControl(GizmoState.translate, TranslateControl);
     this._createGizmoControl(GizmoState.scale, ScaleControl);
     this._createGizmoControl(GizmoState.rotate, RotateControl);
-
-    this.onGizmoChange(this.gizmoState);
 
     // framebuffer picker
     this._framebufferPicker = entity.addComponent(FramebufferPicker);
     this._framebufferPicker.colorRenderPass.mask = this._gizmoLayer;
     this._framebufferPicker.colorRenderTarget = new RenderTarget(
       this.engine,
-      128,
-      128,
-      new Texture2D(this.engine, 128, 128)
+      256,
+      256,
+      new Texture2D(this.engine, 256, 256)
     );
 
     // gizmo collider
-    const sphereCollider = this.entity.addComponent(StaticCollider);
+    const sphereCollider = entity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
     colliderShape.radius = 2;
     sphereCollider.addShape(colliderShape);
-
-    // default add gizmo to its parent entity
-    this._group.addEntity([this.entity]);
-    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(this._group));
   }
 
   /**
@@ -81,9 +74,26 @@ export class GizmoControls extends Script {
    * @param camera - The scene camera
    */
   initGizmoControl(camera: Camera) {
-    this._editorCamera = camera;
-    this._framebufferPicker.camera = camera;
-    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.initCamera(camera));
+    if (camera !== this._editorCamera) {
+      if (this._cameraTransformChangeFlag) {
+        this._cameraTransformChangeFlag.destroy();
+      }
+      if (camera) {
+        const { _group: group } = this;
+        this._editorCamera = camera;
+        this._framebufferPicker.camera = camera;
+        Object.values(this._gizmoMap).forEach((gizmo) => {
+          gizmo.init(camera, this._group);
+        });
+        group.reset();
+        group.addEntity([this.entity]);
+        this._cameraTransformChangeFlag = camera.entity.transform.registerWorldChangeFlag();
+        this._initialized = true;
+      } else {
+        this._cameraTransformChangeFlag = null;
+        this._initialized = false;
+      }
+    }
   }
   /**
    * toggle gizmo orientation type
@@ -106,12 +116,16 @@ export class GizmoControls extends Script {
    * @param targetState - gizmo new state
    */
   onGizmoChange(targetState: GizmoState) {
-    this.gizmoState = targetState;
-    const { _gizmoMap: gizmoMap } = this;
-    const states = Object.keys(gizmoMap);
-    for (let i = states.length - 1; i >= 0; i--) {
-      const state = states[i];
-      gizmoMap[state].entity.isActive = targetState === state;
+    if (this.gizmoState !== targetState) {
+      this.gizmoState = targetState;
+      const { _gizmoMap: gizmoMap } = this;
+      this._gizmoControl = gizmoMap[targetState];
+      const states = Object.keys(gizmoMap);
+      for (let i = states.length - 1; i >= 0; i--) {
+        const state = states[i];
+        gizmoMap[state].entity.isActive = targetState === state;
+      }
+      this._gizmoControl.onGizmoRedraw();
     }
   }
 
@@ -120,160 +134,130 @@ export class GizmoControls extends Script {
    * @param entity - the selected entity, could be empty
    */
   onEntitySelected(entity: Entity | null) {
-    /** 目前是单选，所以清空之前选中的物体 */
     const { _group: group } = this;
     group.reset();
-    if (!entity) {
-      return;
-    }
-    group.addEntity([entity]);
-    Object.values(this._gizmoMap).forEach((gizmo) => gizmo.component.onSelected(group));
+    entity && group.addEntity([entity]);
   }
 
   /**
    * called when pointer enters gizmo
    * @param axisName - the hovered axis name
    */
-  onGizmoHoverStart(axisName: string) {
-    this._selectedAxisName = axisName;
+  private _onGizmoHoverStart(axisName: string) {
     this._isHovered = true;
-    this._gizmoMap[this.gizmoState].component.onHoverStart(axisName);
+    this._gizmoControl.onHoverStart(axisName);
   }
 
   /**
    * called when pointer leaves gizmo
    */
-  onGizmoHoverEnd() {
+  private _onGizmoHoverEnd() {
     if (this._isHovered) {
-      this._gizmoMap[this.gizmoState].component.onHoverEnd();
+      this._gizmoControl.onHoverEnd();
       this._isHovered = false;
     }
   }
+
   /**
    * called when gizmo starts to move
    * @param axisName - the hovered axis name
    */
-  triggerGizmoStart(axisName: string) {
+  private _triggerGizmoStart(axisName: string) {
     this._isStarted = true;
-    this._selectedAxisName = axisName;
     const pointerPosition = this.engine.inputManager.pointerPosition;
     if (pointerPosition) {
-      const { _tempRay } = this;
-      this._editorCamera.screenPointToRay(pointerPosition, _tempRay);
-      this._gizmoMap[this.gizmoState].component.onMoveStart(_tempRay, this._selectedAxisName);
+      this._editorCamera.screenPointToRay(pointerPosition, this._tempRay);
+      this._gizmoControl.onMoveStart(this._tempRay, axisName);
     }
   }
+
   /**
-   * called when gizmo is moving
+   * called when gizmo move
    */
-  onGizmoMove() {
-    if (this._isStarted) {
-      const pointerPosition = this.engine.inputManager.pointerPosition;
-      if (pointerPosition) {
-        this._editorCamera.screenPointToRay(pointerPosition, this._tempRay2);
-        this._gizmoMap[this.gizmoState].component.onMove(this._tempRay2);
-      }
-    }
+  private _triggerGizmoMove() {
+    this._editorCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._tempRay2);
+    this._gizmoControl.onMove(this._tempRay2);
   }
 
   /**
    * called when gizmo movement ends
    */
-  triggerGizmoEnd() {
-    if (this._isStarted) {
-      this._gizmoMap[this.gizmoState].component.onMoveEnd();
-      if (this.gizmoState === GizmoState.rotate && this._group.coordinateType === CoordinateType.Global) {
-        // 如果是旋转且为世界参考坐标，需要更新一下
-        this._group.coordinateType = CoordinateType.Local;
-        this._group.coordinateType = CoordinateType.Global;
-      }
-      this._isStarted = false;
-    }
+  private _triggerGizmoEnd() {
+    this._gizmoControl.onMoveEnd();
+    // todo:当且仅当 group 为世界坐标时，才去更新
+    this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
+    this._isStarted = false;
   }
 
-  _selectHandler(result) {
+  private _selectHandler(result): void {
     const selectedEntity = result?.component?.entity;
     switch (selectedEntity?.layer) {
       case this._gizmoLayer:
-        this.isGizmoStarted = true;
-        this.triggerGizmoStart(selectedEntity.name);
+        this._triggerGizmoStart(selectedEntity.name);
         break;
     }
   }
 
-  _dragHandler(result) {
+  private _overHandler(result) {
     const hoverEntity = result?.component?.entity;
     if (hoverEntity?.layer === this._gizmoLayer) {
-      this.onGizmoHoverEnd();
-      this.onGizmoHoverStart(hoverEntity.name);
+      this._onGizmoHoverEnd();
+      this._onGizmoHoverStart(hoverEntity.name);
     } else {
-      this.onGizmoHoverEnd();
+      this._onGizmoHoverEnd();
     }
   }
 
   /** @internal */
   onUpdate() {
-    const { engine } = this;
-    const { inputManager } = engine;
-
-    // Handle select.
-    if (inputManager.isPointerDown(PointerButton.Primary)) {
-      const pointerPosition = inputManager.pointerPosition;
-      this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
-        this._selectHandler(result);
-      });
+    if (!this._initialized || !this._gizmoControl) {
+      return;
     }
-
-    if (inputManager.isPointerUp(PointerButton.Primary)) {
-      if (this.isGizmoStarted) {
-        this.isGizmoStarted = false;
-        this.triggerGizmoEnd();
-      }
-    }
-
-    // Handler drag.
-    const pointerMovingDelta = inputManager.pointerMovingDelta;
-    if (pointerMovingDelta.x !== 0 || pointerMovingDelta.y !== 0) {
+    const { inputManager } = this.engine;
+    if (this._isStarted) {
       if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
-        if (this.isGizmoStarted) {
-          this.onGizmoMove();
+        const { pointerMovingDelta } = inputManager;
+        if (pointerMovingDelta.x !== 0 || pointerMovingDelta.y !== 0) {
+          this._triggerGizmoMove();
         }
       } else {
-        const pointerPosition = inputManager.pointerPosition;
-        const ray = this._ray;
-        const hit = this._hit;
-        this._editorCamera.screenPointToRay(inputManager.pointerPosition, ray);
-        const result = engine.physicsManager.raycast(ray, Number.MAX_VALUE, this._gizmoLayer, hit);
-        if (result) {
+        this._triggerGizmoEnd();
+      }
+      if (this._group._gizmoTransformDirty) {
+        this._gizmoControl.onGizmoRedraw();
+        this._group._gizmoTransformDirty = false;
+      }
+    } else {
+      this._group.getWorldPosition(this._tempVec);
+      const cameraPosition = this._editorCamera.entity.transform.worldPosition;
+      const currDistance = Vector3.distance(cameraPosition, this._tempVec);
+      let distanceDirty = false;
+      if (Math.abs(this._lastDistance - currDistance) > MathUtil.zeroTolerance) {
+        distanceDirty = true;
+        this._lastDistance = currDistance;
+      }
+
+      if (this._group._gizmoTransformDirty || distanceDirty) {
+        this._gizmoControl.onGizmoRedraw();
+        this._group._gizmoTransformDirty = false;
+      }
+      const { pointerPosition } = inputManager;
+      if (pointerPosition) {
+        if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
           this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
-            this._dragHandler(result);
+            this._selectHandler(result);
+          });
+        } else {
+          this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+            this._overHandler(result);
           });
         }
       }
     }
-    this.update();
-  }
-
-  private update(): void {
-    let s: number = 1;
-    if (this._editorCamera) {
-      const cameraPosition = this._editorCamera.entity.transform.worldPosition;
-      const currentPosition = this.entity.transform.worldPosition;
-      s = Vector3.distance(cameraPosition, currentPosition) * this._scaleFactor;
-    }
-    // hack 操作，记录下当前 gizmo 显示的缩放
-    window.gizmoScale = s;
-    // 需要 group 归一化后的世界矩阵
-    this._group.getNormalizedMatrix(this._tempMatrix, s);
-    this.entity.transform.worldMatrix = this._tempMatrix;
-    if (this._isStarted && this.gizmoState === GizmoState.rotate) {
-      (this._gizmoMap[GizmoState.rotate].component as RotateControl).onLateUpdate();
-    }
   }
 
   private _createGizmoControl(control: string, gizmoComponent: new (entity: Entity) => GizmoComponent) {
-    const entity = this.entity.createChild();
-    const component = entity.addComponent(gizmoComponent);
-    this._gizmoMap[control] = { entity, component };
+    const gizmoControl = this.entity.createChild(control).addComponent(gizmoComponent);
+    this._gizmoMap[control] = gizmoControl;
   }
 }
