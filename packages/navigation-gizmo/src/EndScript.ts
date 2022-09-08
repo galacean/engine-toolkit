@@ -2,25 +2,18 @@ import {
   Camera,
   Color,
   Entity,
+  Matrix,
   Quaternion,
   Script,
   TextRenderer,
+  Vector3,
 } from "oasis-engine";
 import * as TWEEN from "@tweenjs/tween.js";
 import { NavigationGizmo } from "./NavigationGizmo";
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
 
-const targetQuaternion = {
-  x: new Quaternion(0, -1, 0, 1),
-  y: new Quaternion(1, 0, 0, 1),
-  z: new Quaternion(0, 0, 0, 1),
-  "-x": new Quaternion(0, 1, 0, 1),
-  "-y": new Quaternion(-1, 0, 0, 1),
-  "-z": new Quaternion(0, 1, 0, 0),
-};
-
 export class EndScript extends Script {
-  private duration: number = 500;
+  private duration: number = 50;
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
@@ -32,7 +25,44 @@ export class EndScript extends Script {
 
   private _tween = new TWEEN.Tween({ t: 0 });
   private _normalQuat: Quaternion = new Quaternion();
-  private _tempQuat: Quaternion = new Quaternion();
+  private _tempVect: Vector3 = new Vector3();
+  private _tempTargetVect: Vector3 = new Vector3();
+  private _tempPointVect: Vector3 = new Vector3();
+  private _tempMat: Matrix = new Matrix();
+  private _tempRotate: Vector3 = new Vector3();
+
+  private AxisFactor = {
+    x: {
+      upVector: new Vector3(0, 1, 0),
+      axis: "x",
+      factor: 1,
+    },
+    y: {
+      upVector: new Vector3(0, 0, 1),
+      axis: "y",
+      factor: 1,
+    },
+    z: {
+      upVector: new Vector3(0, 1, 0),
+      axis: "z",
+      factor: 1,
+    },
+    "-x": {
+      upVector: new Vector3(0, 1, 0),
+      axis: "x",
+      factor: -1,
+    },
+    "-y": {
+      upVector: new Vector3(0, 0, -1),
+      axis: "y",
+      factor: -1,
+    },
+    "-z": {
+      upVector: new Vector3(0, 1, 0),
+      axis: "z",
+      factor: -1,
+    },
+  };
 
   constructor(entity: Entity) {
     super(entity);
@@ -61,39 +91,57 @@ export class EndScript extends Script {
   }
 
   onPointerClick() {
-    const targetQuat = targetQuaternion[this.entity.name];
-    const currentQuat =
-      this._directionEntity.transform.rotationQuaternion.clone();
+    const currentAxisName = this.entity.name;
+    const targetMat = this._getTargetMatrix(
+      this._sceneCameraEntity,
+      currentAxisName
+    );
 
-    TWEEN.remove(this._tween);
-    this._tween = new TWEEN.Tween({ t: 0 });
-    this._tween
-      .to({ t: 1 }, this.duration)
-      .onStart(() => {
-        if (this._orbitControl) {
-          this._orbitControl.enabled = false;
-        }
+    if (this._orbitControl) {
+      this._orbitControl.enabled = false;
+    }
 
-        this._sceneCamera.isOrthographic = true;
-        this._textRenderer.color.set(0, 0, 0, 1);
-        this._textColor = this._textRenderer.color.clone();
-      })
-      .onUpdate(({ t }) => {
-        Quaternion.lerp(currentQuat, targetQuat, t, this._tempQuat);
-        this._directionEntity.transform.rotationQuaternion = this._tempQuat;
-        this._sceneCameraEntity.transform.rotation =
-          this._directionEntity.transform.rotation;
-      })
-      .onComplete(() => {
-        if (this._orbitControl) {
-          this._orbitControl.enabled = true;
-        }
-      })
-      .start();
+    this._sceneCameraEntity.transform.worldMatrix = targetMat;
+
+    if (this._orbitControl) {
+      this._orbitControl.enabled = true;
+    }
   }
 
   onUpdate() {
     TWEEN.update();
     this.entity.transform.worldRotationQuaternion = this._normalQuat;
+  }
+
+  _getTargetMatrix(entity: Entity, axisName: string) {
+    const currentPos = entity.transform.worldPosition;
+
+    const upVector = this.AxisFactor[axisName].upVector;
+    const factor = this.AxisFactor[axisName].factor;
+    const axis = this.AxisFactor[axisName].axis;
+
+    const radius = this._sceneCameraEntity.transform.worldPosition.length();
+    this._tempRotate = new Vector3();
+    this._tempRotate[axis] = factor * radius;
+
+    entity.transform.getWorldForward(this._tempVect);
+    this._tempVect.scale(radius);
+
+    // get rotate origin point
+    Vector3.add(currentPos, this._tempVect, this._tempPointVect);
+
+    // get position after rotation
+    Vector3.add(this._tempRotate, this._tempPointVect, this._tempTargetVect);
+
+    // get worldMatrix for scene camera
+    Matrix.lookAt(
+      this._tempTargetVect,
+      this._tempPointVect,
+      upVector,
+      this._tempMat
+    );
+    this._tempMat.invert();
+
+    return this._tempMat;
   }
 }
