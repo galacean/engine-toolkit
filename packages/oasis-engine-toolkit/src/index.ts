@@ -6,7 +6,7 @@ export * from "@oasis-engine-toolkit/planar-shadow-material";
 export * from "@oasis-engine-toolkit/lines";
 export * from "@oasis-engine-toolkit/gizmo";
 export * from "@oasis-engine-toolkit/outline";
-export * from "@oasis-engine-toolkit/geometry-texture";
+export * from "@oasis-engine-toolkit/geometry-sketch";
 
 //@ts-ignore
 export const version = `__buildVersion`;

@@ -17,7 +17,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - ➡️  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
 - ⭕️  &nbsp;**Outline** - Show outline of mesh renderers
 - 📐  &nbsp;**Lines** - 2D Solid Line & Dash Line
-- 🖼  &nbsp;**Geometry Texture** - Convert geometry into texture && draw normal and mesh wireframe
+- 🖼  &nbsp;**Geometry Sketch** - Convert geometry into texture && sketch normal and mesh wireframe
 
 ## npm
 

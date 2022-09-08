@@ -1,1 +1,0 @@
-export { GeometryWireframe } from "./GeometryWireframe";

@@ -18,14 +18,14 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/controls": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/gizmo": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/lines": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/outline": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/planar-shadow-material": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/skeleton-viewer": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/geometry-texture": "0.8.0-beta.3"
+    "@oasis-engine-toolkit/auxiliary-lines": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/controls": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/framebuffer-picker": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/gizmo": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/lines": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/outline": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/planar-shadow-material": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/skeleton-viewer": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/geometry-sketch": "0.9.0-alpha.1"
   }
 }
