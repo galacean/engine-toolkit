@@ -159,7 +159,7 @@ export class OrbitControl extends Script {
         _sphericalDelta.phi = _sphericalDump.phi *= 1 - this.dampingFactor;
       }
     }
-    if (this.autoRotate) {
+    if (curHandlerType === ControlHandlerType.None && this.autoRotate) {
       const rotateAngle = (this.autoRotateSpeed / 1000) * deltaTime;
       _sphericalDelta.theta -= rotateAngle;
     }
