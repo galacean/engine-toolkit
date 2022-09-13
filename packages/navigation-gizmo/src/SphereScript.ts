@@ -3,11 +3,13 @@ import {
   Color,
   Entity,
   Layer,
+  Matrix,
   Quaternion,
   Ray,
   Script,
   TextRenderer,
   Vector2,
+  Vector3,
 } from "oasis-engine";
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
 import { NavigationGizmo } from "./NavigationGizmo";
@@ -32,6 +34,7 @@ export class SphereScript extends Script {
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
   private _tempVec: Vector2 = new Vector2();
+  private _tempMat: Matrix = new Matrix();
 
   private _ray: Ray = new Ray();
 
@@ -137,11 +140,34 @@ export class SphereScript extends Script {
 
   onUpdate() {
     if (this.isTriggered) {
-      this._sceneCameraEntity.transform.rotation =
-        this._directionEntity.transform.rotation;
+      this._tempMat = this._directionEntity.transform.worldMatrix.clone();
+      this._tempMat.invert();
+
+      const tempWorldPos =
+        this._sceneCamera.entity.transform.worldPosition.clone();
+      const tempMat = new Matrix();
+      const tempQuat = new Quaternion();
+      Quaternion.invert(
+        this._directionEntity.transform.rotationQuaternion,
+        tempQuat
+      );
+      Matrix.affineTransformation(
+        new Vector3(1, 1, 1),
+        tempQuat,
+        tempWorldPos,
+        tempMat
+      );
+      const { elements } = tempMat;
+      elements[8] = -elements[8];
+      elements[9] = -elements[9];
+      elements[10] = -elements[10];
+      this._sceneCamera.entity.transform.worldMatrix = tempMat;
     } else {
-      this._directionEntity.transform.rotation =
-        this._sceneCameraEntity.transform.rotation;
+      const tempMat = this._sceneCamera.viewMatrix.clone();
+      const { elements: ele } = tempMat;
+      // ignore translate
+      ele[12] = ele[13] = ele[14] = 0;
+      this._directionEntity.transform.worldMatrix = tempMat;
     }
   }
 }
