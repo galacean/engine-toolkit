@@ -10,26 +10,26 @@ import {
 } from "oasis-engine";
 import * as TWEEN from "@tweenjs/tween.js";
 import { NavigationGizmo } from "./NavigationGizmo";
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
+import { OrbitControl } from "oasis-engine-toolkit";
 
 export class EndScript extends Script {
-  private duration: number = 50;
+  private duration: number = 500;
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
   private _orbitControl: OrbitControl | null;
 
-  private _directionEntity: Entity;
   private _textRenderer: TextRenderer;
   private _textColor: Color;
 
   private _tween = new TWEEN.Tween({ t: 0 });
+
   private _normalQuat: Quaternion = new Quaternion();
+  private _tempMat: Matrix = new Matrix();
   private _tempVect: Vector3 = new Vector3();
   private _tempTargetVect: Vector3 = new Vector3();
   private _tempPointVect: Vector3 = new Vector3();
-  private _tempMat: Matrix = new Matrix();
-  private _tempRotate: Vector3 = new Vector3();
+  private _tempRotateVect: Vector3 = new Vector3();
 
   private AxisFactor = {
     x: {
@@ -68,7 +68,6 @@ export class EndScript extends Script {
     super(entity);
 
     const rootEntity = this.entity.parent.parent.parent;
-    this._directionEntity = rootEntity.findByName("direction");
 
     // scene camera
     this._sceneCamera =
@@ -92,20 +91,38 @@ export class EndScript extends Script {
 
   onPointerClick() {
     const currentAxisName = this.entity.name;
+
+    const startMat = this._sceneCameraEntity.transform.worldMatrix.clone();
     const targetMat = this._getTargetMatrix(
       this._sceneCameraEntity,
       currentAxisName
     );
 
-    if (this._orbitControl) {
-      this._orbitControl.enabled = false;
-    }
+    const currentMat = this._sceneCameraEntity.transform.worldMatrix;
 
-    this._sceneCameraEntity.transform.worldMatrix = targetMat;
+    TWEEN.remove(this._tween);
+    this._tween = new TWEEN.Tween({ t: 0 })
+      .to({ t: 1 }, this.duration)
+      .onStart(() => {
+        if (this._orbitControl) {
+          this._orbitControl.enabled = false;
+        }
 
-    if (this._orbitControl) {
-      this._orbitControl.enabled = true;
-    }
+        this._textRenderer.color.set(0, 0, 0, 1);
+        this._textColor = this._textRenderer.color.clone();
+      })
+      .onUpdate(({ t }) => {
+        Matrix.lerp(startMat, targetMat, t, currentMat);
+        this._sceneCameraEntity.transform.worldMatrix = currentMat;
+      })
+      .onComplete(() => {
+        if (this._orbitControl) {
+          this._orbitControl.enabled = true;
+        }
+        this._sceneCamera.resetProjectionMatrix();
+      });
+
+    this._tween.start();
   }
 
   onUpdate() {
@@ -121,17 +138,24 @@ export class EndScript extends Script {
     const axis = this.AxisFactor[axisName].axis;
 
     const radius = this._sceneCameraEntity.transform.worldPosition.length();
-    this._tempRotate = new Vector3();
-    this._tempRotate[axis] = factor * radius;
 
     entity.transform.getWorldForward(this._tempVect);
     this._tempVect.scale(radius);
+
+    this._tempRotateVect = new Vector3();
+    this._tempRotateVect[axis] = factor * radius;
 
     // get rotate origin point
     Vector3.add(currentPos, this._tempVect, this._tempPointVect);
 
     // get position after rotation
-    Vector3.add(this._tempRotate, this._tempPointVect, this._tempTargetVect);
+    Vector3.add(
+      this._tempRotateVect,
+      this._tempPointVect,
+      this._tempTargetVect
+    );
+
+    console.log(axisName, this._tempTargetVect, this._tempPointVect);
 
     // get worldMatrix for scene camera
     Matrix.lookAt(
