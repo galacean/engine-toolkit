@@ -1,11 +1,8 @@
 import {
-  BlendFactor,
-  BlendOperation,
   Color,
   CompareFunction,
   Engine,
   PBRMaterial,
-  RenderQueueType,
   Shader,
   ShaderPass,
   StencilOperation,
@@ -71,23 +68,13 @@ export class PlanarShadowMaterial extends PBRMaterial {
   }
 
   constructor(engine: Engine) {
-    super(engine);
-    this.shader = Shader.find("planarShadowShader");
+    super(engine, Shader.find("planarShadowShader"));
 
-    const shadowRenderState = this.renderStates[1];
+    // set shadow pass transparent
+    this.setIsTransparent(1, true);
 
-    shadowRenderState.depthState.writeEnabled = false;
-
-    const { targetBlendState } = shadowRenderState.blendState;
-    targetBlendState.enabled = true;
-    targetBlendState.sourceColorBlendFactor = BlendFactor.SourceAlpha;
-    targetBlendState.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    targetBlendState.sourceAlphaBlendFactor = BlendFactor.One;
-    targetBlendState.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    targetBlendState.colorBlendOperation = targetBlendState.alphaBlendOperation = BlendOperation.Add;
-    shadowRenderState.renderQueueType = RenderQueueType.Transparent;
-
-    const { stencilState } = shadowRenderState;
+    // set shadow pass stencilState
+    const stencilState = this.renderStates[1].stencilState;
     stencilState.enabled = true;
     stencilState.referenceValue = 0;
     stencilState.compareFunctionFront = CompareFunction.Equal;
