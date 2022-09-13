@@ -25,7 +25,6 @@
     "@oasis-engine-toolkit/lines": "0.8.0-beta.3",
     "@oasis-engine-toolkit/outline": "0.8.0-beta.3",
     "@oasis-engine-toolkit/planar-shadow-material": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/skeleton-viewer": "0.8.0-beta.3",
-    "@oasis-engine-toolkit/stats": "0.8.0-beta.3"
+    "@oasis-engine-toolkit/skeleton-viewer": "0.8.0-beta.3"
   }
 }
