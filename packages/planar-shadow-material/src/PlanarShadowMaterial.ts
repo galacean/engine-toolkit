@@ -68,7 +68,8 @@ export class PlanarShadowMaterial extends PBRMaterial {
   }
 
   constructor(engine: Engine) {
-    super(engine, Shader.find("planarShadowShader"));
+    super(engine);
+    this.shader = Shader.find("planarShadowShader");
 
     // set shadow pass transparent
     this.setIsTransparent(1, true);
