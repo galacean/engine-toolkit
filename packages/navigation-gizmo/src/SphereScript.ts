@@ -34,6 +34,8 @@ export class SphereScript extends Script {
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
   private _tempVec: Vector2 = new Vector2();
+  private _tempVec3: Vector3 = new Vector3();
+  private _unitVec:Vector3 = new Vector3(1,1,1)
   private _tempMat: Matrix = new Matrix();
 
   private _ray: Ray = new Ray();
@@ -140,28 +142,19 @@ export class SphereScript extends Script {
 
   onUpdate() {
     if (this.isTriggered) {
-      this._tempMat = this._directionEntity.transform.worldMatrix.clone();
-      this._tempMat.invert();
-
-      const tempWorldPos =
-        this._sceneCamera.entity.transform.worldPosition.clone();
-      const tempMat = new Matrix();
-      const tempQuat = new Quaternion();
-      Quaternion.invert(
-        this._directionEntity.transform.rotationQuaternion,
-        tempQuat
-      );
-      Matrix.affineTransformation(
-        new Vector3(1, 1, 1),
-        tempQuat,
-        tempWorldPos,
-        tempMat
-      );
-      const { elements } = tempMat;
-      elements[8] = -elements[8];
-      elements[9] = -elements[9];
-      elements[10] = -elements[10];
-      this._sceneCamera.entity.transform.worldMatrix = tempMat;
+            // // align to sceneCamera viewMatrix i.e. sceneCamera inverted worldMatrix
+            this._tempVec3 = this._sceneCameraEntity.transform.worldPosition.clone();
+            this._tempQuat =
+              this._directionEntity.transform.rotationQuaternion.clone();
+            this._tempQuat.invert();
+      
+            Matrix.affineTransformation(
+              this._unitVec,
+              this._tempQuat,
+              this._tempVec3,
+              this._tempMat
+            );
+            this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
     } else {
       const tempMat = this._sceneCamera.viewMatrix.clone();
       const { elements: ele } = tempMat;
