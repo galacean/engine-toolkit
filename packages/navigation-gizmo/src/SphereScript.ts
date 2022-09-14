@@ -13,15 +13,18 @@ import {
 } from "oasis-engine";
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
 import { NavigationGizmo } from "./NavigationGizmo";
-
 export class SphereScript extends Script {
   private isTriggered: boolean = false;
-  private speedFactor: number = 0.02;
+  private speedXFactor: number = 0.02;
+  private speedYFactor: number = 0.002;
+
+  private _radius: number = 15;
 
   private _directionEntity: Entity;
   private _endEntity: Entity;
   private _roundEntity: Entity;
   private _gizmoCamera: Camera;
+  private _gizmoCameraEntity: Entity;
   private _textColor: Array<Color> = [];
 
   private _sceneCamera: Camera;
@@ -33,9 +36,13 @@ export class SphereScript extends Script {
 
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
-  private _tempVec: Vector2 = new Vector2();
-  private _tempVec3: Vector3 = new Vector3();
-  private _unitVec:Vector3 = new Vector3(1,1,1)
+  private _tempQuat3: Quaternion = new Quaternion();
+  private _tempPointer: Vector2 = new Vector2();
+  private _startPos: Vector3 = new Vector3();
+  private _rotateVec: Vector3 = new Vector3();
+  private _targetPoint: Vector3 = new Vector3();
+  private _currentPos: Vector3 = new Vector3();
+  private _unitVec: Vector3 = new Vector3(1, 1, 1);
   private _tempMat: Matrix = new Matrix();
 
   private _ray: Ray = new Ray();
@@ -47,8 +54,8 @@ export class SphereScript extends Script {
     this._directionEntity = rootEntity.findByName("direction");
     this._roundEntity = this.entity.findByName("round");
     this._endEntity = this._directionEntity.findByName("end");
-    const gizmoCameraEntity = rootEntity.findByName("gizmo-camera");
-    this._gizmoCamera = gizmoCameraEntity.getComponent(Camera);
+    this._gizmoCameraEntity = rootEntity.findByName("gizmo-camera");
+    this._gizmoCamera = this._gizmoCameraEntity.getComponent(Camera);
 
     // scene camera
     this._sceneCamera =
@@ -75,21 +82,31 @@ export class SphereScript extends Script {
       this._orbitControl.enabled = false;
     }
 
-    this.isTriggered = true;
     this._sceneCamera.isOrthographic = false;
     this._recoverTextColor();
+
+    // get targetPoint
+    // TODO set as orbit target
+    this._startPos = this._sceneCameraEntity.transform.worldPosition.clone();
+    this._sceneCameraEntity.transform.getWorldForward(this._rotateVec);
+    this._rotateVec.scale(this._radius);
+    Vector3.add(this._startPos, this._rotateVec, this._targetPoint);
 
     this._startQuat =
       this._directionEntity.transform.rotationQuaternion.clone();
     this._startPointer = this.engine.inputManager.pointerPosition.clone();
+
+    this.isTriggered = true;
   }
 
   onPointerDrag() {
     const movePointer = this.engine.inputManager.pointerPosition;
 
-    Vector2.subtract(this._startPointer, movePointer, this._tempVec);
-    this._tempVec.scale(this.speedFactor);
-    this._navigateCamera(this._tempVec.x, this._tempVec.y);
+    Vector2.subtract(this._startPointer, movePointer, this._tempPointer);
+    this._navigateCamera(
+      this._tempPointer.x * this.speedXFactor,
+      this._tempPointer.y * this.speedYFactor
+    );
   }
 
   onPointerUp() {
@@ -119,6 +136,14 @@ export class SphereScript extends Script {
     Quaternion.rotationYawPitchRoll(x, y, 0, this._tempQuat);
     Quaternion.multiply(this._startQuat, this._tempQuat, this._tempQuat2);
     this._directionEntity.transform.rotationQuaternion = this._tempQuat2;
+
+    Vector3.transformByQuat(
+      this._startPos,
+      this._tempQuat.invert(),
+      this._currentPos
+    );
+
+    Vector3.add(this._targetPoint, this._currentPos, this._currentPos);
   }
 
   _getTextColor() {
@@ -139,22 +164,20 @@ export class SphereScript extends Script {
       Object.assign(textRenderer.color, this._textColor[i]);
     }
   }
-
   onUpdate() {
     if (this.isTriggered) {
-            // // align to sceneCamera viewMatrix i.e. sceneCamera inverted worldMatrix
-            this._tempVec3 = this._sceneCameraEntity.transform.worldPosition.clone();
-            this._tempQuat =
-              this._directionEntity.transform.rotationQuaternion.clone();
-            this._tempQuat.invert();
-      
-            Matrix.affineTransformation(
-              this._unitVec,
-              this._tempQuat,
-              this._tempVec3,
-              this._tempMat
-            );
-            this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
+      this._tempQuat3 =
+        this._directionEntity.transform.rotationQuaternion.clone();
+      this._tempQuat3.invert();
+
+      Matrix.affineTransformation(
+        this._unitVec,
+        this._tempQuat3,
+        this._currentPos,
+        this._tempMat
+      );
+
+      this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
     } else {
       const tempMat = this._sceneCamera.viewMatrix.clone();
       const { elements: ele } = tempMat;
