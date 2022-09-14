@@ -1,8 +1,9 @@
 import {
-  BaseMaterial,
+  BlendFactor,
   Color,
   CompareFunction,
   Material,
+  RenderQueueType,
   Shader,
   ShaderPass,
   StencilOperation,
@@ -19,14 +20,22 @@ export class PlanarShadowShaderFactory {
    * Replace material Shader and initialization。
    * @param material - Material to replace and initialization。
    */
-  static replaceShader(material: BaseMaterial) {
+  static replaceShader(material: Material) {
     material.shader = Shader.find("planarShadowShader");
 
-    // set shadow pass transparent
-    material.setIsTransparent(1, true);
+    const shadowRenderState = material.renderStates[1];
+    shadowRenderState.renderQueueType = RenderQueueType.Transparent;
+    shadowRenderState.depthState.writeEnabled = false;
+
+    const targetBlendState = shadowRenderState.blendState.targetBlendState;
+    targetBlendState.enabled = true;
+    targetBlendState.sourceColorBlendFactor = BlendFactor.SourceAlpha;
+    targetBlendState.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+    targetBlendState.sourceAlphaBlendFactor = BlendFactor.One;
+    targetBlendState.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
 
     // set shadow pass stencilState
-    const stencilState = material.renderStates[1].stencilState;
+    const stencilState = shadowRenderState.stencilState;
     stencilState.enabled = true;
     stencilState.referenceValue = 0;
     stencilState.compareFunctionFront = CompareFunction.Equal;
