@@ -13,7 +13,7 @@ import { NavigationGizmo } from "./NavigationGizmo";
 import { OrbitControl } from "oasis-engine-toolkit";
 
 export class EndScript extends Script {
-  private duration: number = 500;
+  private duration: number = 100;
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
