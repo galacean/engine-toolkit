@@ -1,81 +1,32 @@
 import {
+  BaseMaterial,
   Color,
   CompareFunction,
-  Engine,
-  PBRMaterial,
+  Material,
   Shader,
   ShaderPass,
   StencilOperation,
   Vector3
 } from "oasis-engine";
 
-export class PlanarShadowMaterial extends PBRMaterial {
+export class PlanarShadowShaderFactory {
   private static _lightDirProp = Shader.getPropertyByName("u_lightDir");
   private static _planarHeightProp = Shader.getPropertyByName("u_planarHeight");
   private static _shadowColorProp = Shader.getPropertyByName("u_planarShadowColor");
   private static _shadowFalloffProp = Shader.getPropertyByName("u_planarShadowFalloff");
 
   /**
-   * Planar height
+   * Replace material Shader and initialization。
+   * @param material - Material to replace and initialization。
    */
-  get planarHeight(): number {
-    return this.shaderData.getFloat(PlanarShadowMaterial._planarHeightProp);
-  }
-
-  set planarHeight(value: number) {
-    this.shaderData.setFloat(PlanarShadowMaterial._planarHeightProp, value);
-  }
-
-  /**
-   * Light direction
-   */
-  get lightDirection(): Vector3 {
-    return this.shaderData.getVector3(PlanarShadowMaterial._lightDirProp);
-  }
-
-  set lightDirection(value: Vector3) {
-    const lightDir = this.shaderData.getVector3(PlanarShadowMaterial._lightDirProp);
-    if (value !== lightDir) {
-      lightDir.copyFrom(value.normalize());
-    } else {
-      value.normalize();
-    }
-  }
-
-  /**
-   * Shadow color
-   */
-  get shadowColor(): Color {
-    return this.shaderData.getColor(PlanarShadowMaterial._shadowColorProp);
-  }
-
-  set shadowColor(value: Color) {
-    const shadowColor = this.shaderData.getColor(PlanarShadowMaterial._shadowColorProp);
-    if (value !== shadowColor) {
-      shadowColor.copyFrom(value);
-    }
-  }
-
-  /**
-   * Shadow falloff coefficient
-   */
-  get shadowFalloff(): number {
-    return this.shaderData.getFloat(PlanarShadowMaterial._shadowFalloffProp);
-  }
-
-  set shadowFalloff(value: number) {
-    this.shaderData.setFloat(PlanarShadowMaterial._shadowFalloffProp, value);
-  }
-
-  constructor(engine: Engine) {
-    super(engine);
-    this.shader = Shader.find("planarShadowShader");
+  static replaceShader(material: BaseMaterial) {
+    material.shader = Shader.find("planarShadowShader");
 
     // set shadow pass transparent
-    this.setIsTransparent(1, true);
+    material.setIsTransparent(1, true);
 
     // set shadow pass stencilState
-    const stencilState = this.renderStates[1].stencilState;
+    const stencilState = material.renderStates[1].stencilState;
     stencilState.enabled = true;
     stencilState.referenceValue = 0;
     stencilState.compareFunctionFront = CompareFunction.Equal;
@@ -87,11 +38,47 @@ export class PlanarShadowMaterial extends PBRMaterial {
     stencilState.passOperationFront = StencilOperation.IncrementWrap;
     stencilState.passOperationBack = StencilOperation.IncrementWrap;
 
-    const shaderData = this.shaderData;
-    shaderData.setFloat(PlanarShadowMaterial._shadowFalloffProp, 0);
-    shaderData.setColor(PlanarShadowMaterial._shadowColorProp, new Color(1.0, 1.0, 1.0, 1.0));
-    shaderData.setVector3(PlanarShadowMaterial._lightDirProp, new Vector3(0, 0, 0));
-    shaderData.setFloat(PlanarShadowMaterial._planarHeightProp, 0);
+    const shaderData = material.shaderData;
+    shaderData.setFloat(PlanarShadowShaderFactory._shadowFalloffProp, 0);
+    shaderData.setColor(PlanarShadowShaderFactory._shadowColorProp, new Color(1.0, 1.0, 1.0, 1.0));
+    shaderData.setVector3(PlanarShadowShaderFactory._lightDirProp, new Vector3(0, 0, 0));
+    shaderData.setFloat(PlanarShadowShaderFactory._planarHeightProp, 0);
+  }
+
+  /**
+   * Set planar height.
+   */
+  static setPlanarHeight(material: Material, value: number) {
+    material.shaderData.setFloat(PlanarShadowShaderFactory._planarHeightProp, value);
+  }
+
+  /**
+   * Set light direction.
+   */
+  static setLightDirection(material: Material, value: Vector3) {
+    const lightDir = material.shaderData.getVector3(PlanarShadowShaderFactory._lightDirProp);
+    if (value !== lightDir) {
+      lightDir.copyFrom(value.normalize());
+    } else {
+      value.normalize();
+    }
+  }
+
+  /**
+   * Set shadow color
+   */
+  static setShadowColor(material: Material, value: Color) {
+    const shadowColor = material.shaderData.getColor(PlanarShadowShaderFactory._shadowColorProp);
+    if (value !== shadowColor) {
+      shadowColor.copyFrom(value);
+    }
+  }
+
+  /**
+   * Set Shadow falloff coefficient
+   */
+  static setShadowFalloff(material: Material, value: number) {
+    material.shaderData.setFloat(PlanarShadowShaderFactory._shadowFalloffProp, value);
   }
 }
 
