@@ -35,7 +35,7 @@ export function createMeshMaterial(options: Partial<Option> = {}, engine: Engine
   const material = new Material(engine, Shader.find("gizmos-shader"));
   material.shaderData.setVector4("u_color", newOptions.color);
   material.shaderData.setFloat("u_highLight", 0);
-  material.renderQueueType = RenderQueueType.Transparent;
+  material.renderState.renderQueueType = RenderQueueType.Transparent;
 
   if (newOptions.doubleSide) {
     material.renderState.rasterState.cullMode = CullMode.Off;
@@ -53,7 +53,7 @@ export function createMeshMaterial(options: Partial<Option> = {}, engine: Engine
     target.sourceColorBlendFactor = target.sourceAlphaBlendFactor = BlendFactor.SourceAlpha;
     target.destinationColorBlendFactor = target.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
     depthState.writeEnabled = false;
-    material.renderQueueType = RenderQueueType.Transparent;
+    material.renderState.renderQueueType = RenderQueueType.Transparent;
   }
   return material;
 }
