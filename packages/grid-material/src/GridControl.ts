@@ -5,18 +5,12 @@ import { GridMaterial } from "./GridMaterial";
  * Grid Control
  */
 export class GridControl extends Script {
-  private _camera: Camera;
-  private _material: GridMaterial;
-  private _progress = 0;
-  private _is2DGrid = false;
-  private _flipGrid = false;
-
   /**
    * Create Mesh with position in clipped space.
    * @param engine Engine
    */
   static createGridPlane(engine: Engine): ModelMesh {
-    const positions: Vector3[] = new Array(6);
+    const positions = new Array<Vector3>(6);
     positions[0] = new Vector3(1, 1, 0);
     positions[1] = new Vector3(-1, -1, 0);
     positions[2] = new Vector3(-1, 1, 0);
@@ -44,10 +38,20 @@ export class GridControl extends Script {
     return mesh;
   }
 
+  private _material: GridMaterial;
+  private _progress: number = 0;
+  private _is2DGrid: boolean = false;
+  private _flipGrid: boolean = false;
+
   /**
    * Flip speed
    */
   speed = 10.0;
+
+  /**
+   * Camera
+   */
+  camera: Camera = null;
 
   /**
    * Grid Material.
@@ -73,8 +77,7 @@ export class GridControl extends Script {
    * @override
    */
   onAwake() {
-    const { engine: engine, entity: entity } = this;
-    this._camera = entity.getComponent(Camera);
+    const { engine, entity } = this;
 
     const gridRenderer = entity.addComponent(MeshRenderer);
     gridRenderer.mesh = GridControl.createGridPlane(engine);
@@ -86,7 +89,9 @@ export class GridControl extends Script {
    * @override
    */
   onUpdate(deltaTime: number) {
-    const { _material: material, _camera: camera } = this;
+    const { _material: material, camera } = this;
+    if (camera === null) return;
+
     material.nearClipPlane = camera.nearClipPlane;
     material.farClipPlane = camera.farClipPlane;
 

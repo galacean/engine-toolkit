@@ -35,7 +35,7 @@ export class GridMaterial extends BaseMaterial {
   }
 
   /**
-   * Primary Scale
+   * Primary scale of grid size.
    */
   get primaryScale(): number {
     return this.shaderData.getFloat(GridMaterial._primaryScaleProperty);
@@ -46,7 +46,7 @@ export class GridMaterial extends BaseMaterial {
   }
 
   /**
-   * Secondary Scale
+   * Secondary scale of grid size.
    */
   get secondaryScale(): number {
     return this.shaderData.getFloat(GridMaterial._secondaryScaleProperty);
@@ -57,7 +57,7 @@ export class GridMaterial extends BaseMaterial {
   }
 
   /**
-   * Grid Intensity
+   * Grid color intensity.
    */
   get gridIntensity(): number {
     return this.shaderData.getFloat(GridMaterial._gridIntensityProperty);
@@ -68,7 +68,7 @@ export class GridMaterial extends BaseMaterial {
   }
 
   /**
-   * Axis Intensity
+   * Axis color intensity.
    */
   get axisIntensity(): number {
     return this.shaderData.getFloat(GridMaterial._axisIntensityProperty);
@@ -79,7 +79,7 @@ export class GridMaterial extends BaseMaterial {
   }
 
   /**
-   * Flip Progress
+   * 2D-3D flip progress.
    */
   get flipProgress(): number {
     return this.shaderData.getFloat(GridMaterial._flipProgressProperty);
