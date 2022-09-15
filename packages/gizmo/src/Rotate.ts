@@ -9,11 +9,11 @@ import {
   RenderQueueType,
   Vector3
 } from "oasis-engine";
-import { Axis } from "./Axis";
 import { ArcLineMesh } from "./ArcLineMesh";
+import { Axis } from "./Axis";
 import { CircleMesh } from "./CircleMesh";
 import { LinesMesh } from "./LineMesh";
-import { GizmoComponent, AxisProps, axisVector } from "./Type";
+import { AxisProps, axisVector, GizmoComponent } from "./Type";
 import { utils } from "./Utils";
 
 /** @internal */
@@ -180,7 +180,7 @@ export class RotateControl extends Component implements GizmoComponent {
     const planeHelperRenderer = this._rotateHelperPlaneEntity.addComponent(MeshRenderer);
     planeHelperRenderer.mesh = this.rotateHelperPlaneMesh;
     planeHelperRenderer.setMaterial(utils.rotatePlaneMaterial);
-    utils.rotatePlaneMaterial.renderQueueType = RenderQueueType.Transparent;
+    utils.rotatePlaneMaterial.renderState.renderQueueType = RenderQueueType.Transparent;
     this._rotateHelperPlaneEntity.isActive = false;
   }
 

@@ -5,13 +5,12 @@
 ![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit)
 [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine-toolkit)
 
-Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script`, welcome to enjoy!
+Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script` and `Material`, welcome to enjoy!
 
 ## Features
 
 - 🛸  &nbsp;**Controls** - Some camera controllers
 - 🫧  &nbsp;**FrameBufferPicker** - Pixel-based object picking
-- 📊  &nbsp;**Stats** - Statistics rendering data
 - 🖇  &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
 - 🧍🏼  &nbsp;**Skeleton Helper** - Skeleton visualization
 - ➡️  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
@@ -39,7 +38,7 @@ import * as TOOLKIT from "oasis-engine-toolkit";
 or individual classes using:
 
 ```javascript
-import { OrbitControl, FramebufferPicker, Stats } from "oasis-engine-toolkit";
+import { OrbitControl, FramebufferPicker } from "oasis-engine-toolkit";
 ```
 
 ## Contributing
