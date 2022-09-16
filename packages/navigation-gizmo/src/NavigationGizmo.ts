@@ -164,7 +164,7 @@ export class NavigationGizmo extends Component {
    * @param viewportRange - normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
    */
   set viewport(viewportRange: Vector4) {
-    Object.assign(this.sceneCamera.viewport, viewportRange);
+    Object.assign(this._gizmoCamera.viewport, viewportRange);
   }
   /**
    * gizmo layer, default Layer30
