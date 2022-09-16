@@ -12,11 +12,14 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - 🛸  &nbsp;**Controls** - Some camera controllers
 - 🫧  &nbsp;**FrameBufferPicker** - Pixel-based object picking
 - 🖇  &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
-- 🗳  &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
 - 🧍🏼  &nbsp;**Skeleton Helper** - Skeleton visualization
 - ➡️  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
 - ⭕️  &nbsp;**Outline** - Show outline of mesh renderers
 - 📐  &nbsp;**Lines** - 2D Solid Line & Dash Line
+
+### Materials
+- 🗳  &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
+- ⚔️  &nbsp;**Grid Material** - Infinity grid material
 
 ## npm
 

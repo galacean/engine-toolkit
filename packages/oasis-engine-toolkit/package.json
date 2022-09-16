@@ -25,6 +25,7 @@
     "@oasis-engine-toolkit/lines": "0.9.0-alpha.1",
     "@oasis-engine-toolkit/outline": "0.9.0-alpha.1",
     "@oasis-engine-toolkit/planar-shadow-material": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/skeleton-viewer": "0.9.0-alpha.1"
+    "@oasis-engine-toolkit/skeleton-viewer": "0.9.0-alpha.1",
+    "@oasis-engine-toolkit/grid-material": "0.9.0-alpha.1"
   }
 }
