@@ -173,7 +173,7 @@ export class Group {
   /** 添加一个节点的连锁操作 */
   private _applyAdd(entity: Entity) {
     this._entities.push(entity);
-    const listener = entity.transform._registerWorldChangeListenser();
+    const listener = entity.transform._registerWorldChangeListener();
     this._listeners.push(listener);
     const fun = this._onEntityWorldTransformChange(entity);
     listener.listener = fun;
