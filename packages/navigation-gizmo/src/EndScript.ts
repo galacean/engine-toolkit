@@ -113,12 +113,13 @@ export class EndScript extends Script {
     this._tween.start();
   }
 
+  /** @OverRide */
   onUpdate() {
     TWEEN.update();
     this.entity.transform.worldRotationQuaternion = this._normalQuat;
   }
 
-  _getTargetMatrix(entity: Entity, axisName: string) {
+  private _getTargetMatrix(entity: Entity, axisName: string) {
     const {
       _tempRotateVect: tempRotateVect,
       _tempPointVect: tempPointVect,
@@ -129,11 +130,7 @@ export class EndScript extends Script {
     } = this;
 
     const currentPos = entity.transform.worldPosition;
-
-    const upVector = this.AxisFactor[axisName].upVector;
-    const factor = this.AxisFactor[axisName].factor;
-    const axis = this.AxisFactor[axisName].axis;
-
+    const { upVector, factor, axis } = this.AxisFactor[axisName];
     const radius = this._sceneCameraEntity.transform.worldPosition.length();
 
     entity.transform.getWorldForward(tempVect);

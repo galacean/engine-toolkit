@@ -86,7 +86,7 @@ export class SphereScript extends Script {
     this._recoverTextColor();
 
     // get targetPoint
-    // TODO set as orbit target
+    // TODO use orbit control's target
     this._startPos = this._sceneCameraEntity.transform.worldPosition.clone();
     this._sceneCameraEntity.transform.getWorldForward(this._rotateVec);
     this._rotateVec.scale(this._radius);
@@ -118,37 +118,7 @@ export class SphereScript extends Script {
       }
     }
   }
-
-  // delta x translate to rotation around axis y
-  // delta y translate to rotation around axis x
-  _navigateCamera(x: number, y: number) {
-    Quaternion.rotationYawPitchRoll(x, y, 0, this._tempQuat);
-    Quaternion.multiply(this._startQuat, this._tempQuat, this._tempQuat2);
-    this._directionEntity.transform.rotationQuaternion = this._tempQuat2;
-
-    Vector3.transformByQuat(this._startPos, this._tempQuat.invert(), this._currentPos);
-
-    Vector3.add(this._targetPoint, this._currentPos, this._currentPos);
-  }
-
-  _getTextColor() {
-    const entities = this._endEntity.children;
-    for (let i = 0; i < entities.length; i++) {
-      const textEntity = entities[i].findByName("text");
-      const textRenderer = textEntity.getComponent(TextRenderer);
-      const textColor = textRenderer.color.clone();
-      this._textColor.push(textColor);
-    }
-  }
-
-  _recoverTextColor() {
-    const entities = this._endEntity.children;
-    for (let i = 0; i < entities.length; i++) {
-      const textEntity = entities[i].findByName("text");
-      const textRenderer = textEntity.getComponent(TextRenderer);
-      Object.assign(textRenderer.color, this._textColor[i]);
-    }
-  }
+  /** @OverRide */
   onUpdate() {
     if (this.isTriggered) {
       this._tempQuat3 = this._directionEntity.transform.rotationQuaternion.clone();
@@ -163,6 +133,37 @@ export class SphereScript extends Script {
       // ignore translate
       ele[12] = ele[13] = ele[14] = 0;
       this._directionEntity.transform.worldMatrix = tempMat;
+    }
+  }
+
+  // delta x translate to rotation around axis y
+  // delta y translate to rotation around axis x
+  private _navigateCamera(x: number, y: number) {
+    Quaternion.rotationYawPitchRoll(x, y, 0, this._tempQuat);
+    Quaternion.multiply(this._startQuat, this._tempQuat, this._tempQuat2);
+    this._directionEntity.transform.rotationQuaternion = this._tempQuat2;
+
+    Vector3.transformByQuat(this._startPos, this._tempQuat.invert(), this._currentPos);
+
+    Vector3.add(this._targetPoint, this._currentPos, this._currentPos);
+  }
+
+  private _getTextColor() {
+    const entities = this._endEntity.children;
+    for (let i = 0; i < entities.length; i++) {
+      const textEntity = entities[i].findByName("text");
+      const textRenderer = textEntity.getComponent(TextRenderer);
+      const textColor = textRenderer.color.clone();
+      this._textColor.push(textColor);
+    }
+  }
+
+  private _recoverTextColor() {
+    const entities = this._endEntity.children;
+    for (let i = 0; i < entities.length; i++) {
+      const textEntity = entities[i].findByName("text");
+      const textRenderer = textEntity.getComponent(TextRenderer);
+      Object.assign(textRenderer.color, this._textColor[i]);
     }
   }
 }
