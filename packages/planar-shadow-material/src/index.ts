@@ -1,1 +1,1 @@
-export { PlanarShadowMaterial } from "./PlanarShadowMaterial";
+export { PlanarShadowShaderFactory } from "./PlanarShadowShaderFactory";

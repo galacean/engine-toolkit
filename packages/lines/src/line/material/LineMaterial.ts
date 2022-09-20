@@ -12,7 +12,7 @@ export class LineMaterial extends Material {
     } = this.renderState;
     rasterState.cullMode = CullMode.Off;
     depthState.writeEnabled = false;
-    this.renderQueueType = RenderQueueType.Transparent;
+    this.renderState.renderQueueType = RenderQueueType.Transparent;
 
     targetBlendState.enabled = true;
     targetBlendState.sourceColorBlendFactor = BlendFactor.SourceAlpha;

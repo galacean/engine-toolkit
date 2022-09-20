@@ -1,4 +1,4 @@
-import { Engine, Logger, Material, RenderElement, Shader, Vector3 } from "oasis-engine";
+import { Engine, Logger, Material, MeshRenderElement, Shader, Vector3 } from "oasis-engine";
 import fs from "./color.fs.glsl";
 import vs from "./color.vs.glsl";
 
@@ -9,7 +9,7 @@ Shader.create("framebuffer-picker-color", vs, fs);
  */
 export class ColorMaterial extends Material {
   private _currentId: number = 0;
-  private _primitivesMap: RenderElement[] = [];
+  private _primitivesMap: MeshRenderElement[] = [];
 
   constructor(engine: Engine) {
     super(engine, Shader.find("framebuffer-picker-color"));
@@ -54,7 +54,7 @@ export class ColorMaterial extends Material {
   /**
    * @override
    */
-  _preRender(renderElement: RenderElement) {
+  _preRender(renderElement: MeshRenderElement) {
     this._currentId += 1;
     this._primitivesMap[this._currentId] = renderElement;
     renderElement.component.shaderData.setVector3("u_colorId", this.id2Color(this._currentId));
