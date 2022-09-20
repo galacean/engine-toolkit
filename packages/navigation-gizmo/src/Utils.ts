@@ -1,5 +1,13 @@
-import { Material, Mesh, Engine, Vector4, PrimitiveMesh, ModelMesh, Vector3 } from "oasis-engine";
-import { CircleMesh } from "./CircleMesh";
+import {
+  Material,
+  Mesh,
+  Engine,
+  Vector4,
+  PrimitiveMesh,
+  ModelMesh,
+  Vector3,
+} from "oasis-engine";
+import { createCircleMesh } from "./CircleMesh";
 import { createMeshMaterial } from "./MeshMaterial";
 
 class Utils {
@@ -32,20 +40,50 @@ class Utils {
   public zEndTranslateVector: Vector3 = new Vector3();
 
   init(engine: Engine) {
-    this.redMaterial = createMeshMaterial(engine, new Vector4(1.0, 0.25, 0.25, 1.0), false, false);
+    this.redMaterial = createMeshMaterial(
+      engine,
+      new Vector4(1.0, 0.25, 0.25, 1.0),
+      false,
+      false
+    );
 
-    this.greenMaterial = createMeshMaterial(engine, new Vector4(0.5, 0.8, 0.2, 1.0), false, false);
+    this.greenMaterial = createMeshMaterial(
+      engine,
+      new Vector4(0.5, 0.8, 0.2, 1.0),
+      false,
+      false
+    );
 
-    this.blueMaterial = createMeshMaterial(engine, new Vector4(0.3, 0.5, 1.0, 1.0), false, false);
+    this.blueMaterial = createMeshMaterial(
+      engine,
+      new Vector4(0.3, 0.5, 1.0, 1.0),
+      false,
+      false
+    );
 
-    this.bgMaterial = createMeshMaterial(engine, new Vector4(1, 1, 1, 0.2), true, true);
+    this.bgMaterial = createMeshMaterial(
+      engine,
+      new Vector4(1, 1, 1, 0.2),
+      true,
+      true
+    );
 
-    this.darkMaterial = createMeshMaterial(engine, new Vector4(0.5, 0.5, 0.5, 0.5), false, true);
+    this.darkMaterial = createMeshMaterial(
+      engine,
+      new Vector4(0.5, 0.5, 0.5, 0.5),
+      false,
+      true
+    );
 
-    this.axisMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, this.axisLength);
-    this.endMesh = CircleMesh.createCircle(engine, this.endRadius);
-    this.endInnerMesh = CircleMesh.createCircle(engine, this.endRadius - 0.24);
-    this.bgMesh = CircleMesh.createCircle(engine, this.radius, 144);
+    this.axisMesh = PrimitiveMesh.createCylinder(
+      engine,
+      0.12,
+      0.12,
+      this.axisLength
+    );
+    this.endMesh = createCircleMesh(engine, this.endRadius);
+    this.endInnerMesh = createCircleMesh(engine, this.endRadius - 0.24);
+    this.bgMesh = createCircleMesh(engine, this.radius, 144);
 
     this.xRotateVector = new Vector3(0, 0, 90);
     this.yRotateVector = new Vector3(0, 90, 0);
