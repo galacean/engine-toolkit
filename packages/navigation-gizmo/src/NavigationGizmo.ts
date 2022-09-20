@@ -18,18 +18,19 @@ import {
 } from "oasis-engine";
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
-import { utils } from "./Utils";
+import { Utils } from "./Utils";
 
 export class NavigationGizmo extends Component {
-  public _sceneCamera: Camera;
+  private _sceneCamera: Camera;
+  private _gizmoLayer: Layer = Layer.Layer30;
 
   private _gizmoCamera: Camera;
-  private _gizmoLayer: Layer = Layer.Layer30;
   private _gizmoEntity: Entity;
+  private _utils: Utils;
 
   constructor(entity: Entity) {
     super(entity);
-    utils.init(this.engine);
+    this._utils = new Utils(this.engine);
 
     this._gizmoEntity = entity.createChild("navigation-gizmo");
     this._gizmoEntity.layer = this._gizmoLayer;
@@ -82,7 +83,8 @@ export class NavigationGizmo extends Component {
     return this._gizmoLayer;
   }
 
-  _createGizmo() {
+  private _createGizmo() {
+    const utils = this._utils;
     // setup gizmo shape
     const directionEntity = this._gizmoEntity.createChild("direction");
     const axisEntity = directionEntity.createChild("axis");
@@ -136,7 +138,7 @@ export class NavigationGizmo extends Component {
     sphereEntity.addComponent(SphereScript);
   }
 
-  _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material, mesh: Mesh) {
+  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material, mesh: Mesh) {
     entity.transform.setRotation(rotation.x, rotation.y, rotation.z);
     entity.transform.setPosition(position.x, position.y, position.z);
 
@@ -145,7 +147,9 @@ export class NavigationGizmo extends Component {
     axisXRenderer.setMaterial(material);
   }
 
-  _createPositiveEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, name: string) {
+  private _createPositiveEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, name: string) {
+    const utils = this._utils;
+
     entity.transform.setPosition(position.x, position.y, position.z);
 
     const sphereCollider = entity.addComponent(StaticCollider);
@@ -170,7 +174,9 @@ export class NavigationGizmo extends Component {
     entity.addComponent(EndScript);
   }
 
-  _createNegativeEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
+  private _createNegativeEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
+    const utils = this._utils;
+
     entity.transform.setPosition(-position.x, -position.y, -position.z);
 
     const sphereCollider = entity.addComponent(StaticCollider);
