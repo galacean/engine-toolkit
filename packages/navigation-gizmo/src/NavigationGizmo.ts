@@ -14,14 +14,14 @@ import {
   TextHorizontalAlignment,
   TextRenderer,
   Vector3,
-  Vector4,
+  Vector4
 } from "oasis-engine";
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { utils } from "./Utils";
 
 export class NavigationGizmo extends Component {
-  public sceneCamera: Camera;
+  public _sceneCamera: Camera;
 
   private _gizmoCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
@@ -44,6 +44,44 @@ export class NavigationGizmo extends Component {
     this._gizmoCamera.clearFlags = CameraClearFlags.Depth;
   }
 
+  /**
+   * @param camera - scene camera
+   */
+  set camera(camera: Camera) {
+    this._sceneCamera = camera;
+    this._createGizmo();
+  }
+
+  /**
+   * @return current scene camera
+   */
+  get camera() {
+    return this._sceneCamera;
+  }
+  /**
+   * viewport for the gizmo, default upper right corner (0.8, 0, 0.2, 0.2).
+   * @param viewportRange - normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
+   */
+  set viewport(viewportRange: Vector4) {
+    this._gizmoCamera.viewport.copyFrom(viewportRange);
+  }
+  /**
+   * gizmo layer, default Layer30
+   * @param layer - the layer for gizmo and gizmo camera's cullingMask
+   */
+  set layer(layer: Layer) {
+    this._gizmoLayer = layer;
+
+    this._gizmoCamera.cullingMask = layer;
+    this._gizmoEntity.layer = layer;
+  }
+  /**
+   * @return the layer for gizmo and gizmo camera's cullingMask
+   */
+  get layer() {
+    return this._gizmoLayer;
+  }
+
   _createGizmo() {
     // setup gizmo shape
     const directionEntity = this._gizmoEntity.createChild("direction");
@@ -54,27 +92,9 @@ export class NavigationGizmo extends Component {
     const axisYEntity = axisEntity.createChild("y");
     const axisZEntity = axisEntity.createChild("z");
 
-    this._createAxis(
-      axisXEntity,
-      utils.xRotateVector,
-      utils.xTranslateVector,
-      utils.redMaterial,
-      utils.axisMesh
-    );
-    this._createAxis(
-      axisYEntity,
-      utils.yRotateVector,
-      utils.yTranslateVector,
-      utils.greenMaterial,
-      utils.axisMesh
-    );
-    this._createAxis(
-      axisZEntity,
-      utils.zRotateVector,
-      utils.zTranslateVector,
-      utils.blueMaterial,
-      utils.axisMesh
-    );
+    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector, utils.redMaterial, utils.axisMesh);
+    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector, utils.greenMaterial, utils.axisMesh);
+    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector, utils.blueMaterial, utils.axisMesh);
 
     // end
     const endEntity = directionEntity.createChild("end");
@@ -83,55 +103,19 @@ export class NavigationGizmo extends Component {
     const endYEntity = endEntity.createChild("y");
     const endZEntity = endEntity.createChild("z");
 
-    this._createPositiveEnd(
-      endXEntity,
-      utils.xEndTranslateVector,
-      utils.redMaterial,
-      utils.endMesh,
-      "X"
-    );
-    this._createPositiveEnd(
-      endYEntity,
-      utils.yEndTranslateVector,
-      utils.greenMaterial,
-      utils.endMesh,
-      "Y"
-    );
-    this._createPositiveEnd(
-      endZEntity,
-      utils.zEndTranslateVector,
-      utils.blueMaterial,
-      utils.endMesh,
-      "Z"
-    );
+    this._createPositiveEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, utils.endMesh, "X");
+    this._createPositiveEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, utils.endMesh, "Y");
+    this._createPositiveEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, utils.endMesh, "Z");
 
     const endNegativeXEntity = endEntity.createChild("-x");
     const endNegativeYEntity = endEntity.createChild("-y");
     const endNegativeZEntity = endEntity.createChild("-z");
 
-    this._createNegativeEnd(
-      endNegativeXEntity,
-      utils.xEndTranslateVector,
-      utils.redMaterial,
-      utils.endMesh,
-      "-X"
-    );
+    this._createNegativeEnd(endNegativeXEntity, utils.xEndTranslateVector, utils.redMaterial, utils.endMesh, "-X");
 
-    this._createNegativeEnd(
-      endNegativeYEntity,
-      utils.yEndTranslateVector,
-      utils.greenMaterial,
-      utils.endMesh,
-      "-Y"
-    );
+    this._createNegativeEnd(endNegativeYEntity, utils.yEndTranslateVector, utils.greenMaterial, utils.endMesh, "-Y");
 
-    this._createNegativeEnd(
-      endNegativeZEntity,
-      utils.zEndTranslateVector,
-      utils.blueMaterial,
-      utils.endMesh,
-      "-Z"
-    );
+    this._createNegativeEnd(endNegativeZEntity, utils.zEndTranslateVector, utils.blueMaterial, utils.endMesh, "-Z");
 
     // sphere behind
     const sphereEntity = this._gizmoEntity.createChild("sphere");
@@ -151,39 +135,8 @@ export class NavigationGizmo extends Component {
 
     sphereEntity.addComponent(SphereScript);
   }
-  /**
-   * @param camera - scene camera
-   */
-  set camera(camera: Camera) {
-    this.sceneCamera = camera;
 
-    this._createGizmo();
-  }
-  /**
-   * viewport for the gizmo, default upper right corner (0.8, 0, 0.2, 0.2).
-   * @param viewportRange - normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
-   */
-  set viewport(viewportRange: Vector4) {
-    Object.assign(this._gizmoCamera.viewport, viewportRange);
-  }
-  /**
-   * gizmo layer, default Layer30
-   * @param layer - the layer for gizmo and gizmo camera's cullingMask
-   */
-  set layer(layer: Layer) {
-    this._gizmoLayer = layer;
-
-    this._gizmoCamera.cullingMask = layer;
-    this._gizmoEntity.layer = layer;
-  }
-
-  _createAxis(
-    entity: Entity,
-    rotation: Vector3,
-    position: Vector3,
-    material: Material,
-    mesh: Mesh
-  ) {
+  _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material, mesh: Mesh) {
     entity.transform.setRotation(rotation.x, rotation.y, rotation.z);
     entity.transform.setPosition(position.x, position.y, position.z);
 
@@ -192,13 +145,7 @@ export class NavigationGizmo extends Component {
     axisXRenderer.setMaterial(material);
   }
 
-  _createPositiveEnd(
-    entity: Entity,
-    position: Vector3,
-    material: Material,
-    mesh: Mesh,
-    name: string
-  ) {
+  _createPositiveEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, name: string) {
     entity.transform.setPosition(position.x, position.y, position.z);
 
     const sphereCollider = entity.addComponent(StaticCollider);
@@ -223,13 +170,7 @@ export class NavigationGizmo extends Component {
     entity.addComponent(EndScript);
   }
 
-  _createNegativeEnd(
-    entity: Entity,
-    position: Vector3,
-    material: Material,
-    mesh: Mesh,
-    axisName: string
-  ) {
+  _createNegativeEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
     entity.transform.setPosition(-position.x, -position.y, -position.z);
 
     const sphereCollider = entity.addComponent(StaticCollider);

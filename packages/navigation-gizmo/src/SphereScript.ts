@@ -9,7 +9,7 @@ import {
   Script,
   TextRenderer,
   Vector2,
-  Vector3,
+  Vector3
 } from "oasis-engine";
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
 import { NavigationGizmo } from "./NavigationGizmo";
@@ -58,8 +58,8 @@ export class SphereScript extends Script {
     this._gizmoCamera = this._gizmoCameraEntity.getComponent(Camera);
 
     // scene camera
-    this._sceneCamera =
-      rootEntity.parent.getComponent(NavigationGizmo).sceneCamera;
+    this._sceneCamera = rootEntity.parent.getComponent(NavigationGizmo).camera;
+
     this._sceneCameraEntity = this._sceneCamera.entity;
     this._orbitControl = this._sceneCameraEntity.getComponent(OrbitControl);
 
@@ -92,8 +92,7 @@ export class SphereScript extends Script {
     this._rotateVec.scale(this._radius);
     Vector3.add(this._startPos, this._rotateVec, this._targetPoint);
 
-    this._startQuat =
-      this._directionEntity.transform.rotationQuaternion.clone();
+    this._startQuat = this._directionEntity.transform.rotationQuaternion.clone();
     this._startPointer = this.engine.inputManager.pointerPosition.clone();
 
     this.isTriggered = true;
@@ -103,24 +102,14 @@ export class SphereScript extends Script {
     const movePointer = this.engine.inputManager.pointerPosition;
 
     Vector2.subtract(this._startPointer, movePointer, this._tempPointer);
-    this._navigateCamera(
-      this._tempPointer.x * this.speedXFactor,
-      this._tempPointer.y * this.speedYFactor
-    );
+    this._navigateCamera(this._tempPointer.x * this.speedXFactor, this._tempPointer.y * this.speedYFactor);
   }
 
   onPointerUp() {
     if (this.isTriggered) {
       this.isTriggered = false;
-      this._gizmoCamera.screenPointToRay(
-        this.engine.inputManager.pointerPosition,
-        this._ray
-      );
-      const result = this.engine.physicsManager.raycast(
-        this._ray,
-        Number.MAX_VALUE,
-        Layer.Everything
-      );
+      this._gizmoCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._ray);
+      const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
       if (!result) {
         this._roundEntity.isActive = false;
       }
@@ -137,11 +126,7 @@ export class SphereScript extends Script {
     Quaternion.multiply(this._startQuat, this._tempQuat, this._tempQuat2);
     this._directionEntity.transform.rotationQuaternion = this._tempQuat2;
 
-    Vector3.transformByQuat(
-      this._startPos,
-      this._tempQuat.invert(),
-      this._currentPos
-    );
+    Vector3.transformByQuat(this._startPos, this._tempQuat.invert(), this._currentPos);
 
     Vector3.add(this._targetPoint, this._currentPos, this._currentPos);
   }
@@ -166,16 +151,10 @@ export class SphereScript extends Script {
   }
   onUpdate() {
     if (this.isTriggered) {
-      this._tempQuat3 =
-        this._directionEntity.transform.rotationQuaternion.clone();
+      this._tempQuat3 = this._directionEntity.transform.rotationQuaternion.clone();
       this._tempQuat3.invert();
 
-      Matrix.affineTransformation(
-        this._unitVec,
-        this._tempQuat3,
-        this._currentPos,
-        this._tempMat
-      );
+      Matrix.affineTransformation(this._unitVec, this._tempQuat3, this._currentPos, this._tempMat);
 
       this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
     } else {

@@ -62,7 +62,7 @@ export class EndScript extends Script {
     const rootEntity = this.entity.parent.parent.parent;
 
     // scene camera
-    this._sceneCamera = rootEntity.parent.getComponent(NavigationGizmo).sceneCamera;
+    this._sceneCamera = rootEntity.parent.getComponent(NavigationGizmo).camera;
     this._sceneCameraEntity = this._sceneCamera.entity;
     this._orbitControl = this._sceneCameraEntity.getComponent(OrbitControl);
 
