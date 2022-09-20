@@ -45,6 +45,13 @@ export class NavigationGizmo extends Component {
     this._gizmoCamera.clearFlags = CameraClearFlags.Depth;
   }
 
+  /** scene camera
+   * @return current scene camera
+   */
+  get camera() {
+    return this._sceneCamera;
+  }
+
   /**
    * @param camera - scene camera
    */
@@ -54,20 +61,29 @@ export class NavigationGizmo extends Component {
   }
 
   /**
-   * @return current scene camera
-   */
-  get camera() {
-    return this._sceneCamera;
-  }
-  /**
    * viewport for the gizmo, default upper right corner (0.8, 0, 0.2, 0.2).
+   * @return current viewport area
+   */
+  get viewport() {
+    return this._gizmoCamera.viewport;
+  }
+
+  /**
    * @param viewportRange - normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
    */
   set viewport(viewportRange: Vector4) {
     this._gizmoCamera.viewport.copyFrom(viewportRange);
   }
+
   /**
    * gizmo layer, default Layer30
+   * @return the layer for gizmo and gizmo camera's cullingMask
+   */
+  get layer() {
+    return this._gizmoLayer;
+  }
+
+  /**
    * @param layer - the layer for gizmo and gizmo camera's cullingMask
    */
   set layer(layer: Layer) {
@@ -75,12 +91,6 @@ export class NavigationGizmo extends Component {
 
     this._gizmoCamera.cullingMask = layer;
     this._gizmoEntity.layer = layer;
-  }
-  /**
-   * @return the layer for gizmo and gizmo camera's cullingMask
-   */
-  get layer() {
-    return this._gizmoLayer;
   }
 
   private _createGizmo() {

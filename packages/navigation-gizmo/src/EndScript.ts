@@ -3,6 +3,7 @@ import * as TWEEN from "@tweenjs/tween.js";
 import { NavigationGizmo } from "./NavigationGizmo";
 import { OrbitControl } from "oasis-engine-toolkit";
 
+/** @internal */
 export class EndScript extends Script {
   private duration: number = 100;
 

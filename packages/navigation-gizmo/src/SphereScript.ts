@@ -13,6 +13,8 @@ import {
 } from "oasis-engine";
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
 import { NavigationGizmo } from "./NavigationGizmo";
+
+/** @internal */
 export class SphereScript extends Script {
   private isTriggered: boolean = false;
   private speedXFactor: number = 0.02;

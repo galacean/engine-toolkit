@@ -2,6 +2,7 @@ import { Material, Mesh, Engine, Vector4, PrimitiveMesh, ModelMesh, Vector3 } fr
 import { createCircleMesh } from "./CircleMesh";
 import { createMeshMaterial } from "./MeshMaterial";
 
+/** @internal */
 export class Utils {
   public redMaterial: Material;
   public greenMaterial: Material;
