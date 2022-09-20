@@ -1,13 +1,4 @@
-import {
-  Camera,
-  Color,
-  Entity,
-  Matrix,
-  Quaternion,
-  Script,
-  TextRenderer,
-  Vector3,
-} from "oasis-engine";
+import { Camera, Color, Entity, Matrix, Quaternion, Script, TextRenderer, Vector3 } from "oasis-engine";
 import * as TWEEN from "@tweenjs/tween.js";
 import { NavigationGizmo } from "./NavigationGizmo";
 import { OrbitControl } from "oasis-engine-toolkit";
@@ -27,6 +18,7 @@ export class EndScript extends Script {
   private _normalQuat: Quaternion = new Quaternion();
   private _tempMat: Matrix = new Matrix();
   private _tempVect: Vector3 = new Vector3();
+  private _tempUnit: Vector3 = new Vector3();
   private _tempTargetVect: Vector3 = new Vector3();
   private _tempPointVect: Vector3 = new Vector3();
   private _tempRotateVect: Vector3 = new Vector3();
@@ -35,33 +27,33 @@ export class EndScript extends Script {
     x: {
       upVector: new Vector3(0, 1, 0),
       axis: "x",
-      factor: 1,
+      factor: 1
     },
     y: {
       upVector: new Vector3(0, 0, 1),
       axis: "y",
-      factor: 1,
+      factor: 1
     },
     z: {
       upVector: new Vector3(0, 1, 0),
       axis: "z",
-      factor: 1,
+      factor: 1
     },
     "-x": {
       upVector: new Vector3(0, 1, 0),
       axis: "x",
-      factor: -1,
+      factor: -1
     },
     "-y": {
       upVector: new Vector3(0, 0, -1),
       axis: "y",
-      factor: -1,
+      factor: -1
     },
     "-z": {
       upVector: new Vector3(0, 1, 0),
       axis: "z",
-      factor: -1,
-    },
+      factor: -1
+    }
   };
 
   constructor(entity: Entity) {
@@ -70,8 +62,7 @@ export class EndScript extends Script {
     const rootEntity = this.entity.parent.parent.parent;
 
     // scene camera
-    this._sceneCamera =
-      rootEntity.parent.getComponent(NavigationGizmo).sceneCamera;
+    this._sceneCamera = rootEntity.parent.getComponent(NavigationGizmo).sceneCamera;
     this._sceneCameraEntity = this._sceneCamera.entity;
     this._orbitControl = this._sceneCameraEntity.getComponent(OrbitControl);
 
@@ -93,10 +84,7 @@ export class EndScript extends Script {
     const currentAxisName = this.entity.name;
 
     const startMat = this._sceneCameraEntity.transform.worldMatrix.clone();
-    const targetMat = this._getTargetMatrix(
-      this._sceneCameraEntity,
-      currentAxisName
-    );
+    const targetMat = this._getTargetMatrix(this._sceneCameraEntity, currentAxisName);
 
     const currentMat = this._sceneCameraEntity.transform.worldMatrix;
 
@@ -131,6 +119,15 @@ export class EndScript extends Script {
   }
 
   _getTargetMatrix(entity: Entity, axisName: string) {
+    const {
+      _tempRotateVect: tempRotateVect,
+      _tempPointVect: tempPointVect,
+      _tempVect: tempVect,
+      _tempTargetVect: tempTargetVect,
+      _tempMat: tempMat,
+      _tempUnit: tempUnit
+    } = this;
+
     const currentPos = entity.transform.worldPosition;
 
     const upVector = this.AxisFactor[axisName].upVector;
@@ -139,33 +136,22 @@ export class EndScript extends Script {
 
     const radius = this._sceneCameraEntity.transform.worldPosition.length();
 
-    entity.transform.getWorldForward(this._tempVect);
-    this._tempVect.scale(radius);
+    entity.transform.getWorldForward(tempVect);
+    tempVect.scale(radius);
 
-    this._tempRotateVect = new Vector3();
-    this._tempRotateVect[axis] = factor * radius;
+    tempRotateVect.copyFrom(tempUnit);
+    tempRotateVect[axis] = factor * radius;
 
     // get rotate origin point
-    Vector3.add(currentPos, this._tempVect, this._tempPointVect);
+    Vector3.add(currentPos, tempVect, tempPointVect);
 
     // get position after rotation
-    Vector3.add(
-      this._tempRotateVect,
-      this._tempPointVect,
-      this._tempTargetVect
-    );
-
-    console.log(axisName, this._tempTargetVect, this._tempPointVect);
+    Vector3.add(tempRotateVect, tempPointVect, tempTargetVect);
 
     // get worldMatrix for scene camera
-    Matrix.lookAt(
-      this._tempTargetVect,
-      this._tempPointVect,
-      upVector,
-      this._tempMat
-    );
-    this._tempMat.invert();
+    Matrix.lookAt(tempTargetVect, tempPointVect, upVector, tempMat);
+    tempMat.invert();
 
-    return this._tempMat;
+    return tempMat;
   }
 }
