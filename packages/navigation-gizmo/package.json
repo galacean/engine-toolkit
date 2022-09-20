@@ -22,6 +22,6 @@
     "oasis-engine": "^0.9.0-alpha",
     "@oasis-engine/physics-lite": "^0.7.5",
     "@tweenjs/tween.js": "^18.6.4",
-    "@oasis-engine-toolkit/controls": "^0.9.0-alpha"
+    "@oasis-engine-toolkit/controls": "workspace:*"
   }
 }

@@ -1,7 +1,8 @@
 import { Camera, Color, Entity, Matrix, Quaternion, Script, TextRenderer, Vector3 } from "oasis-engine";
 import * as TWEEN from "@tweenjs/tween.js";
 import { NavigationGizmo } from "./NavigationGizmo";
-import { OrbitControl } from "oasis-engine-toolkit";
+
+import { OrbitControl, FreeControl, OrthoControl } from "@oasis-engine-toolkit/controls";
 
 /** @internal */
 export class EndScript extends Script {
@@ -9,12 +10,15 @@ export class EndScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _orbitControl: OrbitControl | null;
+  private _controls: OrbitControl | FreeControl | OrthoControl | null;
+  private _gizmoEntity: Entity;
 
   private _textRenderer: TextRenderer;
   private _textColor: Color;
 
   private _tween = new TWEEN.Tween({ t: 0 });
+
+  private static _startMat: Matrix = new Matrix();
 
   private _normalQuat: Quaternion = new Quaternion();
   private _tempMat: Matrix = new Matrix();
@@ -59,18 +63,31 @@ export class EndScript extends Script {
 
   constructor(entity: Entity) {
     super(entity);
-
-    const rootEntity = this.entity.parent.parent.parent;
-
-    // scene camera
-    this._sceneCamera = rootEntity.parent.getComponent(NavigationGizmo).camera;
-    this._sceneCameraEntity = this._sceneCamera.entity;
-    this._orbitControl = this._sceneCameraEntity.getComponent(OrbitControl);
-
     // text
     const textEntity = this.entity.findByName("text");
     this._textRenderer = textEntity.getComponent(TextRenderer);
-    this._textColor = this._textRenderer.color.clone();
+    this._textColor.copyFrom(this._textRenderer.color);
+  }
+  /**
+   * @return the gizmo entity
+   */
+  get gizmoEntity() {
+    return this._gizmoEntity;
+  }
+
+  /**
+   * @param entity - the gizmo entity
+   */
+  set gizmoEntity(entity: Entity) {
+    this._gizmoEntity = entity;
+
+    const gizmoComponent = this._gizmoEntity.parent.getComponent(NavigationGizmo);
+    // scene camera
+    this._sceneCamera = gizmoComponent.camera;
+    this._sceneCameraEntity = this._sceneCamera.entity;
+
+    // set orbit control
+    this._controls = gizmoComponent.controls;
   }
 
   onPointerEnter() {
@@ -78,13 +95,13 @@ export class EndScript extends Script {
   }
 
   onPointerExit() {
-    Object.assign(this._textRenderer.color, this._textColor);
+    this._textRenderer.color.copyFrom(this._textColor);
   }
 
   onPointerClick() {
     const currentAxisName = this.entity.name;
 
-    const startMat = this._sceneCameraEntity.transform.worldMatrix.clone();
+    EndScript._startMat.copyFrom(this._sceneCameraEntity.transform.worldMatrix);
     const targetMat = this._getTargetMatrix(this._sceneCameraEntity, currentAxisName);
 
     const currentMat = this._sceneCameraEntity.transform.worldMatrix;
@@ -93,20 +110,20 @@ export class EndScript extends Script {
     this._tween = new TWEEN.Tween({ t: 0 })
       .to({ t: 1 }, this.duration)
       .onStart(() => {
-        if (this._orbitControl) {
-          this._orbitControl.enabled = false;
+        if (this._controls) {
+          this._controls.enabled = false;
         }
 
         this._textRenderer.color.set(0, 0, 0, 1);
-        this._textColor = this._textRenderer.color.clone();
+        this._textColor.copyFrom(this._textRenderer.color);
       })
       .onUpdate(({ t }) => {
-        Matrix.lerp(startMat, targetMat, t, currentMat);
+        Matrix.lerp(EndScript._startMat, targetMat, t, currentMat);
         this._sceneCameraEntity.transform.worldMatrix = currentMat;
       })
       .onComplete(() => {
-        if (this._orbitControl) {
-          this._orbitControl.enabled = true;
+        if (this._controls) {
+          this._controls.enabled = true;
         }
         this._sceneCamera.resetProjectionMatrix();
       });

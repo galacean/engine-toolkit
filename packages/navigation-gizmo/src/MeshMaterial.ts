@@ -29,7 +29,7 @@ export function createMeshMaterial(
 ) {
   const material = new Material(engine, Shader.find("navigation-gizmo-shader"));
   material.shaderData.setVector4("u_color", color);
-  material.renderQueueType = RenderQueueType.Transparent;
+  material.renderState[0].renderQueueType = RenderQueueType.Transparent;
 
   if (!depthTest) {
     material.renderState.depthState.enabled = depthTest;
@@ -43,7 +43,7 @@ export function createMeshMaterial(
     target.sourceColorBlendFactor = target.sourceAlphaBlendFactor = BlendFactor.SourceAlpha;
     target.destinationColorBlendFactor = target.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
     depthState.writeEnabled = false;
-    material.renderQueueType = RenderQueueType.Transparent;
+    material.renderState[0].renderQueueType = RenderQueueType.Transparent;
   }
   return material;
 }

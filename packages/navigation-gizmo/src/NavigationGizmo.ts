@@ -19,10 +19,12 @@ import {
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";
+import { OrbitControl, FreeControl, OrthoControl } from "@oasis-engine-toolkit/controls";
 
 export class NavigationGizmo extends Component {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
+  private _sceneControls: OrbitControl | FreeControl | OrthoControl | null;
 
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
@@ -30,6 +32,12 @@ export class NavigationGizmo extends Component {
 
   constructor(entity: Entity) {
     super(entity);
+
+    // @ts-ignore
+    if (!entity.engine.physicsManager._initialized) {
+      throw new Error("PhysicsManager is not initialized");
+    }
+
     this._utils = new Utils(this.engine);
 
     this._gizmoEntity = entity.createChild("navigation-gizmo");
@@ -58,6 +66,10 @@ export class NavigationGizmo extends Component {
   set camera(camera: Camera) {
     this._sceneCamera = camera;
     this._createGizmo();
+
+    if (this._gizmoLayer === this._sceneCamera.cullingMask) {
+      this._gizmoLayer = Layer.Layer29;
+    }
   }
 
   /**
@@ -78,6 +90,7 @@ export class NavigationGizmo extends Component {
   /**
    * gizmo layer, default Layer30
    * @return the layer for gizmo and gizmo camera's cullingMask
+   * @remarks duplicate warning
    */
   get layer() {
     return this._gizmoLayer;
@@ -91,6 +104,22 @@ export class NavigationGizmo extends Component {
 
     this._gizmoCamera.cullingMask = layer;
     this._gizmoEntity.layer = layer;
+  }
+
+  /**
+   * @return the control in the active scene, could be null
+   */
+
+  get controls() {
+    return this._sceneControls;
+  }
+
+  /**
+   * @param control - the control in the active scene, no need to set if there's none
+   */
+
+  set controls(control) {
+    this._sceneControls = control;
   }
 
   private _createGizmo() {
@@ -181,7 +210,8 @@ export class NavigationGizmo extends Component {
     axisXTextRenderer.color.set(0, 0, 0, 1);
     axisXTextRenderer.horizontalAlignment = TextHorizontalAlignment.Center;
 
-    entity.addComponent(EndScript);
+    const endComponent = entity.addComponent(EndScript);
+    endComponent.gizmoEntity = this._gizmoEntity;
   }
 
   private _createNegativeEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
@@ -214,6 +244,7 @@ export class NavigationGizmo extends Component {
     axisXTextRenderer.color.set(1, 1, 1, 0);
     axisXTextRenderer.horizontalAlignment = TextHorizontalAlignment.Center;
 
-    entity.addComponent(EndScript);
+    const endComponent = entity.addComponent(EndScript);
+    endComponent.gizmoEntity = this._gizmoEntity;
   }
 }
