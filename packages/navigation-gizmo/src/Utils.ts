@@ -1,12 +1,4 @@
-import {
-  Material,
-  Mesh,
-  Engine,
-  Vector4,
-  PrimitiveMesh,
-  ModelMesh,
-  Vector3,
-} from "oasis-engine";
+import { Material, Mesh, Engine, Vector4, PrimitiveMesh, ModelMesh, Vector3 } from "oasis-engine";
 import { CircleMesh } from "./CircleMesh";
 import { createMeshMaterial } from "./MeshMaterial";
 
@@ -44,7 +36,7 @@ class Utils {
       {
         color: new Vector4(1.0, 0.25, 0.25, 1.0),
         depthTest: false,
-        blend: false,
+        blend: false
       },
       engine
     );
@@ -53,7 +45,7 @@ class Utils {
       {
         color: new Vector4(0.5, 0.8, 0.2, 1.0),
         depthTest: false,
-        blend: false,
+        blend: false
       },
       engine
     );
@@ -62,7 +54,7 @@ class Utils {
       {
         color: new Vector4(0.3, 0.5, 1.0, 1.0),
         depthTest: false,
-        blend: false,
+        blend: false
       },
       engine
     );
@@ -71,7 +63,7 @@ class Utils {
       {
         color: new Vector4(1, 1, 1, 0.2),
         depthTest: true,
-        blend: true,
+        blend: true
       },
       engine
     );
@@ -80,26 +72,15 @@ class Utils {
       {
         color: new Vector4(0.5, 0.5, 0.5, 0.5),
         depthTest: false,
-        blend: true,
+        blend: true
       },
       engine
     );
 
-    this.axisMesh = PrimitiveMesh.createCylinder(
-      engine,
-      0.12,
-      0.12,
-      this.axisLength
-    );
-    this.endMesh = new CircleMesh(engine, { radius: this.endRadius }).modelMesh;
-    this.endInnerMesh = new CircleMesh(engine, {
-      radius: this.endRadius - 0.24,
-    }).modelMesh;
-
-    this.bgMesh = new CircleMesh(engine, {
-      radius: this.radius,
-      segments: 144,
-    }).modelMesh;
+    this.axisMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, this.axisLength);
+    this.endMesh = CircleMesh.createCircle(engine, this.endRadius);
+    this.endInnerMesh = CircleMesh.createCircle(engine, this.endRadius - 0.24);
+    this.bgMesh = CircleMesh.createCircle(engine, this.radius, 144);
 
     this.xRotateVector = new Vector3(0, 0, 90);
     this.yRotateVector = new Vector3(0, 90, 0);

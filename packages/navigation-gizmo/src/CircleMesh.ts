@@ -1,77 +1,124 @@
-import {
-  Vector3,
-  Quaternion,
-  Engine,
-  ModelMesh,
-  MeshTopology,
-} from "oasis-engine";
-
-interface CircleMeshOptions {
-  center?: Vector3;
-  normal?: Vector3;
-  radius?: number;
-  segments?: number;
-}
+import { Vector3, Quaternion, Engine, ModelMesh, MeshTopology } from "oasis-engine";
 
 export class CircleMesh {
-  public modelMesh: ModelMesh;
+  /**
+   * create a circle mesh
+   * @param engine - Engine
+   * @param radius - Circle radius
+   * @param segments - Number of segments
+   * @param center - Circle center
+   * @param normal - Circle direction
+   * @returns Circle model mesh
+   */
+  static createCircle(
+    engine: Engine,
+    radius: number = 1,
+    segments: number = 48,
+    center: Vector3 = new Vector3(0, 0, 0),
+    normal: Vector3 = new Vector3(0, 0, 1)
+  ): ModelMesh {
+    const mesh = new ModelMesh(engine);
 
-  private center = new Vector3();
-  private normal = new Vector3(0, 0, 1);
-  private startPoint = new Vector3(1, 0, 0);
-  private segments: number = 48;
-  private radius: number = 1;
-  private vertices: Array<Vector3> = [];
-  private indices: Array<number> = [];
+    const indices = new Uint16Array(segments * 3);
+    const vertices: Array<Vector3> = [];
+    const startPoint = new Vector3(1, 0, 0).scale(radius);
+
+    for (let i = 1; i <= segments; i++) {
+      const start = (i - 1) * 3;
+      indices[start] = i;
+      indices[start + 1] = i + 1;
+      indices[start + 2] = 0;
+    }
+
+    vertices.push(center);
+
+    for (let s = 0; s <= segments; s++) {
+      const segment = (s / segments) * Math.PI * 2;
+      Quaternion.rotationAxisAngle(normal, segment, CircleMesh._tempQuat);
+      Vector3.transformByQuat(startPoint, CircleMesh._tempQuat, CircleMesh._tempVect);
+      vertices[s + 1] = CircleMesh._tempVect.clone();
+    }
+
+    CircleMesh._initialize(mesh, vertices, indices);
+    return mesh;
+  }
+
   private static _tempVect: Vector3 = new Vector3();
   private static _tempQuat: Quaternion = new Quaternion();
+
   /**
-   * @param options
+   *
+   * @param mesh
+   * @param vertices
+   * @param indices
    */
-  public constructor(engine: Engine, options?: CircleMeshOptions) {
-    this.modelMesh = new ModelMesh(engine);
+  private static _initialize(mesh: ModelMesh, vertices: Array<Vector3>, indices: Uint16Array) {
+    mesh.setPositions(vertices);
+    mesh.setIndices(indices);
 
-    if (options?.center) {
-      this.center = options.center.clone();
-    }
-    if (options?.normal) {
-      this.normal = options.normal.clone();
-    }
+    mesh.addSubMesh(0, indices.length, MeshTopology.Triangles);
+    mesh.uploadData(false);
+  }
+}
+import { Vector3, Quaternion, Engine, ModelMesh, MeshTopology } from "oasis-engine";
 
-    if (options?.radius) {
-      this.radius = options.radius;
-    }
-    if (options?.segments) {
-      this.segments = options.segments;
-    }
+export class CircleMesh {
+  /**
+   * create a circle mesh
+   * @param engine - Engine
+   * @param radius - Circle radius
+   * @param segments - Number of segments
+   * @param center - Circle center
+   * @param normal - Circle direction
+   * @returns Circle model mesh
+   */
+  static createCircle(
+    engine: Engine,
+    radius: number = 1,
+    segments: number = 48,
+    center: Vector3 = new Vector3(0, 0, 0),
+    normal: Vector3 = new Vector3(0, 0, 1)
+  ): ModelMesh {
+    const mesh = new ModelMesh(engine);
 
-    this.indices = [];
-    this.vertices = [];
-    this.startPoint.scale(this.radius);
+    const indices = new Uint16Array(segments * 3);
+    const vertices: Array<Vector3> = [];
+    const startPoint = new Vector3(1, 0, 0).scale(radius);
 
-    // indices
-    for (let i = 1; i <= this.segments; i++) {
+    for (let i = 1; i <= segments; i++) {
       const start = (i - 1) * 3;
-      this.indices[start] = i;
-      this.indices[start + 1] = i + 1;
-      this.indices[start + 2] = 0;
+      indices[start] = i;
+      indices[start + 1] = i + 1;
+      indices[start + 2] = 0;
     }
-    // vertices
-    this.vertices.push(this.center);
-    for (let s = 0; s <= this.segments; s++) {
-      const segment = (s / this.segments) * Math.PI * 2;
-      Quaternion.rotationAxisAngle(this.normal, segment, CircleMesh._tempQuat);
-      Vector3.transformByQuat(
-        this.startPoint,
-        CircleMesh._tempQuat,
-        CircleMesh._tempVect
-      );
-      this.vertices[s + 1] = CircleMesh._tempVect.clone();
+
+    vertices.push(center);
+
+    for (let s = 0; s <= segments; s++) {
+      const segment = (s / segments) * Math.PI * 2;
+      Quaternion.rotationAxisAngle(normal, segment, CircleMesh._tempQuat);
+      Vector3.transformByQuat(startPoint, CircleMesh._tempQuat, CircleMesh._tempVect);
+      vertices[s + 1] = CircleMesh._tempVect.clone();
     }
-    this.modelMesh.setPositions(this.vertices);
-    this.modelMesh.setIndices(Uint16Array.from(this.indices));
-    this.modelMesh.clearSubMesh();
-    this.modelMesh.addSubMesh(0, this.indices.length, MeshTopology.Triangles);
-    this.modelMesh.uploadData(false);
+
+    CircleMesh._initialize(mesh, vertices, indices);
+    return mesh;
+  }
+
+  private static _tempVect: Vector3 = new Vector3();
+  private static _tempQuat: Quaternion = new Quaternion();
+
+  /**
+   *
+   * @param mesh
+   * @param vertices
+   * @param indices
+   */
+  private static _initialize(mesh: ModelMesh, vertices: Array<Vector3>, indices: Uint16Array) {
+    mesh.setPositions(vertices);
+    mesh.setIndices(indices);
+
+    mesh.addSubMesh(0, indices.length, MeshTopology.Triangles);
+    mesh.uploadData(false);
   }
 }
