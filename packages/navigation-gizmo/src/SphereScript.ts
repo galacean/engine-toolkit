@@ -118,7 +118,7 @@ export class SphereScript extends Script {
       }
     }
   }
-  /** @OverRide */
+  /** @override */
   onUpdate() {
     if (this.isTriggered) {
       this._tempQuat3 = this._directionEntity.transform.rotationQuaternion.clone();

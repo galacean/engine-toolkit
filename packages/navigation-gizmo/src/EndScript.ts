@@ -113,7 +113,7 @@ export class EndScript extends Script {
     this._tween.start();
   }
 
-  /** @OverRide */
+  /** @override */
   onUpdate() {
     TWEEN.update();
     this.entity.transform.worldRotationQuaternion = this._normalQuat;
