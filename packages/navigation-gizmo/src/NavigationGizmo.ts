@@ -13,22 +13,95 @@ import {
   StaticCollider,
   TextHorizontalAlignment,
   TextRenderer,
-  Vector3,
-  Vector4
+  Vector2,
+  Vector3
 } from "oasis-engine";
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";
-import { OrbitControl, FreeControl, OrthoControl } from "@oasis-engine-toolkit/controls";
 
 export class NavigationGizmo extends Component {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
-  private _sceneControls: OrbitControl | FreeControl | OrthoControl | null;
+  private _gizmoPosition: Vector2 = new Vector2(0, 0);
+  private _gizmoSize: number = 0.2;
 
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
   private _utils: Utils;
+
+  private _sphereScript: SphereScript;
+  private _endScript = {
+    X: EndScript,
+    Y: EndScript,
+    Z: EndScript,
+    "-X": EndScript,
+    "-Y": EndScript,
+    "-Z": EndScript
+  };
+
+  /** scene camera
+   * @return current scene camera
+   */
+  get camera() {
+    return this._sceneCamera;
+  }
+
+  set camera(camera: Camera) {
+    this._sceneCamera = camera;
+    this._sphereScript.camera = camera;
+
+    Object.keys(this._endScript).forEach((key) => {
+      this._endScript[key].camera = camera;
+    });
+
+    if (this._gizmoLayer === this._sceneCamera.cullingMask) {
+      this._gizmoLayer = Layer.Layer29;
+    }
+  }
+
+  /**
+   * gizmo layer, default Layer30
+   * @return the layer for gizmo and gizmo camera's cullingMask
+   * @remarks duplicate warning
+   */
+  get layer() {
+    return this._gizmoLayer;
+  }
+
+  set layer(layer: Layer) {
+    this._gizmoLayer = layer;
+
+    this._gizmoCamera.cullingMask = layer;
+    this._gizmoEntity.layer = layer;
+  }
+
+  /**
+   * gizmo position, the left upper point of the gizmo area, default (0, 0).
+   * Normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
+   * @return current gizmo position
+   */
+  get position() {
+    return this._gizmoPosition;
+  }
+
+  set position(position: Vector2) {
+    this._gizmoCamera.viewport.set(position.x, position.y, this._gizmoSize, this._gizmoSize);
+    this._gizmoPosition = position;
+  }
+
+  /**
+   * gizmo size, the length and width of the gizmo area, default 0.2.
+   * @return current gizmo size
+   */
+  get size() {
+    return this._gizmoSize;
+  }
+
+  set size(size: number) {
+    this._gizmoCamera.viewport.set(this._gizmoPosition.x, this._gizmoPosition.y, size, size);
+    this._gizmoSize = size;
+  }
 
   constructor(entity: Entity) {
     super(entity);
@@ -46,80 +119,15 @@ export class NavigationGizmo extends Component {
     const gizmoCameraEntity = this._gizmoEntity.createChild("gizmo-camera");
     gizmoCameraEntity.transform.setPosition(0, 0, 10);
 
-    this._gizmoCamera = gizmoCameraEntity.addComponent(Camera);
-    this._gizmoCamera.isOrthographic = true;
-    this._gizmoCamera.cullingMask = this._gizmoLayer;
-    this._gizmoCamera.viewport.set(0.8, 0, 0.2, 0.2);
-    this._gizmoCamera.clearFlags = CameraClearFlags.Depth;
-  }
+    const gizmoCamera = gizmoCameraEntity.addComponent(Camera);
+    gizmoCamera.isOrthographic = true;
+    gizmoCamera.cullingMask = this._gizmoLayer;
+    gizmoCamera.viewport.set(this._gizmoPosition.x, this._gizmoPosition.y, this._gizmoSize, this._gizmoSize);
+    gizmoCamera.clearFlags = CameraClearFlags.Depth;
 
-  /** scene camera
-   * @return current scene camera
-   */
-  get camera() {
-    return this._sceneCamera;
-  }
+    this._gizmoCamera = gizmoCamera;
 
-  /**
-   * @param camera - scene camera
-   */
-  set camera(camera: Camera) {
-    this._sceneCamera = camera;
     this._createGizmo();
-
-    if (this._gizmoLayer === this._sceneCamera.cullingMask) {
-      this._gizmoLayer = Layer.Layer29;
-    }
-  }
-
-  /**
-   * viewport for the gizmo, default upper right corner (0.8, 0, 0.2, 0.2).
-   * @return current viewport area
-   */
-  get viewport() {
-    return this._gizmoCamera.viewport;
-  }
-
-  /**
-   * @param viewportRange - normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
-   */
-  set viewport(viewportRange: Vector4) {
-    this._gizmoCamera.viewport.copyFrom(viewportRange);
-  }
-
-  /**
-   * gizmo layer, default Layer30
-   * @return the layer for gizmo and gizmo camera's cullingMask
-   * @remarks duplicate warning
-   */
-  get layer() {
-    return this._gizmoLayer;
-  }
-
-  /**
-   * @param layer - the layer for gizmo and gizmo camera's cullingMask
-   */
-  set layer(layer: Layer) {
-    this._gizmoLayer = layer;
-
-    this._gizmoCamera.cullingMask = layer;
-    this._gizmoEntity.layer = layer;
-  }
-
-  /**
-   * @return the control in the active scene, could be null
-   */
-
-  get controls() {
-    return this._sceneControls;
-  }
-
-  /**
-   * @param control - the control in the active scene, no need to set if there's none
-   */
-
-  set controls(control) {
-    this._sceneControls = control;
   }
 
   private _createGizmo() {
@@ -153,9 +161,7 @@ export class NavigationGizmo extends Component {
     const endNegativeZEntity = endEntity.createChild("-z");
 
     this._createNegativeEnd(endNegativeXEntity, utils.xEndTranslateVector, utils.redMaterial, utils.endMesh, "-X");
-
     this._createNegativeEnd(endNegativeYEntity, utils.yEndTranslateVector, utils.greenMaterial, utils.endMesh, "-Y");
-
     this._createNegativeEnd(endNegativeZEntity, utils.zEndTranslateVector, utils.blueMaterial, utils.endMesh, "-Z");
 
     // sphere behind
@@ -171,10 +177,9 @@ export class NavigationGizmo extends Component {
     const roundRenderer = roundEntity.addComponent(MeshRenderer);
     roundRenderer.mesh = utils.bgMesh;
     roundRenderer.setMaterial(utils.bgMaterial);
-
     roundEntity.isActive = false;
 
-    sphereEntity.addComponent(SphereScript);
+    this._sphereScript = sphereEntity.addComponent(SphereScript);
   }
 
   private _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material, mesh: Mesh) {
@@ -186,7 +191,7 @@ export class NavigationGizmo extends Component {
     axisXRenderer.setMaterial(material);
   }
 
-  private _createPositiveEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, name: string) {
+  private _createPositiveEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
     const utils = this._utils;
 
     entity.transform.setPosition(position.x, position.y, position.z);
@@ -204,14 +209,14 @@ export class NavigationGizmo extends Component {
     textEntity.transform.setPosition(0, 0, 0.05);
     const axisXTextRenderer = textEntity.addComponent(TextRenderer);
     axisXTextRenderer.font = Font.createFromOS(this.engine, "Arial");
-    axisXTextRenderer.text = name;
+    axisXTextRenderer.text = axisName;
     axisXTextRenderer.fontStyle = FontStyle.Bold;
     axisXTextRenderer.fontSize = 110;
     axisXTextRenderer.color.set(0, 0, 0, 1);
     axisXTextRenderer.horizontalAlignment = TextHorizontalAlignment.Center;
 
     const endComponent = entity.addComponent(EndScript);
-    endComponent.gizmoEntity = this._gizmoEntity;
+    this._endScript[axisName] = endComponent;
   }
 
   private _createNegativeEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
@@ -245,6 +250,6 @@ export class NavigationGizmo extends Component {
     axisXTextRenderer.horizontalAlignment = TextHorizontalAlignment.Center;
 
     const endComponent = entity.addComponent(EndScript);
-    endComponent.gizmoEntity = this._gizmoEntity;
+    this._endScript[axisName] = endComponent;
   }
 }
