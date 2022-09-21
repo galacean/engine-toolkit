@@ -1,14 +1,20 @@
-import { Material, Mesh, Engine, Vector4, PrimitiveMesh, ModelMesh, Vector3 } from "oasis-engine";
+import {
+  Mesh,
+  Engine,
+  PrimitiveMesh,
+  ModelMesh,
+  Vector3,
+  UnlitMaterial,
+} from "oasis-engine";
 import { createCircleMesh } from "./CircleMesh";
-import { createMeshMaterial } from "./MeshMaterial";
 
 /** @internal */
 export class Utils {
-  public redMaterial: Material;
-  public greenMaterial: Material;
-  public blueMaterial: Material;
-  public bgMaterial: Material;
-  public darkMaterial: Material;
+  public redMaterial: UnlitMaterial;
+  public greenMaterial: UnlitMaterial;
+  public blueMaterial: UnlitMaterial;
+  public bgMaterial: UnlitMaterial;
+  public darkMaterial: UnlitMaterial;
 
   public axisMesh: Mesh;
   public endMesh: Mesh;
@@ -33,17 +39,37 @@ export class Utils {
   public zEndTranslateVector: Vector3 = new Vector3();
 
   constructor(engine: Engine) {
-    this.redMaterial = createMeshMaterial(engine, new Vector4(1.0, 0.25, 0.25, 1.0), false, false);
+    const redMaterial = new UnlitMaterial(engine);
+    redMaterial.isTransparent = true;
+    redMaterial.baseColor.set(1.0, 0.25, 0.25, 1.0);
+    this.redMaterial = redMaterial;
 
-    this.greenMaterial = createMeshMaterial(engine, new Vector4(0.5, 0.8, 0.2, 1.0), false, false);
+    const greenMaterial = new UnlitMaterial(engine);
+    greenMaterial.isTransparent = true;
+    greenMaterial.baseColor.set(0.5, 0.8, 0.2, 1.0);
+    this.greenMaterial = greenMaterial;
 
-    this.blueMaterial = createMeshMaterial(engine, new Vector4(0.3, 0.5, 1.0, 1.0), false, false);
+    const blueMaterial = new UnlitMaterial(engine);
+    blueMaterial.isTransparent = true;
+    blueMaterial.baseColor.set(0.3, 0.5, 1.0, 1.0);
+    this.blueMaterial = blueMaterial;
 
-    this.bgMaterial = createMeshMaterial(engine, new Vector4(1, 1, 1, 0.2), true, true);
+    const bgMaterial = new UnlitMaterial(engine);
+    bgMaterial.isTransparent = true;
+    bgMaterial.baseColor.set(1, 1, 1, 0.2);
+    this.bgMaterial = bgMaterial;
 
-    this.darkMaterial = createMeshMaterial(engine, new Vector4(0.5, 0.5, 0.5, 0.5), false, true);
+    const darkMaterial = new UnlitMaterial(engine);
+    darkMaterial.isTransparent = true;
+    darkMaterial.baseColor.set(0.5, 0.5, 0.5, 0.5);
+    this.darkMaterial = darkMaterial;
 
-    this.axisMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, this.axisLength);
+    this.axisMesh = PrimitiveMesh.createCylinder(
+      engine,
+      0.12,
+      0.12,
+      this.axisLength
+    );
     this.endMesh = createCircleMesh(engine, this.endRadius);
     this.endInnerMesh = createCircleMesh(engine, this.endRadius - 0.24);
     this.bgMesh = createCircleMesh(engine, this.radius, 144);

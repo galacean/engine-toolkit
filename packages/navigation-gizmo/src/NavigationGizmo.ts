@@ -1,7 +1,6 @@
 import {
   Camera,
   CameraClearFlags,
-  Component,
   Entity,
   Font,
   FontStyle,
@@ -9,6 +8,7 @@ import {
   Material,
   Mesh,
   MeshRenderer,
+  Script,
   SphereColliderShape,
   StaticCollider,
   TextHorizontalAlignment,
@@ -20,12 +20,10 @@ import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";
 
-export class NavigationGizmo extends Component {
+export class NavigationGizmo extends Script {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
   private _previousSceneCullingMaskLayer: Layer = Layer.Nothing;
-  private _gizmoPosition: Vector2 = new Vector2(0, 0);
-  private _gizmoSize: number = 0.2;
 
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
@@ -41,6 +39,17 @@ export class NavigationGizmo extends Component {
     "-Z": EndScript,
   };
 
+  /**
+   * @gizmoPosition - gizmo position, the left upper point of the gizmo area, default (0, 0).
+   * Normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
+   */
+  public gizmoPosition: Vector2 = new Vector2(0, 0);
+
+  /**
+   * @gizmoSize gizmo size, the length and width of the gizmo area, default 0.2.
+   */
+  public gizmoSize: number = 0.2;
+
   /** scene camera
    * @return current scene camera
    */
@@ -49,27 +58,25 @@ export class NavigationGizmo extends Component {
   }
 
   set camera(camera: Camera) {
-    if (this._sceneCamera !== camera) {
+    let sceneCamera = this._sceneCamera;
+    if (sceneCamera !== camera) {
+      // restore the previous camera cullingMask
+      if (sceneCamera) {
+        sceneCamera.cullingMask = this._previousSceneCullingMaskLayer;
+      }
       if (camera) {
-        // restore the previous camera cullingMask
-        if (this._sceneCamera) {
-          this._sceneCamera.cullingMask = this._previousSceneCullingMaskLayer;
-        }
-
-        this._sceneCamera = camera;
+        sceneCamera = this._sceneCamera = camera;
         this._sphereScript.camera = camera;
         Object.keys(this._endScript).forEach((key) => {
           this._endScript[key].camera = camera;
         });
 
-        this._previousSceneCullingMaskLayer = this._sceneCamera.cullingMask;
-        if ((this._sceneCamera.cullingMask & this._gizmoLayer) != 0) {
-          this._sceneCamera.cullingMask ^= this._gizmoLayer;
+        this._previousSceneCullingMaskLayer = sceneCamera.cullingMask;
+        if ((sceneCamera.cullingMask & this._gizmoLayer) != 0) {
+          sceneCamera.cullingMask ^= this._gizmoLayer;
+          console.log("camera cullingmask layer modified");
         }
       } else {
-        if (this._sceneCamera) {
-          this._sceneCamera.cullingMask = this._previousSceneCullingMaskLayer;
-        }
         throw new Error("navigation gizmo needs scene camera");
       }
     }
@@ -85,71 +92,31 @@ export class NavigationGizmo extends Component {
   }
 
   set layer(layer: Layer) {
+    const sceneCamera = this._sceneCamera;
     if (this._gizmoLayer !== layer) {
-      if (layer) {
-        // restore previous layer
-        if ((this._previousSceneCullingMaskLayer & this._gizmoLayer) != 0) {
-          this._sceneCamera.cullingMask = this._previousSceneCullingMaskLayer;
-        }
-        this._gizmoLayer = layer;
-        this._gizmoCamera.cullingMask = layer;
-        this._gizmoEntity.layer = layer;
+      // restore previous layer
+      if (sceneCamera) {
+        sceneCamera.cullingMask = this._previousSceneCullingMaskLayer;
+      }
+      this._gizmoLayer = layer;
+      this._gizmoCamera.cullingMask = layer;
+      this._gizmoEntity.layer = layer;
 
-        if ((this._sceneCamera.cullingMask & this._gizmoLayer) != 0) {
-          this._sceneCamera.cullingMask ^= this._gizmoLayer;
-        }
+      if (sceneCamera && (sceneCamera.cullingMask & this._gizmoLayer) != 0) {
+        sceneCamera.cullingMask ^= this._gizmoLayer;
       }
     }
   }
 
-  /**
-   * gizmo position, the left upper point of the gizmo area, default (0, 0).
-   * Normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
-   * @return current gizmo position
-   */
-  get position() {
-    return this._gizmoPosition;
-  }
-
-  set position(position: Vector2) {
-    this._gizmoCamera.viewport.set(
-      position.x,
-      position.y,
-      this._gizmoSize,
-      this._gizmoSize
-    );
-    this._gizmoPosition = position;
-  }
-
-  /**
-   * gizmo size, the length and width of the gizmo area, default 0.2.
-   * @return current gizmo size
-   */
-  get size() {
-    return this._gizmoSize;
-  }
-
-  set size(size: number) {
-    this._gizmoCamera.viewport.set(
-      this._gizmoPosition.x,
-      this._gizmoPosition.y,
-      size,
-      size
-    );
-    this._gizmoSize = size;
-  }
-
-  constructor(entity: Entity) {
-    super(entity);
-
+  onAwake() {
     // @ts-ignore
-    if (!entity.engine.physicsManager._initialized) {
+    if (!this.entity.engine.physicsManager._initialized) {
       throw new Error("PhysicsManager is not initialized");
     }
 
     this._utils = new Utils(this.engine);
 
-    this._gizmoEntity = entity.createChild("navigation-gizmo");
+    this._gizmoEntity = this.entity.createChild("navigation-gizmo");
     this._gizmoEntity.layer = this._gizmoLayer;
 
     const gizmoCameraEntity = this._gizmoEntity.createChild("gizmo-camera");
@@ -159,16 +126,25 @@ export class NavigationGizmo extends Component {
     gizmoCamera.isOrthographic = true;
     gizmoCamera.cullingMask = this._gizmoLayer;
     gizmoCamera.viewport.set(
-      this._gizmoPosition.x,
-      this._gizmoPosition.y,
-      this._gizmoSize,
-      this._gizmoSize
+      this.gizmoPosition.x,
+      this.gizmoPosition.y,
+      this.gizmoSize,
+      this.gizmoSize
     );
     gizmoCamera.clearFlags = CameraClearFlags.Depth;
 
     this._gizmoCamera = gizmoCamera;
 
     this._createGizmo();
+  }
+
+  onUpdate() {
+    this._gizmoCamera.viewport.set(
+      this.gizmoPosition.x,
+      this.gizmoPosition.y,
+      this.gizmoSize,
+      this.gizmoSize
+    );
   }
 
   private _createGizmo() {

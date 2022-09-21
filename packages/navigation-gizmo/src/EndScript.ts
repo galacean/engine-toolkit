@@ -83,9 +83,7 @@ export class EndScript extends Script {
       this._sceneCameraEntity.getComponent(FreeControl);
   }
 
-  constructor(entity: Entity) {
-    super(entity);
-
+  onAwake() {
     const textEntity = this.entity.findByName("text");
     this._textRenderer = textEntity.getComponent(TextRenderer);
     this._textColor.copyFrom(this._textRenderer.color);

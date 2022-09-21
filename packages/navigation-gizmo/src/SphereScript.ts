@@ -67,9 +67,7 @@ export class SphereScript extends Script {
       this._sceneCameraEntity.getComponent(FreeControl);
   }
 
-  constructor(entity: Entity) {
-    super(entity);
-
+  onAwake() {
     const gizmoEntity = this.entity.parent;
     this._directionEntity = gizmoEntity.findByName("direction");
     this._roundEntity = this.entity.findByName("round");
