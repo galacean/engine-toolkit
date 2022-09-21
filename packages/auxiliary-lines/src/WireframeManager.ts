@@ -5,6 +5,7 @@ import {
   CapsuleColliderShape,
   Collider,
   ColliderShapeUpAxis,
+  Color,
   dependentComponents,
   DirectLight,
   Entity,
@@ -70,6 +71,17 @@ export class WireframeManager extends Script {
       WireframeManager._positionPool.push(position);
     }
     return position;
+  }
+
+  /**
+ * Base color.
+ */
+  get baseColor(): Color {
+    return this._material.baseColor;
+  }
+
+  set baseColor(value: Color) {
+    this._material.baseColor = value;
   }
 
   /**
