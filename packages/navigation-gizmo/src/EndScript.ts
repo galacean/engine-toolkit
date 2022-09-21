@@ -78,7 +78,9 @@ export class EndScript extends Script {
   set camera(camera: Camera) {
     this._sceneCamera = camera;
     this._sceneCameraEntity = this._sceneCamera.entity;
-    this._controls = this._sceneCameraEntity.getComponent(OrbitControl);
+    this._controls =
+      this._sceneCameraEntity.getComponent(OrbitControl) ||
+      this._sceneCameraEntity.getComponent(FreeControl);
   }
 
   constructor(entity: Entity) {
