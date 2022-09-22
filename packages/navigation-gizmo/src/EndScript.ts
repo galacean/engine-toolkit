@@ -1,14 +1,4 @@
-import {
-  Camera,
-  Color,
-  Entity,
-  MathUtil,
-  Matrix,
-  Quaternion,
-  Script,
-  TextRenderer,
-  Vector3,
-} from "oasis-engine";
+import { Camera, Color, Entity, MathUtil, Matrix, Quaternion, Script, TextRenderer, Vector3 } from "oasis-engine";
 
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
 
@@ -29,7 +19,7 @@ export class EndScript extends Script {
   private _textRenderer: TextRenderer;
   private _textColor: Color = new Color();
 
-  private _target: Vector3 = new Vector3();
+  private _target: Vector3 = EndScript._vector;
 
   private _normalQuat: Quaternion = new Quaternion();
   private _tempMat: Matrix = new Matrix();
@@ -46,33 +36,33 @@ export class EndScript extends Script {
     x: {
       upVector: new Vector3(0, 1, 0),
       axis: "x",
-      factor: 1,
+      factor: 1
     },
     y: {
       upVector: new Vector3(0, 0, 1),
       axis: "y",
-      factor: 1,
+      factor: 1
     },
     z: {
       upVector: new Vector3(0, 1, 0),
       axis: "z",
-      factor: 1,
+      factor: 1
     },
     "-x": {
       upVector: new Vector3(0, 1, 0),
       axis: "x",
-      factor: -1,
+      factor: -1
     },
     "-y": {
       upVector: new Vector3(0, 0, -1),
       axis: "y",
-      factor: -1,
+      factor: -1
     },
     "-z": {
       upVector: new Vector3(0, 1, 0),
       axis: "z",
-      factor: -1,
-    },
+      factor: -1
+    }
   };
 
   /**
@@ -95,7 +85,7 @@ export class EndScript extends Script {
     return this._target;
   }
 
-  set target(target: Vector3 | null) {
+  set target(target: Vector3) {
     if (target) {
       this._target = target;
       this._isTargetMode = true;
@@ -132,10 +122,7 @@ export class EndScript extends Script {
     const currentAxisName = this.entity.name;
     this._startMat = this._sceneCameraEntity.transform.worldMatrix.clone();
     this._currentMat = this._sceneCameraEntity.transform.worldMatrix;
-    this._targetMat = this._getTargetMatrix(
-      this._sceneCameraEntity,
-      currentAxisName
-    );
+    this._targetMat = this._getTargetMatrix(this._sceneCameraEntity, currentAxisName);
 
     this._flipView = true;
   }
@@ -170,7 +157,7 @@ export class EndScript extends Script {
       _tempEyeVect: tempEyeVect,
       _tempVect: tempVect,
       _tempMat: tempMat,
-      _tempUnit: tempUnit,
+      _tempUnit: tempUnit
     } = this;
     const { upVector, factor, axis } = this.AxisFactor[axisName];
 

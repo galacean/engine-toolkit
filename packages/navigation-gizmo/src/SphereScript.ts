@@ -9,7 +9,7 @@ import {
   Script,
   TextRenderer,
   Vector2,
-  Vector3,
+  Vector3
 } from "oasis-engine";
 
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
@@ -23,7 +23,7 @@ export class SphereScript extends Script {
   private static _tempQuat: Quaternion = new Quaternion();
   private static _tempMat: Matrix = new Matrix();
 
-  private static _vec: Vector3 = new Vector3();
+  private static _vector: Vector3 = new Vector3();
 
   private _isTriggered: boolean = false;
   private _speedXFactor: number = 0.02;
@@ -46,7 +46,7 @@ export class SphereScript extends Script {
   private _tempPointer: Vector2 = new Vector2();
   private _tempMat: Matrix = new Matrix();
   private _upVec: Vector3 = new Vector3();
-  private _target: Vector3 = new Vector3();
+  private _target: Vector3 = SphereScript._vector;
   private _currentPos: Vector3 = new Vector3();
   private _rotateVec: Vector3 = new Vector3();
   private _unitVec: Vector3 = new Vector3(1, 1, 1);
@@ -74,13 +74,13 @@ export class SphereScript extends Script {
     return this._target;
   }
 
-  set target(target: Vector3 | null) {
+  set target(target: Vector3) {
     if (target) {
       this._target = target;
       this._isTargetMode = true;
     } else {
       this._isTargetMode = false;
-      this._target = SphereScript._vec;
+      this._target = SphereScript._vector;
     }
   }
 
@@ -119,16 +119,10 @@ export class SphereScript extends Script {
     this._recoverTextColor();
 
     // get targetPoint
-    SphereScript._startPos.copyFrom(
-      this._sceneCameraEntity.transform.worldPosition
-    );
+    SphereScript._startPos.copyFrom(this._sceneCameraEntity.transform.worldPosition);
 
-    SphereScript._startQuat.copyFrom(
-      this._directionEntity.transform.rotationQuaternion
-    );
-    SphereScript._startPointer.copyFrom(
-      this.engine.inputManager.pointerPosition
-    );
+    SphereScript._startQuat.copyFrom(this._directionEntity.transform.rotationQuaternion);
+    SphereScript._startPointer.copyFrom(this.engine.inputManager.pointerPosition);
 
     this._isTriggered = true;
   }
@@ -136,29 +130,15 @@ export class SphereScript extends Script {
   onPointerDrag() {
     const movePointer = this.engine.inputManager.pointerPosition;
 
-    Vector2.subtract(
-      SphereScript._startPointer,
-      movePointer,
-      this._tempPointer
-    );
-    this._navigateCamera(
-      -this._tempPointer.x * this._speedXFactor,
-      -this._tempPointer.y * this._speedYFactor
-    );
+    Vector2.subtract(SphereScript._startPointer, movePointer, this._tempPointer);
+    this._navigateCamera(-this._tempPointer.x * this._speedXFactor, -this._tempPointer.y * this._speedYFactor);
   }
 
   onPointerUp() {
     if (this._isTriggered) {
       this._isTriggered = false;
-      this._gizmoCamera.screenPointToRay(
-        this.engine.inputManager.pointerPosition,
-        this._ray
-      );
-      const result = this.engine.physicsManager.raycast(
-        this._ray,
-        Number.MAX_VALUE,
-        Layer.Everything
-      );
+      this._gizmoCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._ray);
+      const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
       if (!result) {
         this._roundEntity.isActive = false;
       }
@@ -173,17 +153,10 @@ export class SphereScript extends Script {
 
   onUpdate() {
     if (this._isTriggered) {
-      SphereScript._tempQuat.copyFrom(
-        this._directionEntity.transform.rotationQuaternion
-      );
+      SphereScript._tempQuat.copyFrom(this._directionEntity.transform.rotationQuaternion);
       SphereScript._tempQuat.invert();
 
-      Matrix.affineTransformation(
-        this._unitVec,
-        SphereScript._tempQuat,
-        this._currentPos,
-        this._tempMat
-      );
+      Matrix.affineTransformation(this._unitVec, SphereScript._tempQuat, this._currentPos, this._tempMat);
 
       this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
     } else {
@@ -199,18 +172,10 @@ export class SphereScript extends Script {
   // delta y translate to rotation around axis x
   private _navigateCamera(x: number, y: number) {
     Quaternion.rotationYawPitchRoll(x, y, 0, this._tempQuat);
-    Quaternion.multiply(
-      SphereScript._startQuat,
-      this._tempQuat,
-      this._tempQuat2
-    );
+    Quaternion.multiply(SphereScript._startQuat, this._tempQuat, this._tempQuat2);
     this._directionEntity.transform.rotationQuaternion = this._tempQuat2;
     Vector3.subtract(SphereScript._startPos, this._target, this._rotateVec);
-    Vector3.transformByQuat(
-      this._rotateVec,
-      this._tempQuat.invert(),
-      this._currentPos
-    );
+    Vector3.transformByQuat(this._rotateVec, this._tempQuat.invert(), this._currentPos);
     Vector3.add(this._target, this._currentPos, this._currentPos);
   }
 
