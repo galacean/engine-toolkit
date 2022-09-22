@@ -23,10 +23,12 @@ export class SphereScript extends Script {
   private static _tempQuat: Quaternion = new Quaternion();
   private static _tempMat: Matrix = new Matrix();
 
-  private isTriggered: boolean = false;
-  private speedXFactor: number = 0.02;
-  private speedYFactor: number = 0.002;
-  private isTargetMode: boolean = false;
+  private static _vec: Vector3 = new Vector3();
+
+  private _isTriggered: boolean = false;
+  private _speedXFactor: number = 0.02;
+  private _speedYFactor: number = 0.004;
+  private _isTargetMode: boolean = false;
 
   private _directionEntity: Entity;
   private _endEntity: Entity;
@@ -54,7 +56,7 @@ export class SphereScript extends Script {
   /**
    * @return scene camera
    */
-  get camera() {
+  get camera(): Camera {
     return this._sceneCamera;
   }
 
@@ -68,17 +70,17 @@ export class SphereScript extends Script {
   /**
    * @return target point
    */
-  get target() {
+  get target(): Vector3 {
     return this._target;
   }
 
   set target(target: Vector3 | null) {
     if (target) {
       this._target = target;
-      this.isTargetMode = true;
+      this._isTargetMode = true;
     } else {
-      this.isTargetMode = false;
-      this._target = new Vector3();
+      this._isTargetMode = false;
+      this._target = SphereScript._vec;
     }
   }
 
@@ -99,14 +101,14 @@ export class SphereScript extends Script {
   }
 
   onPointerExit() {
-    if (!this.isTriggered) {
+    if (!this._isTriggered) {
       this._roundEntity.isActive = false;
     }
   }
 
   onPointerDown() {
     if (this._controls) {
-      if (!this.isTargetMode) {
+      if (!this._isTargetMode) {
         this._target = this._controls.target;
       }
 
@@ -128,7 +130,7 @@ export class SphereScript extends Script {
       this.engine.inputManager.pointerPosition
     );
 
-    this.isTriggered = true;
+    this._isTriggered = true;
   }
 
   onPointerDrag() {
@@ -140,14 +142,14 @@ export class SphereScript extends Script {
       this._tempPointer
     );
     this._navigateCamera(
-      -this._tempPointer.x * this.speedXFactor,
-      -this._tempPointer.y * this.speedYFactor
+      -this._tempPointer.x * this._speedXFactor,
+      -this._tempPointer.y * this._speedYFactor
     );
   }
 
   onPointerUp() {
-    if (this.isTriggered) {
-      this.isTriggered = false;
+    if (this._isTriggered) {
+      this._isTriggered = false;
       this._gizmoCamera.screenPointToRay(
         this.engine.inputManager.pointerPosition,
         this._ray
@@ -170,7 +172,7 @@ export class SphereScript extends Script {
   }
 
   onUpdate() {
-    if (this.isTriggered) {
+    if (this._isTriggered) {
       SphereScript._tempQuat.copyFrom(
         this._directionEntity.transform.rotationQuaternion
       );

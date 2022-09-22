@@ -14,7 +14,9 @@ import { OrbitControl } from "@oasis-engine-toolkit/controls";
 
 /** @internal */
 export class EndScript extends Script {
-  private isTargetMode: boolean = false;
+  private static _vector: Vector3 = new Vector3();
+
+  private _isTargetMode: boolean = false;
 
   private _flipView: boolean = false;
   private _flipSpeed = 3.0;
@@ -76,7 +78,7 @@ export class EndScript extends Script {
   /**
    * @return scene camera
    */
-  get camera() {
+  get camera(): Camera {
     return this._sceneCamera;
   }
 
@@ -89,17 +91,17 @@ export class EndScript extends Script {
   /**
    * @return target point
    */
-  get target() {
+  get target(): Vector3 {
     return this._target;
   }
 
   set target(target: Vector3 | null) {
     if (target) {
       this._target = target;
-      this.isTargetMode = true;
+      this._isTargetMode = true;
     } else {
-      this.isTargetMode = false;
-      this._target = new Vector3();
+      this._isTargetMode = false;
+      this._target = EndScript._vector;
     }
   }
   onAwake() {
@@ -118,7 +120,7 @@ export class EndScript extends Script {
 
   onPointerClick() {
     if (this._controls) {
-      if (!this.isTargetMode) {
+      if (!this._isTargetMode) {
         this._target = this._controls.target;
       }
       this._controls.enabled = false;

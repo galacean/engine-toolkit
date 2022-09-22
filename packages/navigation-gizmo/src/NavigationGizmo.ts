@@ -24,7 +24,6 @@ export class NavigationGizmo extends Script {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
   private _previousSceneCullingMaskLayer: Layer = Layer.Nothing;
-  private _target: Vector3 = new Vector3();
 
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
@@ -54,7 +53,7 @@ export class NavigationGizmo extends Script {
   /** scene camera
    * @return current scene camera
    */
-  get camera() {
+  get camera(): Camera {
     return this._sceneCamera;
   }
 
@@ -88,7 +87,7 @@ export class NavigationGizmo extends Script {
    * @return the layer for gizmo and gizmo camera's cullingMask
    * @remarks Layer duplicate warning, check whether this layer is taken
    */
-  get layer() {
+  get layer(): Layer {
     return this._gizmoLayer;
   }
 
@@ -111,13 +110,11 @@ export class NavigationGizmo extends Script {
   /**
    * @return target point of this gizmo, default (0,0,0)
    */
-  get target() {
-    return this._target;
+  get target(): Vector3 {
+    return this._sphereScript.target;
   }
 
   set target(target: Vector3) {
-    this._target = target ? target : new Vector3(0, 0, 0);
-
     this._sphereScript.target = target;
     Object.keys(this._endScript).forEach((key) => {
       this._endScript[key].target = target;
