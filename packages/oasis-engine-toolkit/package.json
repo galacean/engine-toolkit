@@ -26,6 +26,7 @@
     "@oasis-engine-toolkit/outline": "workspace:*",
     "@oasis-engine-toolkit/planar-shadow-material": "workspace:*",
     "@oasis-engine-toolkit/skeleton-viewer": "workspace:*",
-    "@oasis-engine-toolkit/grid-material": "workspace:*"
+    "@oasis-engine-toolkit/grid-material": "workspace:*",
+    "@oasis-engine-toolkit/navigation-gizmo": "workspace:*"
   }
 }

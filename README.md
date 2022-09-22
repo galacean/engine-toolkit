@@ -13,6 +13,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - ➡️ &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
 - ⭕️ &nbsp;**Outline** - Show outline of mesh renderers
 - 📐 &nbsp;**Lines** - 2D Solid Line & Dash Line
+- 🧭 &nbsp;**Navigation Gizmo** - Three-view & visualized operation for camera control
 
 ### Materials
 
