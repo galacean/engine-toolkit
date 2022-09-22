@@ -2,6 +2,7 @@ import {
   Camera,
   Color,
   Entity,
+  MathUtil,
   Matrix,
   Quaternion,
   Script,
@@ -14,6 +15,11 @@ import { OrbitControl } from "@oasis-engine-toolkit/controls";
 /** @internal */
 export class EndScript extends Script {
   private isTargetMode: boolean = false;
+
+  private _flipView: boolean = false;
+  private _flipSpeed = 3.0;
+  private _progress: number = 0;
+
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
   private _controls: OrbitControl;
@@ -25,7 +31,9 @@ export class EndScript extends Script {
 
   private _normalQuat: Quaternion = new Quaternion();
   private _tempMat: Matrix = new Matrix();
-  private _targetMat = new Matrix();
+  private _targetMat: Matrix = new Matrix();
+  private _currentMat: Matrix = new Matrix();
+  private _startMat: Matrix = new Matrix();
   private _tempVect: Vector3 = new Vector3();
   private _tempUnit: Vector3 = new Vector3();
   private _tempEyeVect: Vector3 = new Vector3();
@@ -108,7 +116,7 @@ export class EndScript extends Script {
     this._textRenderer.color.copyFrom(this._textColor);
   }
 
-  onPointerDown() {
+  onPointerClick() {
     if (this._controls) {
       if (!this.isTargetMode) {
         this._target = this._controls.target;
@@ -120,25 +128,37 @@ export class EndScript extends Script {
     this._textColor.copyFrom(this._textRenderer.color);
 
     const currentAxisName = this.entity.name;
+    this._startMat = this._sceneCameraEntity.transform.worldMatrix.clone();
+    this._currentMat = this._sceneCameraEntity.transform.worldMatrix;
     this._targetMat = this._getTargetMatrix(
       this._sceneCameraEntity,
       currentAxisName
     );
+
+    this._flipView = true;
   }
 
-  onPointerUp() {
-    this._sceneCameraEntity.transform.worldMatrix = this._targetMat;
-    this._sceneCameraEntity.transform.getWorldUp(this._upVector);
-
-    if (this._controls) {
-      this._controls.enabled = true;
-      this._controls.up = this._upVector;
-      this._controls.target = this._target;
-    }
-  }
-
-  onUpdate() {
+  onUpdate(deltaTime: number) {
     this.entity.transform.worldRotationQuaternion = this._normalQuat;
+
+    if (this._flipView) {
+      this._progress += deltaTime / 1000;
+      let t = MathUtil.clamp(this._progress * this._flipSpeed, 0, 1);
+      if (t >= 1) {
+        this._flipView = false;
+        this._progress = 0;
+
+        this._sceneCameraEntity.transform.getWorldUp(this._upVector);
+        if (this._controls) {
+          this._controls.enabled = true;
+          this._controls.up = this._upVector;
+          this._controls.target = this._target;
+        }
+      }
+
+      Matrix.lerp(this._startMat, this._targetMat, t, this._currentMat);
+      this._sceneCameraEntity.transform.worldMatrix = this._currentMat;
+    }
   }
 
   private _getTargetMatrix(entity: Entity, axisName: string) {
