@@ -12,7 +12,7 @@ import {
   Vector3,
 } from "oasis-engine";
 
-import { OrbitControl, FreeControl } from "@oasis-engine-toolkit/controls";
+import { OrbitControl } from "@oasis-engine-toolkit/controls";
 
 /** @internal */
 export class SphereScript extends Script {
@@ -23,11 +23,10 @@ export class SphereScript extends Script {
   private static _tempQuat: Quaternion = new Quaternion();
   private static _tempMat: Matrix = new Matrix();
 
-  private _radius: number = 15;
-
   private isTriggered: boolean = false;
   private speedXFactor: number = 0.02;
   private speedYFactor: number = 0.002;
+  private isTargetMode: boolean = false;
 
   private _directionEntity: Entity;
   private _endEntity: Entity;
@@ -38,15 +37,16 @@ export class SphereScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _controls: OrbitControl | FreeControl;
+  private _controls: OrbitControl;
 
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
   private _tempPointer: Vector2 = new Vector2();
   private _tempMat: Matrix = new Matrix();
-  private _rotateVec: Vector3 = new Vector3();
-  private _targetPoint: Vector3 = new Vector3();
+  private _upVec: Vector3 = new Vector3();
+  private _target: Vector3 = new Vector3();
   private _currentPos: Vector3 = new Vector3();
+  private _rotateVec: Vector3 = new Vector3();
   private _unitVec: Vector3 = new Vector3(1, 1, 1);
 
   private _ray: Ray = new Ray();
@@ -62,9 +62,24 @@ export class SphereScript extends Script {
     this._sceneCamera = camera;
     this._sceneCameraEntity = this._sceneCamera.entity;
 
-    this._controls =
-      this._sceneCameraEntity.getComponent(OrbitControl) ||
-      this._sceneCameraEntity.getComponent(FreeControl);
+    this._controls = this._sceneCameraEntity.getComponent(OrbitControl);
+  }
+
+  /**
+   * @return target point
+   */
+  get target() {
+    return this._target;
+  }
+
+  set target(target: Vector3 | null) {
+    if (target) {
+      this._target = target;
+      this.isTargetMode = true;
+    } else {
+      this.isTargetMode = false;
+      this._target = new Vector3();
+    }
   }
 
   onAwake() {
@@ -91,6 +106,10 @@ export class SphereScript extends Script {
 
   onPointerDown() {
     if (this._controls) {
+      if (!this.isTargetMode) {
+        this._target = this._controls.target;
+      }
+
       this._controls.enabled = false;
     }
 
@@ -101,9 +120,6 @@ export class SphereScript extends Script {
     SphereScript._startPos.copyFrom(
       this._sceneCameraEntity.transform.worldPosition
     );
-    this._sceneCameraEntity.transform.getWorldForward(this._rotateVec);
-    this._rotateVec.scale(this._radius);
-    Vector3.add(SphereScript._startPos, this._rotateVec, this._targetPoint);
 
     SphereScript._startQuat.copyFrom(
       this._directionEntity.transform.rotationQuaternion
@@ -124,8 +140,8 @@ export class SphereScript extends Script {
       this._tempPointer
     );
     this._navigateCamera(
-      this._tempPointer.x * this.speedXFactor,
-      this._tempPointer.y * this.speedYFactor
+      -this._tempPointer.x * this.speedXFactor,
+      -this._tempPointer.y * this.speedYFactor
     );
   }
 
@@ -145,7 +161,10 @@ export class SphereScript extends Script {
         this._roundEntity.isActive = false;
       }
       if (this._controls) {
+        this._sceneCameraEntity.transform.getWorldUp(this._upVec);
+
         this._controls.enabled = true;
+        this._controls.up = this._upVec;
       }
     }
   }
@@ -184,14 +203,13 @@ export class SphereScript extends Script {
       this._tempQuat2
     );
     this._directionEntity.transform.rotationQuaternion = this._tempQuat2;
-
+    Vector3.subtract(SphereScript._startPos, this._target, this._rotateVec);
     Vector3.transformByQuat(
-      SphereScript._startPos,
+      this._rotateVec,
       this._tempQuat.invert(),
       this._currentPos
     );
-
-    Vector3.add(this._targetPoint, this._currentPos, this._currentPos);
+    Vector3.add(this._target, this._currentPos, this._currentPos);
   }
 
   private _getTextColor() {

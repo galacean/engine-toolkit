@@ -24,6 +24,7 @@ export class NavigationGizmo extends Script {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
   private _previousSceneCullingMaskLayer: Layer = Layer.Nothing;
+  private _target: Vector3 = new Vector3();
 
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
@@ -40,15 +41,15 @@ export class NavigationGizmo extends Script {
   };
 
   /**
-   * @gizmoPosition - gizmo position, the left upper point of the gizmo area, default (0, 0).
+   * @position - gizmo position, the left upper point of the gizmo area, default (0, 0).
    * Normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
    */
-  public gizmoPosition: Vector2 = new Vector2(0, 0);
+  public position: Vector2 = new Vector2(0, 0);
 
   /**
-   * @gizmoSize gizmo size, the length and width of the gizmo area, default 0.2.
+   * @size gizmo size, the length and width of the gizmo area, default 0.2.
    */
-  public gizmoSize: number = 0.2;
+  public size: number = 0.2;
 
   /** scene camera
    * @return current scene camera
@@ -107,6 +108,21 @@ export class NavigationGizmo extends Script {
       }
     }
   }
+  /**
+   * @return target point of this gizmo, default (0,0,0)
+   */
+  get target() {
+    return this._target;
+  }
+
+  set target(target: Vector3) {
+    this._target = target ? target : new Vector3(0, 0, 0);
+
+    this._sphereScript.target = target;
+    Object.keys(this._endScript).forEach((key) => {
+      this._endScript[key].target = target;
+    });
+  }
 
   onAwake() {
     // @ts-ignore
@@ -125,12 +141,6 @@ export class NavigationGizmo extends Script {
     const gizmoCamera = gizmoCameraEntity.addComponent(Camera);
     gizmoCamera.isOrthographic = true;
     gizmoCamera.cullingMask = this._gizmoLayer;
-    gizmoCamera.viewport.set(
-      this.gizmoPosition.x,
-      this.gizmoPosition.y,
-      this.gizmoSize,
-      this.gizmoSize
-    );
     gizmoCamera.clearFlags = CameraClearFlags.Depth;
 
     this._gizmoCamera = gizmoCamera;
@@ -140,10 +150,10 @@ export class NavigationGizmo extends Script {
 
   onUpdate() {
     this._gizmoCamera.viewport.set(
-      this.gizmoPosition.x,
-      this.gizmoPosition.y,
-      this.gizmoSize,
-      this.gizmoSize
+      this.position.x,
+      this.position.y,
+      this.size,
+      this.size
     );
   }
 
