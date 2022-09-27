@@ -31,7 +31,7 @@ export class GizmoControls extends Script {
   private _isStarted = false;
   private _isHovered = false;
   private _gizmoLayer: Layer = Layer.Layer30;
-  private _gizmoMap: Record<number, GizmoComponent> = {};
+  private _gizmoMap: Array<GizmoComponent> = [];
   private _sceneCamera: Camera;
   private _gizmoControl: GizmoComponent | null;
   private _group: Group = new Group();
@@ -57,9 +57,11 @@ export class GizmoControls extends Script {
         const { _group: group } = this;
         this._sceneCamera = camera;
         this._framebufferPicker.camera = camera;
-        Object.values(this._gizmoMap).forEach((gizmo) => {
-          gizmo.init(camera, this._group);
+
+        this._gizmoMap.forEach((gizmoControl) => {
+          gizmoControl.init(camera, this._group);
         });
+
         group.reset();
         this._initialized = true;
       } else {
@@ -98,13 +100,14 @@ export class GizmoControls extends Script {
       this._gizmoState = targetState;
       const { _gizmoMap: gizmoMap } = this;
 
-      this._gizmoControl = targetState ? gizmoMap[targetState] : null;
+      const targetIdx = gizmoMap.findIndex((gizmoControl) => {
+        return gizmoControl.type === targetState;
+      });
+      this._gizmoControl = targetIdx > -1 ? gizmoMap[targetIdx] : null;
 
-      const states = Object.keys(gizmoMap);
-      for (let i = states.length - 1; i >= 0; i--) {
-        const state = states[i];
-        gizmoMap[state].entity.isActive = (targetState & state) != 0;
-      }
+      gizmoMap.forEach((gizmoControl) => {
+        gizmoControl.entity.isActive = (targetState & gizmoControl.type) != 0;
+      });
 
       this._gizmoControl?.onGizmoRedraw();
     }
@@ -253,7 +256,7 @@ export class GizmoControls extends Script {
 
   private _createGizmoControl(control: GizmoState, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
     const gizmoControl = this.entity.createChild(control.toString()).addComponent(gizmoComponent);
-    this._gizmoMap[control] = gizmoControl;
+    this._gizmoMap.push(gizmoControl);
   }
 
   private _onGizmoHoverStart(axisName: string): void {

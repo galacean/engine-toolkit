@@ -5,9 +5,12 @@ import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { Group } from "./Group";
 import { GizmoControls } from "./GizmoControls";
 import { GizmoMesh } from "./GizmoMesh";
+import { GizmoMaterial } from "./GizmoMaterial";
+import { GizmoState } from "./enums/GizmoState";
 
 /** @internal */
 export class RotateControl extends GizmoComponent {
+  type: GizmoState = GizmoState.rotate;
   private _group: Group;
   private _camera: Camera;
 
@@ -115,9 +118,9 @@ export class RotateControl extends GizmoComponent {
     this.rotateAxisComponent.z.initAxis(this.rotateControlMap.z);
 
     // invisible gizmo entity
-    this.rotateControlMap.x.axisMaterial.posCutOff = true;
-    this.rotateControlMap.y.axisMaterial.posCutOff = true;
-    this.rotateControlMap.z.axisMaterial.posCutOff = true;
+    (<GizmoMaterial>this.rotateControlMap.x.axisMaterial).posCutOff = true;
+    (<GizmoMaterial>this.rotateControlMap.y.axisMaterial).posCutOff = true;
+    (<GizmoMaterial>this.rotateControlMap.z.axisMaterial).posCutOff = true;
 
     // rotate gizmo in-process debug helper entity
     this._gizmoRotateHelperEntity = entity.createChild("helper");

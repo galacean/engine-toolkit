@@ -1,5 +1,6 @@
 import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane } from "oasis-engine";
 import { UnlitMaterial } from "oasis-engine/types";
+import { GizmoState } from "./enums/GizmoState";
 import { GizmoMaterial } from "./GizmoMaterial";
 import { Group } from "./Group";
 
@@ -8,6 +9,7 @@ import { Group } from "./Group";
  * Gizmo Component
  */
 export abstract class GizmoComponent extends Component {
+  type: GizmoState;
   gizmoEntity: Entity;
   gizmoHelperEntity: Entity;
   // Get group when init gizmo.

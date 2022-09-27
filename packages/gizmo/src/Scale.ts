@@ -5,9 +5,11 @@ import { utils } from "./Utils";
 import { Group } from "./Group";
 import { GizmoControls } from "./GizmoControls";
 import { GizmoComponent, AxisProps, axisVector } from "./Type";
+import { GizmoState } from "./enums/GizmoState";
 
 /** @internal */
 export class ScaleControl extends GizmoComponent {
+  type: GizmoState = GizmoState.scale;
   private _camera: Camera;
   private _group: Group;
   private _scaleFactor: number = 1;
