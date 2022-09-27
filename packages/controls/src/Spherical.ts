@@ -6,6 +6,7 @@ export class Spherical {
   private static xAxis: Vector3 = new Vector3();
   private static yAxis: Vector3 = new Vector3();
   private static zAxis: Vector3 = new Vector3();
+  private matrix: Matrix = new Matrix();
   private matrixInv: Matrix = new Matrix();
   constructor(public radius?: number, public phi?: number, public theta?: number) {
     this.radius = radius !== undefined ? radius : 1.0;
@@ -34,6 +35,11 @@ export class Spherical {
     Vector3.cross(xAxis, yAxis, zAxis);
     zAxis.normalize();
     Vector3.cross(yAxis, zAxis, xAxis);
+    const { elements: es } = this.matrix;
+    (es[0] = xAxis.x), (es[1] = xAxis.y), (es[2] = xAxis.z);
+    (es[4] = yAxis.x), (es[5] = yAxis.y), (es[6] = yAxis.z);
+    (es[8] = zAxis.x), (es[9] = zAxis.y), (es[10] = zAxis.z);
+
     const { elements: eInv } = this.matrixInv;
     (eInv[0] = xAxis.x), (eInv[4] = xAxis.y), (eInv[8] = xAxis.z);
     (eInv[1] = yAxis.x), (eInv[5] = yAxis.y), (eInv[9] = yAxis.z);
@@ -63,6 +69,7 @@ export class Spherical {
     const sinPhiRadius = Math.sin(phi) * radius;
     this.phi -= Math.floor(this.phi / Math.PI / 2) * Math.PI * 2;
     value.set(sinPhiRadius * Math.sin(theta), radius * Math.cos(phi), sinPhiRadius * Math.cos(theta));
+    value.transformNormal(this.matrix);
     return this.phi > Math.PI;
   }
 }
