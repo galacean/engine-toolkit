@@ -1,10 +1,19 @@
-import { Vector4, Component, Entity, MeshRenderer, Material, RenderQueueType, Color } from "oasis-engine";
-
-import { AxisProps } from "./Type";
+import {
+  Component,
+  Entity,
+  MeshRenderer,
+  Color,
+  UnlitMaterial,
+} from "oasis-engine";
 import { utils } from "./Utils";
+import { AxisProps } from "./Type";
+import { GizmoMaterial } from "./GizmoMaterial";
 export class Axis extends Component {
-  private _material: Material;
-  private _color: Color;
+  private _material: UnlitMaterial | GizmoMaterial;
+  private _color: Color = new Color();
+  private _highLightColor: Color = new Color();
+  private _yellowColor: Color = new Color(1.0, 0.95, 0.0, 1.0);
+  private _grayColor: Color = new Color(0.75, 0.75, 0.75, 0.6);
 
   constructor(entity: Entity) {
     super(entity);
@@ -13,8 +22,11 @@ export class Axis extends Component {
   /** setup axis geometry */
   initAxis(value: AxisProps) {
     this._material = value.axisMaterial;
-    this._material.renderQueueType = RenderQueueType.Transparent;
-    this._color = value.axisMaterial.shaderData.getColor("u_color");
+    this._color.copyFrom(value.axisMaterial.baseColor);
+
+    this._highLightColor.copyFrom(this._color);
+    this._highLightColor.a = 0.7;
+
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {
       const axisEntity = this.entity.createChild(value.name);
@@ -36,28 +48,28 @@ export class Axis extends Component {
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
       axisHelperRenderer.priority = 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
+
       axisHelperRenderer.setMaterial(utils.invisibleMaterial);
     }
   }
   /** highlight axis */
   highLight() {
-    this._material?.shaderData.setFloat("u_highLight", 0.2);
+    this._material.baseColor.copyFrom(this._highLightColor);
   }
   /** unhighligh axis */
   unLight() {
-    this._material?.shaderData.setFloat("u_highLight", 0.0);
+    this._material.baseColor.copyFrom(this._color);
   }
   /** change axis color into yellow */
   yellow() {
-    this._material?.shaderData.setVector4("u_color", new Vector4(1.0, 0.95, 0.0, 1.0));
+    this._material.baseColor.copyFrom(this._yellowColor);
   }
   /** change axis color into gray */
   gray() {
-    this._material?.shaderData.setVector4("u_color", new Vector4(0.75, 0.75, 0.75, 0.6));
+    this._material.baseColor.copyFrom(this._grayColor);
   }
   /** recove axis color */
   recover() {
-    // @ts-ignore
-    this._material?.shaderData.setVector4("u_color", this._color);
+    this._material.baseColor.copyFrom(this._color);
   }
 }

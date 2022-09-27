@@ -1,21 +1,39 @@
-import { BoundingBox, Renderer, Vector3, Matrix, Entity, ListenerUpdateFlag } from "oasis-engine";
+import {
+  BoundingBox,
+  Renderer,
+  Vector3,
+  Matrix,
+  Entity,
+  ListenerUpdateFlag,
+} from "oasis-engine";
+import { AnchorType, CoordinateType } from "./enums/GizmoState";
 
-export enum AnchorType {
-  Pivot,
-  Center
-}
-
-export enum CoordinateType {
-  Local,
-  Global
+/**
+ * dirty flag for the group
+ */
+export enum GroupDirtyFlag {
+  /**
+   * none
+   */
+  None = 0,
+  /**
+   * anchor changed
+   */
+  AnchorDirty = 1,
+  /**
+   * coordinate changed
+   */
+  CoordinateDirty = 2,
+  /**
+   * anchor & coordinate changed
+   */
+  All = 3,
 }
 
 /**
- * 组.
- * todo: 增加对子节点世界坐标改变的监听
+ * Group
  */
 export class Group {
-  // 临时变量
   private static _tempVec30: Vector3 = new Vector3();
   private static _tempMat0: Matrix = new Matrix();
   private static _tempMat1: Matrix = new Matrix();
@@ -24,25 +42,22 @@ export class Group {
   // @internal
   _gizmoTransformDirty: boolean = true;
 
-  // Group 内 Entity 数组
   private _entities: Entity[] = [];
   private _listeners: ListenerUpdateFlag[] = [];
-  // Group 的世界矩阵
   private _worldMatrix: Matrix = new Matrix();
-  // 锚点类(Pivot, Center)
   private _anchorType: AnchorType = AnchorType.Pivot;
-  // 坐标系类型(Local, Global)
   private _coordinateType: CoordinateType = CoordinateType.Local;
   private _dirtyFlag: GroupDirtyFlag = GroupDirtyFlag.All;
 
   /**
-   * 获取锚点类型
+   * get anchor type
+   * @return anchor type, pivor or center
    */
-  public get anchorType(): AnchorType {
+  get anchorType(): AnchorType {
     return this._anchorType;
   }
 
-  public set anchorType(value: AnchorType) {
+  set anchorType(value: AnchorType) {
     if (this._anchorType !== value) {
       this._anchorType = value;
       this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
@@ -50,38 +65,106 @@ export class Group {
   }
 
   /**
-   * 获取坐标系类型
+   * get coordinate type
+   * @return coordinate type, world or local
    */
-  public get coordinateType(): CoordinateType {
+  get coordinateType(): CoordinateType {
     return this._coordinateType;
   }
 
-  public set coordinateType(value: CoordinateType) {
+  set coordinateType(value: CoordinateType) {
     if (this._coordinateType !== value) {
       this._coordinateType = value;
       this.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     }
   }
-
   /**
-   * 强制更新某个标记
+   * add entity to the group
+   * @param addEntity - entity to add
    */
-  public forceUpdate(flag: GroupDirtyFlag) {
-    this._dirtyFlag |= flag;
+  addEntity(addEntity: Entity): void {
+    const { _entities: entities } = this;
+    let canAdd: boolean = true;
+    for (let j = entities.length - 1; j >= 0; j--) {
+      const compareEntity = entities[j];
+      if (compareEntity === addEntity) {
+        canAdd = false;
+        break;
+      } else if (this._hasRelationship(compareEntity, addEntity)) {
+        canAdd = false;
+        break;
+      } else if (this._hasRelationship(addEntity, compareEntity)) {
+        this._applyDel(j);
+      }
+    }
+    if (canAdd) {
+      this._applyAdd(addEntity);
+    }
   }
 
   /**
-   * 获取 group 在世界空间的位姿
-   * @param out
-   * @returns
+   * add entities to the group
+   * @param addEntities - entities to add, in array
    */
-  public getWorldMatrix(out?: Matrix): Boolean {
+  addEntities(addEntities: Entity[]): void {
+    for (let i = addEntities.length - 1; i >= 0; i--) {
+      this.addEntity(addEntities[i]);
+    }
+  }
+
+  /**
+   * remove entity from the group
+   * @param delEntity - entity to delete
+   */
+  deleteEntity(delEntity: Entity) {
+    this._applyDel(delEntity);
+  }
+
+  /**
+   * remove entities from the group
+   * @param delEntities - entities to delete, in array
+   */
+  deleteEntities(delEntities: Entity[]) {
+    for (let i = delEntities.length - 1; i >= 0; i--) {
+      this.deleteEntity(delEntities[i]);
+    }
+  }
+
+  /**
+   * get entity index in group
+   * @param entity
+   * @return number, -1 if not in group
+   */
+  getIndexOf(entity: Entity): number {
+    const { _entities: entities } = this;
+    return entities.findIndex((ele: Entity) => {
+      return entity === ele;
+    });
+  }
+
+  /**
+   * clear the group
+   */
+  reset(): void {
+    this._entities.length = 0;
+    const { _listeners: listeners } = this;
+    for (let i = listeners.length - 1; i >= 0; i--) {
+      listeners[i].destroy();
+    }
+    listeners.length = 0;
+    this._dirtyFlag = GroupDirtyFlag.All;
+  }
+
+  /**
+   * get group's world matrix
+   * @param out - updated world matrix for the group
+   * @return boolean, true if group's world matrix needs update
+   */
+  getWorldMatrix(out?: Matrix): Boolean {
     if (this._entities.length <= 0) {
       return false;
     } else {
-      /** Update anchor. */
       this._updateAnchor();
-      /** Update coordinate. */
       this._updateCoordinate();
       out && out.copyFrom(this._worldMatrix);
       return true;
@@ -89,11 +172,10 @@ export class Group {
   }
 
   /**
-   * 获取 group 在世界空间的位置
-   * @param out
-   * @returns
+   * get group's world position
+   * @param out - updated world position for the group
    */
-  public getWorldPosition(out?: Vector3): void {
+  getWorldPosition(out?: Vector3): void {
     if (this.getWorldMatrix()) {
       const { elements: ele } = this._worldMatrix;
       out.set(ele[12], ele[13], ele[14]);
@@ -101,92 +183,58 @@ export class Group {
   }
 
   /**
-   * 设置 group 在世界空间中的位姿
-   * @param value
+   * set group's world matrix
+   * @param value the new world matrix for the group
    */
-  public setWorldMatrix(value: Matrix) {
+  setWorldMatrix(value: Matrix): void {
     if (this.getWorldMatrix()) {
       const { _worldMatrix: worldMatrix } = this;
       if (!Matrix.equals(worldMatrix, value)) {
-        // Old worldMatrix.
+        // old worldMatrix.
         const { _tempMat0: groupWorldInvMat, _tempMat1: nodeMat } = Group;
         Matrix.invert(worldMatrix, groupWorldInvMat);
-        // New worldMatrix.
+        // new worldMatrix.
         worldMatrix.copyFrom(value);
         const { _entities: entities } = this;
-        // 更新 entities 内所有物体的坐标
+        // update entities worldMatrix
         for (let i = entities.length - 1; i >= 0; i--) {
           const nodeTrans = entities[i].transform;
-          // Get entity's localMatrix.
+          // get entity's localMatrix.
           Matrix.multiply(groupWorldInvMat, nodeTrans.worldMatrix, nodeMat);
-          // Update entity's worldMatrix.
+          // update entity's worldMatrix.
           Matrix.multiply(worldMatrix, nodeMat, nodeMat);
           nodeTrans.worldMatrix = nodeMat;
         }
       }
-      /** 主动设置的时候，清理脏标记 */
       this._dirtyFlag = GroupDirtyFlag.None;
     }
   }
 
   /**
-   * 添加节点
-   * @param addEntities
+   * force update group dirty flag
+   * @param flag - group dirty flag
    */
-  public addEntity(addEntities: Entity[]): void {
-    const { _entities: entities } = this;
-    for (let i = addEntities.length - 1; i >= 0; i--) {
-      // 1.不存在已有的组内
-      // 2.不是任意点的子节点
-      // 3.需要删除他的子节点
-      const entity = addEntities[i];
-      let canAdd: boolean = true;
-      // 1.不存在已有的组内
-      for (let j = entities.length - 1; j >= 0; j--) {
-        const compareEntity = entities[j];
-        if (compareEntity === entity) {
-          // 完全相等
-          canAdd = false;
-          break;
-        } else if (this._hasRelationship(compareEntity, entity)) {
-          // 如果希望添加的 entity 是已有节点的子节点，那么就没有必要加进这个 group
-          canAdd = false;
-          break;
-        } else {
-          // 如果希望添加的 entity 是已有节点的子节点
-          // 1. 删除已有节点
-          // 2. 还要继续判断是否有其他子节点
-          this._applyDel(j);
-        }
-      }
-      if (canAdd) {
-        this._applyAdd(entity);
-      }
-    }
-  }
 
-  public setDirtyFlagTrue(flag: GroupDirtyFlag) {
+  setDirtyFlagTrue(flag: GroupDirtyFlag) {
     this._dirtyFlag |= flag;
     this._gizmoTransformDirty = true;
   }
 
-  /** 添加一个节点的连锁操作 */
   private _applyAdd(entity: Entity) {
     this._entities.push(entity);
     const listener = entity.transform._registerWorldChangeListener();
     this._listeners.push(listener);
     const fun = this._onEntityWorldTransformChange(entity);
     listener.listener = fun;
-    // 第一次加入的时候，会调用一次
     fun();
   }
 
-  /** 移除一个节点的连锁操作 */
   private _applyDel(value: Entity | number) {
-    const index = typeof value === "number" ? value : this._entities.indexOf(value);
+    const index =
+      typeof value === "number" ? value : this._entities.indexOf(value);
+
     if (index === 0) {
       if (this._coordinateType === CoordinateType.Local) {
-        // Local 模式下需要更新旋转，缩放和位移
         this.setDirtyFlagTrue(GroupDirtyFlag.All);
       } else {
         this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
@@ -204,15 +252,10 @@ export class Group {
     }
   }
 
-  /**
-   * 监听的子节点全局坐标发生改变
-   */
   private _onEntityWorldTransformChange(entity: Entity): () => void {
     return () => {
       if (this._entities.indexOf(entity) === 0) {
-        // 如果这个 entity 是参考节点
         if (this._coordinateType === CoordinateType.Local) {
-          // Local 模式下需要更新旋转，缩放和位移
           this.setDirtyFlagTrue(GroupDirtyFlag.All);
         } else {
           this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
@@ -225,35 +268,6 @@ export class Group {
     };
   }
 
-  /**
-   * 移除 group 中的 entity
-   * @param delEntities
-   */
-  public delEntity(delEntities: Entity[]): void {
-    for (let i = delEntities.length - 1; i >= 0; i--) {
-      this._applyDel(delEntities[i]);
-    }
-  }
-
-  /**
-   * 解散组
-   */
-  public reset() {
-    this._entities.length = 0;
-    const { _listeners: listeners } = this;
-    for (let i = listeners.length - 1; i >= 0; i--) {
-      listeners[i].destroy();
-    }
-    listeners.length = 0;
-    this._dirtyFlag = GroupDirtyFlag.All;
-  }
-
-  /**
-   * 判断节点间的父子关系，在添加节点的时候调用
-   * @param parent
-   * @param compareChild
-   * @returns
-   */
   private _hasRelationship(parent: Entity, compareChild: Entity): boolean {
     while (compareChild.parent) {
       if (parent === compareChild.parent) {
@@ -270,15 +284,13 @@ export class Group {
       const { _worldMatrix: worldMatrix } = this;
       const { _tempVec30: tempVec3 } = Group;
       const { elements: e } = worldMatrix;
-      // 更新锚点
       switch (this._anchorType) {
         case AnchorType.Center:
-          // 计算得到中点的世界坐标
           this._getCenter(tempVec3);
           (e[12] = tempVec3.x), (e[13] = tempVec3.y), (e[14] = tempVec3.z);
           break;
         case AnchorType.Pivot:
-          // 与 unity 操作相同，以第一个 entity 为参照
+          // align to the first entity
           const worldE = this._entities[0].transform.worldMatrix.elements;
           (e[12] = worldE[12]), (e[13] = worldE[13]), (e[14] = worldE[14]);
         default:
@@ -289,12 +301,11 @@ export class Group {
   }
 
   private _updateCoordinate() {
-    /** Update coordinate. */
     if (this._dirtyFlag & GroupDirtyFlag.CoordinateDirty) {
       const { elements: e } = this._worldMatrix;
       switch (this._coordinateType) {
         case CoordinateType.Local:
-          // 与 unity 操作相同，以第一个 entity 为参照
+          // align to the first entity
           const wE = this._entities[0].transform.worldMatrix.elements;
           const sx = 1 / Math.sqrt(wE[0] ** 2 + wE[1] ** 2 + wE[2] ** 2);
           const sy = 1 / Math.sqrt(wE[4] ** 2 + wE[5] ** 2 + wE[6] ** 2);
@@ -316,10 +327,17 @@ export class Group {
   }
 
   private _getCenter(out: Vector3): void {
-    // 拿所有 entity 形成的包围盒的中点
     const { _tempBoundBox: tempBoundBox } = Group;
-    tempBoundBox.min.set(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
-    tempBoundBox.max.set(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+    tempBoundBox.min.set(
+      Number.POSITIVE_INFINITY,
+      Number.POSITIVE_INFINITY,
+      Number.POSITIVE_INFINITY
+    );
+    tempBoundBox.max.set(
+      Number.NEGATIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+      Number.NEGATIVE_INFINITY
+    );
     const { _entities: entities } = this;
     for (let i = entities.length - 1; i >= 0; i--) {
       const entity = entities[i];
@@ -333,11 +351,4 @@ export class Group {
     }
     tempBoundBox.getCenter(out);
   }
-}
-
-export enum GroupDirtyFlag {
-  None = 0,
-  AnchorDirty = 1,
-  CoordinateDirty = 2,
-  All = 3
 }

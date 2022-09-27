@@ -7,22 +7,17 @@ import {
   Quaternion,
   Ray,
   RenderQueueType,
-  Vector3
+  Vector3,
 } from "oasis-engine";
 import { Axis } from "./Axis";
-import { ArcLineMesh } from "./ArcLineMesh";
-import { CircleMesh } from "./CircleMesh";
-import { LinesMesh } from "./LineMesh";
-import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { utils } from "./Utils";
+import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { Group } from "./Group";
-import { GizmoMaterial } from "./GizmoMaterial";
 import { GizmoControls } from "./GizmoControls";
+import { GizmoMesh } from "./GizmoMesh";
 
 /** @internal */
-export class RotateControl extends Component implements GizmoComponent {
-  gizmoEntity: Entity;
-  gizmoHelperEntity: Entity;
+export class RotateControl extends GizmoComponent {
   private _group: Group;
   private _camera: Camera;
 
@@ -32,28 +27,15 @@ export class RotateControl extends Component implements GizmoComponent {
     y: AxisProps;
     z: AxisProps;
   };
-  private xArcLineMesh = new ArcLineMesh(this.engine, {
-    radius: 1.6,
-    radialSegments: 96,
-    arc: 360
-  });
 
-  private yArcLineMesh = new ArcLineMesh(this.engine, {
-    radius: 1.6,
-    radialSegments: 96,
-    arc: 360
-  });
-
-  private zArcLineMesh = new ArcLineMesh(this.engine, {
-    radius: 1.6,
-    radialSegments: 96,
-    arc: 360
-  });
+  private xArcLineMesh = utils.arcLineMesh;
+  private yArcLineMesh = utils.arcLineMesh;
+  private zArcLineMesh = utils.arcLineMesh;
 
   private arcLineMesh = {
     x: this.xArcLineMesh,
     y: this.yArcLineMesh,
-    z: this.zArcLineMesh
+    z: this.zArcLineMesh,
   };
 
   private _gizmoRotateHelperEntity: Entity;
@@ -62,28 +44,21 @@ export class RotateControl extends Component implements GizmoComponent {
   private _axisX: Entity;
   private _axisY: Entity;
   private _axisZ: Entity;
-  private _helperAxisX: Entity;
-  private _helperAxisY: Entity;
-  private _helperAxisZ: Entity;
 
   private _startLineHelperEntity: Entity;
-  private startLineMesh: LinesMesh = new LinesMesh(this.engine, {
-    points: [
-      [0, 0, 0],
-      [0, 0, 0]
-    ],
-    count: 2
-  });
+  private startLineMesh = GizmoMesh.createLine(this.engine, [
+    new Vector3(0, 0, 0),
+    new Vector3(0, 0, 0),
+  ]);
   private _endLineHelperEntity: Entity;
-  private endLineMesh: LinesMesh = new LinesMesh(this.engine, {
-    points: [
-      [0, 0, 0],
-      [0, 0, 0]
-    ],
-    count: 2
-  });
+
+  private endLineMesh = GizmoMesh.createLine(this.engine, [
+    new Vector3(0, 0, 0),
+    new Vector3(0, 0, 0),
+  ]);
+
   private _rotateHelperPlaneEntity: Entity;
-  private _rotateHelperPlaneMesh: CircleMesh = new CircleMesh({}, this.engine);
+  private _rotateHelperPlaneMesh = GizmoMesh.createCircle(this.engine);
 
   private _selectedAxisName: string;
   private _startScale: Vector3 = new Vector3();
@@ -106,6 +81,8 @@ export class RotateControl extends Component implements GizmoComponent {
     this._initAxis();
     this._createAxis(entity);
   }
+  gizmoEntity: Entity;
+  gizmoHelperEntity: Entity;
   /** init axis geometry */
   private _initAxis() {
     this.rotateControlMap = {
@@ -115,7 +92,7 @@ export class RotateControl extends Component implements GizmoComponent {
         axisMaterial: utils.redArcMaterial,
         axisHelperMesh: [utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(0, 90, 90)],
-        axisTranslation: [new Vector3(0, 0, 0)]
+        axisTranslation: [new Vector3(0, 0, 0)],
       },
       y: {
         name: "y",
@@ -123,7 +100,7 @@ export class RotateControl extends Component implements GizmoComponent {
         axisMaterial: utils.greenArcMaterial,
         axisHelperMesh: [utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(90, 0, 0)],
-        axisTranslation: [new Vector3(0, 0, 0)]
+        axisTranslation: [new Vector3(0, 0, 0)],
       },
       z: {
         name: "z",
@@ -131,8 +108,8 @@ export class RotateControl extends Component implements GizmoComponent {
         axisMaterial: utils.blueArcMaterial,
         axisHelperMesh: [utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(0, 0, -90)],
-        axisTranslation: [new Vector3(0, 0, 0)]
-      }
+        axisTranslation: [new Vector3(0, 0, 0)],
+      },
     };
   }
   private _createAxis(entity: Entity) {
@@ -147,7 +124,7 @@ export class RotateControl extends Component implements GizmoComponent {
     this.rotateAxisComponent = {
       x: this._axisX.addComponent(Axis),
       y: this._axisY.addComponent(Axis),
-      z: this._axisZ.addComponent(Axis)
+      z: this._axisZ.addComponent(Axis),
     };
 
     this.rotateAxisComponent.x.initAxis(this.rotateControlMap.x);
@@ -155,34 +132,38 @@ export class RotateControl extends Component implements GizmoComponent {
     this.rotateAxisComponent.z.initAxis(this.rotateControlMap.z);
 
     // invisible gizmo entity
-    this._helperAxisX = this.gizmoHelperEntity.findByName("x");
-    this._helperAxisY = this.gizmoHelperEntity.findByName("y");
-    this._helperAxisZ = this.gizmoHelperEntity.findByName("z");
-    (this.rotateControlMap.x.axisMaterial as GizmoMaterial).posCutOff = true;
-    (this.rotateControlMap.y.axisMaterial as GizmoMaterial).posCutOff = true;
-    (this.rotateControlMap.z.axisMaterial as GizmoMaterial).posCutOff = true;
+    this.rotateControlMap.x.axisMaterial.posCutOff = true;
+    this.rotateControlMap.y.axisMaterial.posCutOff = true;
+    this.rotateControlMap.z.axisMaterial.posCutOff = true;
 
     // rotate gizmo in-process debug helper entity
     this._gizmoRotateHelperEntity = entity.createChild("helper");
 
     // rotate start line
-    this._startLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperS");
-    const startHelperRenderer = this._startLineHelperEntity.addComponent(MeshRenderer);
+    this._startLineHelperEntity =
+      this._gizmoRotateHelperEntity.createChild("lineHelperS");
+    const startHelperRenderer =
+      this._startLineHelperEntity.addComponent(MeshRenderer);
     startHelperRenderer.mesh = this.startLineMesh;
     startHelperRenderer.setMaterial(utils.yellowMaterial);
 
     // rotate end line
-    this._endLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperE");
-    const endHelperRenderer = this._endLineHelperEntity.addComponent(MeshRenderer);
+    this._endLineHelperEntity =
+      this._gizmoRotateHelperEntity.createChild("lineHelperE");
+    const endHelperRenderer =
+      this._endLineHelperEntity.addComponent(MeshRenderer);
     endHelperRenderer.mesh = this.endLineMesh;
     endHelperRenderer.setMaterial(utils.yellowMaterial);
 
     // rotate plane
-    this._rotateHelperPlaneEntity = this._gizmoRotateHelperEntity.createChild("rotateHelperPlane");
-    const planeHelperRenderer = this._rotateHelperPlaneEntity.addComponent(MeshRenderer);
-    planeHelperRenderer.mesh = this._rotateHelperPlaneMesh.modelMesh;
+    this._rotateHelperPlaneEntity =
+      this._gizmoRotateHelperEntity.createChild("rotateHelperPlane");
+    const planeHelperRenderer =
+      this._rotateHelperPlaneEntity.addComponent(MeshRenderer);
+    planeHelperRenderer.mesh = this._rotateHelperPlaneMesh;
     // @ts-ignore
-    this._rotateHelperPlaneMesh.modelMesh._enableVAO = false;
+    this._rotateHelperPlaneMesh._enableVAO = false;
+
     planeHelperRenderer.setMaterial(utils.rotatePlaneMaterial);
     utils.rotatePlaneMaterial.renderQueueType = RenderQueueType.Transparent;
     this._rotateHelperPlaneEntity.isActive = false;
@@ -210,30 +191,27 @@ export class RotateControl extends Component implements GizmoComponent {
   }
 
   onMoveStart(ray: Ray, axisName: string) {
-    // 记录一些开始点击的参数
     this._selectedAxisName = axisName;
     const { _group, _startPointUnit: startP } = this;
     _group.getWorldMatrix(this._startMatrix);
-    this._startMatrix.decompose(this._startTranslate, this._startQuat, this._startScale);
+    this._startMatrix.decompose(
+      this._startTranslate,
+      this._startQuat,
+      this._startScale
+    );
     Matrix.invert(this._startMatrix, this._startInvMatrix);
-    // 计算局部射线在局部空间中的交点，作为旋转的起点
     this._calRayIntersection(ray, startP);
-    // 更新正在操作的轴的表现
-    this.setAxisSelected(axisName, true);
-    // 初始化辅助线和辅助面板
-    this.startLineMesh.update([
-      [0, 0, 0],
-      [startP.x, startP.y, startP.z]
-    ]);
-    this.endLineMesh.update([
-      [0, 0, 0],
-      [startP.x, startP.y, startP.z]
-    ]);
-    this._rotateHelperPlaneMesh.update({
-      startPoint: startP,
-      normal: axisVector[axisName],
-      thetaLength: 0
-    });
+    this._setAxisSelected(axisName, true);
+    GizmoMesh.updateLine(this.startLineMesh, [new Vector3(0, 0, 0), startP]);
+    GizmoMesh.updateLine(this.endLineMesh, [new Vector3(0, 0, 0), startP]);
+
+    GizmoMesh.updateCircle(
+      this._rotateHelperPlaneMesh,
+      startP,
+      axisVector[axisName],
+      0
+    );
+
     const s = this._getGizmoScale();
     this._startMatrix.scale(this._tempVec.set(s, s, s));
     this.gizmoEntity.transform.worldMatrix = this._startMatrix;
@@ -250,31 +228,34 @@ export class RotateControl extends Component implements GizmoComponent {
   onMove(ray: Ray): void {
     const { _startPointUnit: startP, _currPointUnit: currP } = this;
     const localAxis = axisVector[this._selectedAxisName];
-    // 计算局部射线在局部空间中的交点，为当前旋转的位置
+
     this._calRayIntersection(ray, currP);
-    // 累计旋转角度
     const rad = this._getFinalRad(startP, currP, localAxis);
-    // 更新辅助面板
-    this._rotateHelperPlaneMesh.update({
-      startPoint: startP,
-      normal: localAxis,
-      thetaLength: rad
-    });
-    // 更新 Group 的旋转
+    GizmoMesh.updateCircle(this._rotateHelperPlaneMesh, startP, localAxis, rad);
+
     this._currQuat.copyFrom(this._startQuat).rotateAxisAngle(localAxis, rad);
     const { _tempMatrix: mat } = this;
-    Matrix.affineTransformation(this._startScale, this._currQuat, this._startTranslate, mat);
+    Matrix.affineTransformation(
+      this._startScale,
+      this._currQuat,
+      this._startTranslate,
+      mat
+    );
     this._group.setWorldMatrix(mat);
 
     const d = (rad / Math.PI) * 180;
-    this._endLineHelperEntity.transform.setRotation(d * localAxis.x, d * localAxis.y, d * localAxis.z);
+    this._endLineHelperEntity.transform.setRotation(
+      d * localAxis.x,
+      d * localAxis.y,
+      d * localAxis.z
+    );
   }
 
   onMoveEnd() {
     this._finalRad = 0;
     this._previousRad = 0;
     // recover axis color
-    this.setAxisSelected(this._selectedAxisName, false);
+    this._setAxisSelected(this._selectedAxisName, false);
     // recover arc line
     this.rotateControlMap[this._selectedAxisName].axisMaterial.posCutOff = true;
     // hide helper entity
@@ -286,10 +267,14 @@ export class RotateControl extends Component implements GizmoComponent {
   onGizmoRedraw() {
     this._group.getWorldMatrix(this._tempMatrix);
     const s = this._getGizmoScale();
-    this.gizmoEntity.transform.worldMatrix = this._tempMatrix.scale(this._tempVec.set(s, s, s));
+    this.gizmoEntity.transform.worldMatrix =
+      this.gizmoHelperEntity.transform.worldMatrix = this._tempMatrix.scale(
+        this._tempVec.set(s, s, s)
+      );
+    this.gizmoHelperEntity;
   }
 
-  private setAxisSelected(axisName: string, isSelected: boolean) {
+  private _setAxisSelected(axisName: string, isSelected: boolean) {
     this.rotateControlMap[axisName].axisMaterial.posCutOff = !isSelected;
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
@@ -306,11 +291,10 @@ export class RotateControl extends Component implements GizmoComponent {
   }
 
   private _calRayIntersection(ray: Ray, out: Vector3) {
-    // 将世界射线转为局部射线
+    // transform ray to local space
     const worldToLocal = this._startInvMatrix;
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
-    // 取与面的交点
     ray.getPoint(ray.intersectPlane(axisPlane[this._selectedAxisName]), out);
     out.normalize().scale(utils.rotateCircleRadius);
   }
@@ -319,12 +303,14 @@ export class RotateControl extends Component implements GizmoComponent {
     const dot = Vector3.dot(p1, p2);
     Vector3.cross(p1, p2, this._tempVec);
     const direction = Vector3.dot(this._tempVec, rotateAxis);
-    const currentRad = Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
+    const currentRad =
+      Math.sign(direction) * Math.acos(dot / utils.rotateCircleRadius ** 2);
     const incrementRad = currentRad - this._previousRad;
     if (this._previousRad * currentRad < 0) {
       Math.abs(currentRad) < Math.PI / 2
         ? (this._finalRad += incrementRad)
-        : (this._finalRad += -Math.sign(incrementRad) * (2 * Math.PI - Math.abs(incrementRad)));
+        : (this._finalRad +=
+            -Math.sign(incrementRad) * (2 * Math.PI - Math.abs(incrementRad)));
     } else {
       this._finalRad += incrementRad;
     }
@@ -335,6 +321,9 @@ export class RotateControl extends Component implements GizmoComponent {
   private _getGizmoScale(): number {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldPosition(this._tempVec);
-    return Vector3.distance(cameraPosition, this._tempVec) * GizmoControls._scaleFactor;
+    return (
+      Vector3.distance(cameraPosition, this._tempVec) *
+      GizmoControls._scaleFactor
+    );
   }
 }

@@ -1,10 +1,10 @@
 import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 
 import { Axis } from "./Axis";
+import { utils } from "./Utils";
 import { GizmoControls } from "./GizmoControls";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
-import { utils } from "./Utils";
 
 /** @internal */
 export class TranslateControl extends GizmoComponent {
@@ -96,23 +96,25 @@ export class TranslateControl extends GizmoComponent {
   }
 
   onMove(ray: Ray): void {
-    // 计算局部射线
+    // transform ray to local space
     this._calRayIntersection(ray, this._currPoint);
     const currScale = this._scale;
     const { _tempMat: mat, _tempVec0: subVec, _startScale } = this;
-    // 换算一下缩放，两次的缩放是不一样的，所以用原点计算
-    subVec.x = this._currPoint.x - (this._startPoint.x / _startScale) * currScale;
-    subVec.y = this._currPoint.y - (this._startPoint.y / _startScale) * currScale;
-    subVec.z = this._currPoint.z - (this._startPoint.z / _startScale) * currScale;
+    // eliminate the side effect of gizmo's scaling
+    subVec.x =
+      this._currPoint.x - (this._startPoint.x / _startScale) * currScale;
+    subVec.y =
+      this._currPoint.y - (this._startPoint.y / _startScale) * currScale;
+    subVec.z =
+      this._currPoint.z - (this._startPoint.z / _startScale) * currScale;
 
     const localAxis = axisVector[this._selectedAxisName];
     mat.identity();
     mat.elements[12] = subVec.x * localAxis.x;
     mat.elements[13] = subVec.y * localAxis.y;
     mat.elements[14] = subVec.z * localAxis.z;
-    // align movement
+
     Matrix.multiply(this._startGroupMatrix, mat, mat);
-    // 更新组内所有 entity 的位置
     this._group.setWorldMatrix(mat);
   }
 
@@ -130,9 +132,17 @@ export class TranslateControl extends GizmoComponent {
     const { _tempMat, _tempVec0 } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);
-    _tempVec0.set(_tempMat.elements[12], _tempMat.elements[13], _tempMat.elements[14]);
-    const s = (this._scale = Vector3.distance(cameraPosition, _tempVec0) * GizmoControls._scaleFactor);
-    this.gizmoEntity.transform.worldMatrix = _tempMat.scale(_tempVec0.set(s, s, s));
+    _tempVec0.set(
+      _tempMat.elements[12],
+      _tempMat.elements[13],
+      _tempMat.elements[14]
+    );
+    const s = (this._scale =
+      Vector3.distance(cameraPosition, _tempVec0) * GizmoControls._scaleFactor);
+    this.gizmoEntity.transform.worldMatrix =
+      this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
+        _tempVec0.set(s, s, s)
+      );
   }
 
   private _initAxis() {
@@ -142,24 +152,48 @@ export class TranslateControl extends GizmoComponent {
         axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
         axisMaterial: utils.greenMaterial,
         axisHelperMesh: [utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90), new Vector3(0, 0, 90)],
-        axisTranslation: [new Vector3(0, 0, 0), new Vector3(1.5, 0, 0), new Vector3(-1.5, 0, 0)]
+        axisRotation: [
+          new Vector3(0, 0, -90),
+          new Vector3(0, 0, -90),
+          new Vector3(0, 0, 90),
+        ],
+        axisTranslation: [
+          new Vector3(0, 0, 0),
+          new Vector3(1.5, 0, 0),
+          new Vector3(-1.5, 0, 0),
+        ],
       },
       y: {
         name: "y",
         axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
         axisMaterial: utils.blueMaterial,
         axisHelperMesh: [utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0), new Vector3(180, 0, 0)],
-        axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 1.5, 0), new Vector3(0, -1.5, 0)]
+        axisRotation: [
+          new Vector3(0, 90, 0),
+          new Vector3(0, 0, 0),
+          new Vector3(180, 0, 0),
+        ],
+        axisTranslation: [
+          new Vector3(0, 0, 0),
+          new Vector3(0, 1.5, 0),
+          new Vector3(0, -1.5, 0),
+        ],
       },
       z: {
         name: "z",
         axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
         axisMaterial: utils.redMaterial,
         axisHelperMesh: [utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90), new Vector3(0, -90, 90)],
-        axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
+        axisRotation: [
+          new Vector3(0, 90, 90),
+          new Vector3(0, 90, 90),
+          new Vector3(0, -90, 90),
+        ],
+        axisTranslation: [
+          new Vector3(0, 0, 0),
+          new Vector3(0, 0, 1.5),
+          new Vector3(0, 0, -1.5),
+        ],
       },
       xy: {
         name: "xy",
@@ -167,7 +201,7 @@ export class TranslateControl extends GizmoComponent {
         axisMaterial: utils.lightRedMaterial,
         axisHelperMesh: [utils.axisHelperPlaneMesh],
         axisRotation: [new Vector3(0, 90, 90)],
-        axisTranslation: [new Vector3(0.5, 0.5, 0)]
+        axisTranslation: [new Vector3(0.5, 0.5, 0)],
       },
       yz: {
         name: "yz",
@@ -175,7 +209,7 @@ export class TranslateControl extends GizmoComponent {
         axisMaterial: utils.lightGreenMaterial,
         axisHelperMesh: [utils.axisHelperPlaneMesh],
         axisRotation: [new Vector3(90, 90, 0)],
-        axisTranslation: [new Vector3(0, 0.5, 0.5)]
+        axisTranslation: [new Vector3(0, 0.5, 0.5)],
       },
       xz: {
         name: "xz",
@@ -183,8 +217,8 @@ export class TranslateControl extends GizmoComponent {
         axisMaterial: utils.lightBlueMaterial,
         axisHelperMesh: [utils.axisHelperPlaneMesh],
         axisRotation: [new Vector3(0, 0, 0)],
-        axisTranslation: [new Vector3(0.5, 0, 0.5)]
-      }
+        axisTranslation: [new Vector3(0.5, 0, 0.5)],
+      },
     };
   }
 
@@ -204,7 +238,7 @@ export class TranslateControl extends GizmoComponent {
       z: axisZ.addComponent(Axis),
       xy: axisXY.addComponent(Axis),
       yz: axisYZ.addComponent(Axis),
-      xz: axisXZ.addComponent(Axis)
+      xz: axisXZ.addComponent(Axis),
     };
 
     this._translateAxisComponent.x.initAxis(this._translateControlMap.x);
@@ -221,7 +255,11 @@ export class TranslateControl extends GizmoComponent {
       case "y":
       case "z":
       case "xyz":
-        const { _tempVec0: centerP, _tempVec1: crossP, _tempVec2: cameraP } = this;
+        const {
+          _tempVec0: centerP,
+          _tempVec1: crossP,
+          _tempVec2: cameraP,
+        } = this;
         cameraP.copyFrom(this._camera.entity.transform.worldPosition);
         cameraP.transformToVec3(this._startInvMatrix);
         const localAxis = axisVector[this._selectedAxisName];
@@ -240,11 +278,9 @@ export class TranslateControl extends GizmoComponent {
   }
 
   private _calRayIntersection(ray: Ray, out: Vector3) {
-    // 将世界射线转为局部射线
     const worldToLocal = this._startInvMatrix;
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
-    // 取与面的交点
     ray.getPoint(ray.intersectPlane(this._plane), out);
   }
 }
