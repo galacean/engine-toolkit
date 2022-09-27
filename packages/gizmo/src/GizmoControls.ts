@@ -11,7 +11,7 @@ import {
   Vector3,
   MathUtil,
   Script,
-  MeshRenderElement,
+  MeshRenderElement
 } from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -21,7 +21,6 @@ import { utils } from "./Utils";
 import { GizmoState, AnchorType, CoordinateType } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
 import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
-
 /**
  * Gizmo controls, including translate, rotate, scale
  */
@@ -169,7 +168,7 @@ export class GizmoControls extends Script {
    * for single select, called when entity is selected
    * @param entity - the selected entity, could be empty
    */
-  selectEntity(entity: Entity | null):void {
+  selectEntity(entity: Entity | null): void {
     const { _group: group } = this;
     group.reset();
     entity && group.addEntity(entity);
@@ -180,20 +179,18 @@ export class GizmoControls extends Script {
    * @param entity - the selected entity, could be empty
    */
 
-  addEntity(entity: Entity | null):void {
+  addEntity(entity: Entity | null): void {
     const { _group: group } = this;
     entity && group.addEntity(entity);
-    console.log("a", group);
   }
 
   /**
    * for multiple select, called when entity is deselected
    * @param entity - the selected entity, could be empty
    */
-  deselectEntity(entity: Entity):void {
+  deselectEntity(entity: Entity): void {
     const { _group: group } = this;
     entity && group.deleteEntity(entity);
-    console.log("s", group);
   }
 
   /**
@@ -230,9 +227,7 @@ export class GizmoControls extends Script {
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
       const currDistance = Vector3.distance(cameraPosition, this._tempVec);
       let distanceDirty = false;
-      if (
-        Math.abs(this._lastDistance - currDistance) > MathUtil.zeroTolerance
-      ) {
+      if (Math.abs(this._lastDistance - currDistance) > MathUtil.zeroTolerance) {
         distanceDirty = true;
         this._lastDistance = currDistance;
       }
@@ -244,45 +239,36 @@ export class GizmoControls extends Script {
       const { pointerPosition } = inputManager;
       if (pointerPosition) {
         if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
-          this._framebufferPicker
-            .pick(pointerPosition.x, pointerPosition.y)
-            .then((result) => {
-              this._selectHandler(result);
-            });
+          this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+            this._selectHandler(result);
+          });
         } else {
-          this._framebufferPicker
-            .pick(pointerPosition.x, pointerPosition.y)
-            .then((result) => {
-              this._overHandler(result);
-            });
+          this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+            this._overHandler(result);
+          });
         }
       }
     }
   }
 
-  private _createGizmoControl(
-    control: GizmoState,
-    gizmoComponent: new (entity: Entity) => GizmoComponent
-  ):void {
-    const gizmoControl = this.entity
-      .createChild(control.toString())
-      .addComponent(gizmoComponent);
+  private _createGizmoControl(control: GizmoState, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
+    const gizmoControl = this.entity.createChild(control.toString()).addComponent(gizmoComponent);
     this._gizmoMap[control] = gizmoControl;
   }
 
-  private _onGizmoHoverStart(axisName: string):void {
+  private _onGizmoHoverStart(axisName: string): void {
     this._isHovered = true;
     this._gizmoControl.onHoverStart(axisName);
   }
 
-  private _onGizmoHoverEnd():void {
+  private _onGizmoHoverEnd(): void {
     if (this._isHovered) {
       this._gizmoControl.onHoverEnd();
       this._isHovered = false;
     }
   }
 
-  private _triggerGizmoStart(axisName: string):void {
+  private _triggerGizmoStart(axisName: string): void {
     this._isStarted = true;
     const pointerPosition = this.engine.inputManager.pointerPosition;
     if (pointerPosition) {
@@ -291,21 +277,18 @@ export class GizmoControls extends Script {
     }
   }
 
-  private _triggerGizmoMove():void {
-    this._sceneCamera.screenPointToRay(
-      this.engine.inputManager.pointerPosition,
-      this._tempRay2
-    );
+  private _triggerGizmoMove(): void {
+    this._sceneCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._tempRay2);
     this._gizmoControl.onMove(this._tempRay2);
   }
 
-  private _triggerGizmoEnd():void {
+  private _triggerGizmoEnd(): void {
     this._gizmoControl.onMoveEnd();
     this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     this._isStarted = false;
   }
 
-  private _selectHandler(result: MeshRenderElement):void {
+  private _selectHandler(result: MeshRenderElement): void {
     const selectedEntity = result?.component?.entity;
     switch (selectedEntity?.layer) {
       case this._gizmoLayer:
@@ -314,7 +297,7 @@ export class GizmoControls extends Script {
     }
   }
 
-  private _overHandler(result: MeshRenderElement):void {
+  private _overHandler(result: MeshRenderElement): void {
     const hoverEntity = result?.component?.entity;
     if (hoverEntity?.layer === this._gizmoLayer) {
       this._onGizmoHoverEnd();

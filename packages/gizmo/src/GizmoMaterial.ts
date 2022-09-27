@@ -1,12 +1,4 @@
-import {
-  Material,
-  Shader,
-  Color,
-  RenderQueueType,
-  Engine,
-  BlendFactor,
-  CullMode,
-} from "oasis-engine";
+import { Material, Shader, Color, RenderQueueType, Engine, BlendFactor, CullMode } from "oasis-engine";
 
 const vertexSource = `
   uniform mat4 u_MVPMat;
@@ -74,10 +66,8 @@ export class GizmoMaterial extends Material {
     const target = this.renderState.blendState.targetBlendState;
     const depthState = this.renderState.depthState;
     target.enabled = true;
-    target.sourceColorBlendFactor = target.sourceAlphaBlendFactor =
-      BlendFactor.SourceAlpha;
-    target.destinationColorBlendFactor = target.destinationAlphaBlendFactor =
-      BlendFactor.OneMinusSourceAlpha;
+    target.sourceColorBlendFactor = target.sourceAlphaBlendFactor = BlendFactor.SourceAlpha;
+    target.destinationColorBlendFactor = target.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
     depthState.writeEnabled = false;
 
     this.shaderData.disableMacro(GizmoMaterial._posCutoffMacro);

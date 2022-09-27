@@ -17,7 +17,7 @@ export enum GizmoState {
   /**
    * scale state
    */
-  scale = 0x4,
+  scale = 0x4
 }
 
 /**
@@ -31,7 +31,7 @@ export enum AnchorType {
   /**
    * positions the Gizmo at the center of the selected entity or entities rendered bounds
    */
-  Center,
+  Center
 }
 
 /**
@@ -45,5 +45,5 @@ export enum CoordinateType {
   /**
    * aligns to the world space orientation
    */
-  Global,
+  Global
 }

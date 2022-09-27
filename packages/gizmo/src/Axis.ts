@@ -1,10 +1,4 @@
-import {
-  Component,
-  Entity,
-  MeshRenderer,
-  Color,
-  UnlitMaterial,
-} from "oasis-engine";
+import { Component, Entity, MeshRenderer, Color, UnlitMaterial } from "oasis-engine";
 import { utils } from "./Utils";
 import { AxisProps } from "./Type";
 import { GizmoMaterial } from "./GizmoMaterial";
@@ -20,7 +14,7 @@ export class Axis extends Component {
   }
 
   /** setup axis geometry */
-  initAxis(value: AxisProps):void {
+  initAxis(value: AxisProps): void {
     this._material = value.axisMaterial;
     this._color.copyFrom(value.axisMaterial.baseColor);
 
@@ -53,23 +47,23 @@ export class Axis extends Component {
     }
   }
   /** highlight axis */
-  highLight():void {
+  highLight(): void {
     this._material.baseColor.copyFrom(this._highLightColor);
   }
   /** unhighligh axis */
-  unLight():void {
+  unLight(): void {
     this._material.baseColor.copyFrom(this._color);
   }
   /** change axis color into yellow */
-  yellow():void {
+  yellow(): void {
     this._material.baseColor.copyFrom(this._yellowColor);
   }
   /** change axis color into gray */
-  gray():void {
+  gray(): void {
     this._material.baseColor.copyFrom(this._grayColor);
   }
   /** recove axis color */
-  recover():void {
+  recover(): void {
     this._material.baseColor.copyFrom(this._color);
   }
 }

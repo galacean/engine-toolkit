@@ -1,12 +1,4 @@
-import {
-  Component,
-  Entity,
-  Ray,
-  Vector3,
-  Mesh,
-  Camera,
-  Plane,
-} from "oasis-engine";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane } from "oasis-engine";
 import { UnlitMaterial } from "oasis-engine/types";
 import { GizmoMaterial } from "./GizmoMaterial";
 import { Group } from "./Group";
@@ -41,7 +33,7 @@ export const axisVector: { [key: string]: Vector3 } = {
   xy: new Vector3(1, 1, 0),
   yz: new Vector3(0, 1, 1),
   xz: new Vector3(1, 0, 1),
-  xyz: new Vector3(1, 1, 1),
+  xyz: new Vector3(1, 1, 1)
 };
 
 export const axisPlane: { [key: string]: Plane } = {
@@ -50,7 +42,7 @@ export const axisPlane: { [key: string]: Plane } = {
   z: new Plane(new Vector3(0, 0, 1), 0),
   xy: new Plane(new Vector3(0, 0, 1), 0),
   yz: new Plane(new Vector3(1, 0, 0), 0),
-  xz: new Plane(new Vector3(0, 1, 0), 0),
+  xz: new Plane(new Vector3(0, 1, 0), 0)
 };
 
 export const axisIndices: { [key: string]: Array<string> } = {
@@ -60,7 +52,7 @@ export const axisIndices: { [key: string]: Array<string> } = {
   xy: ["x", "y"],
   xz: ["x", "z"],
   yz: ["y", "z"],
-  xyz: ["x", "y", "z"],
+  xyz: ["x", "y", "z"]
 };
 
 export interface AxisProps {
