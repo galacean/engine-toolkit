@@ -19,6 +19,8 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "alpha"
+    "oasis-engine": "^0.9.0-alpha",
+    "@oasis-engine/physics-lite": "^0.7.5",
+    "@oasis-engine-toolkit/framebuffer-picker": "workspace:*"
   }
 }
