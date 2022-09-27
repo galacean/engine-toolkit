@@ -81,10 +81,9 @@ export class RotateControl extends GizmoComponent {
     this._initAxis();
     this._createAxis(entity);
   }
-  gizmoEntity: Entity;
-  gizmoHelperEntity: Entity;
+
   /** init axis geometry */
-  private _initAxis() {
+  private _initAxis():void {
     this.rotateControlMap = {
       x: {
         name: "x",
@@ -112,7 +111,7 @@ export class RotateControl extends GizmoComponent {
       },
     };
   }
-  private _createAxis(entity: Entity) {
+  private _createAxis(entity: Entity):void {
     // visible gizmo entity
     this.gizmoEntity = entity.createChild("visible");
     this.gizmoHelperEntity = entity.createChild("invisible");
@@ -169,12 +168,12 @@ export class RotateControl extends GizmoComponent {
     this._rotateHelperPlaneEntity.isActive = false;
   }
 
-  init(camera: Camera, group: Group) {
+  init(camera: Camera, group: Group):void {
     this._camera = camera;
     this._group = group;
   }
 
-  onHoverStart(axisName: string) {
+  onHoverStart(axisName: string):void {
     this._selectedAxisName = axisName;
     // high light when mouse enter
     const currEntity = this.gizmoEntity.findByName(axisName);
@@ -182,7 +181,7 @@ export class RotateControl extends GizmoComponent {
     currComponent?.highLight && currComponent.highLight();
   }
 
-  onHoverEnd() {
+  onHoverEnd():void {
     // unlight when mouse leave
     const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
     const currComponent = currEntity.getComponent(Axis);
@@ -190,7 +189,7 @@ export class RotateControl extends GizmoComponent {
     this._selectedAxisName = null;
   }
 
-  onMoveStart(ray: Ray, axisName: string) {
+  onMoveStart(ray: Ray, axisName: string):void {
     this._selectedAxisName = axisName;
     const { _group, _startPointUnit: startP } = this;
     _group.getWorldMatrix(this._startMatrix);
@@ -251,7 +250,7 @@ export class RotateControl extends GizmoComponent {
     );
   }
 
-  onMoveEnd() {
+  onMoveEnd():void {
     this._finalRad = 0;
     this._previousRad = 0;
     // recover axis color
@@ -264,7 +263,7 @@ export class RotateControl extends GizmoComponent {
     this._rotateHelperPlaneEntity.isActive = false;
   }
 
-  onGizmoRedraw() {
+  onGizmoRedraw():void {
     this._group.getWorldMatrix(this._tempMatrix);
     const s = this._getGizmoScale();
     this.gizmoEntity.transform.worldMatrix =
@@ -274,7 +273,7 @@ export class RotateControl extends GizmoComponent {
     this.gizmoHelperEntity;
   }
 
-  private _setAxisSelected(axisName: string, isSelected: boolean) {
+  private _setAxisSelected(axisName: string, isSelected: boolean):void {
     this.rotateControlMap[axisName].axisMaterial.posCutOff = !isSelected;
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
@@ -290,7 +289,7 @@ export class RotateControl extends GizmoComponent {
     }
   }
 
-  private _calRayIntersection(ray: Ray, out: Vector3) {
+  private _calRayIntersection(ray: Ray, out: Vector3):void {
     // transform ray to local space
     const worldToLocal = this._startInvMatrix;
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);

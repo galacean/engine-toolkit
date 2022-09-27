@@ -169,7 +169,7 @@ export class GizmoControls extends Script {
    * for single select, called when entity is selected
    * @param entity - the selected entity, could be empty
    */
-  selectEntity(entity: Entity | null) {
+  selectEntity(entity: Entity | null):void {
     const { _group: group } = this;
     group.reset();
     entity && group.addEntity(entity);
@@ -180,7 +180,7 @@ export class GizmoControls extends Script {
    * @param entity - the selected entity, could be empty
    */
 
-  addEntity(entity: Entity | null) {
+  addEntity(entity: Entity | null):void {
     const { _group: group } = this;
     entity && group.addEntity(entity);
     console.log("a", group);
@@ -190,7 +190,7 @@ export class GizmoControls extends Script {
    * for multiple select, called when entity is deselected
    * @param entity - the selected entity, could be empty
    */
-  deselectEntity(entity: Entity) {
+  deselectEntity(entity: Entity):void {
     const { _group: group } = this;
     entity && group.deleteEntity(entity);
     console.log("s", group);
@@ -263,26 +263,26 @@ export class GizmoControls extends Script {
   private _createGizmoControl(
     control: GizmoState,
     gizmoComponent: new (entity: Entity) => GizmoComponent
-  ) {
+  ):void {
     const gizmoControl = this.entity
       .createChild(control.toString())
       .addComponent(gizmoComponent);
     this._gizmoMap[control] = gizmoControl;
   }
 
-  private _onGizmoHoverStart(axisName: string) {
+  private _onGizmoHoverStart(axisName: string):void {
     this._isHovered = true;
     this._gizmoControl.onHoverStart(axisName);
   }
 
-  private _onGizmoHoverEnd() {
+  private _onGizmoHoverEnd():void {
     if (this._isHovered) {
       this._gizmoControl.onHoverEnd();
       this._isHovered = false;
     }
   }
 
-  private _triggerGizmoStart(axisName: string) {
+  private _triggerGizmoStart(axisName: string):void {
     this._isStarted = true;
     const pointerPosition = this.engine.inputManager.pointerPosition;
     if (pointerPosition) {
@@ -291,7 +291,7 @@ export class GizmoControls extends Script {
     }
   }
 
-  private _triggerGizmoMove() {
+  private _triggerGizmoMove():void {
     this._sceneCamera.screenPointToRay(
       this.engine.inputManager.pointerPosition,
       this._tempRay2
@@ -299,13 +299,13 @@ export class GizmoControls extends Script {
     this._gizmoControl.onMove(this._tempRay2);
   }
 
-  private _triggerGizmoEnd() {
+  private _triggerGizmoEnd():void {
     this._gizmoControl.onMoveEnd();
     this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     this._isStarted = false;
   }
 
-  private _selectHandler(result: RenderElement) {
+  private _selectHandler(result: RenderElement):void {
     const selectedEntity = result?.component?.entity;
     switch (selectedEntity?.layer) {
       case this._gizmoLayer:
@@ -314,7 +314,7 @@ export class GizmoControls extends Script {
     }
   }
 
-  private _overHandler(result: RenderElement) {
+  private _overHandler(result: RenderElement):void {
     const hoverEntity = result?.component?.entity;
     if (hoverEntity?.layer === this._gizmoLayer) {
       this._onGizmoHoverEnd();

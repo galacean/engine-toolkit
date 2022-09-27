@@ -116,7 +116,7 @@ export class Group {
    * remove entity from the group
    * @param delEntity - entity to delete
    */
-  deleteEntity(delEntity: Entity) {
+  deleteEntity(delEntity: Entity):void {
     this._applyDel(delEntity);
   }
 
@@ -124,7 +124,7 @@ export class Group {
    * remove entities from the group
    * @param delEntities - entities to delete, in array
    */
-  deleteEntities(delEntities: Entity[]) {
+  deleteEntities(delEntities: Entity[]):void {
     for (let i = delEntities.length - 1; i >= 0; i--) {
       this.deleteEntity(delEntities[i]);
     }
@@ -215,12 +215,12 @@ export class Group {
    * @param flag - group dirty flag
    */
 
-  setDirtyFlagTrue(flag: GroupDirtyFlag) {
+  setDirtyFlagTrue(flag: GroupDirtyFlag):void {
     this._dirtyFlag |= flag;
     this._gizmoTransformDirty = true;
   }
 
-  private _applyAdd(entity: Entity) {
+  private _applyAdd(entity: Entity):void {
     this._entities.push(entity);
     const listener = entity.transform._registerWorldChangeListener();
     this._listeners.push(listener);
@@ -229,7 +229,7 @@ export class Group {
     fun();
   }
 
-  private _applyDel(value: Entity | number) {
+  private _applyDel(value: Entity | number):void {
     const index =
       typeof value === "number" ? value : this._entities.indexOf(value);
 
@@ -279,7 +279,7 @@ export class Group {
     return false;
   }
 
-  private _updateAnchor() {
+  private _updateAnchor():void {
     if (this._dirtyFlag & GroupDirtyFlag.AnchorDirty) {
       const { _worldMatrix: worldMatrix } = this;
       const { _tempVec30: tempVec3 } = Group;
@@ -300,7 +300,7 @@ export class Group {
     }
   }
 
-  private _updateCoordinate() {
+  private _updateCoordinate():void {
     if (this._dirtyFlag & GroupDirtyFlag.CoordinateDirty) {
       const { elements: e } = this._worldMatrix;
       switch (this._coordinateType) {

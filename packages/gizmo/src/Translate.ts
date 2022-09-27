@@ -47,12 +47,12 @@ export class TranslateControl extends GizmoComponent {
     this._createAxis(entity);
   }
 
-  init(camera: Camera, group: Group) {
+  init(camera: Camera, group: Group):void {
     this._camera = camera;
     this._group = group;
   }
 
-  onHoverStart(axisName: string) {
+  onHoverStart(axisName: string) :void{
     this._selectedAxisName = axisName;
     // change color
     const currEntity = this.gizmoEntity.findByName(axisName);
@@ -60,7 +60,7 @@ export class TranslateControl extends GizmoComponent {
     currComponent?.highLight && currComponent.highLight();
   }
 
-  onHoverEnd() {
+  onHoverEnd():void {
     // recover axis color
     const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
     const currComponent = currEntity.getComponent(Axis);
@@ -69,7 +69,7 @@ export class TranslateControl extends GizmoComponent {
     this._selectedAxisName = null;
   }
 
-  onMoveStart(ray: Ray, axisName: string) {
+  onMoveStart(ray: Ray, axisName: string):void {
     this._selectedAxisName = axisName;
     // get gizmo start worldPosition
     this._group.getWorldMatrix(this._startGroupMatrix);
@@ -118,7 +118,7 @@ export class TranslateControl extends GizmoComponent {
     this._group.setWorldMatrix(mat);
   }
 
-  onMoveEnd() {
+  onMoveEnd():void {
     // recover axis cover
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
@@ -128,7 +128,7 @@ export class TranslateControl extends GizmoComponent {
     }
   }
 
-  onGizmoRedraw() {
+  onGizmoRedraw():void {
     const { _tempMat, _tempVec0 } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);
@@ -145,7 +145,7 @@ export class TranslateControl extends GizmoComponent {
       );
   }
 
-  private _initAxis() {
+  private _initAxis():void {
     this._translateControlMap = {
       x: {
         name: "x",
@@ -222,7 +222,7 @@ export class TranslateControl extends GizmoComponent {
     };
   }
 
-  private _createAxis(entity: Entity) {
+  private _createAxis(entity: Entity):void {
     this.gizmoEntity = entity.createChild("visible");
     this.gizmoHelperEntity = entity.createChild("invisible");
     const axisX = this.gizmoEntity.createChild("x");
@@ -249,7 +249,7 @@ export class TranslateControl extends GizmoComponent {
     this._translateAxisComponent.yz.initAxis(this._translateControlMap.yz);
   }
 
-  private _getHitPlane() {
+  private _getHitPlane():void {
     switch (this._selectedAxisName) {
       case "x":
       case "y":
@@ -277,7 +277,7 @@ export class TranslateControl extends GizmoComponent {
     }
   }
 
-  private _calRayIntersection(ray: Ray, out: Vector3) {
+  private _calRayIntersection(ray: Ray, out: Vector3) :void{
     const worldToLocal = this._startInvMatrix;
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);

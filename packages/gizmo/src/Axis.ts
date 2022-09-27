@@ -20,7 +20,7 @@ export class Axis extends Component {
   }
 
   /** setup axis geometry */
-  initAxis(value: AxisProps) {
+  initAxis(value: AxisProps):void {
     this._material = value.axisMaterial;
     this._color.copyFrom(value.axisMaterial.baseColor);
 
@@ -53,23 +53,23 @@ export class Axis extends Component {
     }
   }
   /** highlight axis */
-  highLight() {
+  highLight():void {
     this._material.baseColor.copyFrom(this._highLightColor);
   }
   /** unhighligh axis */
-  unLight() {
+  unLight():void {
     this._material.baseColor.copyFrom(this._color);
   }
   /** change axis color into yellow */
-  yellow() {
+  yellow():void {
     this._material.baseColor.copyFrom(this._yellowColor);
   }
   /** change axis color into gray */
-  gray() {
+  gray():void {
     this._material.baseColor.copyFrom(this._grayColor);
   }
   /** recove axis color */
-  recover() {
+  recover():void {
     this._material.baseColor.copyFrom(this._color);
   }
 }

@@ -43,25 +43,25 @@ export class ScaleControl extends GizmoComponent {
     this._createAxis(entity);
   }
 
-  init(camera: Camera, group: Group) {
+  init(camera: Camera, group: Group):void {
     this._camera = camera;
     this._group = group;
   }
 
-  onHoverStart(axisName: string) {
+  onHoverStart(axisName: string):void {
     this._selectedAxisName = axisName;
     const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent?.highLight && currComponent.highLight();
   }
 
-  onHoverEnd() {
+  onHoverEnd():void {
     const currEntity = this.gizmoEntity.findByName(this._selectedAxisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent?.unLight && currComponent.unLight();
   }
 
-  onMoveStart(ray: Ray, axisName: string) {
+  onMoveStart(ray: Ray, axisName: string):void {
     this._selectedAxisName = axisName;
     // get gizmo start worldPosition
     this._group.getWorldMatrix(this._startGroupMatrix);
@@ -112,7 +112,7 @@ export class ScaleControl extends GizmoComponent {
     this._group.setWorldMatrix(mat);
   }
 
-  onMoveEnd() {
+  onMoveEnd():void {
     const entityArray = this.gizmoEntity.children;
     for (let i = 0; i < entityArray.length; i++) {
       const currEntity = entityArray[i];
@@ -121,7 +121,7 @@ export class ScaleControl extends GizmoComponent {
     }
   }
 
-  onGizmoRedraw() {
+  onGizmoRedraw():void {
     const { _tempVec0, _tempMat } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);
@@ -137,7 +137,7 @@ export class ScaleControl extends GizmoComponent {
     );
   }
 
-  private _initAxis() {
+  private _initAxis():void {
     this._scaleControlMap = {
       x: {
         name: "x",
@@ -211,7 +211,7 @@ export class ScaleControl extends GizmoComponent {
     };
   }
 
-  private _createAxis(entity: Entity) {
+  private _createAxis(entity: Entity):void {
     this.gizmoEntity = entity.createChild("visible");
     this.gizmoHelperEntity = entity.createChild("invisible");
     const axisX = this.gizmoEntity.createChild("x");
@@ -232,7 +232,7 @@ export class ScaleControl extends GizmoComponent {
     this._scaleAxisComponent.xyz.initAxis(this._scaleControlMap.xyz);
   }
 
-  private _getHitPlane() {
+  private _getHitPlane():void {
     switch (this._selectedAxisName) {
       case "x":
       case "y":
@@ -254,7 +254,7 @@ export class ScaleControl extends GizmoComponent {
     }
   }
 
-  private _calRayIntersection(ray: Ray, out: Vector3) {
+  private _calRayIntersection(ray: Ray, out: Vector3):void {
     const worldToLocal = this._startInvMatrix;
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
