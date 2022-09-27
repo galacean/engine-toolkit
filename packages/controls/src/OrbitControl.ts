@@ -72,7 +72,7 @@ export class OrbitControl extends Script {
 
   set up(value: Vector3) {
     this._up.copyFrom(value);
-    this._spherical.setUp(value);
+    this._spherical.setYAxis(value);
     this._atTheBack = false;
   }
 
@@ -85,7 +85,7 @@ export class OrbitControl extends Script {
 
   set target(value: Vector3) {
     this._target.copyFrom(value);
-    this._spherical.setUp(value);
+    this._spherical.setYAxis(value);
     this._atTheBack = false;
   }
 
@@ -140,7 +140,7 @@ export class OrbitControl extends Script {
     this.input = engine.inputManager;
     this.camera = entity.getComponent(Camera);
     this.cameraTransform = entity.transform;
-    this._spherical.setUp(this._up);
+    this._spherical.setYAxis(this._up);
     this._atTheBack = false;
   }
 

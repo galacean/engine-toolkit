@@ -26,7 +26,7 @@ export class Spherical {
     return this;
   }
 
-  setUp(up: Vector3) {
+  setYAxis(up: Vector3) {
     const { xAxis, yAxis, zAxis } = Spherical;
     if (Vector3.equals(xAxis.set(1, 0, 0), yAxis.copyFrom(up).normalize())) {
       xAxis.set(0, 1, 0);
