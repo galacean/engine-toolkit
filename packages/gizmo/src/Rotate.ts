@@ -165,7 +165,7 @@ export class RotateControl extends GizmoComponent {
     this._rotateHelperPlaneMesh._enableVAO = false;
 
     planeHelperRenderer.setMaterial(utils.rotatePlaneMaterial);
-    utils.rotatePlaneMaterial.renderQueueType = RenderQueueType.Transparent;
+    utils.rotatePlaneMaterial.renderState.renderQueueType = RenderQueueType.Transparent;
     this._rotateHelperPlaneEntity.isActive = false;
   }
 

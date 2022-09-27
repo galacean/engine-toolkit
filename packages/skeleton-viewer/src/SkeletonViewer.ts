@@ -44,7 +44,7 @@ export class SkeletonViewer extends Script {
     if (!materialMap.get(engine)) {
       const material = new Material(entity.engine, Shader.find("skeleton-viewer"));
       material.renderState.rasterState.depthBias = -100000000;
-      material.renderQueueType = RenderQueueType.Transparent;
+      material.renderState.renderQueueType = RenderQueueType.Transparent;
       materialMap.set(engine, material);
     }
 
