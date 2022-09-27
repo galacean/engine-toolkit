@@ -67,7 +67,7 @@ export class GizmoMaterial extends Material {
 
   constructor(engine: Engine) {
     super(engine, Shader.find("gizmo-shader"));
-    this.renderQueueType = RenderQueueType.Transparent;
+    this.renderState[0].renderQueueType = RenderQueueType.Transparent;
     this.renderState.depthState.enabled = false;
     this.renderState.rasterState.cullMode = CullMode.Off;
 

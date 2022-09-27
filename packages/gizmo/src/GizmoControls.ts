@@ -11,7 +11,7 @@ import {
   Vector3,
   MathUtil,
   Script,
-  RenderElement,
+  MeshRenderElement,
 } from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -305,7 +305,7 @@ export class GizmoControls extends Script {
     this._isStarted = false;
   }
 
-  private _selectHandler(result: RenderElement):void {
+  private _selectHandler(result: MeshRenderElement):void {
     const selectedEntity = result?.component?.entity;
     switch (selectedEntity?.layer) {
       case this._gizmoLayer:
@@ -314,7 +314,7 @@ export class GizmoControls extends Script {
     }
   }
 
-  private _overHandler(result: RenderElement):void {
+  private _overHandler(result: MeshRenderElement):void {
     const hoverEntity = result?.component?.entity;
     if (hoverEntity?.layer === this._gizmoLayer) {
       this._onGizmoHoverEnd();
