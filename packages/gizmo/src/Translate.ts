@@ -2,7 +2,6 @@ import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 
 import { Axis } from "./Axis";
 import { utils } from "./Utils";
-import { GizmoControls } from "./GizmoControls";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { GizmoState } from "./enums/GizmoState";
@@ -132,7 +131,7 @@ export class TranslateControl extends GizmoComponent {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);
     _tempVec0.set(_tempMat.elements[12], _tempMat.elements[13], _tempMat.elements[14]);
-    const s = (this._scale = Vector3.distance(cameraPosition, _tempVec0) * GizmoControls._scaleFactor);
+    const s = (this._scale = Vector3.distance(cameraPosition, _tempVec0) * utils.scaleFactor);
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
       _tempVec0.set(s, s, s)
     );

@@ -3,7 +3,6 @@ import { Axis } from "./Axis";
 import { utils } from "./Utils";
 import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { Group } from "./Group";
-import { GizmoControls } from "./GizmoControls";
 import { GizmoMesh } from "./GizmoMesh";
 import { GizmoMaterial } from "./GizmoMaterial";
 import { GizmoState } from "./enums/GizmoState";
@@ -279,6 +278,6 @@ export class RotateControl extends GizmoComponent {
   private _getGizmoScale(): number {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldPosition(this._tempVec);
-    return Vector3.distance(cameraPosition, this._tempVec) * GizmoControls._scaleFactor;
+    return Vector3.distance(cameraPosition, this._tempVec) * utils.scaleFactor;
   }
 }

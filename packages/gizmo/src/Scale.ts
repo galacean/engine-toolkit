@@ -3,7 +3,6 @@ import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 import { Axis } from "./Axis";
 import { utils } from "./Utils";
 import { Group } from "./Group";
-import { GizmoControls } from "./GizmoControls";
 import { GizmoComponent, AxisProps, axisVector } from "./Type";
 import { GizmoState } from "./enums/GizmoState";
 
@@ -129,7 +128,7 @@ export class ScaleControl extends GizmoComponent {
     this._group.getWorldMatrix(_tempMat);
     const { elements: ele } = _tempMat;
     _tempVec0.set(ele[12], ele[13], ele[14]);
-    const s = Vector3.distance(cameraPosition, _tempVec0) * GizmoControls._scaleFactor;
+    const s = Vector3.distance(cameraPosition, _tempVec0) * utils.scaleFactor;
     const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
     const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
     const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);

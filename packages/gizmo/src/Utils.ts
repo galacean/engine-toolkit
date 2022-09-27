@@ -4,6 +4,7 @@ import { GizmoMesh } from "./GizmoMesh";
 
 class Utils {
   rotateCircleRadius = 1.6;
+  scaleFactor = 0.05773502691896257;
 
   redMaterial: UnlitMaterial;
   lightRedMaterial: UnlitMaterial;
