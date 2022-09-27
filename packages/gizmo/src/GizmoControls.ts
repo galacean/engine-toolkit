@@ -25,8 +25,6 @@ import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
  * Gizmo controls, including translate, rotate, scale
  */
 export class GizmoControls extends Script {
-  static _scaleFactor = 0.05773502691896257;
-
   private _initialized = false;
   private _isStarted = false;
   private _isHovered = false;
