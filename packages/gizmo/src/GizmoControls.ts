@@ -28,7 +28,7 @@ export class GizmoControls extends Script {
   private _initialized = false;
   private _isStarted = false;
   private _isHovered = false;
-  private _gizmoLayer: Layer = Layer.Layer30;
+  private _gizmoLayer: Layer;
   private _gizmoMap: Array<GizmoComponent> = [];
   private _sceneCamera: Camera;
   private _gizmoControl: GizmoComponent | null;
@@ -69,7 +69,7 @@ export class GizmoControls extends Script {
   }
 
   /**
-   * gizmo layer, default Layer30
+   * gizmo layer, default Layer29
    * @return the layer for gizmo entity and gizmo's inner framebuffer picker
    * @remarks Layer duplicate warning, check whether this layer is taken
    */
@@ -155,6 +155,7 @@ export class GizmoControls extends Script {
       256,
       new Texture2D(this.engine, 256, 256)
     );
+    this.layer = Layer.Layer29;
 
     // gizmo collider
     const sphereCollider = entity.addComponent(StaticCollider);
