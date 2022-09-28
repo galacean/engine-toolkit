@@ -31,24 +31,35 @@ export abstract class GizmoComponent extends Component {
   abstract onGizmoRedraw(): void;
 }
 
-export const axisVector: { [key: string]: Vector3 } = {
-  x: new Vector3(1, 0, 0),
-  y: new Vector3(0, 1, 0),
-  z: new Vector3(0, 0, 1),
-  xy: new Vector3(1, 1, 0),
-  yz: new Vector3(0, 1, 1),
-  xz: new Vector3(1, 0, 1),
-  xyz: new Vector3(1, 1, 1)
-};
+export enum axisType {
+  "x" = 0,
+  "y" = 1,
+  "z" = 2,
+  "xy" = 3,
+  "yz" = 4,
+  "xz" = 5,
+  "xyz" = 6
+}
 
-export const axisPlane: { [key: string]: Plane } = {
-  x: new Plane(new Vector3(1, 0, 0), 0),
-  y: new Plane(new Vector3(0, 1, 0), 0),
-  z: new Plane(new Vector3(0, 0, 1), 0),
-  xy: new Plane(new Vector3(0, 0, 1), 0),
-  yz: new Plane(new Vector3(1, 0, 0), 0),
-  xz: new Plane(new Vector3(0, 1, 0), 0)
-};
+export const axisVector = [
+  new Vector3(1, 0, 0),
+  new Vector3(0, 1, 0),
+  new Vector3(0, 0, 1),
+  new Vector3(1, 1, 0),
+  new Vector3(0, 1, 1),
+  new Vector3(1, 0, 1),
+  new Vector3(1, 1, 1)
+];
+
+export const axisPlane = [
+  new Plane(new Vector3(1, 0, 0), 0),
+  new Plane(new Vector3(0, 1, 0), 0),
+  new Plane(new Vector3(0, 0, 1), 0),
+  new Plane(new Vector3(0, 0, 1), 0),
+  new Plane(new Vector3(1, 0, 0), 0),
+  new Plane(new Vector3(0, 1, 0), 0)
+];
+
 export interface AxisProps {
   name: string;
   axisMesh: Array<Mesh>;
