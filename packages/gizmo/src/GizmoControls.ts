@@ -233,9 +233,13 @@ export class GizmoControls extends Script {
             this._selectHandler(result);
           });
         } else {
-          this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
-            this._overHandler(result);
-          });
+          this.camera.screenPointToRay(inputManager.pointerPosition, this._tempRay);
+          const result = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._gizmoLayer);
+          if (result) {
+            this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+              this._overHandler(result);
+            });
+          }
         }
       }
     }
