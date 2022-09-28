@@ -1,6 +1,6 @@
 {
   "name": "oasis-engine-toolkit",
-  "version": "0.8.0-beta.6",
+  "version": "0.8.0-beta.7",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
@@ -18,14 +18,14 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/controls": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/gizmo": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/lines": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/outline": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/planar-shadow-material": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/skeleton-viewer": "0.8.0-beta.6",
-    "@oasis-engine-toolkit/stats": "0.8.0-beta.6"
+    "@oasis-engine-toolkit/auxiliary-lines": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/controls": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/framebuffer-picker": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/gizmo": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/lines": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/outline": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/planar-shadow-material": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/skeleton-viewer": "0.8.0-beta.7",
+    "@oasis-engine-toolkit/stats": "0.8.0-beta.7"
   }
 }
