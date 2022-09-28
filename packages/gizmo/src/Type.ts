@@ -28,7 +28,7 @@ export abstract class GizmoComponent extends Component {
   /** Called when gizmo movement ends.*/
   abstract onMoveEnd(): void;
   /** Called when gizmo's transform is dirty.*/
-  abstract onGizmoRedraw(): void;
+  abstract onUpdate(): void;
 }
 
 export enum axisType {

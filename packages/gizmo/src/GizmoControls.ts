@@ -89,11 +89,11 @@ export class GizmoControls extends Script {
    * change gizmo state
    * @return current gizmo state - translate, or rotate, scale, null, default null
    */
-  get gizmoState(): GizmoState {
+  get state(): GizmoState {
     return this._gizmoState;
   }
 
-  set gizmoState(targetState: GizmoState) {
+  set state(targetState: GizmoState) {
     if (!(this._gizmoState & targetState)) {
       this._gizmoState = targetState;
       const { _gizmoMap: gizmoMap } = this;
@@ -107,7 +107,7 @@ export class GizmoControls extends Script {
         gizmoControl.entity.isActive = (targetState & gizmoControl.type) != 0;
       });
 
-      this._gizmoControl?.onGizmoRedraw();
+      this._gizmoControl?.onUpdate();
     }
   }
 
@@ -115,11 +115,11 @@ export class GizmoControls extends Script {
    * toggle gizmo anchor type
    * @return current anchor type - center or pivot, default center
    */
-  get gizmoAnchor(): AnchorType {
+  get anchorType(): AnchorType {
     return this._group.anchorType;
   }
 
-  set gizmoAnchor(targetAnchor: AnchorType) {
+  set anchorType(targetAnchor: AnchorType) {
     this._group.anchorType = targetAnchor;
   }
 
@@ -127,11 +127,11 @@ export class GizmoControls extends Script {
    * toggle gizmo orientation type
    * @return current orientation type - global or local, default local
    */
-  get gizmoCoord(): CoordinateType {
+  get coordType(): CoordinateType {
     return this._group.coordinateType;
   }
 
-  set gizmoCoord(targetCoord: CoordinateType) {
+  set coordType(targetCoord: CoordinateType) {
     this._group.coordinateType = targetCoord;
   }
 
@@ -148,7 +148,6 @@ export class GizmoControls extends Script {
 
     // framebuffer picker
     this._framebufferPicker = entity.addComponent(FramebufferPicker);
-    this._framebufferPicker.colorRenderPass.mask = this._gizmoLayer;
     this._framebufferPicker.colorRenderTarget = new RenderTarget(
       this.engine,
       256,
@@ -163,9 +162,9 @@ export class GizmoControls extends Script {
     colliderShape.radius = Utils.rotateCircleRadius + 0.5;
     sphereCollider.addShape(colliderShape);
 
-    this.gizmoState = this._gizmoState;
-    this.gizmoAnchor = AnchorType.Center;
-    this.gizmoCoord = CoordinateType.Local;
+    this.state = this._gizmoState;
+    this.anchorType = AnchorType.Center;
+    this.coordType = CoordinateType.Local;
   }
 
   /**
@@ -210,7 +209,7 @@ export class GizmoControls extends Script {
         this._triggerGizmoEnd();
       }
       if (this._group._gizmoTransformDirty) {
-        this._gizmoControl.onGizmoRedraw();
+        this._gizmoControl.onUpdate();
         this._group._gizmoTransformDirty = false;
       }
     } else {
@@ -224,7 +223,7 @@ export class GizmoControls extends Script {
       }
 
       if (this._group._gizmoTransformDirty || distanceDirty) {
-        this._gizmoControl.onGizmoRedraw();
+        this._gizmoControl.onUpdate();
         this._group._gizmoTransformDirty = false;
       }
       const { pointerPosition } = inputManager;

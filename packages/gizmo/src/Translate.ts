@@ -112,7 +112,7 @@ export class TranslateControl extends GizmoComponent {
     }
   }
 
-  onGizmoRedraw(): void {
+  onUpdate(): void {
     const { _tempMat, _tempVec0 } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);

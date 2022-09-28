@@ -112,7 +112,7 @@ export class ScaleControl extends GizmoComponent {
     }
   }
 
-  onGizmoRedraw(): void {
+  onUpdate(): void {
     const { _tempVec0, _tempMat } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);

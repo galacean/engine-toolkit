@@ -217,7 +217,7 @@ export class RotateControl extends GizmoComponent {
     this._rotateHelperPlaneEntity.isActive = false;
   }
 
-  onGizmoRedraw(): void {
+  onUpdate(): void {
     this._group.getWorldMatrix(this._tempMatrix);
     const s = this._getGizmoScale();
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = this._tempMatrix.scale(
