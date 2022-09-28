@@ -17,7 +17,7 @@ import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
-import { utils } from "./Utils";
+import { Utils } from "./Utils";
 import { GizmoState, AnchorType, CoordinateType } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
 import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
@@ -137,6 +137,8 @@ export class GizmoControls extends Script {
 
   constructor(entity: Entity) {
     super(entity);
+
+    const utils = new Utils();
     utils.init(this.engine);
 
     // setup mesh
@@ -157,7 +159,7 @@ export class GizmoControls extends Script {
     // gizmo collider
     const sphereCollider = entity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
-    colliderShape.radius = utils.rotateCircleRadius + 0.5;
+    colliderShape.radius = Utils.rotateCircleRadius + 0.5;
     sphereCollider.addShape(colliderShape);
 
     this.gizmoState = this._gizmoState;
@@ -166,42 +168,29 @@ export class GizmoControls extends Script {
   }
 
   /**
-   * for single select, called when entity is selected
-   * @param entity - the selected entity, could be empty
+   * add entity to the group
+   * @param entity - the entity to add, could be empty
+   * @return boolean, true if the entity is the previous group, false if not
    */
-  selectEntity(entity: Entity | null): void {
+  addEntity(entity: Entity | null): boolean {
     const { _group: group } = this;
-    group.reset();
-    entity && group.addEntity(entity);
+    return entity && group.addEntity(entity);
   }
 
   /**
-   * for multiple select, called when entity is selected
-   * @param entity - the selected entity, could be empty
+   * remove entity from the group
+   * @param entity - the entity to remove
    */
-
-  addEntity(entity: Entity | null): void {
-    const { _group: group } = this;
-    entity && group.addEntity(entity);
-  }
-
-  /**
-   * for multiple select, called when entity is deselected
-   * @param entity - the selected entity, could be empty
-   */
-  deselectEntity(entity: Entity): void {
+  removeEntity(entity: Entity): void {
     const { _group: group } = this;
     entity && group.deleteEntity(entity);
   }
 
   /**
-   * get entity index in group
-   * @param entity
-   * @return number, -1 if not in group
+   * clear all entities in the group
    */
-  getIndexOf(entity: Entity): number {
-    const { _group: group } = this;
-    return group.getIndexOf(entity);
+  clearEntity(): void {
+    this._group.reset();
   }
 
   /** @internal */
