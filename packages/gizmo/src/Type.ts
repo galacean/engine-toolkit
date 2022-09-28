@@ -9,23 +9,26 @@ import { Group } from "./Group";
  * Gizmo Component
  */
 export abstract class GizmoComponent extends Component {
+  /** gizmo state */
   type: GizmoState;
+  /** gizmo entity, visible part */
   gizmoEntity: Entity;
+  /** gizmo entity, invisible part */
   gizmoHelperEntity: Entity;
-  // Get group when init gizmo.
-  init?(camera: Camera, group: Group): void;
-  // Called when pointer enters gizmo.
-  onHoverStart?(axisName: string): void;
-  // Called when pointer leaves gizmo.
-  onHoverEnd?(): void;
-  // Called when gizmo starts to move.
-  onMoveStart?(ray: Ray, axisName: string): void;
-  // Called when gizmo is moving.
-  onMove?(ray: Ray): void;
-  // Called when gizmo movement ends.
-  onMoveEnd?(): void;
-  // Called when gizmo's transform is dirty.
-  onGizmoRedraw?(): void;
+  /** Get group when init gizmo. */
+  abstract init(camera: Camera, group: Group): void;
+  /** Called when pointer enters gizmo. */
+  abstract onHoverStart(axisName: string): void;
+  /** Called when pointer leaves gizmo. */
+  abstract onHoverEnd(): void;
+  /** Called when gizmo starts to move.*/
+  abstract onMoveStart(ray: Ray, axisName: string): void;
+  /** Called when gizmo is moving.*/
+  abstract onMove(ray: Ray): void;
+  /** Called when gizmo movement ends.*/
+  abstract onMoveEnd(): void;
+  /** Called when gizmo's transform is dirty.*/
+  abstract onGizmoRedraw(): void;
 }
 
 export const axisVector: { [key: string]: Vector3 } = {
@@ -46,17 +49,6 @@ export const axisPlane: { [key: string]: Plane } = {
   yz: new Plane(new Vector3(1, 0, 0), 0),
   xz: new Plane(new Vector3(0, 1, 0), 0)
 };
-
-export const axisIndices: { [key: string]: Array<string> } = {
-  x: ["x"],
-  y: ["y"],
-  z: ["z"],
-  xy: ["x", "y"],
-  xz: ["x", "z"],
-  yz: ["y", "z"],
-  xyz: ["x", "y", "z"]
-};
-
 export interface AxisProps {
   name: string;
   axisMesh: Array<Mesh>;
