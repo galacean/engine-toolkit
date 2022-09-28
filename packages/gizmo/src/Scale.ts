@@ -1,7 +1,7 @@
 import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 
 import { Axis } from "./Axis";
-import { utils } from "./Utils";
+import { Utils } from "./Utils";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector } from "./Type";
 import { GizmoState } from "./enums/GizmoState";
@@ -128,7 +128,7 @@ export class ScaleControl extends GizmoComponent {
     this._group.getWorldMatrix(_tempMat);
     const { elements: ele } = _tempMat;
     _tempVec0.set(ele[12], ele[13], ele[14]);
-    const s = Vector3.distance(cameraPosition, _tempVec0) * utils.scaleFactor;
+    const s = Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
     const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
     const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
     const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
@@ -139,33 +139,33 @@ export class ScaleControl extends GizmoComponent {
     this._scaleControlMap = {
       x: {
         name: "x",
-        axisMesh: [utils.lineMeshShort, utils.axisEndCubeMesh, utils.axisEndCubeMesh],
-        axisMaterial: utils.greenMaterial,
-        axisHelperMesh: [utils.axisHelperLineMesh],
+        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh, Utils.axisEndCubeMesh],
+        axisMaterial: Utils.greenMaterial,
+        axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90), new Vector3(0, 0, 90)],
         axisTranslation: [new Vector3(0, 0, 0), new Vector3(1.5, 0, 0), new Vector3(-1.5, 0, 0)]
       },
       y: {
         name: "y",
-        axisMesh: [utils.lineMeshShort, utils.axisEndCubeMesh, utils.axisEndCubeMesh],
-        axisMaterial: utils.blueMaterial,
-        axisHelperMesh: [utils.axisHelperLineMesh],
+        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh, Utils.axisEndCubeMesh],
+        axisMaterial: Utils.blueMaterial,
+        axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0), new Vector3(180, 0, 0)],
         axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 1.5, 0), new Vector3(0, -1.5, 0)]
       },
       z: {
         name: "z",
-        axisMesh: [utils.lineMeshShort, utils.axisEndCubeMesh, utils.axisEndCubeMesh],
-        axisMaterial: utils.redMaterial,
-        axisHelperMesh: [utils.axisHelperLineMesh],
+        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh, Utils.axisEndCubeMesh],
+        axisMaterial: Utils.redMaterial,
+        axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90), new Vector3(0, -90, 90)],
         axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
       },
       xyz: {
         name: "xyz",
-        axisMesh: [utils.axisCubeMesh],
-        axisMaterial: utils.greyMaterial,
-        axisHelperMesh: [utils.axisCubeMesh],
+        axisMesh: [Utils.axisCubeMesh],
+        axisMaterial: Utils.greyMaterial,
+        axisHelperMesh: [Utils.axisCubeMesh],
         axisRotation: [new Vector3(0, 0, 0)],
         axisTranslation: [new Vector3(0, 0, 0)],
         priority: 102

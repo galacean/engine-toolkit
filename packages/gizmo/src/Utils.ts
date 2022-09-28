@@ -2,90 +2,90 @@ import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3, UnlitMaterial, Color, 
 import { GizmoMaterial } from "./GizmoMaterial";
 import { GizmoMesh } from "./GizmoMesh";
 
-class Utils {
-  rotateCircleRadius = 1.6;
-  scaleFactor = 0.05773502691896257;
+export class Utils {
+  static rotateCircleRadius = 1.6;
+  static scaleFactor = 0.05773502691896257;
 
-  redMaterial: UnlitMaterial;
-  lightRedMaterial: UnlitMaterial;
-  redArcMaterial: GizmoMaterial;
-  greenMaterial: UnlitMaterial;
-  lightGreenMaterial: UnlitMaterial;
-  greenArcMaterial: GizmoMaterial;
-  blueMaterial: UnlitMaterial;
-  lightBlueMaterial: UnlitMaterial;
-  blueArcMaterial: GizmoMaterial;
-  yellowMaterial: UnlitMaterial;
+  static redMaterial: UnlitMaterial;
+  static lightRedMaterial: UnlitMaterial;
+  static redArcMaterial: GizmoMaterial;
+  static greenMaterial: UnlitMaterial;
+  static lightGreenMaterial: UnlitMaterial;
+  static greenArcMaterial: GizmoMaterial;
+  static blueMaterial: UnlitMaterial;
+  static lightBlueMaterial: UnlitMaterial;
+  static blueArcMaterial: GizmoMaterial;
+  static yellowMaterial: UnlitMaterial;
 
-  greyMaterial: UnlitMaterial;
+  static greyMaterial: UnlitMaterial;
 
-  rotatePlaneMaterial: UnlitMaterial;
+  static rotatePlaneMaterial: UnlitMaterial;
 
-  invisibleMaterial: UnlitMaterial;
+  static invisibleMaterial: UnlitMaterial;
 
-  lineMesh: ModelMesh;
-  lineMeshShort: ModelMesh;
-  arcLineMesh: ModelMesh;
+  static lineMesh: ModelMesh;
+  static lineMeshShort: ModelMesh;
+  static arcLineMesh: ModelMesh;
 
-  axisHelpertorusMesh: Mesh;
-  axisHelperCubeMesh: Mesh;
-  torusColliderMesh: Mesh;
+  static axisHelpertorusMesh: Mesh;
+  static axisHelperCubeMesh: Mesh;
+  static torusColliderMesh: Mesh;
 
-  axisHelperLineMesh: Mesh;
-  axisHelperPlaneMesh: Mesh;
-  axisArrowMesh: Mesh;
-  axisHelperArrowMesh: Mesh;
-  axisPlaneMesh: Mesh;
-  axisCubeMesh: Mesh;
-  axisSphereMesh: Mesh;
-  axisEndCubeMesh: Mesh;
+  static axisHelperLineMesh: Mesh;
+  static axisHelperPlaneMesh: Mesh;
+  static axisArrowMesh: Mesh;
+  static axisHelperArrowMesh: Mesh;
+  static axisPlaneMesh: Mesh;
+  static axisCubeMesh: Mesh;
+  static axisSphereMesh: Mesh;
+  static axisEndCubeMesh: Mesh;
 
   init(engine: Engine) {
-    this.redMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 1.0);
-    this.lightRedMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 0.9);
+    Utils.redMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 1.0);
+    Utils.lightRedMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 0.9);
 
     const redArcMaterial = new GizmoMaterial(engine);
     redArcMaterial.baseColor = new Color(1, 0.25, 0.25, 1);
-    this.redArcMaterial = redArcMaterial;
+    Utils.redArcMaterial = redArcMaterial;
 
-    this.greenMaterial = this._createUnlitMaterial(engine, 0.5, 0.8, 0.2, 1.0);
-    this.lightGreenMaterial = this._createUnlitMaterial(engine, 0.5, 0.8, 0.2, 0.9);
+    Utils.greenMaterial = this._createUnlitMaterial(engine, 0.5, 0.8, 0.2, 1.0);
+    Utils.lightGreenMaterial = this._createUnlitMaterial(engine, 0.5, 0.8, 0.2, 0.9);
 
     const greenArcMaterial = new GizmoMaterial(engine);
     greenArcMaterial.baseColor = new Color(0.5, 0.8, 0.2, 1);
-    this.greenArcMaterial = greenArcMaterial;
+    Utils.greenArcMaterial = greenArcMaterial;
 
-    this.blueMaterial = this._createUnlitMaterial(engine, 0.3, 0.5, 1.0, 1.0);
-    this.lightBlueMaterial = this._createUnlitMaterial(engine, 0.3, 0.5, 1.0, 0.9);
+    Utils.blueMaterial = this._createUnlitMaterial(engine, 0.3, 0.5, 1.0, 1.0);
+    Utils.lightBlueMaterial = this._createUnlitMaterial(engine, 0.3, 0.5, 1.0, 0.9);
 
     const blueArcMaterial = new GizmoMaterial(engine);
     blueArcMaterial.baseColor = new Color(0.3, 0.5, 1.0, 1);
-    this.blueArcMaterial = blueArcMaterial;
+    Utils.blueArcMaterial = blueArcMaterial;
 
-    this.yellowMaterial = this._createUnlitMaterial(engine, 1.0, 0.95, 0.0, 1.0);
+    Utils.yellowMaterial = this._createUnlitMaterial(engine, 1.0, 0.95, 0.0, 1.0);
 
-    this.greyMaterial = this._createUnlitMaterial(engine, 0.75, 0.75, 0.75, 1.0);
-    this.rotatePlaneMaterial = this._createUnlitMaterial(engine, 1.0, 0.95, 0.0, 0.2);
+    Utils.greyMaterial = this._createUnlitMaterial(engine, 0.75, 0.75, 0.75, 1.0);
+    Utils.rotatePlaneMaterial = this._createUnlitMaterial(engine, 1.0, 0.95, 0.0, 0.2);
 
-    this.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
-    this.invisibleMaterial = this._createUnlitMaterial(engine, 0, 0, 0, 0);
+    Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
+    Utils.invisibleMaterial = this._createUnlitMaterial(engine, 0, 0, 0, 0);
 
-    this.lineMesh = GizmoMesh.createLine(engine, [new Vector3(0, 0, 0), new Vector3(0, 1.5, 0)]);
+    Utils.lineMesh = GizmoMesh.createLine(engine, [new Vector3(0, 0, 0), new Vector3(0, 1.5, 0)]);
 
-    this.lineMeshShort = GizmoMesh.createLine(engine, [new Vector3(0, 0.2, 0), new Vector3(0, 1.5, 0)]);
+    Utils.lineMeshShort = GizmoMesh.createLine(engine, [new Vector3(0, 0.2, 0), new Vector3(0, 1.5, 0)]);
 
-    this.arcLineMesh = GizmoMesh.createArc(engine, Math.PI, 1.6, 96);
+    Utils.arcLineMesh = GizmoMesh.createArc(engine, Math.PI, 1.6, 96);
 
-    this.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.06, 0.24);
-    this.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
-    this.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.3, 0.3, 0.3);
-    this.axisSphereMesh = PrimitiveMesh.createSphere(engine, 0.2);
-    this.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
+    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.06, 0.24);
+    Utils.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
+    Utils.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.3, 0.3, 0.3);
+    Utils.axisSphereMesh = PrimitiveMesh.createSphere(engine, 0.2);
+    Utils.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
 
-    this.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, 3.35);
-    this.axisHelperCubeMesh = PrimitiveMesh.createCuboid(engine, 0.4, 0.4, 0.4);
-    this.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
-    this.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 180);
+    Utils.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, 3.35);
+    Utils.axisHelperCubeMesh = PrimitiveMesh.createCuboid(engine, 0.4, 0.4, 0.4);
+    Utils.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
+    Utils.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 180);
   }
 
   private _createUnlitMaterial(
@@ -102,5 +102,3 @@ class Utils {
     return material;
   }
 }
-
-export const utils = new Utils();

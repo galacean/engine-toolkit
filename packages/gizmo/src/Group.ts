@@ -44,7 +44,7 @@ export class Group {
 
   /**
    * get anchor type
-   * @return anchor type, pivor or center
+   * @return anchor type, pivot or center
    */
   get anchorType(): AnchorType {
     return this._anchorType;
@@ -75,7 +75,7 @@ export class Group {
    * add entity to the group
    * @param addEntity - entity to add
    */
-  addEntity(addEntity: Entity): void {
+  addEntity(addEntity: Entity): boolean {
     const { _entities: entities } = this;
     let canAdd: boolean = true;
     for (let j = entities.length - 1; j >= 0; j--) {
@@ -93,6 +93,8 @@ export class Group {
     if (canAdd) {
       this._applyAdd(addEntity);
     }
+
+    return canAdd;
   }
 
   /**
@@ -286,7 +288,6 @@ export class Group {
           // align to the first entity
           const worldE = this._entities[0].transform.worldMatrix.elements;
           (e[12] = worldE[12]), (e[13] = worldE[13]), (e[14] = worldE[14]);
-        default:
           break;
       }
       this._dirtyFlag &= ~GroupDirtyFlag.AnchorDirty;

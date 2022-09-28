@@ -1,7 +1,7 @@
 import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
 
 import { Axis } from "./Axis";
-import { utils } from "./Utils";
+import { Utils } from "./Utils";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane } from "./Type";
 import { GizmoState } from "./enums/GizmoState";
@@ -131,7 +131,7 @@ export class TranslateControl extends GizmoComponent {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);
     _tempVec0.set(_tempMat.elements[12], _tempMat.elements[13], _tempMat.elements[14]);
-    const s = (this._scale = Vector3.distance(cameraPosition, _tempVec0) * utils.scaleFactor);
+    const s = (this._scale = Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor);
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
       _tempVec0.set(s, s, s)
     );
@@ -141,49 +141,49 @@ export class TranslateControl extends GizmoComponent {
     this._translateControlMap = {
       x: {
         name: "x",
-        axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
-        axisMaterial: utils.greenMaterial,
-        axisHelperMesh: [utils.axisHelperLineMesh],
+        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh, Utils.axisArrowMesh],
+        axisMaterial: Utils.greenMaterial,
+        axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90), new Vector3(0, 0, 90)],
         axisTranslation: [new Vector3(0, 0, 0), new Vector3(1.5, 0, 0), new Vector3(-1.5, 0, 0)]
       },
       y: {
         name: "y",
-        axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
-        axisMaterial: utils.blueMaterial,
-        axisHelperMesh: [utils.axisHelperLineMesh],
+        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh, Utils.axisArrowMesh],
+        axisMaterial: Utils.blueMaterial,
+        axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0), new Vector3(180, 0, 0)],
         axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 1.5, 0), new Vector3(0, -1.5, 0)]
       },
       z: {
         name: "z",
-        axisMesh: [utils.lineMesh, utils.axisArrowMesh, utils.axisArrowMesh],
-        axisMaterial: utils.redMaterial,
-        axisHelperMesh: [utils.axisHelperLineMesh],
+        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh, Utils.axisArrowMesh],
+        axisMaterial: Utils.redMaterial,
+        axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90), new Vector3(0, -90, 90)],
         axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
       },
       xy: {
         name: "xy",
-        axisMesh: [utils.axisPlaneMesh],
-        axisMaterial: utils.lightRedMaterial,
-        axisHelperMesh: [utils.axisHelperPlaneMesh],
+        axisMesh: [Utils.axisPlaneMesh],
+        axisMaterial: Utils.lightRedMaterial,
+        axisHelperMesh: [Utils.axisHelperPlaneMesh],
         axisRotation: [new Vector3(0, 90, 90)],
         axisTranslation: [new Vector3(0.5, 0.5, 0)]
       },
       yz: {
         name: "yz",
-        axisMesh: [utils.axisPlaneMesh],
-        axisMaterial: utils.lightGreenMaterial,
-        axisHelperMesh: [utils.axisHelperPlaneMesh],
+        axisMesh: [Utils.axisPlaneMesh],
+        axisMaterial: Utils.lightGreenMaterial,
+        axisHelperMesh: [Utils.axisHelperPlaneMesh],
         axisRotation: [new Vector3(90, 90, 0)],
         axisTranslation: [new Vector3(0, 0.5, 0.5)]
       },
       xz: {
         name: "xz",
-        axisMesh: [utils.axisPlaneMesh],
-        axisMaterial: utils.lightBlueMaterial,
-        axisHelperMesh: [utils.axisHelperPlaneMesh],
+        axisMesh: [Utils.axisPlaneMesh],
+        axisMaterial: Utils.lightBlueMaterial,
+        axisHelperMesh: [Utils.axisHelperPlaneMesh],
         axisRotation: [new Vector3(0, 0, 0)],
         axisTranslation: [new Vector3(0.5, 0, 0.5)]
       }
