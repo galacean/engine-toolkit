@@ -1,6 +1,6 @@
 {
   "name": "oasis-engine-toolkit",
-  "version": "0.9.0-alpha.1",
+  "version": "0.9.0-alpha.2",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
@@ -18,13 +18,15 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/controls": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/framebuffer-picker": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/gizmo": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/lines": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/outline": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/planar-shadow-material": "0.9.0-alpha.1",
-    "@oasis-engine-toolkit/skeleton-viewer": "0.9.0-alpha.1"
+    "@oasis-engine-toolkit/auxiliary-lines": "workspace:*",
+    "@oasis-engine-toolkit/controls": "workspace:*",
+    "@oasis-engine-toolkit/framebuffer-picker": "workspace:*",
+    "@oasis-engine-toolkit/gizmo": "workspace:*",
+    "@oasis-engine-toolkit/lines": "workspace:*",
+    "@oasis-engine-toolkit/outline": "workspace:*",
+    "@oasis-engine-toolkit/planar-shadow-material": "workspace:*",
+    "@oasis-engine-toolkit/skeleton-viewer": "workspace:*",
+    "@oasis-engine-toolkit/grid-material": "workspace:*",
+    "@oasis-engine-toolkit/navigation-gizmo": "workspace:*"
   }
 }

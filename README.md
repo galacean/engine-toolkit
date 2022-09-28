@@ -1,22 +1,24 @@
 # Engine Toolkit
 
-<a href="https://www.npmjs.com/package/oasis-engine-toolkit"><img src="https://img.shields.io/npm/v/oasis-engine-toolkit"/></a>
-![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine-toolkit)
-![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit)
-[![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine-toolkit)
+<a href="https://www.npmjs.com/package/oasis-engine-toolkit"><img src="https://img.shields.io/npm/v/oasis-engine-toolkit"/></a> ![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine-toolkit) ![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit) [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine-toolkit)
 
 Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script` and `Material`, welcome to enjoy!
 
 ## Features
 
-- 🛸  &nbsp;**Controls** - Some camera controllers
-- 🫧  &nbsp;**FrameBufferPicker** - Pixel-based object picking
-- 🖇  &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
-- 🗳  &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
-- 🧍🏼  &nbsp;**Skeleton Helper** - Skeleton visualization
-- ➡️  &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
-- ⭕️  &nbsp;**Outline** - Show outline of mesh renderers
-- 📐  &nbsp;**Lines** - 2D Solid Line & Dash Line
+- 🛸 &nbsp;**Controls** - Some camera controllers
+- 🫧 &nbsp;**FrameBufferPicker** - Pixel-based object picking
+- 🖇 &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
+- 🧍🏼 &nbsp;**Skeleton Helper** - Skeleton visualization
+- ➡️ &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
+- ⭕️ &nbsp;**Outline** - Show outline of mesh renderers
+- 📐 &nbsp;**Lines** - 2D Solid Line & Dash Line
+- 🧭 &nbsp;**Navigation Gizmo** - Three-view & visualized operation for camera control
+
+### Materials
+
+- 🗳 &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
+- ⚔️ &nbsp;**Grid Material** - Infinity grid material
 
 ## npm
 
@@ -46,10 +48,15 @@ Make sure to read the [Contributing Guide](.github/HOW_TO_CONTRIBUTE.md) / [贡�
 
 ## Build
 
-If you don't already have Node.js and NPM, go install them. Then, in the folder where you have cloned the repository, install the build dependencies using npm:
+prerequisites:
+
+- [Node.js v15.0.0+](https://nodejs.org/en/) and NPM (Install Node.js By official website)
+- [PNPM](https://pnpm.io/) (Install Pnpm globally by `npm install -g pnpm`)
+
+First, you need to install the dependencies:
 
 ```sh
-npm run bootstrap
+pnpm install
 ```
 
 Then, to build the source, using npm:
@@ -65,6 +72,6 @@ npm run b:all
 - [Documentation](https://oasisengine.cn/0.6/docs/install-cn)
 - [API References](https://oasisengine.cn/0.6/api/core/index)
 
+## License
 
-## License 
 The engine is released under the [MIT](https://opensource.org/licenses/MIT) license. See LICENSE file.
