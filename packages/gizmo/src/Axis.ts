@@ -19,7 +19,10 @@ export class Axis extends Component {
     this._color.copyFrom(value.axisMaterial.baseColor);
 
     this._highLightColor.copyFrom(this._color);
-    this._highLightColor.a = 0.7;
+    this._highLightColor.r = this._highLightColor.r + 0.3;
+    this._highLightColor.g = this._highLightColor.g + 0.3;
+    this._highLightColor.b = this._highLightColor.b + 0.3;
+    this._highLightColor.a = this._highLightColor.a + 0.1;
 
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {
