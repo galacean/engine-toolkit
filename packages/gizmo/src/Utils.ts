@@ -26,6 +26,7 @@ export class Utils {
   static lineMesh: ModelMesh;
   static lineMeshShort: ModelMesh;
   static arcLineMesh: ModelMesh;
+  static axisTorusMesh: ModelMesh;
 
   static axisHelpertorusMesh: Mesh;
   static axisHelperCubeMesh: Mesh;
@@ -70,22 +71,22 @@ export class Utils {
     Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterial = this._createUnlitMaterial(engine, 0, 0, 0, 0);
 
-    Utils.lineMesh = GizmoMesh.createLine(engine, [new Vector3(0, 0, 0), new Vector3(0, 1.5, 0)]);
-
-    Utils.lineMeshShort = GizmoMesh.createLine(engine, [new Vector3(0, 0.2, 0), new Vector3(0, 1.5, 0)]);
+    Utils.lineMesh = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.5);
+    Utils.lineMeshShort = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.3);
 
     Utils.arcLineMesh = GizmoMesh.createArc(engine, Math.PI, 1.6, 96);
 
-    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.06, 0.24);
+    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.08, 0.24);
     Utils.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
     Utils.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.3, 0.3, 0.3);
     Utils.axisSphereMesh = PrimitiveMesh.createSphere(engine, 0.2);
     Utils.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
+    Utils.axisTorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.02, 6, 72, 360);
 
     Utils.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, 3.35);
     Utils.axisHelperCubeMesh = PrimitiveMesh.createCuboid(engine, 0.4, 0.4, 0.4);
     Utils.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
-    Utils.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 180);
+    Utils.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 360);
   }
 
   private _createUnlitMaterial(

@@ -131,7 +131,7 @@ export class TranslateControl extends GizmoComponent {
         axisMaterial: Utils.greenMaterial,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90), new Vector3(0, 0, 90)],
-        axisTranslation: [new Vector3(0, 0, 0), new Vector3(1.5, 0, 0), new Vector3(-1.5, 0, 0)]
+        axisTranslation: [new Vector3(0.75, 0, 0), new Vector3(1.5, 0, 0), new Vector3(-1.5, 0, 0)]
       },
       {
         name: "y",
@@ -139,7 +139,7 @@ export class TranslateControl extends GizmoComponent {
         axisMaterial: Utils.blueMaterial,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0), new Vector3(180, 0, 0)],
-        axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 1.5, 0), new Vector3(0, -1.5, 0)]
+        axisTranslation: [new Vector3(0, 0.75, 0), new Vector3(0, 1.5, 0), new Vector3(0, -1.5, 0)]
       },
       {
         name: "z",
@@ -147,7 +147,7 @@ export class TranslateControl extends GizmoComponent {
         axisMaterial: Utils.redMaterial,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90), new Vector3(0, -90, 90)],
-        axisTranslation: [new Vector3(0, 0, 0), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
+        axisTranslation: [new Vector3(0, 0, 0.75), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
       },
       {
         name: "xy",

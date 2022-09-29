@@ -16,12 +16,6 @@ export class RotateControl extends GizmoComponent {
   private _rotateAxisComponent: Array<Axis> = [];
   private _rotateControlMap: Array<AxisProps> = [];
 
-  private _xArcLineMesh = Utils.arcLineMesh;
-  private _yArcLineMesh = Utils.arcLineMesh;
-  private _zArcLineMesh = Utils.arcLineMesh;
-
-  private _arcLineMesh = [this._xArcLineMesh, this._yArcLineMesh, this._zArcLineMesh];
-
   private _gizmoRotateHelperEntity: Entity;
 
   private _tempMatrix: Matrix = new Matrix();
@@ -65,7 +59,7 @@ export class RotateControl extends GizmoComponent {
     this._rotateControlMap = [
       {
         name: "x",
-        axisMesh: [this._arcLineMesh[axisType.x]],
+        axisMesh: [Utils.axisTorusMesh],
         axisMaterial: Utils.redArcMaterial,
         axisHelperMesh: [Utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(0, 90, 90)],
@@ -73,7 +67,7 @@ export class RotateControl extends GizmoComponent {
       },
       {
         name: "y",
-        axisMesh: [this._arcLineMesh[axisType.y]],
+        axisMesh: [Utils.axisTorusMesh],
         axisMaterial: Utils.greenArcMaterial,
         axisHelperMesh: [Utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(90, 0, 0)],
@@ -81,7 +75,7 @@ export class RotateControl extends GizmoComponent {
       },
       {
         name: "z",
-        axisMesh: [this._arcLineMesh[axisType.z]],
+        axisMesh: [Utils.axisTorusMesh],
         axisMaterial: Utils.blueArcMaterial,
         axisHelperMesh: [Utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(0, 0, -90)],
