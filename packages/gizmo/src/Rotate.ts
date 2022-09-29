@@ -63,7 +63,8 @@ export class RotateControl extends GizmoComponent {
         axisMaterial: Utils.redArcMaterial,
         axisHelperMesh: [Utils.axisHelpertorusMesh],
         axisRotation: [new Vector3(0, 90, 90)],
-        axisTranslation: [new Vector3(0, 0, 0)]
+        axisTranslation: [new Vector3(0, 0, 0)],
+        priority: 102
       },
       {
         name: "y",
