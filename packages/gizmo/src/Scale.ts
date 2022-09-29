@@ -92,10 +92,17 @@ export class ScaleControl extends GizmoComponent {
       case axisType.x:
       case axisType.y:
       case axisType.z:
-      case axisType.xyz:
         scaleVec.x = scaleVec.x * factorVec.x + 1;
         scaleVec.y = scaleVec.y * factorVec.y + 1;
         scaleVec.z = scaleVec.z * factorVec.z + 1;
+        break;
+      case axisType.xyz:
+        const start = this._startPoint.length();
+        const end = this._currPoint.length();
+
+        scaleVec.x = end / start;
+        scaleVec.y = end / start;
+        scaleVec.z = end / start;
         break;
     }
 
