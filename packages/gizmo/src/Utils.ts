@@ -1,165 +1,105 @@
-import { Material, Mesh, Engine, Vector4, PrimitiveMesh } from "oasis-engine";
-import { ArcLineMesh } from "./ArcLineMesh";
-import { LinesMesh } from "./LineMesh";
-import { createMeshMaterial } from "./MeshMaterial";
+import { Mesh, Engine, PrimitiveMesh, ModelMesh, UnlitMaterial, Color, CullMode } from "oasis-engine";
+import { GizmoMaterial } from "./GizmoMaterial";
+import { GizmoMesh } from "./GizmoMesh";
 
-class Utils {
-  public redMaterial: Material;
-  public lightRedMaterial: Material;
-  public greenMaterial: Material;
-  public lightGreenMaterial: Material;
-  public blueMaterial: Material;
-  public lightBlueMaterial: Material;
-  public yellowMaterial: Material;
+export class Utils {
+  static rotateCircleRadius = 1.6;
+  static scaleFactor = 0.05773502691896257;
 
-  public greyMaterial: Material;
+  static redMaterial: UnlitMaterial;
+  static lightRedMaterial: UnlitMaterial;
+  static redArcMaterial: GizmoMaterial;
+  static greenMaterial: UnlitMaterial;
+  static lightGreenMaterial: UnlitMaterial;
+  static greenArcMaterial: GizmoMaterial;
+  static blueMaterial: UnlitMaterial;
+  static lightBlueMaterial: UnlitMaterial;
+  static blueArcMaterial: GizmoMaterial;
+  static yellowMaterial: UnlitMaterial;
 
-  public rotatePlaneMaterial: Material;
+  static greyMaterial: UnlitMaterial;
 
-  public invisibleMaterial: Material;
+  static rotatePlaneMaterial: UnlitMaterial;
 
-  public lineMesh: LinesMesh;
-  public lineMeshShort: LinesMesh;
-  public arcLineMesh: ArcLineMesh;
+  static invisibleMaterial: UnlitMaterial;
 
-  public axisHelpertorusMesh: Mesh;
+  static lineMesh: ModelMesh;
+  static lineMeshShort: ModelMesh;
+  static arcLineMesh: ModelMesh;
+  static axisTorusMesh: ModelMesh;
 
-  public torusColliderMesh: Mesh;
+  static axisHelpertorusMesh: Mesh;
+  static axisHelperCubeMesh: Mesh;
+  static torusColliderMesh: Mesh;
 
-  public rotateCircleRadius = 1.6;
+  static axisHelperLineMesh: Mesh;
+  static axisHelperPlaneMesh: Mesh;
+  static axisArrowMesh: Mesh;
+  static axisHelperArrowMesh: Mesh;
+  static axisPlaneMesh: Mesh;
+  static axisCubeMesh: Mesh;
+  static axisSphereMesh: Mesh;
+  static axisEndCubeMesh: Mesh;
 
-  public axisHelperLineMesh: Mesh;
-  public axisHelperPlaneMesh: Mesh;
-  public axisArrowMesh: Mesh;
-  public axisHelperArrowMesh: Mesh;
-  public axisPlaneMesh: Mesh;
-  public axisCubeMesh: Mesh;
-  public axisSphereMesh: Mesh;
-  public axisEndCubeMesh: Mesh;
+  static init(engine: Engine) {
+    Utils.redMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 1.0);
+    Utils.lightRedMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 0.9);
 
-  init(engine: Engine) {
-    this.redMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.25, 0.25, 1.0),
-        depthTest: false,
-        doubleSide: true,
-        blend: true
-      },
-      engine
-    );
-    this.lightRedMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.25, 0.25, 0.9),
-        depthTest: false,
-        doubleSide: true,
-        blend: true
-      },
-      engine
-    );
-    this.greenMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.5, 0.8, 0.2, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    const redArcMaterial = new GizmoMaterial(engine);
+    redArcMaterial.baseColor = new Color(1, 0.25, 0.25, 1);
+    Utils.redArcMaterial = redArcMaterial;
 
-    this.lightGreenMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.5, 0.8, 0.2, 0.9),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
-    this.blueMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.3, 0.5, 1.0, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    Utils.greenMaterial = this._createUnlitMaterial(engine, 0.5, 0.8, 0.2, 1.0);
+    Utils.lightGreenMaterial = this._createUnlitMaterial(engine, 0.5, 0.8, 0.2, 0.9);
 
-    this.yellowMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.95, 0.0, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    const greenArcMaterial = new GizmoMaterial(engine);
+    greenArcMaterial.baseColor = new Color(0.5, 0.8, 0.2, 1);
+    Utils.greenArcMaterial = greenArcMaterial;
 
-    this.lightBlueMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.3, 0.5, 1.0, 0.9),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    Utils.blueMaterial = this._createUnlitMaterial(engine, 0.3, 0.5, 1.0, 1.0);
+    Utils.lightBlueMaterial = this._createUnlitMaterial(engine, 0.3, 0.5, 1.0, 0.9);
 
-    this.greyMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.75, 0.75, 0.75, 1.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    const blueArcMaterial = new GizmoMaterial(engine);
+    blueArcMaterial.baseColor = new Color(0.3, 0.5, 1.0, 1);
+    Utils.blueArcMaterial = blueArcMaterial;
 
-    this.rotatePlaneMaterial = createMeshMaterial(
-      {
-        color: new Vector4(1.0, 0.95, 0.0, 0.2),
-        depthTest: false,
-        blend: true,
-        doubleSide: true
-      },
-      engine
-    );
+    Utils.yellowMaterial = this._createUnlitMaterial(engine, 1.0, 0.95, 0.0, 1.0);
 
-    this.invisibleMaterial = createMeshMaterial(
-      {
-        color: new Vector4(0.0, 0.0, 0.0, 0.0),
-        depthTest: false,
-        blend: true
-      },
-      engine
-    );
+    Utils.greyMaterial = this._createUnlitMaterial(engine, 0.75, 0.75, 0.75, 1.0);
+    Utils.rotatePlaneMaterial = this._createUnlitMaterial(engine, 1.0, 0.95, 0.0, 0.2);
 
-    this.lineMesh = new LinesMesh(engine, {
-      points: [
-        [0, 0, 0],
-        [0, 1.5, 0]
-      ],
-      count: 2
-    });
+    Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
+    Utils.invisibleMaterial = this._createUnlitMaterial(engine, 0, 0, 0, 0);
 
-    this.lineMeshShort = new LinesMesh(engine, {
-      points: [
-        [0, 0.2, 0],
-        [0, 1.5, 0]
-      ],
-      count: 2
-    });
+    Utils.lineMesh = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.5);
+    Utils.lineMeshShort = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.3);
 
-    this.arcLineMesh = new ArcLineMesh(engine, {
-      radius: 1.6,
-      radialSegments: 48,
-      arc: 180
-    });
+    Utils.arcLineMesh = GizmoMesh.createArc(engine, Math.PI, 1.6, 96);
 
-    this.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.06, 0.24);
-    this.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
-    this.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
-    this.axisSphereMesh = PrimitiveMesh.createSphere(engine, 0.2);
-    this.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
+    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.08, 0.24);
+    Utils.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
+    Utils.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.3, 0.3, 0.3);
+    Utils.axisSphereMesh = PrimitiveMesh.createSphere(engine, 0.2);
+    Utils.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.2, 0.2, 0.2);
+    Utils.axisTorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.02, 6, 72, 360);
 
-    this.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, 3.35);
-    this.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
-    this.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 180);
+    Utils.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, 3.35);
+    Utils.axisHelperCubeMesh = PrimitiveMesh.createCuboid(engine, 0.4, 0.4, 0.4);
+    Utils.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
+    Utils.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 360);
+  }
+
+  private static _createUnlitMaterial(
+    engine: Engine,
+    r: number = 1.0,
+    g: number = 1.0,
+    b: number = 1.0,
+    a: number = 1.0
+  ): UnlitMaterial {
+    const material = new UnlitMaterial(engine);
+    material.isTransparent = true;
+    material.renderState.depthState.enabled = false;
+    material.baseColor.set(r, g, b, a);
+    return material;
   }
 }
-
-export const utils = new Utils();

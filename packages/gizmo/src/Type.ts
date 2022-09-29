@@ -1,52 +1,71 @@
-import { Component, Entity, Ray, Vector3, Mesh, Material, Camera } from "oasis-engine";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane } from "oasis-engine";
+import { UnlitMaterial } from "oasis-engine/types";
+import { GizmoState } from "./enums/GizmoState";
+import { GizmoMaterial } from "./GizmoMaterial";
+import { Group } from "./Group";
 
+/**
+ * @internal
+ * Gizmo Component
+ */
 export abstract class GizmoComponent extends Component {
+  /** gizmo state */
+  type: GizmoState;
+  /** gizmo entity, visible part */
   gizmoEntity: Entity;
+  /** gizmo entity, invisible part */
   gizmoHelperEntity: Entity;
-
-  // Get scene camera when init gizmo.  
-  initCamera?(camera: Camera): void;
-  // Called when an entity is selected.
-  onSelected?(entity: Entity): void;
-  // Called when pointer enters gizmo.
-  onHoverStart?(axisName: string): void;
-  // Called when pointer leaves gizmo.
-  onHoverEnd?(): void;
-  // Called when gizmo starts to move.
-  onMoveStart?(ray: Ray, axisName: string): void;
-  // Called when gizmo is moving.
-  onMove?(ray: Ray): void;
-  // Called when gizmo movement ends.
-  onMoveEnd?(): void;
-  // Called when gizmo orientation changes.
-  toggleOrientation?(isGlobal: boolean): void;
+  /** Get group when init gizmo. */
+  abstract init(camera: Camera, group: Group): void;
+  /** Called when pointer enters gizmo. */
+  abstract onHoverStart(axisName: string): void;
+  /** Called when pointer leaves gizmo. */
+  abstract onHoverEnd(): void;
+  /** Called when gizmo starts to move.*/
+  abstract onMoveStart(ray: Ray, axisName: string): void;
+  /** Called when gizmo is moving.*/
+  abstract onMove(ray: Ray): void;
+  /** Called when gizmo movement ends.*/
+  abstract onMoveEnd(): void;
+  /** Called when gizmo's transform is dirty.*/
+  abstract onUpdate(): void;
 }
 
-export const axisVector: { [key: string]: Vector3 } = {
-  x: new Vector3(1, 0, 0),
-  y: new Vector3(0, 1, 0),
-  z: new Vector3(0, 0, 1),
-  xy: new Vector3(1, 1, 0),
-  yz: new Vector3(0, 1, 1),
-  xz: new Vector3(1, 0, 1),
-  xyz: new Vector3(1, 1, 1)
-};
+export enum axisType {
+  "x" = 0,
+  "y" = 1,
+  "z" = 2,
+  "xy" = 3,
+  "yz" = 4,
+  "xz" = 5,
+  "xyz" = 6
+}
 
-export const axisIndices: { [key: string]: Array<string> } = {
-  x: ["x"],
-  y: ["y"],
-  z: ["z"],
-  xy: ["x", "y"],
-  xz: ["x", "z"],
-  yz: ["y", "z"],
-  xyz: ["x", "y", "z"]
-};
+export const axisVector = [
+  new Vector3(1, 0, 0),
+  new Vector3(0, 1, 0),
+  new Vector3(0, 0, 1),
+  new Vector3(1, 1, 0),
+  new Vector3(0, 1, 1),
+  new Vector3(1, 0, 1),
+  new Vector3(1, 1, 1)
+];
+
+export const axisPlane = [
+  new Plane(new Vector3(1, 0, 0), 0),
+  new Plane(new Vector3(0, 1, 0), 0),
+  new Plane(new Vector3(0, 0, 1), 0),
+  new Plane(new Vector3(0, 0, 1), 0),
+  new Plane(new Vector3(1, 0, 0), 0),
+  new Plane(new Vector3(0, 1, 0), 0)
+];
 
 export interface AxisProps {
   name: string;
   axisMesh: Array<Mesh>;
-  axisMaterial: Material;
+  axisMaterial: UnlitMaterial | GizmoMaterial;
   axisHelperMesh: Array<Mesh>;
-  axisRotation: Array<Vector3> | null;
-  axisTranslation: Array<Vector3> | null;
+  axisRotation: Array<Vector3>;
+  axisTranslation: Array<Vector3>;
+  priority?: number;
 }

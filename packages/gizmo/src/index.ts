@@ -1,2 +1,2 @@
-export { GizmoControls } from "./GizmoControls";
-export { GizmoState } from './enums/GizmoState'
+export { Gizmo } from "./Gizmo";
+export { GizmoState, AnchorType, CoordinateType } from "./enums/GizmoState";
