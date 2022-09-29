@@ -80,8 +80,10 @@ export class GizmoControls extends Script {
   set layer(layer: Layer) {
     if (this._gizmoLayer !== layer) {
       this._gizmoLayer = layer;
-      this.entity.layer = layer;
       this._framebufferPicker.colorRenderPass.mask = layer;
+      this._traverseEntity(this.entity, (entity) => {
+        entity.layer = layer;
+      });
     }
   }
 
@@ -159,6 +161,7 @@ export class GizmoControls extends Script {
       256,
       new Texture2D(this.engine, 256, 256)
     );
+
     this.layer = Layer.Layer29;
 
     // gizmo collider
@@ -303,6 +306,13 @@ export class GizmoControls extends Script {
       this._onGizmoHoverStart(hoverEntity.name);
     } else {
       this._onGizmoHoverEnd();
+    }
+  }
+
+  private _traverseEntity(entity: Entity, callback: (entity: Entity) => any) {
+    callback(entity);
+    for (const child of entity.children) {
+      this._traverseEntity(child, callback);
     }
   }
 }
