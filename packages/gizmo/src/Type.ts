@@ -65,7 +65,7 @@ export interface AxisProps {
   axisMesh: Array<Mesh>;
   axisMaterial: UnlitMaterial | GizmoMaterial;
   axisHelperMesh: Array<Mesh>;
-  axisRotation: Array<Vector3> | null;
-  axisTranslation: Array<Vector3> | null;
+  axisRotation: Array<Vector3>;
+  axisTranslation: Array<Vector3>;
   priority?: number;
 }

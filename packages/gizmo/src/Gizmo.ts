@@ -31,7 +31,7 @@ export class GizmoControls extends Script {
   private _gizmoLayer: Layer;
   private _gizmoMap: Array<GizmoComponent> = [];
   private _sceneCamera: Camera;
-  private _gizmoControl: GizmoComponent | null;
+  private _gizmoControl: GizmoComponent;
   private _group: Group = new Group();
   private _framebufferPicker: FramebufferPicker;
   private _lastDistance: number = -1;
@@ -145,8 +145,7 @@ export class GizmoControls extends Script {
       throw new Error("PhysicsManager is not initialized");
     }
 
-    const utils = new Utils();
-    utils.init(this.engine);
+    Utils.init(this.engine);
 
     // setup mesh
     this._createGizmoControl(GizmoState.translate, TranslateControl);
@@ -238,14 +237,19 @@ export class GizmoControls extends Script {
       if (pointerPosition) {
         if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
           this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
-            this._selectHandler(result);
+            if (result) {
+              this._selectHandler(result);
+            }
           });
         } else {
           this.camera.screenPointToRay(inputManager.pointerPosition, this._tempRay);
-          const result = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._gizmoLayer);
-          if (result) {
+          const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._gizmoLayer);
+          if (isHit) {
             this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
-              this._overHandler(result);
+              this._onGizmoHoverEnd();
+              if (result) {
+                this._overHandler(result);
+              }
             });
           }
         }
@@ -291,8 +295,8 @@ export class GizmoControls extends Script {
   }
 
   private _selectHandler(result: MeshRenderElement): void {
-    const selectedEntity = result?.component?.entity;
-    switch (selectedEntity?.layer) {
+    const selectedEntity = result.component.entity;
+    switch (selectedEntity.layer) {
       case this._gizmoLayer:
         this._triggerGizmoStart(selectedEntity.name);
         break;
@@ -300,12 +304,9 @@ export class GizmoControls extends Script {
   }
 
   private _overHandler(result: MeshRenderElement): void {
-    const hoverEntity = result?.component?.entity;
-    if (hoverEntity?.layer === this._gizmoLayer) {
-      this._onGizmoHoverEnd();
+    const hoverEntity = result.component.entity;
+    if (hoverEntity.layer === this._gizmoLayer) {
       this._onGizmoHoverStart(hoverEntity.name);
-    } else {
-      this._onGizmoHoverEnd();
     }
   }
 

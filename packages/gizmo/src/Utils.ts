@@ -1,4 +1,4 @@
-import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3, UnlitMaterial, Color, CullMode } from "oasis-engine";
+import { Mesh, Engine, PrimitiveMesh, ModelMesh, UnlitMaterial, Color, CullMode } from "oasis-engine";
 import { GizmoMaterial } from "./GizmoMaterial";
 import { GizmoMesh } from "./GizmoMesh";
 
@@ -41,7 +41,7 @@ export class Utils {
   static axisSphereMesh: Mesh;
   static axisEndCubeMesh: Mesh;
 
-  init(engine: Engine) {
+  static init(engine: Engine) {
     Utils.redMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 1.0);
     Utils.lightRedMaterial = this._createUnlitMaterial(engine, 1.0, 0.25, 0.25, 0.9);
 
@@ -89,7 +89,7 @@ export class Utils {
     Utils.axisHelpertorusMesh = PrimitiveMesh.createTorus(engine, 1.6, 0.16, 6, 18, 360);
   }
 
-  private _createUnlitMaterial(
+  private static _createUnlitMaterial(
     engine: Engine,
     r: number = 1.0,
     g: number = 1.0,
