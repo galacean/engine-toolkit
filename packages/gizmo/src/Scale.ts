@@ -43,13 +43,13 @@ export class ScaleControl extends GizmoComponent {
     this._selectedAxis = axisType[axisName];
     const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
-    currComponent?.highLight && currComponent.highLight();
+    currComponent.highLight && currComponent.highLight();
   }
 
   onHoverEnd(): void {
     const currEntity = this.gizmoEntity.findByName(axisType[this._selectedAxis]);
     const currComponent = currEntity.getComponent(Axis);
-    currComponent?.unLight && currComponent.unLight();
+    currComponent.unLight && currComponent.unLight();
   }
 
   onMoveStart(ray: Ray, axisName: string): void {
@@ -75,9 +75,9 @@ export class ScaleControl extends GizmoComponent {
       const currEntity = entityArray[i];
       const currComponent = currEntity.getComponent(Axis);
       if (axisType[currEntity.name] === this._selectedAxis) {
-        currComponent?.yellow && currComponent.yellow();
+        currComponent.yellow && currComponent.yellow();
       } else {
-        currComponent?.gray && currComponent.gray();
+        currComponent.gray && currComponent.gray();
       }
     }
   }
@@ -108,7 +108,7 @@ export class ScaleControl extends GizmoComponent {
     for (let i = 0; i < entityArray.length; i++) {
       const currEntity = entityArray[i];
       const currComponent = currEntity.getComponent(Axis);
-      currComponent?.recover && currComponent.recover();
+      currComponent.recover && currComponent.recover();
     }
   }
 

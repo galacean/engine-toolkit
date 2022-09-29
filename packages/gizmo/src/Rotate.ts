@@ -148,14 +148,14 @@ export class RotateControl extends GizmoComponent {
     // high light when mouse enter
     const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
-    currComponent?.highLight && currComponent.highLight();
+    currComponent.highLight && currComponent.highLight();
   }
 
   onHoverEnd(): void {
     // unlight when mouse leave
     const currEntity = this.gizmoEntity.findByName(axisType[this._selectedAxis]);
     const currComponent = currEntity.getComponent(Axis);
-    currComponent?.unLight && currComponent.unLight();
+    currComponent.unLight && currComponent.unLight();
     this._selectedAxis = null;
   }
 
@@ -234,9 +234,9 @@ export class RotateControl extends GizmoComponent {
       const currComponent = currEntity.getComponent(Axis);
       if (axisType[currEntity.name] === axis) {
         if (isSelected) {
-          currComponent?.yellow && currComponent.yellow();
+          currComponent.yellow && currComponent.yellow();
         } else {
-          currComponent?.recover && currComponent.recover();
+          currComponent.recover && currComponent.recover();
         }
       }
     }
