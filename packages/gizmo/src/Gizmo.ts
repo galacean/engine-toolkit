@@ -24,7 +24,7 @@ import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
-export class GizmoControls extends Script {
+export class Gizmo extends Script {
   private _initialized = false;
   private _isStarted = false;
   private _isHovered = false;
@@ -179,7 +179,7 @@ export class GizmoControls extends Script {
    * @param entity - the entity to add, could be empty
    * @return boolean, true if the entity is the previous group, false if not
    */
-  addEntity(entity: Entity | null): boolean {
+  addEntity(entity: Entity): boolean {
     const { _group: group } = this;
     return entity && group.addEntity(entity);
   }
