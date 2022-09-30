@@ -1,6 +1,6 @@
 import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane } from "oasis-engine";
 import { UnlitMaterial } from "oasis-engine/types";
-import { GizmoState } from "./enums/GizmoState";
+import { Type } from "./enums/GizmoState";
 import { GizmoMaterial } from "./GizmoMaterial";
 import { Group } from "./Group";
 
@@ -10,7 +10,7 @@ import { Group } from "./Group";
  */
 export abstract class GizmoComponent extends Component {
   /** gizmo state */
-  type: GizmoState;
+  type: Type;
   /** gizmo entity, visible part */
   gizmoEntity: Entity;
   /** gizmo entity, invisible part */
@@ -28,7 +28,7 @@ export abstract class GizmoComponent extends Component {
   /** Called when gizmo movement ends.*/
   abstract onMoveEnd(): void;
   /** Called when gizmo's transform is dirty.*/
-  abstract onUpdate(): void;
+  abstract onUpdate(isModified: boolean): void;
 }
 
 export enum axisType {
@@ -65,6 +65,7 @@ export interface AxisProps {
   axisMesh: Array<Mesh>;
   axisMaterial: UnlitMaterial | GizmoMaterial;
   axisHelperMesh: Array<Mesh>;
+  axisHelperMaterial: UnlitMaterial | GizmoMaterial;
   axisRotation: Array<Vector3>;
   axisTranslation: Array<Vector3>;
   priority?: number;

@@ -1,7 +1,7 @@
 /**
  * Gizmo State
  */
-export enum GizmoState {
+export enum Type {
   /**
    * null state
    */
@@ -17,7 +17,11 @@ export enum GizmoState {
   /**
    * scale state
    */
-  scale = 0x4
+  scale = 0x4,
+  /**
+   * all state
+   */
+  all = 0xf
 }
 
 /**

@@ -5,11 +5,11 @@ import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Ty
 import { Group } from "./Group";
 import { GizmoMesh } from "./GizmoMesh";
 import { GizmoMaterial } from "./GizmoMaterial";
-import { GizmoState } from "./enums/GizmoState";
+import { Type } from "./enums/GizmoState";
 
 /** @internal */
 export class RotateControl extends GizmoComponent {
-  type: GizmoState = GizmoState.rotate;
+  type: Type = Type.rotate;
   private _group: Group;
   private _camera: Camera;
 
@@ -22,6 +22,8 @@ export class RotateControl extends GizmoComponent {
   private _axisX: Entity;
   private _axisY: Entity;
   private _axisZ: Entity;
+
+  private _isModified: boolean = false;
 
   private _startLineHelperEntity: Entity;
   private _startLineMesh = GizmoMesh.createLine(this.engine, [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]);
@@ -62,15 +64,16 @@ export class RotateControl extends GizmoComponent {
         axisMesh: [Utils.axisTorusMesh],
         axisMaterial: Utils.redArcMaterial,
         axisHelperMesh: [Utils.axisHelpertorusMesh],
+        axisHelperMaterial: Utils.invisibleMaterialRotate,
         axisRotation: [new Vector3(0, 90, 90)],
-        axisTranslation: [new Vector3(0, 0, 0)],
-        priority: 102
+        axisTranslation: [new Vector3(0, 0, 0)]
       },
       {
         name: "y",
         axisMesh: [Utils.axisTorusMesh],
         axisMaterial: Utils.greenArcMaterial,
         axisHelperMesh: [Utils.axisHelpertorusMesh],
+        axisHelperMaterial: Utils.invisibleMaterialRotate,
         axisRotation: [new Vector3(90, 0, 0)],
         axisTranslation: [new Vector3(0, 0, 0)]
       },
@@ -79,6 +82,7 @@ export class RotateControl extends GizmoComponent {
         axisMesh: [Utils.axisTorusMesh],
         axisMaterial: Utils.blueArcMaterial,
         axisHelperMesh: [Utils.axisHelpertorusMesh],
+        axisHelperMaterial: Utils.invisibleMaterialRotate,
         axisRotation: [new Vector3(0, 0, -90)],
         axisTranslation: [new Vector3(0, 0, 0)]
       }
@@ -212,8 +216,10 @@ export class RotateControl extends GizmoComponent {
     this._rotateHelperPlaneEntity.isActive = false;
   }
 
-  onUpdate(): void {
+  onUpdate(isModified: boolean = false): void {
     this._group.getWorldMatrix(this._tempMatrix);
+
+    this._isModified = isModified;
     const s = this._getGizmoScale();
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = this._tempMatrix.scale(
       this._tempVec.set(s, s, s)
@@ -266,6 +272,8 @@ export class RotateControl extends GizmoComponent {
   private _getGizmoScale(): number {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldPosition(this._tempVec);
-    return Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor;
+    return this._isModified
+      ? Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor * 0.8
+      : Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor;
   }
 }
