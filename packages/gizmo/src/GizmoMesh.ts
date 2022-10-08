@@ -1,4 +1,4 @@
-import { Engine, MeshTopology, ModelMesh, Quaternion, Vector3 } from "oasis-engine";
+import { Engine, MeshTopology, ModelMesh, Quaternion, Vector2, Vector3 } from "oasis-engine";
 
 export class GizmoMesh {
   private static _tempQuat: Quaternion = new Quaternion();
@@ -53,32 +53,85 @@ export class GizmoMesh {
     GizmoMesh._initialize(mesh, vertices, indices, MeshTopology.Triangles);
   }
 
-  static createArc(engine: Engine, arc: number = 180, radius: number = 1.6, radialSegments: number = 48): ModelMesh {
+  static createCircleTube(
+    engine: Engine,
+    arc: number = Math.PI,
+    radius: number = 1.6,
+    tubeRadius: number = 0.02,
+    tubularSegments: number = 48,
+    radialSegments: number = 6
+  ): ModelMesh {
     const mesh = new ModelMesh(engine);
-    GizmoMesh.updateArc(mesh, arc, radius, radialSegments);
+    GizmoMesh.updateCircleTube(mesh, arc, radius, tubeRadius, tubularSegments, radialSegments);
     return mesh;
   }
 
-  static updateArc(mesh: ModelMesh, arc: number = Math.PI, radius: number = 1.6, radialSegments: number = 48) {
-    const vertices: Array<Vector3> = [];
-    const indices: Uint8Array = new Uint8Array(2 * radialSegments);
+  static updateCircleTube(
+    mesh: ModelMesh,
+    arc: number = Math.PI,
+    radius: number = 1.6,
+    tubeRadius: number = 0.02,
+    tubularSegments: number = 48,
+    radialSegments: number = 6
+  ) {
+    const vertexCount = (radialSegments + 1) * (tubularSegments + 1);
+    const rectangleCount = radialSegments * tubularSegments;
+    const indices: Uint16Array = new Uint16Array(rectangleCount * 6);
+
+    const vertices: Vector3[] = new Array(vertexCount);
+    const normals: Vector3[] = new Array(vertexCount);
+    const uvs: Vector2[] = new Array(vertexCount);
+
+    let offset = 0;
 
     for (let i = 0; i <= radialSegments; i++) {
-      const theta = (arc * 2) / radialSegments;
-      vertices.push(new Vector3(radius * Math.cos(i * theta), radius * Math.sin(i * theta), 0));
-    }
+      for (let j = 0; j <= tubularSegments; j++) {
+        const u = (j / tubularSegments) * arc;
+        const v = (i / radialSegments) * Math.PI * 2;
+        const cosV = Math.cos(v);
+        const sinV = Math.sin(v);
+        const cosU = Math.cos(u);
+        const sinU = Math.sin(u);
 
-    for (let i = 0; i < 2 * radialSegments; i++) {
-      let start = 0;
-      if (i % 2 === 0) {
-        start = i / 2;
-      } else {
-        start = (i + 1) / 2;
+        const position = new Vector3(
+          (radius + tubeRadius * cosV) * cosU,
+          (radius + tubeRadius * cosV) * sinU,
+          tubeRadius * sinV
+        );
+        vertices[offset] = position;
+
+        const centerX = radius * cosU;
+        const centerY = radius * sinU;
+        normals[offset] = new Vector3(position.x - centerX, position.y - centerY, position.z).normalize();
+
+        uvs[offset++] = new Vector2(j / tubularSegments, i / radialSegments);
       }
-      indices[i] = start;
     }
 
-    GizmoMesh._initialize(mesh, vertices, indices, MeshTopology.Lines);
+    offset = 0;
+    for (let i = 1; i <= radialSegments; i++) {
+      for (let j = 1; j <= tubularSegments; j++) {
+        const a = (tubularSegments + 1) * i + j - 1;
+        const b = (tubularSegments + 1) * (i - 1) + j - 1;
+        const c = (tubularSegments + 1) * (i - 1) + j;
+        const d = (tubularSegments + 1) * i + j;
+
+        indices[offset++] = a;
+        indices[offset++] = b;
+        indices[offset++] = d;
+
+        indices[offset++] = b;
+        indices[offset++] = c;
+        indices[offset++] = d;
+      }
+    }
+
+    const { bounds } = mesh;
+    const outerRadius = radius + tubeRadius;
+    bounds.min.set(-outerRadius, -outerRadius, -tubeRadius);
+    bounds.max.set(outerRadius, outerRadius, tubeRadius);
+
+    GizmoMesh._initialize(mesh, vertices, indices, MeshTopology.Triangles, normals, uvs);
   }
 
   static createLine(engine: Engine, points: Array<Vector3>): ModelMesh {
@@ -102,10 +155,15 @@ export class GizmoMesh {
     mesh: ModelMesh,
     vertices: Array<Vector3>,
     indices: Uint16Array | Uint8Array,
-    meshTopology: MeshTopology
+    meshTopology: MeshTopology,
+    normals?: Array<Vector3>,
+    uvs?: Array<Vector2>
   ) {
     mesh.setPositions(vertices);
     mesh.setIndices(indices);
+
+    normals && mesh.setNormals(normals);
+    uvs && mesh.setUVs(uvs);
 
     mesh.clearSubMesh();
 

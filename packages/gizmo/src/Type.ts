@@ -1,7 +1,6 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane } from "oasis-engine";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh } from "oasis-engine";
 import { UnlitMaterial } from "oasis-engine/types";
 import { Type } from "./enums/GizmoState";
-import { GizmoMaterial } from "./GizmoMaterial";
 import { Group } from "./Group";
 
 /**
@@ -62,10 +61,10 @@ export const axisPlane = [
 
 export interface AxisProps {
   name: string;
-  axisMesh: Array<Mesh>;
-  axisMaterial: UnlitMaterial | GizmoMaterial;
+  axisMesh: Array<ModelMesh>;
+  axisMaterial: UnlitMaterial;
   axisHelperMesh: Array<Mesh>;
-  axisHelperMaterial: UnlitMaterial | GizmoMaterial;
+  axisHelperMaterial: UnlitMaterial;
   axisRotation: Array<Vector3>;
   axisTranslation: Array<Vector3>;
   priority?: number;
