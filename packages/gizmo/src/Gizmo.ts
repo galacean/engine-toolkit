@@ -18,7 +18,7 @@ import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
-import { Type, AnchorType, CoordinateType } from "./enums/GizmoState";
+import { State, AnchorType, CoordinateType } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
 import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
 /**
@@ -43,7 +43,7 @@ export class Gizmo extends Script {
   private _tempRay: Ray = new Ray();
   private _tempRay2: Ray = new Ray();
 
-  private _type: Type = Type.null;
+  private _type: State = null;
 
   /**
    * initial scene camera in gizmo
@@ -95,18 +95,18 @@ export class Gizmo extends Script {
    * change gizmo type
    * @return current gizmo type - translate, or rotate, scale, null, all, default null
    */
-  get type(): Type {
+  get state(): State {
     return this._type;
   }
 
-  set type(targetState: Type) {
+  set state(targetState: State) {
     this._type = targetState;
 
     this._traverseControl(
       targetState,
       (control) => {
         control.entity.isActive = true;
-        targetState === Type.all ? control.onUpdate(true) : control.onUpdate(false);
+        targetState === State.all ? control.onUpdate(true) : control.onUpdate(false);
       },
       (control) => {
         control.entity.isActive = false;
@@ -149,9 +149,9 @@ export class Gizmo extends Script {
     Utils.init(this.engine);
 
     // setup mesh
-    this._createGizmoControl(Type.translate, TranslateControl);
-    this._createGizmoControl(Type.rotate, RotateControl);
-    this._createGizmoControl(Type.scale, ScaleControl);
+    this._createGizmoControl(State.translate, TranslateControl);
+    this._createGizmoControl(State.rotate, RotateControl);
+    this._createGizmoControl(State.scale, ScaleControl);
 
     // framebuffer picker
     this._framebufferPicker = entity.addComponent(FramebufferPicker);
@@ -170,7 +170,7 @@ export class Gizmo extends Script {
     colliderShape.radius = Utils.rotateCircleRadius + 0.8;
     sphereCollider.addShape(colliderShape);
 
-    this.type = this._type;
+    this.state = this._type;
     this.anchorType = AnchorType.Center;
     this.coordType = CoordinateType.Local;
   }
@@ -203,7 +203,7 @@ export class Gizmo extends Script {
 
   /** @internal */
   onUpdate() {
-    if (!this._initialized || Type.null) {
+    if (!this._initialized) {
       return;
     }
 
@@ -219,7 +219,7 @@ export class Gizmo extends Script {
       }
       if (this._group._gizmoTransformDirty) {
         this._traverseControl(this._type, (control) => {
-          this._type === Type.all ? control.onUpdate(true) : control.onUpdate(false);
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
         });
         this._group._gizmoTransformDirty = false;
       }
@@ -235,7 +235,7 @@ export class Gizmo extends Script {
 
       if (this._group._gizmoTransformDirty || distanceDirty) {
         this._traverseControl(this._type, (control) => {
-          this._type === Type.all ? control.onUpdate(true) : control.onUpdate(false);
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
         });
         this._group._gizmoTransformDirty = false;
       }
@@ -263,12 +263,12 @@ export class Gizmo extends Script {
     }
   }
 
-  private _createGizmoControl(type: Type, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
+  private _createGizmoControl(type: State, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
     const control = this.entity.createChild(type.toString()).addComponent(gizmoComponent);
     this._controlMap.push(control);
   }
 
-  private _onGizmoHoverStart(currentType: Type, axisName: string): void {
+  private _onGizmoHoverStart(currentType: State, axisName: string): void {
     if (!this._isHovered) {
       this._isHovered = true;
       this._traverseControl(currentType, (control) => {
@@ -285,7 +285,7 @@ export class Gizmo extends Script {
     }
   }
 
-  private _triggerGizmoStart(currentType: Type, axisName: string): void {
+  private _triggerGizmoStart(currentType: State, axisName: string): void {
     this._isStarted = true;
     this._onGizmoHoverEnd();
     const pointerPosition = this.engine.inputManager.pointerPosition;
@@ -343,7 +343,7 @@ export class Gizmo extends Script {
   }
 
   private _traverseControl(
-    targetType: Type = this._type,
+    targetType: State = this._type,
     callbackForTarget: (control: GizmoComponent) => any,
     callbackForOther?: (control: GizmoComponent) => any
   ) {

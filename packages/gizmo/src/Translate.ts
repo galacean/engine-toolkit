@@ -4,11 +4,11 @@ import { Axis } from "./Axis";
 import { Utils } from "./Utils";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";
-import { Type } from "./enums/GizmoState";
+import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class TranslateControl extends GizmoComponent {
-  type: Type = Type.translate;
+  type: State = State.translate;
   private _scale: number = 1;
   private _camera: Camera;
   private _group: Group;

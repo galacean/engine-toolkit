@@ -4,11 +4,11 @@ import { Utils } from "./Utils";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";
 import { Group } from "./Group";
 import { GizmoMesh } from "./GizmoMesh";
-import { Type } from "./enums/GizmoState";
+import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class RotateControl extends GizmoComponent {
-  type: Type = Type.rotate;
+  type: State = State.rotate;
   private _group: Group;
   private _camera: Camera;
 

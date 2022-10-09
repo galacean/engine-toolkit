@@ -1,11 +1,7 @@
 /**
  * Gizmo State
  */
-export enum Type {
-  /**
-   * null state
-   */
-  null = 0x0,
+export enum State {
   /**
    * translate state
    */
