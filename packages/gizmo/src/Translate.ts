@@ -4,11 +4,11 @@ import { Axis } from "./Axis";
 import { Utils } from "./Utils";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";
-import { GizmoState } from "./enums/GizmoState";
+import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class TranslateControl extends GizmoComponent {
-  type: GizmoState = GizmoState.translate;
+  type: State = State.translate;
   private _scale: number = 1;
   private _camera: Camera;
   private _group: Group;
@@ -112,7 +112,7 @@ export class TranslateControl extends GizmoComponent {
     }
   }
 
-  onUpdate(): void {
+  onUpdate(isModified: boolean = false): void {
     const { _tempMat, _tempVec0 } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);
@@ -127,33 +127,37 @@ export class TranslateControl extends GizmoComponent {
     this._translateControlMap = [
       {
         name: "x",
-        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.greenMaterial,
+        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
+        axisMaterial: Utils.greenMaterialTrans,
         axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90), new Vector3(0, 0, 90)],
-        axisTranslation: [new Vector3(0.75, 0, 0), new Vector3(1.5, 0, 0), new Vector3(-1.5, 0, 0)]
+        axisHelperMaterial: Utils.invisibleMaterialTrans,
+        axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90)],
+        axisTranslation: [new Vector3(0.75, 0, 0), new Vector3(1.5, 0, 0)]
       },
       {
         name: "y",
-        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.blueMaterial,
+        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
+        axisMaterial: Utils.blueMaterialTrans,
         axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0), new Vector3(180, 0, 0)],
-        axisTranslation: [new Vector3(0, 0.75, 0), new Vector3(0, 1.5, 0), new Vector3(0, -1.5, 0)]
+        axisHelperMaterial: Utils.invisibleMaterialTrans,
+        axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0)],
+        axisTranslation: [new Vector3(0, 0.75, 0), new Vector3(0, 1.5, 0)]
       },
       {
         name: "z",
-        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.redMaterial,
+        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
+        axisMaterial: Utils.redMaterialTrans,
         axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90), new Vector3(0, -90, 90)],
-        axisTranslation: [new Vector3(0, 0, 0.75), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
+        axisHelperMaterial: Utils.invisibleMaterialTrans,
+        axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90)],
+        axisTranslation: [new Vector3(0, 0, 0.75), new Vector3(0, 0, 1.5)]
       },
       {
         name: "xy",
         axisMesh: [Utils.axisPlaneMesh],
         axisMaterial: Utils.lightRedMaterial,
         axisHelperMesh: [Utils.axisHelperPlaneMesh],
+        axisHelperMaterial: Utils.invisibleMaterialTrans,
         axisRotation: [new Vector3(0, 90, 90)],
         axisTranslation: [new Vector3(0.5, 0.5, 0)]
       },
@@ -162,6 +166,8 @@ export class TranslateControl extends GizmoComponent {
         axisMesh: [Utils.axisPlaneMesh],
         axisMaterial: Utils.lightGreenMaterial,
         axisHelperMesh: [Utils.axisHelperPlaneMesh],
+        axisHelperMaterial: Utils.invisibleMaterialTrans,
+
         axisRotation: [new Vector3(90, 90, 0)],
         axisTranslation: [new Vector3(0, 0.5, 0.5)]
       },
@@ -170,6 +176,7 @@ export class TranslateControl extends GizmoComponent {
         axisMesh: [Utils.axisPlaneMesh],
         axisMaterial: Utils.lightBlueMaterial,
         axisHelperMesh: [Utils.axisHelperPlaneMesh],
+        axisHelperMaterial: Utils.invisibleMaterialTrans,
         axisRotation: [new Vector3(0, 0, 0)],
         axisTranslation: [new Vector3(0.5, 0, 0.5)]
       }

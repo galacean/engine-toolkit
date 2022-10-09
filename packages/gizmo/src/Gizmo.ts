@@ -18,7 +18,7 @@ import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
-import { GizmoState, AnchorType, CoordinateType } from "./enums/GizmoState";
+import { State, AnchorType, CoordinateType } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
 import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
 /**
@@ -28,18 +28,22 @@ export class Gizmo extends Script {
   private _initialized = false;
   private _isStarted = false;
   private _isHovered = false;
-  private _gizmoLayer: Layer;
-  private _gizmoMap: Array<GizmoComponent> = [];
-  private _sceneCamera: Camera;
-  private _gizmoControl: GizmoComponent;
-  private _group: Group = new Group();
-  private _framebufferPicker: FramebufferPicker;
   private _lastDistance: number = -1;
+
+  private _sceneCamera: Camera;
+  private _layer: Layer;
+  private _framebufferPicker: FramebufferPicker;
+
+  private _controlMap: Array<GizmoComponent> = [];
+  private _currentControl: GizmoComponent;
+
+  private _group: Group = new Group();
+
   private _tempVec: Vector3 = new Vector3();
   private _tempRay: Ray = new Ray();
   private _tempRay2: Ray = new Ray();
 
-  private _gizmoState: GizmoState = GizmoState.null;
+  private _type: State = null;
 
   /**
    * initial scene camera in gizmo
@@ -56,7 +60,7 @@ export class Gizmo extends Script {
         this._sceneCamera = camera;
         this._framebufferPicker.camera = camera;
 
-        this._gizmoMap.forEach((gizmoControl) => {
+        this._controlMap.forEach((gizmoControl) => {
           gizmoControl.init(camera, this._group);
         });
 
@@ -74,12 +78,12 @@ export class Gizmo extends Script {
    * @remarks Layer duplicate warning, check whether this layer is taken
    */
   get layer(): Layer {
-    return this._gizmoLayer;
+    return this._layer;
   }
 
   set layer(layer: Layer) {
-    if (this._gizmoLayer !== layer) {
-      this._gizmoLayer = layer;
+    if (this._layer !== layer) {
+      this._layer = layer;
       this._framebufferPicker.colorRenderPass.mask = layer;
       this._traverseEntity(this.entity, (entity) => {
         entity.layer = layer;
@@ -88,29 +92,26 @@ export class Gizmo extends Script {
   }
 
   /**
-   * change gizmo state
-   * @return current gizmo state - translate, or rotate, scale, null, default null
+   * change gizmo type
+   * @return current gizmo type - translate, or rotate, scale, null, all, default null
    */
-  get state(): GizmoState {
-    return this._gizmoState;
+  get state(): State {
+    return this._type;
   }
 
-  set state(targetState: GizmoState) {
-    if (!(this._gizmoState & targetState)) {
-      this._gizmoState = targetState;
-      const { _gizmoMap: gizmoMap } = this;
+  set state(targetState: State) {
+    this._type = targetState;
 
-      const targetIdx = gizmoMap.findIndex((gizmoControl) => {
-        return gizmoControl.type === targetState;
-      });
-      this._gizmoControl = targetIdx > -1 ? gizmoMap[targetIdx] : null;
-
-      gizmoMap.forEach((gizmoControl) => {
-        gizmoControl.entity.isActive = (targetState & gizmoControl.type) != 0;
-      });
-
-      this._gizmoControl?.onUpdate();
-    }
+    this._traverseControl(
+      targetState,
+      (control) => {
+        control.entity.isActive = true;
+        targetState === State.all ? control.onUpdate(true) : control.onUpdate(false);
+      },
+      (control) => {
+        control.entity.isActive = false;
+      }
+    );
   }
 
   /**
@@ -148,9 +149,9 @@ export class Gizmo extends Script {
     Utils.init(this.engine);
 
     // setup mesh
-    this._createGizmoControl(GizmoState.translate, TranslateControl);
-    this._createGizmoControl(GizmoState.scale, ScaleControl);
-    this._createGizmoControl(GizmoState.rotate, RotateControl);
+    this._createGizmoControl(State.translate, TranslateControl);
+    this._createGizmoControl(State.rotate, RotateControl);
+    this._createGizmoControl(State.scale, ScaleControl);
 
     // framebuffer picker
     this._framebufferPicker = entity.addComponent(FramebufferPicker);
@@ -166,10 +167,10 @@ export class Gizmo extends Script {
     // gizmo collider
     const sphereCollider = entity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
-    colliderShape.radius = Utils.rotateCircleRadius + 0.5;
+    colliderShape.radius = Utils.rotateCircleRadius + 0.8;
     sphereCollider.addShape(colliderShape);
 
-    this.state = this._gizmoState;
+    this.state = this._type;
     this.anchorType = AnchorType.Center;
     this.coordType = CoordinateType.Local;
   }
@@ -202,9 +203,10 @@ export class Gizmo extends Script {
 
   /** @internal */
   onUpdate() {
-    if (!this._initialized || !this._gizmoControl) {
+    if (!this._initialized) {
       return;
     }
+
     const { inputManager } = this.engine;
     if (this._isStarted) {
       if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
@@ -216,7 +218,9 @@ export class Gizmo extends Script {
         this._triggerGizmoEnd();
       }
       if (this._group._gizmoTransformDirty) {
-        this._gizmoControl.onUpdate();
+        this._traverseControl(this._type, (control) => {
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
+        });
         this._group._gizmoTransformDirty = false;
       }
     } else {
@@ -230,7 +234,9 @@ export class Gizmo extends Script {
       }
 
       if (this._group._gizmoTransformDirty || distanceDirty) {
-        this._gizmoControl.onUpdate();
+        this._traverseControl(this._type, (control) => {
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
+        });
         this._group._gizmoTransformDirty = false;
       }
       const { pointerPosition } = inputManager;
@@ -243,7 +249,7 @@ export class Gizmo extends Script {
           });
         } else {
           this.camera.screenPointToRay(inputManager.pointerPosition, this._tempRay);
-          const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._gizmoLayer);
+          const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
           if (isHit) {
             this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
               this._onGizmoHoverEnd();
@@ -257,57 +263,76 @@ export class Gizmo extends Script {
     }
   }
 
-  private _createGizmoControl(control: GizmoState, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
-    const gizmoControl = this.entity.createChild(control.toString()).addComponent(gizmoComponent);
-    this._gizmoMap.push(gizmoControl);
+  private _createGizmoControl(type: State, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
+    const control = this.entity.createChild(type.toString()).addComponent(gizmoComponent);
+    this._controlMap.push(control);
   }
 
-  private _onGizmoHoverStart(axisName: string): void {
-    this._isHovered = true;
-    this._gizmoControl.onHoverStart(axisName);
+  private _onGizmoHoverStart(currentType: State, axisName: string): void {
+    if (!this._isHovered) {
+      this._isHovered = true;
+      this._traverseControl(currentType, (control) => {
+        this._currentControl = control;
+      });
+      this._currentControl.onHoverStart(axisName);
+    }
   }
 
   private _onGizmoHoverEnd(): void {
     if (this._isHovered) {
-      this._gizmoControl.onHoverEnd();
+      this._currentControl.onHoverEnd();
       this._isHovered = false;
     }
   }
 
-  private _triggerGizmoStart(axisName: string): void {
+  private _triggerGizmoStart(currentType: State, axisName: string): void {
     this._isStarted = true;
+    this._onGizmoHoverEnd();
     const pointerPosition = this.engine.inputManager.pointerPosition;
     if (pointerPosition) {
       this._sceneCamera.screenPointToRay(pointerPosition, this._tempRay);
-      this._gizmoControl.onMoveStart(this._tempRay, axisName);
+      this._traverseControl(
+        currentType,
+        (control) => {
+          this._currentControl = control;
+        },
+        (control) => {
+          control.entity.isActive = false;
+        }
+      );
+
+      this._currentControl.onMoveStart(this._tempRay, axisName);
     }
   }
 
   private _triggerGizmoMove(): void {
     this._sceneCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._tempRay2);
-    this._gizmoControl.onMove(this._tempRay2);
+    this._currentControl.onMove(this._tempRay2);
   }
 
   private _triggerGizmoEnd(): void {
-    this._gizmoControl.onMoveEnd();
+    this._currentControl.onMoveEnd();
     this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
+    this._traverseControl(this._type, (control) => {
+      control.entity.isActive = true;
+    });
     this._isStarted = false;
   }
 
   private _selectHandler(result: MeshRenderElement): void {
+    const currentControl = parseInt(result.material.name);
     const selectedEntity = result.component.entity;
     switch (selectedEntity.layer) {
-      case this._gizmoLayer:
-        this._triggerGizmoStart(selectedEntity.name);
+      case this._layer:
+        this._triggerGizmoStart(currentControl, selectedEntity.name);
         break;
     }
   }
 
   private _overHandler(result: MeshRenderElement): void {
+    const currentControl = parseInt(result.material.name);
     const hoverEntity = result.component.entity;
-    if (hoverEntity.layer === this._gizmoLayer) {
-      this._onGizmoHoverStart(hoverEntity.name);
-    }
+    this._onGizmoHoverStart(currentControl, hoverEntity.name);
   }
 
   private _traverseEntity(entity: Entity, callback: (entity: Entity) => any) {
@@ -315,5 +340,21 @@ export class Gizmo extends Script {
     for (const child of entity.children) {
       this._traverseEntity(child, callback);
     }
+  }
+
+  private _traverseControl(
+    targetType: State = this._type,
+    callbackForTarget: (control: GizmoComponent) => any,
+    callbackForOther?: (control: GizmoComponent) => any
+  ) {
+    this._controlMap.forEach((control) => {
+      if ((targetType & control.type) != 0) {
+        callbackForTarget(control);
+      } else {
+        if (callbackForOther) {
+          callbackForOther(control);
+        }
+      }
+    });
   }
 }

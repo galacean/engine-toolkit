@@ -1,11 +1,7 @@
 /**
  * Gizmo State
  */
-export enum GizmoState {
-  /**
-   * null state
-   */
-  null = 0x0,
+export enum State {
   /**
    * translate state
    */
@@ -17,7 +13,11 @@ export enum GizmoState {
   /**
    * scale state
    */
-  scale = 0x4
+  scale = 0x4,
+  /**
+   * all state
+   */
+  all = 0xf
 }
 
 /**

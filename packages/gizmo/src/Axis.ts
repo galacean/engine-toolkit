@@ -1,9 +1,7 @@
 import { Component, Entity, MeshRenderer, Color, UnlitMaterial } from "oasis-engine";
-import { Utils } from "./Utils";
 import { AxisProps } from "./Type";
-import { GizmoMaterial } from "./GizmoMaterial";
 export class Axis extends Component {
-  private _material: UnlitMaterial | GizmoMaterial;
+  private _material: UnlitMaterial;
   private _color: Color = new Color();
   private _highLightColor: Color = new Color();
   private _yellowColor: Color = new Color(1.0, 0.95, 0.0, 1.0);
@@ -45,8 +43,7 @@ export class Axis extends Component {
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
       axisHelperRenderer.priority = 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
-
-      axisHelperRenderer.setMaterial(Utils.invisibleMaterial);
+      axisHelperRenderer.setMaterial(value.axisHelperMaterial);
     }
   }
   /** highlight axis */

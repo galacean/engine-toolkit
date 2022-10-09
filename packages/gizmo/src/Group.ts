@@ -313,8 +313,6 @@ export class Group {
           (e[1] = 0), (e[5] = 1), (e[9] = 0);
           (e[2] = 0), (e[6] = 0), (e[10] = 1);
           break;
-        default:
-          break;
       }
       this._dirtyFlag &= ~GroupDirtyFlag.CoordinateDirty;
     }

@@ -4,11 +4,11 @@ import { Axis } from "./Axis";
 import { Utils } from "./Utils";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisType } from "./Type";
-import { GizmoState } from "./enums/GizmoState";
+import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class ScaleControl extends GizmoComponent {
-  type: GizmoState = GizmoState.scale;
+  type: State = State.scale;
   private _camera: Camera;
   private _group: Group;
   private _scaleFactor: number = 1;
@@ -119,13 +119,17 @@ export class ScaleControl extends GizmoComponent {
     }
   }
 
-  onUpdate(): void {
+  onUpdate(isModified: boolean = false): void {
     const { _tempVec0, _tempMat } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);
     const { elements: ele } = _tempMat;
     _tempVec0.set(ele[12], ele[13], ele[14]);
-    const s = Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
+
+    const s = isModified
+      ? Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor * 0.75
+      : Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
+
     const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
     const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
     const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
@@ -136,36 +140,43 @@ export class ScaleControl extends GizmoComponent {
     this._scaleControlMap = [
       {
         name: "x",
-        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.greenMaterial,
+        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
+        axisMaterial: Utils.greenMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90), new Vector3(0, 0, 90)],
-        axisTranslation: [new Vector3(0.75, 0, 0), new Vector3(1.5, 0, 0), new Vector3(-1.5, 0, 0)]
+        axisHelperMaterial: Utils.invisibleMaterialScale,
+        axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90)],
+        axisTranslation: [new Vector3(0.75, 0, 0), new Vector3(1.5, 0, 0)],
+        priority: 102
       },
       {
         name: "y",
-        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.blueMaterial,
+        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
+        axisMaterial: Utils.blueMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0), new Vector3(180, 0, 0)],
-        axisTranslation: [new Vector3(0, 0.75, 0), new Vector3(0, 1.5, 0), new Vector3(0, -1.5, 0)]
+        axisHelperMaterial: Utils.invisibleMaterialScale,
+        axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0)],
+        axisTranslation: [new Vector3(0, 0.75, 0), new Vector3(0, 1.5, 0)],
+        priority: 102
       },
       {
         name: "z",
-        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.redMaterial,
+        axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
+        axisMaterial: Utils.redMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90), new Vector3(0, -90, 90)],
-        axisTranslation: [new Vector3(0, 0, 0.75), new Vector3(0, 0, 1.5), new Vector3(0, 0, -1.5)]
+        axisHelperMaterial: Utils.invisibleMaterialScale,
+        axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90)],
+        axisTranslation: [new Vector3(0, 0, 0.75), new Vector3(0, 0, 1.5)],
+        priority: 102
       },
       {
         name: "xyz",
         axisMesh: [Utils.axisCubeMesh],
         axisMaterial: Utils.greyMaterial,
         axisHelperMesh: [Utils.axisCubeMesh],
+        axisHelperMaterial: Utils.invisibleMaterialScale,
         axisRotation: [new Vector3(0, 0, 0)],
         axisTranslation: [new Vector3(0, 0, 0)],
-        priority: 102
+        priority: 105
       }
     ];
   }
