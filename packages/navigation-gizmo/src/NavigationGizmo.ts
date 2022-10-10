@@ -121,6 +121,17 @@ export class NavigationGizmo extends Script {
     });
   }
 
+  /**
+   * @return gizmo camera's priority, larger than any other camera in scene, default 100
+   */
+  get priority(): number {
+    return this._gizmoCamera.priority;
+  }
+
+  set priority(priority: number) {
+    this._gizmoCamera.priority = priority;
+  }
+
   onAwake() {
     // @ts-ignore
     if (!this.entity.engine.physicsManager._initialized) {
