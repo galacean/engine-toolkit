@@ -14,7 +14,7 @@ import {
   TextHorizontalAlignment,
   TextRenderer,
   Vector2,
-  Vector3,
+  Vector3
 } from "oasis-engine";
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
@@ -36,7 +36,7 @@ export class NavigationGizmo extends Script {
     Z: EndScript,
     "-X": EndScript,
     "-Y": EndScript,
-    "-Z": EndScript,
+    "-Z": EndScript
   };
 
   /**
@@ -139,19 +139,14 @@ export class NavigationGizmo extends Script {
     gizmoCamera.isOrthographic = true;
     gizmoCamera.cullingMask = this._gizmoLayer;
     gizmoCamera.clearFlags = CameraClearFlags.Depth;
-
+    gizmoCamera.priority = 100;
     this._gizmoCamera = gizmoCamera;
 
     this._createGizmo();
   }
 
   onUpdate() {
-    this._gizmoCamera.viewport.set(
-      this.position.x,
-      this.position.y,
-      this.size,
-      this.size
-    );
+    this._gizmoCamera.viewport.set(this.position.x, this.position.y, this.size, this.size);
   }
 
   private _createGizmo() {
@@ -165,27 +160,9 @@ export class NavigationGizmo extends Script {
     const axisYEntity = axisEntity.createChild("y");
     const axisZEntity = axisEntity.createChild("z");
 
-    this._createAxis(
-      axisXEntity,
-      utils.xRotateVector,
-      utils.xTranslateVector,
-      utils.redMaterial,
-      utils.axisMesh
-    );
-    this._createAxis(
-      axisYEntity,
-      utils.yRotateVector,
-      utils.yTranslateVector,
-      utils.greenMaterial,
-      utils.axisMesh
-    );
-    this._createAxis(
-      axisZEntity,
-      utils.zRotateVector,
-      utils.zTranslateVector,
-      utils.blueMaterial,
-      utils.axisMesh
-    );
+    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector, utils.redMaterial, utils.axisMesh);
+    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector, utils.greenMaterial, utils.axisMesh);
+    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector, utils.blueMaterial, utils.axisMesh);
 
     // end
     const endEntity = directionEntity.createChild("end");
@@ -194,53 +171,17 @@ export class NavigationGizmo extends Script {
     const endYEntity = endEntity.createChild("y");
     const endZEntity = endEntity.createChild("z");
 
-    this._createPositiveEnd(
-      endXEntity,
-      utils.xEndTranslateVector,
-      utils.redMaterial,
-      utils.endMesh,
-      "X"
-    );
-    this._createPositiveEnd(
-      endYEntity,
-      utils.yEndTranslateVector,
-      utils.greenMaterial,
-      utils.endMesh,
-      "Y"
-    );
-    this._createPositiveEnd(
-      endZEntity,
-      utils.zEndTranslateVector,
-      utils.blueMaterial,
-      utils.endMesh,
-      "Z"
-    );
+    this._createPositiveEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, utils.endMesh, "X");
+    this._createPositiveEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, utils.endMesh, "Y");
+    this._createPositiveEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, utils.endMesh, "Z");
 
     const endNegativeXEntity = endEntity.createChild("-x");
     const endNegativeYEntity = endEntity.createChild("-y");
     const endNegativeZEntity = endEntity.createChild("-z");
 
-    this._createNegativeEnd(
-      endNegativeXEntity,
-      utils.xEndTranslateVector,
-      utils.redMaterial,
-      utils.endMesh,
-      "-X"
-    );
-    this._createNegativeEnd(
-      endNegativeYEntity,
-      utils.yEndTranslateVector,
-      utils.greenMaterial,
-      utils.endMesh,
-      "-Y"
-    );
-    this._createNegativeEnd(
-      endNegativeZEntity,
-      utils.zEndTranslateVector,
-      utils.blueMaterial,
-      utils.endMesh,
-      "-Z"
-    );
+    this._createNegativeEnd(endNegativeXEntity, utils.xEndTranslateVector, utils.redMaterial, utils.endMesh, "-X");
+    this._createNegativeEnd(endNegativeYEntity, utils.yEndTranslateVector, utils.greenMaterial, utils.endMesh, "-Y");
+    this._createNegativeEnd(endNegativeZEntity, utils.zEndTranslateVector, utils.blueMaterial, utils.endMesh, "-Z");
 
     // sphere behind
     const sphereEntity = this._gizmoEntity.createChild("sphere");
@@ -260,13 +201,7 @@ export class NavigationGizmo extends Script {
     this._sphereScript = sphereEntity.addComponent(SphereScript);
   }
 
-  private _createAxis(
-    entity: Entity,
-    rotation: Vector3,
-    position: Vector3,
-    material: Material,
-    mesh: Mesh
-  ) {
+  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material, mesh: Mesh) {
     entity.transform.setRotation(rotation.x, rotation.y, rotation.z);
     entity.transform.setPosition(position.x, position.y, position.z);
 
@@ -275,13 +210,7 @@ export class NavigationGizmo extends Script {
     axisXRenderer.setMaterial(material);
   }
 
-  private _createPositiveEnd(
-    entity: Entity,
-    position: Vector3,
-    material: Material,
-    mesh: Mesh,
-    axisName: string
-  ) {
+  private _createPositiveEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
     const utils = this._utils;
 
     entity.transform.setPosition(position.x, position.y, position.z);
@@ -309,13 +238,7 @@ export class NavigationGizmo extends Script {
     this._endScript[axisName] = endComponent;
   }
 
-  private _createNegativeEnd(
-    entity: Entity,
-    position: Vector3,
-    material: Material,
-    mesh: Mesh,
-    axisName: string
-  ) {
+  private _createNegativeEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
     const utils = this._utils;
 
     entity.transform.setPosition(-position.x, -position.y, -position.z);
