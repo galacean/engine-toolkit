@@ -85,7 +85,6 @@ export class OrbitControl extends Script {
 
   set target(value: Vector3) {
     this._target.copyFrom(value);
-    this._spherical.setYAxis(value);
     this._atTheBack = false;
   }
 
