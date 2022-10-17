@@ -15,6 +15,7 @@ import {
   MeshTopology,
   ModelMesh,
   PointLight,
+  Renderer,
   Script,
   SphereColliderShape,
   SpotLight,
@@ -39,6 +40,7 @@ export class WireframeManager extends Script {
     new Vector3(-1, -1, -1)
   ];
   private static _tempMatrix: Matrix = new Matrix();
+  private static _tempVector: Vector3 = new Vector3();
 
   private _cameraPositions = [
     new Vector3(),
@@ -74,8 +76,8 @@ export class WireframeManager extends Script {
   }
 
   /**
- * Base color.
- */
+   * Base color.
+   */
   get baseColor(): Color {
     return this._material.baseColor;
   }
@@ -273,6 +275,38 @@ export class WireframeManager extends Script {
     this._rotateAroundX(positionsOffset);
 
     this._wireframeElements.push(new WireframeElement(light.entity.transform, positionsOffset));
+  }
+
+  /**
+   * Create auxiliary mesh for renderer.
+   * @param renderer - The Renderer
+   */
+  addRendererWireframe(renderer: Renderer): void {
+    const transform = renderer.entity.transform;
+    const bounds = renderer.bounds;
+    const tempVector = WireframeManager._tempVector;
+    bounds.getExtent(tempVector);
+
+    const localPositions = this._localPositions;
+    const positionsOffset = localPositions.length;
+
+    const cuboidIndicesCount = WireframePrimitive.cuboidIndexCount;
+    this._growthIndexMemory(cuboidIndicesCount);
+    const indices = this._indices;
+    WireframePrimitive.createCuboidWireframe(
+      tempVector.x,
+      tempVector.y,
+      tempVector.z,
+      localPositions,
+      positionsOffset,
+      indices,
+      this._indicesCount
+    );
+    bounds.getCenter(tempVector);
+    this._localTranslate(positionsOffset, tempVector);
+
+    this._indicesCount += cuboidIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
   }
 
   /**
