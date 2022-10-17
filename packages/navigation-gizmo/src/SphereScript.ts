@@ -31,6 +31,9 @@ export class SphereScript extends Script {
 
   private _directionEntity: Entity;
   private _endEntity: Entity;
+  private _xEntity: Entity;
+  private _yEntity: Entity;
+  private _zEntity: Entity;
   private _roundEntity: Entity;
   private _gizmoCamera: Camera;
   private _gizmoCameraEntity: Entity;
@@ -90,17 +93,27 @@ export class SphereScript extends Script {
     this._gizmoCameraEntity = gizmoEntity.findByName("gizmo-camera");
     this._gizmoCamera = this._gizmoCameraEntity.getComponent(Camera);
 
+    this._xEntity = this._endEntity.findByName("-x").findByName("back");
+    this._yEntity = this._endEntity.findByName("-y").findByName("back");
+    this._zEntity = this._endEntity.findByName("-z").findByName("back");
+
     // original text color
     this._getTextColor();
   }
 
   onPointerEnter() {
     this._roundEntity.isActive = true;
+    this._xEntity.isActive = true;
+    this._yEntity.isActive = true;
+    this._zEntity.isActive = true;
   }
 
   onPointerExit() {
     if (!this._isTriggered) {
       this._roundEntity.isActive = false;
+      this._xEntity.isActive = false;
+      this._yEntity.isActive = false;
+      this._zEntity.isActive = false;
     }
   }
 
@@ -138,6 +151,9 @@ export class SphereScript extends Script {
       const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
       if (!result) {
         this._roundEntity.isActive = false;
+        this._xEntity.isActive = false;
+        this._yEntity.isActive = false;
+        this._zEntity.isActive = false;
       }
 
       this._isTriggered = false;
@@ -163,6 +179,8 @@ export class SphereScript extends Script {
     this._directionEntity.transform.worldMatrix = SphereScript._tempMat;
   }
 
+  private tempX = new Vector3();
+  private currentDirect = 1;
   // delta x translate to rotation around axis y
   // delta y translate to rotation around axis vertical to scene camera
   private _navigateCamera() {
