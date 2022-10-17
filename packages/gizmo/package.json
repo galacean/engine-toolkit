@@ -19,7 +19,7 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^0.9.0-alpha",
+    "oasis-engine": "alpha",
     "@oasis-engine-toolkit/framebuffer-picker": "workspace:*"
   }
 }
