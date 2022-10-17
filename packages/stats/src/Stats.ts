@@ -2,7 +2,7 @@ import { Script, Camera } from "oasis-engine";
 import Monitor from "./Monitor";
 
 /**
- * Engine Feature: Display engine status data such as FPS.
+ * Display engine status data such as FPS.
  */
 export class Stats extends Script {
   private monitor: Monitor;
