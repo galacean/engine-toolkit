@@ -1,0 +1,360 @@
+import {
+  Camera,
+  Entity,
+  Ray,
+  Layer,
+  RenderTarget,
+  Texture2D,
+  PointerButton,
+  SphereColliderShape,
+  StaticCollider,
+  Vector3,
+  MathUtil,
+  Script,
+  MeshRenderElement
+} from "oasis-engine";
+import { ScaleControl } from "./Scale";
+import { TranslateControl } from "./Translate";
+import { RotateControl } from "./Rotate";
+import { GizmoComponent } from "./Type";
+import { Utils } from "./Utils";
+import { State, AnchorType, CoordinateType } from "./enums/GizmoState";
+import { Group, GroupDirtyFlag } from "./Group";
+import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
+/**
+ * Gizmo controls, including translate, rotate, scale
+ */
+export class Gizmo extends Script {
+  private _initialized = false;
+  private _isStarted = false;
+  private _isHovered = false;
+  private _lastDistance: number = -1;
+
+  private _sceneCamera: Camera;
+  private _layer: Layer;
+  private _framebufferPicker: FramebufferPicker;
+
+  private _controlMap: Array<GizmoComponent> = [];
+  private _currentControl: GizmoComponent;
+
+  private _group: Group = new Group();
+
+  private _tempVec: Vector3 = new Vector3();
+  private _tempRay: Ray = new Ray();
+  private _tempRay2: Ray = new Ray();
+
+  private _type: State = null;
+
+  /**
+   * initial scene camera in gizmo
+   * @return camera - The scene camera
+   */
+  get camera(): Camera {
+    return this._sceneCamera;
+  }
+
+  set camera(camera: Camera) {
+    if (camera !== this._sceneCamera) {
+      if (camera) {
+        const { _group: group } = this;
+        this._sceneCamera = camera;
+        this._framebufferPicker.camera = camera;
+
+        this._controlMap.forEach((gizmoControl) => {
+          gizmoControl.init(camera, this._group);
+        });
+
+        group.reset();
+        this._initialized = true;
+      } else {
+        this._initialized = false;
+      }
+    }
+  }
+
+  /**
+   * gizmo layer, default Layer29
+   * @return the layer for gizmo entity and gizmo's inner framebuffer picker
+   * @remarks Layer duplicate warning, check whether this layer is taken
+   */
+  get layer(): Layer {
+    return this._layer;
+  }
+
+  set layer(layer: Layer) {
+    if (this._layer !== layer) {
+      this._layer = layer;
+      this._framebufferPicker.colorRenderPass.mask = layer;
+      this._traverseEntity(this.entity, (entity) => {
+        entity.layer = layer;
+      });
+    }
+  }
+
+  /**
+   * change gizmo type
+   * @return current gizmo type - translate, or rotate, scale, null, all, default null
+   */
+  get state(): State {
+    return this._type;
+  }
+
+  set state(targetState: State) {
+    this._type = targetState;
+
+    this._traverseControl(
+      targetState,
+      (control) => {
+        control.entity.isActive = true;
+        targetState === State.all ? control.onUpdate(true) : control.onUpdate(false);
+      },
+      (control) => {
+        control.entity.isActive = false;
+      }
+    );
+  }
+
+  /**
+   * toggle gizmo anchor type
+   * @return current anchor type - center or pivot, default center
+   */
+  get anchorType(): AnchorType {
+    return this._group.anchorType;
+  }
+
+  set anchorType(targetAnchor: AnchorType) {
+    this._group.anchorType = targetAnchor;
+  }
+
+  /**
+   * toggle gizmo orientation type
+   * @return current orientation type - global or local, default local
+   */
+  get coordType(): CoordinateType {
+    return this._group.coordinateType;
+  }
+
+  set coordType(targetCoord: CoordinateType) {
+    this._group.coordinateType = targetCoord;
+  }
+
+  constructor(entity: Entity) {
+    super(entity);
+
+    // @ts-ignore
+    if (!this.entity.engine.physicsManager._initialized) {
+      throw new Error("PhysicsManager is not initialized");
+    }
+
+    Utils.init(this.engine);
+
+    // setup mesh
+    this._createGizmoControl(State.translate, TranslateControl);
+    this._createGizmoControl(State.rotate, RotateControl);
+    this._createGizmoControl(State.scale, ScaleControl);
+
+    // framebuffer picker
+    this._framebufferPicker = entity.addComponent(FramebufferPicker);
+    this._framebufferPicker.colorRenderTarget = new RenderTarget(
+      this.engine,
+      256,
+      256,
+      new Texture2D(this.engine, 256, 256)
+    );
+
+    this.layer = Layer.Layer29;
+
+    // gizmo collider
+    const sphereCollider = entity.addComponent(StaticCollider);
+    const colliderShape = new SphereColliderShape();
+    colliderShape.radius = Utils.rotateCircleRadius + 0.8;
+    sphereCollider.addShape(colliderShape);
+
+    this.state = this._type;
+    this.anchorType = AnchorType.Center;
+    this.coordType = CoordinateType.Local;
+  }
+
+  /**
+   * add entity to the group
+   * @param entity - the entity to add, could be empty
+   * @return boolean, true if the entity is the previous group, false if not
+   */
+  addEntity(entity: Entity): boolean {
+    const { _group: group } = this;
+    return entity && group.addEntity(entity);
+  }
+
+  /**
+   * remove entity from the group
+   * @param entity - the entity to remove
+   */
+  removeEntity(entity: Entity): void {
+    const { _group: group } = this;
+    entity && group.deleteEntity(entity);
+  }
+
+  /**
+   * clear all entities in the group
+   */
+  clearEntity(): void {
+    this._group.reset();
+  }
+
+  /** @internal */
+  onUpdate() {
+    if (!this._initialized) {
+      return;
+    }
+
+    const { inputManager } = this.engine;
+    if (this._isStarted) {
+      if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
+        const { pointerMovingDelta } = inputManager;
+        if (pointerMovingDelta.x !== 0 || pointerMovingDelta.y !== 0) {
+          this._triggerGizmoMove();
+        }
+      } else {
+        this._triggerGizmoEnd();
+      }
+      if (this._group._gizmoTransformDirty) {
+        this._traverseControl(this._type, (control) => {
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
+        });
+        this._group._gizmoTransformDirty = false;
+      }
+    } else {
+      this._group.getWorldPosition(this._tempVec);
+      const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
+      const currDistance = Vector3.distance(cameraPosition, this._tempVec);
+      let distanceDirty = false;
+      if (Math.abs(this._lastDistance - currDistance) > MathUtil.zeroTolerance) {
+        distanceDirty = true;
+        this._lastDistance = currDistance;
+      }
+
+      if (this._group._gizmoTransformDirty || distanceDirty) {
+        this._traverseControl(this._type, (control) => {
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
+        });
+        this._group._gizmoTransformDirty = false;
+      }
+      const { pointerPosition } = inputManager;
+      if (pointerPosition) {
+        if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
+          this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+            if (result) {
+              this._selectHandler(result);
+            }
+          });
+        } else {
+          this.camera.screenPointToRay(inputManager.pointerPosition, this._tempRay);
+          const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
+          if (isHit) {
+            this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+              this._onGizmoHoverEnd();
+              if (result) {
+                this._overHandler(result);
+              }
+            });
+          }
+        }
+      }
+    }
+  }
+
+  private _createGizmoControl(type: State, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
+    const control = this.entity.createChild(type.toString()).addComponent(gizmoComponent);
+    this._controlMap.push(control);
+  }
+
+  private _onGizmoHoverStart(currentType: State, axisName: string): void {
+    if (!this._isHovered) {
+      this._isHovered = true;
+      this._traverseControl(currentType, (control) => {
+        this._currentControl = control;
+      });
+      this._currentControl.onHoverStart(axisName);
+    }
+  }
+
+  private _onGizmoHoverEnd(): void {
+    if (this._isHovered) {
+      this._currentControl.onHoverEnd();
+      this._isHovered = false;
+    }
+  }
+
+  private _triggerGizmoStart(currentType: State, axisName: string): void {
+    this._isStarted = true;
+    this._onGizmoHoverEnd();
+    const pointerPosition = this.engine.inputManager.pointerPosition;
+    if (pointerPosition) {
+      this._sceneCamera.screenPointToRay(pointerPosition, this._tempRay);
+      this._traverseControl(
+        currentType,
+        (control) => {
+          this._currentControl = control;
+        },
+        (control) => {
+          control.entity.isActive = false;
+        }
+      );
+
+      this._currentControl.onMoveStart(this._tempRay, axisName);
+    }
+  }
+
+  private _triggerGizmoMove(): void {
+    this._sceneCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._tempRay2);
+    this._currentControl.onMove(this._tempRay2);
+  }
+
+  private _triggerGizmoEnd(): void {
+    this._currentControl.onMoveEnd();
+    this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
+    this._traverseControl(this._type, (control) => {
+      control.entity.isActive = true;
+    });
+    this._isStarted = false;
+  }
+
+  private _selectHandler(result: MeshRenderElement): void {
+    const currentControl = parseInt(result.material.name);
+    const selectedEntity = result.component.entity;
+    switch (selectedEntity.layer) {
+      case this._layer:
+        this._triggerGizmoStart(currentControl, selectedEntity.name);
+        break;
+    }
+  }
+
+  private _overHandler(result: MeshRenderElement): void {
+    const currentControl = parseInt(result.material.name);
+    const hoverEntity = result.component.entity;
+    this._onGizmoHoverStart(currentControl, hoverEntity.name);
+  }
+
+  private _traverseEntity(entity: Entity, callback: (entity: Entity) => any) {
+    callback(entity);
+    for (const child of entity.children) {
+      this._traverseEntity(child, callback);
+    }
+  }
+
+  private _traverseControl(
+    targetType: State = this._type,
+    callbackForTarget: (control: GizmoComponent) => any,
+    callbackForOther?: (control: GizmoComponent) => any
+  ) {
+    this._controlMap.forEach((control) => {
+      if ((targetType & control.type) != 0) {
+        callbackForTarget(control);
+      } else {
+        if (callbackForOther) {
+          callbackForOther(control);
+        }
+      }
+    });
+  }
+}

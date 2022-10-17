@@ -16,10 +16,6 @@ export class OrbitControl extends Script {
   camera: Camera;
   cameraTransform: Transform;
 
-  /** Target position. */
-  target: Vector3 = new Vector3();
-  /** Up vector */
-  up: Vector3 = new Vector3(0, 1, 0);
   /** Whether to automatically rotate the camera, the default is false. */
   autoRotate: boolean = false;
   /** The radian of automatic rotation per second. */
@@ -46,15 +42,18 @@ export class OrbitControl extends Script {
   minZoom: number = 0.0;
   /** Maximum zoom speed, the default is positive infinity. */
   maxZoom: number = Infinity;
-  /** The minimum radian in the vertical direction, the default is 0 radian, the value range is 0 - Math.PI. */
-  minPolarAngle: number = 0.0;
-  /** The maximum radian in the vertical direction, the default is Math.PI, and the value range is 0 - Math.PI. */
-  maxPolarAngle: number = Math.PI;
+  /** The minimum radian in the vertical direction, the default is 1 degree. */
+  minPolarAngle: number = 1;
+  /** The maximum radian in the vertical direction,  the default is 179 degree.  */
+  maxPolarAngle: number = (179 / 180) * Math.PI;
   /** The minimum radian in the horizontal direction, the default is negative infinity. */
   minAzimuthAngle: number = -Infinity;
   /** The maximum radian in the horizontal direction, the default is positive infinity.  */
   maxAzimuthAngle: number = Infinity;
 
+  private _up: Vector3 = new Vector3(0, 1, 0);
+  private _target: Vector3 = new Vector3();
+  private _atTheBack: boolean = false;
   private _spherical: Spherical = new Spherical();
   private _sphericalDelta: Spherical = new Spherical();
   private _sphericalDump: Spherical = new Spherical();
@@ -63,6 +62,31 @@ export class OrbitControl extends Script {
   private _panOffset: Vector3 = new Vector3();
   private _tempVec3: Vector3 = new Vector3();
   private _enableHandler: number = ControlHandlerType.All;
+
+  /**
+   * Return up vector.
+   */
+  get up(): Vector3 {
+    return this._up;
+  }
+
+  set up(value: Vector3) {
+    this._up.copyFrom(value);
+    this._spherical.setYAxis(value);
+    this._atTheBack = false;
+  }
+
+  /**
+   * Return target position.
+   * */
+  get target(): Vector3 {
+    return this._target;
+  }
+
+  set target(value: Vector3) {
+    this._target.copyFrom(value);
+    this._atTheBack = false;
+  }
 
   /**
    *  Return Whether to enable rotation, the default is true.
@@ -115,6 +139,8 @@ export class OrbitControl extends Script {
     this.input = engine.inputManager;
     this.camera = entity.getComponent(Camera);
     this.cameraTransform = entity.transform;
+    this._spherical.setYAxis(this._up);
+    this._atTheBack = false;
   }
 
   onUpdate(deltaTime: number): void {
@@ -150,10 +176,6 @@ export class OrbitControl extends Script {
       }
     }
     const { _sphericalDump, _sphericalDelta } = this;
-    if (this.autoRotate) {
-      const rotateAngle = (this.autoRotateSpeed / 1000) * deltaTime;
-      this._sphericalDelta.theta -= rotateAngle;
-    }
     if (this.enableDamping) {
       if (enableHandler & ControlHandlerType.ZOOM && curHandlerType ^ ControlHandlerType.ZOOM) {
         this._zoomFrag *= 1 - this.zoomFactor;
@@ -162,6 +184,10 @@ export class OrbitControl extends Script {
         _sphericalDelta.theta = _sphericalDump.theta *= 1 - this.dampingFactor;
         _sphericalDelta.phi = _sphericalDump.phi *= 1 - this.dampingFactor;
       }
+    }
+    if (curHandlerType === ControlHandlerType.None && this.autoRotate) {
+      const rotateAngle = (this.autoRotateSpeed / 1000) * deltaTime;
+      _sphericalDelta.theta -= rotateAngle;
     }
   }
 
@@ -200,21 +226,20 @@ export class OrbitControl extends Script {
   private _updateTransform(): void {
     const { cameraTransform, target, _tempVec3, _spherical, _sphericalDelta, _panOffset } = this;
     Vector3.subtract(cameraTransform.position, target, _tempVec3);
-    _spherical.setFromVec3(_tempVec3);
+    _spherical.setFromVec3(_tempVec3, this._atTheBack);
     _spherical.theta += _sphericalDelta.theta;
     _spherical.phi += _sphericalDelta.phi;
     _spherical.theta = Math.max(this.minAzimuthAngle, Math.min(this.maxAzimuthAngle, _spherical.theta));
     _spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, _spherical.phi));
     _spherical.makeSafe();
-
     if (this._scale !== 1) {
       this._zoomFrag = _spherical.radius * (this._scale - 1);
     }
     _spherical.radius += this._zoomFrag;
     _spherical.radius = Math.max(this.minDistance, Math.min(this.maxDistance, _spherical.radius));
-    _spherical.setToVec3(_tempVec3);
-    Vector3.add(target.add(_panOffset), _tempVec3, cameraTransform.position);
-    cameraTransform.lookAt(target, this.up);
+    this._atTheBack = _spherical.setToVec3(_tempVec3);
+    Vector3.add(target.add(_panOffset), _tempVec3, cameraTransform.worldPosition);
+    cameraTransform.lookAt(target, _tempVec3.copyFrom(this.up).scale(this._atTheBack ? -1 : 1));
     /** Reset cache value. */
     this._zoomFrag = 0;
     this._scale = 1;
