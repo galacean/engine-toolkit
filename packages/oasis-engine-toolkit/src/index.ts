@@ -8,6 +8,7 @@ export * from "@oasis-engine-toolkit/gizmo";
 export * from "@oasis-engine-toolkit/outline";
 export * from "@oasis-engine-toolkit/grid-material";
 export * from "@oasis-engine-toolkit/navigation-gizmo";
+export * from "@oasis-engine-toolkit/geometry-sketch";
 
 //@ts-ignore
 export const version = `__buildVersion`;
