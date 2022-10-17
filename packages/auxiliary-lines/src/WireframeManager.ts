@@ -58,6 +58,7 @@ export class WireframeManager extends Script {
   private _indicesCount = 0;
   private _supportUint32Array: boolean;
 
+  private _wireframeRenderers: Renderer[] = [];
   private _wireframeElements: WireframeElement[] = [];
   private _renderer: MeshRenderer;
   private _material: UnlitMaterial;
@@ -90,6 +91,7 @@ export class WireframeManager extends Script {
    * Clear all wireframe.
    */
   clear(): void {
+    this._wireframeRenderers.length = 0;
     this._wireframeElements.length = 0;
     this._localPositions.length = 0;
     this._globalPositions.length = 0;
@@ -282,31 +284,8 @@ export class WireframeManager extends Script {
    * @param renderer - The Renderer
    */
   addRendererWireframe(renderer: Renderer): void {
-    const transform = renderer.entity.transform;
-    const bounds = renderer.bounds;
-    const tempVector = WireframeManager._tempVector;
-    bounds.getExtent(tempVector);
-
-    const localPositions = this._localPositions;
-    const positionsOffset = localPositions.length;
-
-    const cuboidIndicesCount = WireframePrimitive.cuboidIndexCount;
-    this._growthIndexMemory(cuboidIndicesCount);
-    const indices = this._indices;
-    WireframePrimitive.createCuboidWireframe(
-      tempVector.x,
-      tempVector.y,
-      tempVector.z,
-      localPositions,
-      positionsOffset,
-      indices,
-      this._indicesCount
-    );
-    bounds.getCenter(tempVector);
-    this._localTranslate(positionsOffset, tempVector);
-
-    this._indicesCount += cuboidIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+    this._growthIndexMemory(WireframePrimitive.cuboidIndexCount);
+    this._wireframeRenderers.push(renderer);
   }
 
   /**
@@ -466,11 +445,16 @@ export class WireframeManager extends Script {
    * @param deltaTime
    */
   onUpdate(deltaTime: number): void {
-    const mesh = this._mesh;
-    const localPositions = this._localPositions;
-    const globalPositions = this._globalPositions;
-    const wireframeElements = this._wireframeElements;
+    const {
+      _mesh: mesh,
+      _localPositions: localPositions,
+      _globalPositions: globalPositions,
+      _wireframeElements: wireframeElements,
+      _wireframeRenderers: wireframeRenderers,
+      _indices: indices
+    } = this;
 
+    // update local to world geometry
     const localPositionLength = localPositions.length;
     globalPositions.length = localPositionLength;
     let positionIndex = 0;
@@ -498,11 +482,37 @@ export class WireframeManager extends Script {
       }
     }
 
-    if (needUpdate) {
+    // update world-space geometry
+    let indicesCount = this._indicesCount;
+    for (let i = 0; i < wireframeRenderers.length; i++) {
+      const renderer = wireframeRenderers[i];
+      const bounds = renderer.bounds;
+      const tempVector = WireframeManager._tempVector;
+      bounds.getExtent(tempVector);
+
+      const positionsOffset = globalPositions.length;
+      WireframePrimitive.createCuboidWireframe(
+        tempVector.x,
+        tempVector.y,
+        tempVector.z,
+        globalPositions,
+        positionsOffset,
+        indices,
+        indicesCount
+      );
+      bounds.getCenter(tempVector);
+      for (let i = positionsOffset; i < globalPositions.length; i++) {
+        const position = globalPositions[i];
+        position.add(tempVector);
+      }
+      indicesCount += WireframePrimitive.cuboidIndexCount;
+    }
+
+    if (wireframeRenderers.length > 0 || needUpdate) {
       mesh.setPositions(globalPositions);
       mesh.setIndices(this._indices);
       mesh.uploadData(false);
-      mesh.subMesh.count = this._indicesCount;
+      mesh.subMesh.count = indicesCount;
     }
   }
 
