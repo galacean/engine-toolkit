@@ -27,7 +27,21 @@ export class ControlPointer {
         } else if (input.isPointerHeldDown(PointerButton.Primary)) {
           this._updateType(ControlHandlerType.ROTATE, DeltaType.Moving);
         } else {
-          this._updateType(ControlHandlerType.None, DeltaType.Moving);
+          // When `onPointerMove` happens on the same frame as `onPointerUp`
+          // Need to record the movement of this frame
+          if (input.pointerMovingDelta.x !== 0 && input.pointerMovingDelta.y !== 0) {
+            if (input.isPointerUp(PointerButton.Secondary)) {
+              this._updateType(ControlHandlerType.PAN, DeltaType.Moving);
+            } else if (input.isPointerUp(PointerButton.Auxiliary)) {
+              this._updateType(ControlHandlerType.ZOOM, DeltaType.Moving);
+            } else if (input.isPointerUp(PointerButton.Primary)) {
+              this._updateType(ControlHandlerType.ROTATE, DeltaType.Moving);
+            } else {
+              this._updateType(ControlHandlerType.None, DeltaType.Moving);
+            }
+          } else {
+            this._updateType(ControlHandlerType.None, DeltaType.Moving);
+          }
         }
         break;
       case 2:
