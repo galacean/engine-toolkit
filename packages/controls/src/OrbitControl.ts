@@ -20,8 +20,6 @@ export class OrbitControl extends Script {
   autoRotate: boolean = false;
   /** The radian of automatic rotation per second. */
   autoRotateSpeed: number = Math.PI;
-  /** Whether to enable keyboard. */
-  enableKeys: boolean = false;
   /** Whether to enable camera damping, the default is true. */
   enableDamping: boolean = true;
   /** Rotation speed, default is 1.0 . */
@@ -51,6 +49,7 @@ export class OrbitControl extends Script {
   /** The maximum radian in the horizontal direction, the default is positive infinity.  */
   maxAzimuthAngle: number = Infinity;
 
+  private _enableKeys: boolean = true;
   private _up: Vector3 = new Vector3(0, 1, 0);
   private _target: Vector3 = new Vector3();
   private _atTheBack: boolean = false;
@@ -64,6 +63,30 @@ export class OrbitControl extends Script {
   private _enableHandler: number = ControlHandlerType.All;
 
   /**
+   * Return whether to enable keyboard.
+   */
+  get enableKeys(): boolean {
+    return this._enableKeys;
+  }
+
+  set enableKeys(value: boolean) {
+    if (this._enableKeys !== value) {
+      this._enableKeys = value;
+      const { inputDevices } = this;
+      if (value) {
+        inputDevices.push(ControlKeyboard);
+      } else {
+        for (let i = inputDevices.length - 1; i >= 0; i--) {
+          if (inputDevices[i] === ControlKeyboard) {
+            inputDevices.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  /*
    * Return up vector.
    */
   get up(): Vector3 {
@@ -85,7 +108,6 @@ export class OrbitControl extends Script {
 
   set target(value: Vector3) {
     this._target.copyFrom(value);
-    this._spherical.setYAxis(value);
     this._atTheBack = false;
   }
 

@@ -183,7 +183,6 @@ export class NavigationGizmo extends Script {
     const endZEntity = endEntity.createChild("z");
 
     this._createEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, "X", new Color(0, 0, 0, 1));
-
     this._createEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, "Y", new Color(0, 0, 0, 1));
     this._createEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, "Z", new Color(0, 0, 0, 1));
 

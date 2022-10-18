@@ -5,15 +5,18 @@
 Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script` and `Material`, welcome to enjoy!
 
 ## Features
+- 📊 &nbsp;**Stats** - Statistics rendering data
 
 - 🛸 &nbsp;**Controls** - Some camera controllers
 - 🫧 &nbsp;**FrameBufferPicker** - Pixel-based object picking
+- ➡️ &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
+- 🧭 &nbsp;**Navigation Gizmo** - Three-view & visualized operation for camera control
+
+- 📐 &nbsp;**Lines** - 2D Solid Line & Dash Line
 - 🖇 &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
 - 🧍🏼 &nbsp;**Skeleton Helper** - Skeleton visualization
-- ➡️ &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
 - ⭕️ &nbsp;**Outline** - Show outline of mesh renderers
-- 📐 &nbsp;**Lines** - 2D Solid Line & Dash Line
-- 🧭 &nbsp;**Navigation Gizmo** - Three-view & visualized operation for camera control
+- 🖼 &nbsp;**Geometry Sketch** - Convert geometry into texture && sketch normal and mesh wireframe
 
 ### Materials
 

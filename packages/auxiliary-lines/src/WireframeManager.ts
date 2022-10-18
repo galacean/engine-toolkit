@@ -15,6 +15,7 @@ import {
   MeshTopology,
   ModelMesh,
   PointLight,
+  Renderer,
   Script,
   SphereColliderShape,
   SpotLight,
@@ -39,6 +40,7 @@ export class WireframeManager extends Script {
     new Vector3(-1, -1, -1)
   ];
   private static _tempMatrix: Matrix = new Matrix();
+  private static _tempVector: Vector3 = new Vector3();
 
   private _cameraPositions = [
     new Vector3(),
@@ -56,6 +58,7 @@ export class WireframeManager extends Script {
   private _indicesCount = 0;
   private _supportUint32Array: boolean;
 
+  private _wireframeRenderers: Renderer[] = [];
   private _wireframeElements: WireframeElement[] = [];
   private _renderer: MeshRenderer;
   private _material: UnlitMaterial;
@@ -74,8 +77,8 @@ export class WireframeManager extends Script {
   }
 
   /**
- * Base color.
- */
+   * Base color.
+   */
   get baseColor(): Color {
     return this._material.baseColor;
   }
@@ -88,6 +91,7 @@ export class WireframeManager extends Script {
    * Clear all wireframe.
    */
   clear(): void {
+    this._wireframeRenderers.length = 0;
     this._wireframeElements.length = 0;
     this._localPositions.length = 0;
     this._globalPositions.length = 0;
@@ -276,6 +280,15 @@ export class WireframeManager extends Script {
   }
 
   /**
+   * Create auxiliary mesh for renderer.
+   * @param renderer - The Renderer
+   */
+  addRendererWireframe(renderer: Renderer): void {
+    this._growthIndexMemory(WireframePrimitive.cuboidIndexCount);
+    this._wireframeRenderers.push(renderer);
+  }
+
+  /**
    * Create auxiliary mesh for collider.
    * @param collider - The Collider
    */
@@ -432,11 +445,16 @@ export class WireframeManager extends Script {
    * @param deltaTime
    */
   onUpdate(deltaTime: number): void {
-    const mesh = this._mesh;
-    const localPositions = this._localPositions;
-    const globalPositions = this._globalPositions;
-    const wireframeElements = this._wireframeElements;
+    const {
+      _mesh: mesh,
+      _localPositions: localPositions,
+      _globalPositions: globalPositions,
+      _wireframeElements: wireframeElements,
+      _wireframeRenderers: wireframeRenderers,
+      _indices: indices
+    } = this;
 
+    // update local to world geometry
     const localPositionLength = localPositions.length;
     globalPositions.length = localPositionLength;
     let positionIndex = 0;
@@ -464,11 +482,37 @@ export class WireframeManager extends Script {
       }
     }
 
-    if (needUpdate) {
+    // update world-space geometry
+    let indicesCount = this._indicesCount;
+    for (let i = 0; i < wireframeRenderers.length; i++) {
+      const renderer = wireframeRenderers[i];
+      const bounds = renderer.bounds;
+      const tempVector = WireframeManager._tempVector;
+      bounds.getExtent(tempVector);
+
+      const positionsOffset = globalPositions.length;
+      WireframePrimitive.createCuboidWireframe(
+        tempVector.x,
+        tempVector.y,
+        tempVector.z,
+        globalPositions,
+        positionsOffset,
+        indices,
+        indicesCount
+      );
+      bounds.getCenter(tempVector);
+      for (let i = positionsOffset; i < globalPositions.length; i++) {
+        const position = globalPositions[i];
+        position.add(tempVector);
+      }
+      indicesCount += WireframePrimitive.cuboidIndexCount;
+    }
+
+    if (wireframeRenderers.length > 0 || needUpdate) {
       mesh.setPositions(globalPositions);
       mesh.setIndices(this._indices);
       mesh.uploadData(false);
-      mesh.subMesh.count = this._indicesCount;
+      mesh.subMesh.count = indicesCount;
     }
   }
 
