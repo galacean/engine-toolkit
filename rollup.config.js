@@ -59,7 +59,7 @@ const commonPlugins = [
 
 function config({ location, pkgJson }) {
   const input = path.join(location, "src", "index.ts");
-  const external = Object.keys(pkgJson.dependencies || {});
+  const external = Object.keys(Object.assign(pkgJson.dependencies ?? {}, pkgJson.peerDependencies ?? {}));
   const name = pkgJson.name;
   commonPlugins.push(
     replace({
