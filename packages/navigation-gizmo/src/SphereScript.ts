@@ -47,10 +47,13 @@ export class SphereScript extends Script {
   private _tempQuat2: Quaternion = new Quaternion();
   private _tempPointer: Vector2 = new Vector2();
   private _tempMat: Matrix = new Matrix();
-  private _upVec: Vector3 = new Vector3(0, 1, 0);
+  private _upVec: Vector3 = new Vector3();
+  private _topVec: Vector3 = new Vector3(0, 1, 0);
+  private _bottomVec: Vector3 = new Vector3(0, -1, 0);
   private _target: Vector3 = SphereScript._vector;
   private _currentPos: Vector3 = new Vector3();
   private _rotateVec: Vector3 = new Vector3();
+  private _tempUpVec: Vector3 = new Vector3();
 
   private _ray: Ray = new Ray();
 
@@ -134,11 +137,15 @@ export class SphereScript extends Script {
 
     SphereScript._startQuat.copyFrom(this._directionEntity.transform.worldRotationQuaternion);
     SphereScript._startPointer.copyFrom(this.engine.inputManager.pointerPosition);
+
+    this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
+    this._tempUpVec.y > 0 ? this._upVec.copyFrom(this._topVec) : this._upVec.copyFrom(this._bottomVec);
+
     this._sceneCameraEntity.transform.getWorldForward(SphereScript._startAxis);
     Vector3.cross(SphereScript._startAxis, this._upVec, SphereScript._startAxis);
 
-    this._navigateCamera();
     this._isTriggered = true;
+    this._navigateCamera();
   }
 
   onPointerDrag() {
@@ -165,9 +172,10 @@ export class SphereScript extends Script {
       }
     }
   }
-
   onUpdate() {
     if (this._isTriggered) {
+      this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
+      this._tempUpVec.y > 0 ? this._upVec.copyFrom(this._topVec) : this._upVec.copyFrom(this._bottomVec);
       Matrix.lookAt(this._currentPos, this._target, this._upVec, this._tempMat);
       this._tempMat.invert();
       this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
@@ -179,8 +187,6 @@ export class SphereScript extends Script {
     this._directionEntity.transform.worldMatrix = SphereScript._tempMat;
   }
 
-  private tempX = new Vector3();
-  private currentDirect = 1;
   // delta x translate to rotation around axis y
   // delta y translate to rotation around axis vertical to scene camera
   private _navigateCamera() {
