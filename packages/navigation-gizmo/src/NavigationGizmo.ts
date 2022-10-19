@@ -1,12 +1,12 @@
 import {
   Camera,
   CameraClearFlags,
+  Color,
   Entity,
   Font,
   FontStyle,
   Layer,
   Material,
-  Mesh,
   MeshRenderer,
   Script,
   SphereColliderShape,
@@ -46,9 +46,9 @@ export class NavigationGizmo extends Script {
   public position: Vector2 = new Vector2(0, 0);
 
   /**
-   * @size gizmo size, the length and width of the gizmo area, default 0.2.
+   * @size gizmo size, the length and width of the gizmo area, default 0.12.
    */
-  public size: number = 0.2;
+  public size: number = 0.12;
 
   /** scene camera
    * @return current scene camera
@@ -171,9 +171,9 @@ export class NavigationGizmo extends Script {
     const axisYEntity = axisEntity.createChild("y");
     const axisZEntity = axisEntity.createChild("z");
 
-    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector, utils.redMaterial, utils.axisMesh);
-    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector, utils.greenMaterial, utils.axisMesh);
-    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector, utils.blueMaterial, utils.axisMesh);
+    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector);
+    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector);
+    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector);
 
     // end
     const endEntity = directionEntity.createChild("end");
@@ -182,17 +182,35 @@ export class NavigationGizmo extends Script {
     const endYEntity = endEntity.createChild("y");
     const endZEntity = endEntity.createChild("z");
 
-    this._createPositiveEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, utils.endMesh, "X");
-    this._createPositiveEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, utils.endMesh, "Y");
-    this._createPositiveEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, utils.endMesh, "Z");
+    this._createEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, "X", new Color(0, 0, 0, 1));
+    this._createEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, "Y", new Color(0, 0, 0, 1));
+    this._createEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, "Z", new Color(0, 0, 0, 1));
 
     const endNegativeXEntity = endEntity.createChild("-x");
     const endNegativeYEntity = endEntity.createChild("-y");
     const endNegativeZEntity = endEntity.createChild("-z");
 
-    this._createNegativeEnd(endNegativeXEntity, utils.xEndTranslateVector, utils.redMaterial, utils.endMesh, "-X");
-    this._createNegativeEnd(endNegativeYEntity, utils.yEndTranslateVector, utils.greenMaterial, utils.endMesh, "-Y");
-    this._createNegativeEnd(endNegativeZEntity, utils.zEndTranslateVector, utils.blueMaterial, utils.endMesh, "-Z");
+    this._createEnd(
+      endNegativeXEntity,
+      utils.xEndTranslateVector.negate(),
+      utils.greyMaterial,
+      "-X",
+      new Color(1, 1, 1, 0)
+    );
+    this._createEnd(
+      endNegativeYEntity,
+      utils.yEndTranslateVector.negate(),
+      utils.greyMaterial,
+      "-Y",
+      new Color(1, 1, 1, 0)
+    );
+    this._createEnd(
+      endNegativeZEntity,
+      utils.zEndTranslateVector.negate(),
+      utils.greyMaterial,
+      "-Z",
+      new Color(1, 1, 1, 0)
+    );
 
     // sphere behind
     const sphereEntity = this._gizmoEntity.createChild("sphere");
@@ -212,16 +230,16 @@ export class NavigationGizmo extends Script {
     this._sphereScript = sphereEntity.addComponent(SphereScript);
   }
 
-  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material, mesh: Mesh) {
+  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3) {
     entity.transform.setRotation(rotation.x, rotation.y, rotation.z);
     entity.transform.setPosition(position.x, position.y, position.z);
 
     const axisXRenderer = entity.addComponent(MeshRenderer);
-    axisXRenderer.mesh = mesh;
-    axisXRenderer.setMaterial(material);
+    axisXRenderer.mesh = this._utils.axisMesh;
+    axisXRenderer.setMaterial(this._utils.axisMaterial);
   }
 
-  private _createPositiveEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
+  private _createEnd(entity: Entity, position: Vector3, material: Material, axisName: string, fontColor: Color) {
     const utils = this._utils;
 
     entity.transform.setPosition(position.x, position.y, position.z);
@@ -231,9 +249,11 @@ export class NavigationGizmo extends Script {
     colliderShape.radius = utils.endRadius;
     sphereCollider.addShape(colliderShape);
 
-    const axisXRenderer = entity.addComponent(MeshRenderer);
-    axisXRenderer.mesh = mesh;
-    axisXRenderer.setMaterial(material);
+    const renderEntity = entity.createChild("back");
+    const axisRenderer = renderEntity.addComponent(MeshRenderer);
+    axisRenderer.mesh = utils.endMesh;
+    axisRenderer.setMaterial(material);
+    renderEntity.isActive = false;
 
     const textEntity = entity.createChild("text");
     textEntity.transform.setPosition(0, 0, 0.05);
@@ -241,42 +261,9 @@ export class NavigationGizmo extends Script {
     axisXTextRenderer.font = Font.createFromOS(this.engine, "Arial");
     axisXTextRenderer.text = axisName;
     axisXTextRenderer.fontStyle = FontStyle.Bold;
-    axisXTextRenderer.fontSize = 110;
-    axisXTextRenderer.color.set(0, 0, 0, 1);
-    axisXTextRenderer.horizontalAlignment = TextHorizontalAlignment.Center;
+    axisXTextRenderer.fontSize = 200;
 
-    const endComponent = entity.addComponent(EndScript);
-    this._endScript[axisName] = endComponent;
-  }
-
-  private _createNegativeEnd(entity: Entity, position: Vector3, material: Material, mesh: Mesh, axisName: string) {
-    const utils = this._utils;
-
-    entity.transform.setPosition(-position.x, -position.y, -position.z);
-
-    const sphereCollider = entity.addComponent(StaticCollider);
-    const colliderShape = new SphereColliderShape();
-    colliderShape.radius = utils.endRadius;
-    sphereCollider.addShape(colliderShape);
-
-    const axisXRenderer = entity.addComponent(MeshRenderer);
-    axisXRenderer.mesh = mesh;
-    axisXRenderer.setMaterial(material);
-
-    const innerEndEntity = entity.createChild("text");
-    innerEndEntity.transform.setPosition(0, 0, 0.03);
-    const axisXInnerRenderer = innerEndEntity.addComponent(MeshRenderer);
-    axisXInnerRenderer.mesh = utils.endInnerMesh;
-    axisXInnerRenderer.setMaterial(utils.darkMaterial);
-
-    const textEntity = entity.createChild("text");
-    textEntity.transform.setPosition(0, 0, 0.05);
-    const axisXTextRenderer = textEntity.addComponent(TextRenderer);
-    axisXTextRenderer.font = Font.createFromOS(this.engine, "Arial");
-    axisXTextRenderer.text = axisName;
-    axisXTextRenderer.fontStyle = FontStyle.Bold;
-    axisXTextRenderer.fontSize = 110;
-    axisXTextRenderer.color.set(1, 1, 1, 0);
+    axisXTextRenderer.color.copyFrom(fontColor);
     axisXTextRenderer.horizontalAlignment = TextHorizontalAlignment.Center;
 
     const endComponent = entity.addComponent(EndScript);

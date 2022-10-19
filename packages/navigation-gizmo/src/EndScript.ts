@@ -16,6 +16,7 @@ export class EndScript extends Script {
   private _sceneCameraEntity: Entity;
   private _controls: OrbitControl;
 
+  private _backEntity: Entity;
   private _textRenderer: TextRenderer;
   private _textColor: Color = new Color();
 
@@ -29,7 +30,7 @@ export class EndScript extends Script {
   private _tempVect: Vector3 = new Vector3();
   private _tempUnit: Vector3 = new Vector3();
   private _tempEyeVect: Vector3 = new Vector3();
-  private _upVector: Vector3 = new Vector3();
+  private _upVector: Vector3 = new Vector3(0, 1, 0);
   private _tempRotateVect: Vector3 = new Vector3();
 
   private AxisFactor = {
@@ -87,37 +88,39 @@ export class EndScript extends Script {
 
   set target(target: Vector3) {
     if (target) {
-      this._target = target;
+      this._target.copyFrom(target);
       this._isTargetMode = true;
     } else {
       this._isTargetMode = false;
-      this._target = EndScript._vector;
+      this._target.copyFrom(EndScript._vector);
     }
   }
+
   onAwake() {
     const textEntity = this.entity.findByName("text");
     this._textRenderer = textEntity.getComponent(TextRenderer);
     this._textColor.copyFrom(this._textRenderer.color);
+
+    this._backEntity = this.entity.findByName("back");
   }
 
   onPointerEnter() {
     this._textRenderer.color.set(1, 1, 1, 1);
+    this._backEntity.isActive = true;
   }
 
   onPointerExit() {
     this._textRenderer.color.copyFrom(this._textColor);
+    this._backEntity.isActive = false;
   }
 
   onPointerClick() {
     if (this._controls) {
       if (!this._isTargetMode) {
-        this._target = this._controls.target;
+        this._target.copyFrom(this._controls.target);
       }
       this._controls.enabled = false;
     }
-
-    this._textRenderer.color.set(0, 0, 0, 1);
-    this._textColor.copyFrom(this._textRenderer.color);
 
     const currentAxisName = this.entity.name;
     this._startMat = this._sceneCameraEntity.transform.worldMatrix.clone();
@@ -137,11 +140,10 @@ export class EndScript extends Script {
         this._flipView = false;
         this._progress = 0;
 
-        this._sceneCameraEntity.transform.getWorldUp(this._upVector);
         if (this._controls) {
           this._controls.enabled = true;
-          this._controls.up = this._upVector;
           this._controls.target = this._target;
+          this._controls.up = this._upVector;
         }
       }
 
@@ -171,9 +173,7 @@ export class EndScript extends Script {
 
     // get worldMatrix for scene camera
     Matrix.lookAt(tempEyeVect, tempTargetVect, upVector, tempMat);
-
     tempMat.invert();
-
     return tempMat;
   }
 }
