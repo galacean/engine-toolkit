@@ -114,14 +114,20 @@ uniform mat4 u_projInvMat;
 varying vec3 nearPoint;
 varying vec3 farPoint;
 
-vec3 UnprojectPoint(float x, float y, float z) {
-    vec4 unprojectedPoint =  u_viewInvMat * u_projInvMat * vec4(x, y, z, 1.0);
+vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat) {
+    vec4 unprojectedPoint =  viewInvMat * u_projInvMat * vec4(x, y, z, 1.0);
     return unprojectedPoint.xyz / unprojectedPoint.w;
 }
 
 void main() {
-    nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0).xyz;// unprojecting on the near plane
-    farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0).xyz;// unprojecting on the far plane
+    float tol = 0.0001;
+    mat4 viewInvMat = u_viewInvMat;
+    if (abs(viewInvMat[3][1]) < tol) {
+        viewInvMat[3][1] = tol;
+    }
+    
+    nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0, viewInvMat);// unprojecting on the near plane
+    farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat);// unprojecting on the far plane
     gl_Position = vec4(POSITION, 1.0);// using directly the clipped coordinates
 }`,
   `
