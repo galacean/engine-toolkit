@@ -342,7 +342,7 @@ export class Group {
       for (let i = entities.length - 1; i >= 0; i--) {
         out.add(entities[i].transform.worldPosition);
       }
-      out.scale(0.5);
+      out.scale(1 / entities.length);
     }
   }
 }
