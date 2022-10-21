@@ -323,9 +323,11 @@ export class Group {
     tempBoundBox.min.set(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
     tempBoundBox.max.set(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
     const { _entities: entities } = this;
+    let isEffective = false;
     for (let i = entities.length - 1; i >= 0; i--) {
       const entity = entities[i];
       const renderers = entity.getComponentsIncludeChildren(Renderer, []);
+      isEffective ||= renderers.length > 0;
       for (let j = renderers.length - 1; j >= 0; j--) {
         const renderer = renderers[j];
         if (renderer.entity.isActiveInHierarchy) {
@@ -333,6 +335,14 @@ export class Group {
         }
       }
     }
-    tempBoundBox.getCenter(out);
+    if (isEffective) {
+      tempBoundBox.getCenter(out);
+    } else {
+      out.set(0, 0, 0);
+      for (let i = entities.length - 1; i >= 0; i--) {
+        out.add(entities[i].transform.worldPosition);
+      }
+      out.scale(0.5);
+    }
   }
 }
