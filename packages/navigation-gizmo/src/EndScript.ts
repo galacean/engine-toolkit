@@ -28,41 +28,45 @@ export class EndScript extends Script {
   private _currentMat: Matrix = new Matrix();
   private _startMat: Matrix = new Matrix();
   private _tempVect: Vector3 = new Vector3();
-  private _tempUnit: Vector3 = new Vector3();
   private _tempEyeVect: Vector3 = new Vector3();
   private _upVector: Vector3 = new Vector3(0, 1, 0);
-  private _tempRotateVect: Vector3 = new Vector3();
 
   private AxisFactor = {
     x: {
-      upVector: new Vector3(0, 1, 0),
+      upVector: this._upVector,
       axis: "x",
-      factor: 1
+      factor: 1,
+      unit: new Vector3(0, 0.001, 0)
     },
     y: {
-      upVector: new Vector3(0, 0, 1),
+      upVector: this._upVector,
       axis: "y",
-      factor: 1
+      factor: 1,
+      unit: new Vector3(0, 0, 0.001)
     },
     z: {
-      upVector: new Vector3(0, 1, 0),
+      upVector: this._upVector,
       axis: "z",
-      factor: 1
+      factor: 1,
+      unit: new Vector3(0, 0.001, 0)
     },
     "-x": {
-      upVector: new Vector3(0, 1, 0),
+      upVector: this._upVector,
       axis: "x",
-      factor: -1
+      factor: -1,
+      unit: new Vector3(0, 0.001, 0)
     },
     "-y": {
-      upVector: new Vector3(0, 0, -1),
+      upVector: new Vector3(0, -1, 0),
       axis: "y",
-      factor: -1
+      factor: -1,
+      unit: new Vector3(0, 0, -0.001)
     },
     "-z": {
-      upVector: new Vector3(0, 1, 0),
+      upVector: this._upVector,
       axis: "z",
-      factor: -1
+      factor: -1,
+      unit: new Vector3(0, 0.001, 0)
     }
   };
 
@@ -153,23 +157,15 @@ export class EndScript extends Script {
   }
 
   private _getTargetMatrix(entity: Entity, axisName: string) {
-    const {
-      _tempRotateVect: tempRotateVect,
-      _target: tempTargetVect,
-      _tempEyeVect: tempEyeVect,
-      _tempVect: tempVect,
-      _tempMat: tempMat,
-      _tempUnit: tempUnit
-    } = this;
-    const { upVector, factor, axis } = this.AxisFactor[axisName];
+    const { _target: tempTargetVect, _tempEyeVect: tempEyeVect, _tempVect: tempVect, _tempMat: tempMat } = this;
+    const { upVector, factor, axis, unit } = this.AxisFactor[axisName];
 
     Vector3.subtract(entity.transform.worldPosition, tempTargetVect, tempVect);
     const radius = tempVect.length();
-    tempRotateVect.copyFrom(tempUnit);
-    tempRotateVect[axis] = factor * radius;
+    unit[axis] = factor * radius;
 
     // get eye position
-    Vector3.add(tempRotateVect, tempTargetVect, tempEyeVect);
+    Vector3.add(unit, tempTargetVect, tempEyeVect);
 
     // get worldMatrix for scene camera
     Matrix.lookAt(tempEyeVect, tempTargetVect, upVector, tempMat);
