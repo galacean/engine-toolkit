@@ -4,6 +4,7 @@ import {
   Entity,
   Layer,
   Matrix,
+  Pointer,
   Quaternion,
   Ray,
   Script,
@@ -120,7 +121,7 @@ export class SphereScript extends Script {
     }
   }
 
-  onPointerDown() {
+  onPointerDown(pointer: Pointer) {
     if (this._controls) {
       if (!this._isTargetMode) {
         this._target.copyFrom(this._controls.target);
@@ -136,7 +137,7 @@ export class SphereScript extends Script {
     SphereScript._startPos.copyFrom(this._sceneCameraEntity.transform.worldPosition);
 
     SphereScript._startQuat.copyFrom(this._directionEntity.transform.worldRotationQuaternion);
-    SphereScript._startPointer.copyFrom(this.engine.inputManager.pointerPosition);
+    SphereScript._startPointer.copyFrom(pointer.position);
 
     this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
     this._tempUpVec.y > 0 ? this._upVec.copyFrom(this._topVec) : this._upVec.copyFrom(this._bottomVec);
@@ -145,16 +146,16 @@ export class SphereScript extends Script {
     Vector3.cross(SphereScript._startAxis, this._upVec, SphereScript._startAxis);
 
     this._isTriggered = true;
-    this._navigateCamera();
+    this._navigateCamera(pointer);
   }
 
-  onPointerDrag() {
-    this._navigateCamera();
+  onPointerDrag(pointer: Pointer) {
+    this._navigateCamera(pointer);
   }
 
-  onPointerUp() {
+  onPointerUp(pointer: Pointer) {
     if (this._isTriggered) {
-      this._gizmoCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._ray);
+      this._gizmoCamera.screenPointToRay(pointer.position, this._ray);
       const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
       if (!result) {
         this._roundEntity.isActive = false;
@@ -189,8 +190,8 @@ export class SphereScript extends Script {
 
   // delta x translate to rotation around axis y
   // delta y translate to rotation around axis vertical to scene camera
-  private _navigateCamera() {
-    const movePointer = this.engine.inputManager.pointerPosition;
+  private _navigateCamera(pointer: Pointer) {
+    const movePointer = pointer.position;
 
     Vector2.subtract(SphereScript._startPointer, movePointer, this._tempPointer);
     let x = -this._tempPointer.x * this._speedXFactor;

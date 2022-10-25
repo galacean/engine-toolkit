@@ -6,11 +6,12 @@ import { StaticInterfaceImplement } from "./StaticInterfaceImplement";
 
 enum DeltaType {
   Moving,
-  Distance
+  Distance,
+  None
 }
 @StaticInterfaceImplement<IControlInput>()
 export class ControlPointer {
-  private static _deltaType: DeltaType = DeltaType.Moving;
+  private static _deltaType: DeltaType = DeltaType.None;
   private static _handlerType: ControlHandlerType = ControlHandlerType.None;
   private static _frameIndex: number = 0;
   private static _lastUsefulFrameIndex: number = -1;
@@ -29,7 +30,8 @@ export class ControlPointer {
         } else {
           // When `onPointerMove` happens on the same frame as `onPointerUp`
           // Need to record the movement of this frame
-          if (input.pointerMovingDelta.x !== 0 && input.pointerMovingDelta.y !== 0) {
+          const { deltaPosition } = input.pointers[0];
+          if (deltaPosition.x !== 0 && deltaPosition.y !== 0) {
             if (input.isPointerUp(PointerButton.Secondary)) {
               this._updateType(ControlHandlerType.PAN, DeltaType.Moving);
             } else if (input.isPointerUp(PointerButton.Auxiliary)) {
@@ -37,10 +39,10 @@ export class ControlPointer {
             } else if (input.isPointerUp(PointerButton.Primary)) {
               this._updateType(ControlHandlerType.ROTATE, DeltaType.Moving);
             } else {
-              this._updateType(ControlHandlerType.None, DeltaType.Moving);
+              this._updateType(ControlHandlerType.None, DeltaType.None);
             }
           } else {
-            this._updateType(ControlHandlerType.None, DeltaType.Moving);
+            this._updateType(ControlHandlerType.None, DeltaType.None);
           }
         }
         break;
@@ -51,7 +53,7 @@ export class ControlPointer {
         this._updateType(ControlHandlerType.PAN, DeltaType.Moving);
         break;
       default:
-        this._updateType(ControlHandlerType.None, DeltaType.Moving);
+        this._updateType(ControlHandlerType.None, DeltaType.None);
         break;
     }
     return this._handlerType;
@@ -61,13 +63,18 @@ export class ControlPointer {
     const { _frameIndex: frameIndex } = this;
     switch (this._deltaType) {
       case DeltaType.Moving:
+        outDelta.x = 0;
+        outDelta.y = 0;
         if (this._lastUsefulFrameIndex === frameIndex - 1) {
-          const { pointerMovingDelta } = control.input;
-          outDelta.x = pointerMovingDelta.x;
-          outDelta.y = pointerMovingDelta.y;
-        } else {
-          outDelta.x = 0;
-          outDelta.y = 0;
+          const { pointers } = control.input;
+          const length = pointers.length;
+          for (let i = length - 1; i >= 0; i--) {
+            const { deltaPosition } = pointers[i];
+            outDelta.x += deltaPosition.x;
+            outDelta.y += deltaPosition.y;
+          }
+          outDelta.x /= length;
+          outDelta.y /= length;
         }
         break;
       case DeltaType.Distance:
