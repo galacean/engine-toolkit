@@ -505,9 +505,9 @@ export class WireframeManager extends Script {
 
       const positionsOffset = globalPositions.length;
       WireframePrimitive.createCuboidWireframe(
-        tempVector.x,
-        tempVector.y,
-        tempVector.z,
+        tempVector.x * 2,
+        tempVector.y * 2,
+        tempVector.z * 2,
         globalPositions,
         positionsOffset,
         indices,
