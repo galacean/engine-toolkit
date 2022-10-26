@@ -3,6 +3,7 @@ import {
   Color,
   Entity,
   Layer,
+  MathUtil,
   Matrix,
   Pointer,
   Quaternion,
@@ -46,17 +47,19 @@ export class SphereScript extends Script {
 
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
-  private _tempPointer: Vector2 = new Vector2();
+  private _deltaPointer: Vector2 = new Vector2();
   private _tempMat: Matrix = new Matrix();
-  private _upVec: Vector3 = new Vector3();
+  private _upVec: Vector3 = new Vector3(0, 1, 0);
   private _topVec: Vector3 = new Vector3(0, 1, 0);
   private _bottomVec: Vector3 = new Vector3(0, -1, 0);
   private _target: Vector3 = SphereScript._vector;
   private _currentPos: Vector3 = new Vector3();
   private _rotateVec: Vector3 = new Vector3();
   private _tempUpVec: Vector3 = new Vector3();
+  private _startRadian: number = 0;
 
   private _ray: Ray = new Ray();
+  private _isBack: boolean = false;
 
   /**
    * @return scene camera
@@ -140,10 +143,19 @@ export class SphereScript extends Script {
     SphereScript._startPointer.copyFrom(pointer.position);
 
     this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
-    this._tempUpVec.y > 0 ? this._upVec.copyFrom(this._topVec) : this._upVec.copyFrom(this._bottomVec);
-
+    this._isBack = this._tempUpVec.y <= 0;
+    this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
     this._sceneCameraEntity.transform.getWorldForward(SphereScript._startAxis);
     Vector3.cross(SphereScript._startAxis, this._upVec, SphereScript._startAxis);
+
+    Vector3.subtract(SphereScript._startPos, this._target, this._tempUpVec);
+    const radius = this._tempUpVec.length();
+    const dot = Vector3.dot(this._tempUpVec, this._upVec);
+    if (this._isBack) {
+      this._startRadian = Math.PI + Math.acos(MathUtil.clamp(dot / radius, -1, 1));
+    } else {
+      this._startRadian = Math.acos(MathUtil.clamp(dot / radius, -1, 1));
+    }
 
     this._isTriggered = true;
     this._navigateCamera(pointer);
@@ -175,8 +187,7 @@ export class SphereScript extends Script {
   }
   onUpdate() {
     if (this._isTriggered) {
-      this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
-      this._tempUpVec.y > 0 ? this._upVec.copyFrom(this._topVec) : this._upVec.copyFrom(this._bottomVec);
+      this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
       Matrix.lookAt(this._currentPos, this._target, this._upVec, this._tempMat);
       this._tempMat.invert();
       this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
@@ -192,18 +203,24 @@ export class SphereScript extends Script {
   // delta y translate to rotation around axis vertical to scene camera
   private _navigateCamera(pointer: Pointer) {
     const movePointer = pointer.position;
+    Vector2.subtract(SphereScript._startPointer, movePointer, this._deltaPointer);
 
-    Vector2.subtract(SphereScript._startPointer, movePointer, this._tempPointer);
-    let x = -this._tempPointer.x * this._speedXFactor;
-    let y = -this._tempPointer.y * this._speedYFactor;
+    let x = -this._deltaPointer.x * this._speedXFactor;
+    let y = -this._deltaPointer.y * this._speedYFactor;
+
+    if (this._startRadian - y <= 0 || this._startRadian - y > Math.PI) {
+      this._isBack = true;
+    } else {
+      this._isBack = false;
+    }
 
     const { _tempQuat: tempQuat, _tempQuat2: tempQuat2 } = this;
 
     Quaternion.rotationAxisAngle(SphereScript._startAxis, y, tempQuat);
     Quaternion.rotationYawPitchRoll(x, 0, 0, tempQuat2);
-
     Quaternion.multiply(tempQuat, tempQuat2, tempQuat);
     Vector3.subtract(SphereScript._startPos, this._target, this._rotateVec);
+
     Vector3.transformByQuat(this._rotateVec, tempQuat.invert(), this._currentPos);
     Vector3.add(this._target, this._currentPos, this._currentPos);
   }

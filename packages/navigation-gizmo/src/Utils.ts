@@ -49,17 +49,17 @@ export class Utils {
 
     const bgMaterial = new UnlitMaterial(engine);
     bgMaterial.isTransparent = true;
-    bgMaterial.baseColor.set(1, 1, 1, 0.2);
+    bgMaterial.baseColor.set(1, 1, 1, 0.1);
     this.bgMaterial = bgMaterial;
 
     const axisMaterial = new UnlitMaterial(engine);
     axisMaterial.isTransparent = true;
-    axisMaterial.baseColor.set(0.5, 0.5, 0.5, 0.5);
+    axisMaterial.baseColor.set(0.2, 0.2, 0.2, 0.8);
     this.axisMaterial = axisMaterial;
 
     const greyMaterial = new UnlitMaterial(engine);
     greyMaterial.isTransparent = true;
-    greyMaterial.baseColor.set(0.5, 0.5, 0.5, 0.2);
+    greyMaterial.baseColor.set(0.5, 0.5, 0.5, 1);
     this.greyMaterial = greyMaterial;
 
     this.axisMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, this.axisLength);
