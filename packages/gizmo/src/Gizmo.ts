@@ -11,7 +11,9 @@ import {
   Vector3,
   MathUtil,
   Script,
-  MeshRenderElement
+  MeshRenderElement,
+  Pointer,
+  PointerPhase
 } from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -207,11 +209,13 @@ export class Gizmo extends Script {
       return;
     }
 
-    const { inputManager } = this.engine;
+    const { pointers } = this.engine.inputManager;
+    const pointer = pointers.find((pointer: Pointer) => {
+      return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
+    });
     if (this._isStarted) {
-      if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
-        const { pointerMovingDelta } = inputManager;
-        if (pointerMovingDelta.x !== 0 || pointerMovingDelta.y !== 0) {
+      if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
+        if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
           this._triggerGizmoMove();
         }
       } else {
@@ -239,19 +243,18 @@ export class Gizmo extends Script {
         });
         this._group._gizmoTransformDirty = false;
       }
-      const { pointerPosition } = inputManager;
-      if (pointerPosition) {
-        if (inputManager.isPointerHeldDown(PointerButton.Primary)) {
-          this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+      if (pointer) {
+        if ((pointer.pressedButtons & PointerButton.Primary) !== 0) {
+          this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
             if (result) {
               this._selectHandler(result);
             }
           });
         } else {
-          this.camera.screenPointToRay(inputManager.pointerPosition, this._tempRay);
+          this.camera.screenPointToRay(pointer.position, this._tempRay);
           const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
           if (isHit) {
-            this._framebufferPicker.pick(pointerPosition.x, pointerPosition.y).then((result) => {
+            this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
               this._onGizmoHoverEnd();
               if (result) {
                 this._overHandler(result);
@@ -288,9 +291,11 @@ export class Gizmo extends Script {
   private _triggerGizmoStart(currentType: State, axisName: string): void {
     this._isStarted = true;
     this._onGizmoHoverEnd();
-    const pointerPosition = this.engine.inputManager.pointerPosition;
-    if (pointerPosition) {
-      this._sceneCamera.screenPointToRay(pointerPosition, this._tempRay);
+    const pointer = this.engine.inputManager.pointers.find((pointer: Pointer) => {
+      return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
+    });
+    if (pointer) {
+      this._sceneCamera.screenPointToRay(pointer.position, this._tempRay);
       this._traverseControl(
         currentType,
         (control) => {
@@ -306,7 +311,10 @@ export class Gizmo extends Script {
   }
 
   private _triggerGizmoMove(): void {
-    this._sceneCamera.screenPointToRay(this.engine.inputManager.pointerPosition, this._tempRay2);
+    const pointer = this.engine.inputManager.pointers.find((pointer: Pointer) => {
+      return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
+    });
+    this._sceneCamera.screenPointToRay(pointer.position, this._tempRay2);
     this._currentControl.onMove(this._tempRay2);
   }
 
