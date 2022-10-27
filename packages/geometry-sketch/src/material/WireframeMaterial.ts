@@ -4,6 +4,7 @@ import { geometryTextureDefine, geometryTextureVert } from "./GeometryShader";
 Shader.create(
   "wireframeShader",
   `
+#include <common>
    uniform float u_lineScale;
    uniform mat4 u_VPMat;
    uniform mat4 u_worldMatrix;
