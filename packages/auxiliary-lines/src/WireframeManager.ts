@@ -318,6 +318,7 @@ export class WireframeManager extends Script {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
     const { position, rotation, size } = shape;
+    const { _tempVector: tempVector, _tempRotation: tempRotation } = WireframeManager;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -334,9 +335,10 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, WireframeManager._tempRotation);
-    this._localRotation(positionsOffset, WireframeManager._tempRotation);
-    this._localTranslate(positionsOffset, position);
+    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    this._localRotation(positionsOffset, tempRotation);
+    Vector3.multiply(position, worldScale, tempVector);
+    this._localTranslate(positionsOffset, tempVector);
 
     this._indicesCount += cuboidIndicesCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
@@ -350,6 +352,7 @@ export class WireframeManager extends Script {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
     const { position, rotation, radius } = shape;
+    const { _tempVector: tempVector, _tempRotation: tempRotation } = WireframeManager;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -364,9 +367,10 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, WireframeManager._tempRotation);
-    this._localRotation(positionsOffset, WireframeManager._tempRotation);
-    this._localTranslate(positionsOffset, position);
+    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    this._localRotation(positionsOffset, tempRotation);
+    Vector3.multiply(position, worldScale, tempVector);
+    this._localTranslate(positionsOffset, tempVector);
 
     this._indicesCount += sphereIndicesCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
@@ -381,7 +385,12 @@ export class WireframeManager extends Script {
     const worldScale = transform.lossyWorldScale;
     const maxScale = Math.max(worldScale.x, worldScale.y, worldScale.z);
     const { radius, height, upAxis, position, rotation } = shape;
-    const { _tempRotation: tempRotation, _tempAxis: tempAxis, _halfSqrt: halfSqrt } = WireframeManager;
+    const {
+      _tempVector: tempVector,
+      _tempRotation: tempRotation,
+      _tempAxis: tempAxis,
+      _halfSqrt: halfSqrt
+    } = WireframeManager;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -410,7 +419,8 @@ export class WireframeManager extends Script {
     Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
     Quaternion.multiply(tempRotation, tempAxis, tempRotation);
     this._localRotation(positionsOffset, tempRotation);
-    this._localTranslate(positionsOffset, position);
+    Vector3.multiply(position, worldScale, tempVector);
+    this._localTranslate(positionsOffset, tempVector);
 
     this._indicesCount += capsuleIndicesCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
