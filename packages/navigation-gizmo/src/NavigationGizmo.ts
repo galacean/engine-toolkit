@@ -13,8 +13,8 @@ import {
   StaticCollider,
   TextHorizontalAlignment,
   TextRenderer,
-  Vector2,
-  Vector3
+  Vector3,
+  Vector4
 } from "oasis-engine";
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
@@ -40,15 +40,11 @@ export class NavigationGizmo extends Script {
   };
 
   /**
-   * @position - gizmo position, the left upper point of the gizmo area, default (0, 0).
-   * Normalized expression, the upper left corner is (0, 0), and the lower right corner is (1, 1).
+   * @viewport Viewport, normalized expression
+   *
+   * (position along x, position along y, size along x, size along y)
    */
-  public position: Vector2 = new Vector2(0, 0);
-
-  /**
-   * @size gizmo size, the length and width of the gizmo area, default 0.12.
-   */
-  public size: number = 0.12;
+  public viewport: Vector4 = new Vector4(0, 0, 0.12, 0.12);
 
   /** scene camera
    * @return current scene camera
@@ -157,7 +153,7 @@ export class NavigationGizmo extends Script {
   }
 
   onUpdate() {
-    this._gizmoCamera.viewport.set(this.position.x, this.position.y, this.size, this.size);
+    this._gizmoCamera.viewport.copyFrom(this.viewport);
   }
 
   private _createGizmo() {
