@@ -14,8 +14,6 @@ import {
   Vector3
 } from "oasis-engine";
 
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
-
 /** @internal */
 export class SphereScript extends Script {
   private static _startQuat: Quaternion = new Quaternion();
@@ -43,7 +41,7 @@ export class SphereScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _controls: OrbitControl;
+  private _control: any;
 
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
@@ -71,8 +69,17 @@ export class SphereScript extends Script {
   set camera(camera: Camera) {
     this._sceneCamera = camera;
     this._sceneCameraEntity = this._sceneCamera.entity;
+  }
 
-    this._controls = this._sceneCameraEntity.getComponent(OrbitControl);
+  /**
+   * @return control component on the same camera, such as orbitControl
+   */
+  get control(): any {
+    return this._control;
+  }
+
+  set control(control: any) {
+    this._control = control;
   }
 
   /**
@@ -88,7 +95,7 @@ export class SphereScript extends Script {
       this._isTargetMode = true;
     } else {
       this._isTargetMode = false;
-      this._target = this._controls.target;
+      this._target = this._control.target;
     }
   }
 
@@ -125,12 +132,12 @@ export class SphereScript extends Script {
   }
 
   onPointerDown(pointer: Pointer) {
-    if (this._controls) {
+    if (this._control) {
       if (!this._isTargetMode) {
-        this._target.copyFrom(this._controls.target);
+        this._target.copyFrom(this._control.target);
       }
 
-      this._controls.enabled = false;
+      this._control.enabled = false;
     }
 
     this._sceneCamera.isOrthographic = false;
@@ -178,10 +185,10 @@ export class SphereScript extends Script {
 
       this._isTriggered = false;
 
-      if (this._controls) {
-        this._controls.enabled = true;
-        this._controls.target = this._target;
-        this._controls.up = this._upVec;
+      if (this._control) {
+        this._control.enabled = true;
+        this._control.target = this._target;
+        this._control.up = this._upVec;
       }
     }
   }

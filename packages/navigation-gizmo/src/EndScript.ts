@@ -1,7 +1,5 @@
 import { Camera, Color, Entity, MathUtil, Matrix, Quaternion, Script, TextRenderer, Vector3 } from "oasis-engine";
 
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
-
 /** @internal */
 export class EndScript extends Script {
   private static _vector: Vector3 = new Vector3();
@@ -14,7 +12,7 @@ export class EndScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _controls: OrbitControl;
+  private _control: any;
 
   private _backEntity: Entity;
   private _textRenderer: TextRenderer;
@@ -80,7 +78,17 @@ export class EndScript extends Script {
   set camera(camera: Camera) {
     this._sceneCamera = camera;
     this._sceneCameraEntity = this._sceneCamera.entity;
-    this._controls = this._sceneCameraEntity.getComponent(OrbitControl);
+  }
+
+  /**
+   * @return control component on the same camera, such as orbitControl
+   */
+  get control(): any {
+    return this._control;
+  }
+
+  set control(control: any) {
+    this._control = control;
   }
 
   /**
@@ -119,11 +127,11 @@ export class EndScript extends Script {
   }
 
   onPointerClick() {
-    if (this._controls) {
+    if (this._control) {
       if (!this._isTargetMode) {
-        this._target.copyFrom(this._controls.target);
+        this._target.copyFrom(this._control.target);
       }
-      this._controls.enabled = false;
+      this._control.enabled = false;
     }
 
     const currentAxisName = this.entity.name;
@@ -144,10 +152,10 @@ export class EndScript extends Script {
         this._flipView = false;
         this._progress = 0;
 
-        if (this._controls) {
-          this._controls.enabled = true;
-          this._controls.target = this._target;
-          this._controls.up = this._upVector;
+        if (this._control) {
+          this._control.enabled = true;
+          this._control.target = this._target;
+          this._control.up = this._upVector;
         }
       }
 

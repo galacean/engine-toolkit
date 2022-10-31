@@ -26,6 +26,7 @@ export class NavigationGizmo extends Script {
   private _previousSceneCullingMaskLayer: Layer = Layer.Nothing;
 
   private _gizmoCamera: Camera;
+  private _control: any;
   private _gizmoEntity: Entity;
   private _utils: Utils;
 
@@ -118,6 +119,21 @@ export class NavigationGizmo extends Script {
     this._sphereScript.target = target;
     Object.keys(this._endScript).forEach((key) => {
       this._endScript[key].target = target;
+    });
+  }
+
+  /**
+   * @return control component on the same camera, such as orbitControl
+   */
+  get control(): any {
+    return this._control;
+  }
+
+  set control(control: any) {
+    this._control = control;
+    this._sphereScript.control = control;
+    Object.keys(this._endScript).forEach((key) => {
+      this._endScript[key].control = control;
     });
   }
 
