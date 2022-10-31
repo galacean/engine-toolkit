@@ -171,9 +171,9 @@ export class NavigationGizmo extends Script {
     const axisYEntity = axisEntity.createChild("y");
     const axisZEntity = axisEntity.createChild("z");
 
-    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector);
-    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector);
-    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector);
+    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector, utils.redMaterial);
+    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector, utils.greenMaterial);
+    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector, utils.blueMaterial);
 
     // end
     const endEntity = directionEntity.createChild("end");
@@ -230,13 +230,13 @@ export class NavigationGizmo extends Script {
     this._sphereScript = sphereEntity.addComponent(SphereScript);
   }
 
-  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3) {
+  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material) {
     entity.transform.setRotation(rotation.x, rotation.y, rotation.z);
     entity.transform.setPosition(position.x, position.y, position.z);
 
     const axisXRenderer = entity.addComponent(MeshRenderer);
     axisXRenderer.mesh = this._utils.axisMesh;
-    axisXRenderer.setMaterial(this._utils.axisMaterial);
+    axisXRenderer.setMaterial(material);
   }
 
   private _createEnd(entity: Entity, position: Vector3, material: Material, axisName: string, fontColor: Color) {

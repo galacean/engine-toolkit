@@ -7,7 +7,6 @@ export class Utils {
   public greenMaterial: UnlitMaterial;
   public blueMaterial: UnlitMaterial;
   public bgMaterial: UnlitMaterial;
-  public axisMaterial: UnlitMaterial;
   public greyMaterial: UnlitMaterial;
 
   public axisMesh: Mesh;
@@ -51,11 +50,6 @@ export class Utils {
     bgMaterial.isTransparent = true;
     bgMaterial.baseColor.set(1, 1, 1, 0.1);
     this.bgMaterial = bgMaterial;
-
-    const axisMaterial = new UnlitMaterial(engine);
-    axisMaterial.isTransparent = true;
-    axisMaterial.baseColor.set(0.2, 0.2, 0.2, 0.8);
-    this.axisMaterial = axisMaterial;
 
     const greyMaterial = new UnlitMaterial(engine);
     greyMaterial.isTransparent = true;
