@@ -198,9 +198,9 @@ export class NavigationGizmo extends Script {
     const endYEntity = endEntity.createChild("y");
     const endZEntity = endEntity.createChild("z");
 
-    this._createEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, "X", new Color(0, 0, 0, 1));
-    this._createEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, "Y", new Color(0, 0, 0, 1));
-    this._createEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, "Z", new Color(0, 0, 0, 1));
+    this._createEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, "X", new Color(1.0, 0.25, 0.25, 1.0));
+    this._createEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, "Y", new Color(0.5, 0.8, 0.2, 1.0));
+    this._createEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, "Z", new Color(0.3, 0.5, 1.0, 1.0));
 
     const endNegativeXEntity = endEntity.createChild("-x");
     const endNegativeYEntity = endEntity.createChild("-y");
