@@ -2,6 +2,7 @@ import {
   Camera,
   CameraClearFlags,
   Color,
+  Component,
   Entity,
   Font,
   FontStyle,
@@ -20,13 +21,19 @@ import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";
 
+export interface Control {
+  target: Vector3;
+  up: Vector3;
+  enabled: boolean;
+}
+
 export class NavigationGizmo extends Script {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
   private _previousSceneCullingMaskLayer: Layer = Layer.Nothing;
 
   private _gizmoCamera: Camera;
-  private _control: any;
+  private _control: Control;
   private _gizmoEntity: Entity;
   private _utils: Utils;
 
@@ -125,11 +132,11 @@ export class NavigationGizmo extends Script {
   /**
    * @return control component on the same camera, such as orbitControl
    */
-  get control(): any {
+  get control(): Control {
     return this._control;
   }
 
-  set control(control: any) {
+  set control(control: Control) {
     this._control = control;
     this._sphereScript.control = control;
     Object.keys(this._endScript).forEach((key) => {

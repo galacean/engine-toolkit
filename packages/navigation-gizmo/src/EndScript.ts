@@ -1,4 +1,5 @@
 import { Camera, Color, Entity, MathUtil, Matrix, Quaternion, Script, TextRenderer, Vector3 } from "oasis-engine";
+import { Control } from "./NavigationGizmo";
 
 /** @internal */
 export class EndScript extends Script {
@@ -12,7 +13,7 @@ export class EndScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _control: any;
+  private _control: Control;
 
   private _backEntity: Entity;
   private _textRenderer: TextRenderer;
@@ -83,11 +84,11 @@ export class EndScript extends Script {
   /**
    * @return control component on the same camera, such as orbitControl
    */
-  get control(): any {
+  get control(): Control {
     return this._control;
   }
 
-  set control(control: any) {
+  set control(control: Control) {
     this._control = control;
   }
 

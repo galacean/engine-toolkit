@@ -13,6 +13,7 @@ import {
   Vector2,
   Vector3
 } from "oasis-engine";
+import { Control } from "./NavigationGizmo";
 
 /** @internal */
 export class SphereScript extends Script {
@@ -41,7 +42,7 @@ export class SphereScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _control: any;
+  private _control: Control;
 
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
@@ -74,11 +75,11 @@ export class SphereScript extends Script {
   /**
    * @return control component on the same camera, such as orbitControl
    */
-  get control(): any {
+  get control(): Control {
     return this._control;
   }
 
-  set control(control: any) {
+  set control(control: Control) {
     this._control = control;
   }
 
