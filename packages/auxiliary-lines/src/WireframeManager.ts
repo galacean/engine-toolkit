@@ -60,6 +60,7 @@ export class WireframeManager extends Script {
   private _globalPositions: Vector3[] = [];
   private _indices: Uint16Array | Uint32Array = null;
   private _indicesCount = 0;
+  private _boundsIndicesCount = 0;
   private _supportUint32Array: boolean;
 
   private _wireframeRenderers: Renderer[] = [];
@@ -284,11 +285,11 @@ export class WireframeManager extends Script {
   }
 
   /**
-   * Create auxiliary mesh for renderer.
+   * Create auxiliary mesh for renderer axis-aligned boundingbox.
    * @param renderer - The Renderer
    */
   addRendererWireframe(renderer: Renderer): void {
-    this._growthIndexMemory(WireframePrimitive.cuboidIndexCount);
+    this._boundsIndicesCount += WireframePrimitive.cuboidIndexCount;
     this._wireframeRenderers.push(renderer);
   }
 
@@ -506,6 +507,7 @@ export class WireframeManager extends Script {
     }
 
     // update world-space geometry
+    this._growthIndexMemory(this._boundsIndicesCount);
     let indicesCount = this._indicesCount;
     for (let i = 0; i < wireframeRenderers.length; i++) {
       const renderer = wireframeRenderers[i];
