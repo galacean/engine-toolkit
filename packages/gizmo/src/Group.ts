@@ -1,4 +1,4 @@
-import { BoundingBox, Renderer, Vector3, Matrix, Entity, ListenerUpdateFlag } from "oasis-engine";
+import { BoundingBox, Renderer, Vector3, Matrix, Entity } from "oasis-engine";
 import { AnchorType, CoordinateType } from "./enums/GizmoState";
 
 /**
@@ -36,7 +36,7 @@ export class Group {
   _gizmoTransformDirty: boolean = true;
 
   private _entities: Entity[] = [];
-  private _listeners: ListenerUpdateFlag[] = [];
+  private _listeners: { entity: Entity; fun: (entity: Entity) => void }[] = [];
   private _worldMatrix: Matrix = new Matrix();
   private _anchorType: AnchorType = AnchorType.Pivot;
   private _coordinateType: CoordinateType = CoordinateType.Local;
@@ -144,7 +144,9 @@ export class Group {
     this._entities.length = 0;
     const { _listeners: listeners } = this;
     for (let i = listeners.length - 1; i >= 0; i--) {
-      listeners[i].destroy();
+      const listener = listeners[i];
+      // @ts-ignore
+      listener.entity.transform._updateFlagManager.removeListener(listener.fun);
     }
     listeners.length = 0;
     this._dirtyFlag = GroupDirtyFlag.All;
@@ -217,11 +219,10 @@ export class Group {
 
   private _applyAdd(entity: Entity): void {
     this._entities.push(entity);
-    // @ts-ignore
-    const listener = entity.transform._registerWorldChangeListener();
-    this._listeners.push(listener);
     const fun = this._onEntityWorldTransformChange(entity);
-    listener.listener = fun;
+    // @ts-ignore
+    entity.transform._updateFlagManager.addListener(fun);
+    this._listeners.push({ entity, fun });
     fun();
   }
 
@@ -235,14 +236,18 @@ export class Group {
         this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
       }
       this._entities.splice(index, 1);
-      this._listeners[index].destroy();
+      const listener = this._listeners[index];
+      // @ts-ignore
+      listener.entity.transform._updateFlagManager.removeListener(listener.fun);
       this._listeners.splice(index, 1);
     } else if (index > 0) {
       if (this._anchorType === AnchorType.Center) {
         this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
       }
       this._entities.splice(index, 1);
-      this._listeners[index].destroy();
+      const listener = this._listeners[index];
+      // @ts-ignore
+      listener.entity.transform._updateFlagManager.removeListener(listener.fun);
       this._listeners.splice(index, 1);
     }
   }
