@@ -1,6 +1,7 @@
 import {
   Camera,
   Color,
+  Component,
   Entity,
   Layer,
   MathUtil,
@@ -13,8 +14,6 @@ import {
   Vector2,
   Vector3
 } from "oasis-engine";
-
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
 
 /** @internal */
 export class SphereScript extends Script {
@@ -29,7 +28,6 @@ export class SphereScript extends Script {
   private _isTriggered: boolean = false;
   private _speedXFactor: number = 0.02;
   private _speedYFactor: number = 0.004;
-  private _isTargetMode: boolean = false;
 
   private _directionEntity: Entity;
   private _endEntity: Entity;
@@ -43,7 +41,6 @@ export class SphereScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _controls: OrbitControl;
 
   private _tempQuat: Quaternion = new Quaternion();
   private _tempQuat2: Quaternion = new Quaternion();
@@ -61,6 +58,8 @@ export class SphereScript extends Script {
   private _ray: Ray = new Ray();
   private _isBack: boolean = false;
 
+  private _disabledCompArray: Array<Component> = [];
+
   /**
    * @return scene camera
    */
@@ -71,8 +70,6 @@ export class SphereScript extends Script {
   set camera(camera: Camera) {
     this._sceneCamera = camera;
     this._sceneCameraEntity = this._sceneCamera.entity;
-
-    this._controls = this._sceneCameraEntity.getComponent(OrbitControl);
   }
 
   /**
@@ -82,14 +79,8 @@ export class SphereScript extends Script {
     return this._target;
   }
 
-  set target(target: Vector3) {
-    if (target) {
-      this._target = target;
-      this._isTargetMode = true;
-    } else {
-      this._isTargetMode = false;
-      this._target = this._controls.target;
-    }
+  set target(value: Vector3) {
+    this._target.copyFrom(value);
   }
 
   onAwake() {
@@ -125,13 +116,7 @@ export class SphereScript extends Script {
   }
 
   onPointerDown(pointer: Pointer) {
-    if (this._controls) {
-      if (!this._isTargetMode) {
-        this._target.copyFrom(this._controls.target);
-      }
-
-      this._controls.enabled = false;
-    }
+    this._disableComponent();
 
     this._sceneCamera.isOrthographic = false;
     this._recoverTextColor();
@@ -177,12 +162,7 @@ export class SphereScript extends Script {
       }
 
       this._isTriggered = false;
-
-      if (this._controls) {
-        this._controls.enabled = true;
-        this._controls.target = this._target;
-        this._controls.up = this._upVec;
-      }
+      this._enableComponent();
     }
   }
   onUpdate() {
@@ -241,6 +221,28 @@ export class SphereScript extends Script {
       const textEntity = entities[i].findByName("text");
       const textRenderer = textEntity.getComponent(TextRenderer);
       textRenderer.color.copyFrom(this._textColor[i]);
+    }
+  }
+
+  private _disableComponent() {
+    const components = [];
+    this._sceneCameraEntity.getComponents(Script, components);
+    for (let i = 0; i < components.length; i++) {
+      const currentComponent = components[i];
+      const proto = Object.getPrototypeOf(currentComponent);
+      if (proto.onUpdate || proto.onLateUpdate || proto.onPhysicsUpdate) {
+        if (currentComponent.enabled) {
+          currentComponent.enabled = false;
+          this._disabledCompArray.push(currentComponent);
+        }
+      }
+    }
+  }
+
+  private _enableComponent() {
+    for (let i = 0; i < this._disabledCompArray.length; i++) {
+      const currentComponent = this._disabledCompArray[i];
+      currentComponent.enabled = true;
     }
   }
 }

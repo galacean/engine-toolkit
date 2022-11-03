@@ -28,6 +28,7 @@ export class NavigationGizmo extends Script {
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
   private _utils: Utils;
+  private _target: Vector3 = new Vector3();
 
   private _sphereScript: SphereScript;
   private _endScript = {
@@ -46,9 +47,9 @@ export class NavigationGizmo extends Script {
   public position: Vector2 = new Vector2(0, 0);
 
   /**
-   * @size gizmo size, the length and width of the gizmo area, default 0.12.
+   * @size gizmo size, the length and width of the gizmo area, default (0.12,0.12).
    */
-  public size: number = 0.12;
+  public size: Vector2 = new Vector2(0.12, 0.12);
 
   /** scene camera
    * @return current scene camera
@@ -83,6 +84,20 @@ export class NavigationGizmo extends Script {
   }
 
   /**
+   * target point for gizmo, default (0,0,0)
+   * @return target point
+   */
+  get target(): Vector3 {
+    return this._target;
+  }
+
+  set target(value: Vector3) {
+    if (value !== this._target) {
+      this._target.copyFrom(value);
+    }
+  }
+
+  /**
    * gizmo layer, default Layer30
    * @return the layer for gizmo and gizmo camera's cullingMask
    * @remarks Layer duplicate warning, check whether this layer is taken
@@ -106,19 +121,6 @@ export class NavigationGizmo extends Script {
         sceneCamera.cullingMask ^= this._gizmoLayer;
       }
     }
-  }
-  /**
-   * @return target point of this gizmo, default (0,0,0)
-   */
-  get target(): Vector3 {
-    return this._sphereScript.target;
-  }
-
-  set target(target: Vector3) {
-    this._sphereScript.target = target;
-    Object.keys(this._endScript).forEach((key) => {
-      this._endScript[key].target = target;
-    });
   }
 
   /**
@@ -154,10 +156,14 @@ export class NavigationGizmo extends Script {
     this._gizmoCamera = gizmoCamera;
 
     this._createGizmo();
+
+    this._setTarget = this._setTarget.bind(this);
+    //@ts-ignore
+    this._target._onValueChanged = this._setTarget;
   }
 
   onUpdate() {
-    this._gizmoCamera.viewport.set(this.position.x, this.position.y, this.size, this.size);
+    this._gizmoCamera.viewport.set(this.position.x, this.position.y, this.size.x, this.size.y);
   }
 
   private _createGizmo() {
@@ -171,9 +177,9 @@ export class NavigationGizmo extends Script {
     const axisYEntity = axisEntity.createChild("y");
     const axisZEntity = axisEntity.createChild("z");
 
-    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector);
-    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector);
-    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector);
+    this._createAxis(axisXEntity, utils.xRotateVector, utils.xTranslateVector, utils.redMaterial);
+    this._createAxis(axisYEntity, utils.yRotateVector, utils.yTranslateVector, utils.greenMaterial);
+    this._createAxis(axisZEntity, utils.zRotateVector, utils.zTranslateVector, utils.blueMaterial);
 
     // end
     const endEntity = directionEntity.createChild("end");
@@ -182,9 +188,9 @@ export class NavigationGizmo extends Script {
     const endYEntity = endEntity.createChild("y");
     const endZEntity = endEntity.createChild("z");
 
-    this._createEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, "X", new Color(0, 0, 0, 1));
-    this._createEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, "Y", new Color(0, 0, 0, 1));
-    this._createEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, "Z", new Color(0, 0, 0, 1));
+    this._createEnd(endXEntity, utils.xEndTranslateVector, utils.redMaterial, "X", new Color(1.0, 0.25, 0.25, 1.0));
+    this._createEnd(endYEntity, utils.yEndTranslateVector, utils.greenMaterial, "Y", new Color(0.5, 0.8, 0.2, 1.0));
+    this._createEnd(endZEntity, utils.zEndTranslateVector, utils.blueMaterial, "Z", new Color(0.3, 0.5, 1.0, 1.0));
 
     const endNegativeXEntity = endEntity.createChild("-x");
     const endNegativeYEntity = endEntity.createChild("-y");
@@ -230,13 +236,13 @@ export class NavigationGizmo extends Script {
     this._sphereScript = sphereEntity.addComponent(SphereScript);
   }
 
-  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3) {
+  private _createAxis(entity: Entity, rotation: Vector3, position: Vector3, material: Material) {
     entity.transform.setRotation(rotation.x, rotation.y, rotation.z);
     entity.transform.setPosition(position.x, position.y, position.z);
 
     const axisXRenderer = entity.addComponent(MeshRenderer);
     axisXRenderer.mesh = this._utils.axisMesh;
-    axisXRenderer.setMaterial(this._utils.axisMaterial);
+    axisXRenderer.setMaterial(material);
   }
 
   private _createEnd(entity: Entity, position: Vector3, material: Material, axisName: string, fontColor: Color) {
@@ -268,5 +274,12 @@ export class NavigationGizmo extends Script {
 
     const endComponent = entity.addComponent(EndScript);
     this._endScript[axisName] = endComponent;
+  }
+
+  private _setTarget(): void {
+    this._sphereScript.target.copyFrom(this._target);
+    Object.keys(this._endScript).forEach((key) => {
+      this._endScript[key].target.copyFrom(this._target);
+    });
   }
 }

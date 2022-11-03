@@ -1,12 +1,19 @@
-import { Camera, Color, Entity, MathUtil, Matrix, Quaternion, Script, TextRenderer, Vector3 } from "oasis-engine";
-
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
+import {
+  Camera,
+  Color,
+  Component,
+  Entity,
+  MathUtil,
+  Matrix,
+  Quaternion,
+  Script,
+  TextRenderer,
+  Vector3
+} from "oasis-engine";
 
 /** @internal */
 export class EndScript extends Script {
   private static _vector: Vector3 = new Vector3();
-
-  private _isTargetMode: boolean = false;
 
   private _flipView: boolean = false;
   private _flipSpeed = 3.0;
@@ -14,7 +21,6 @@ export class EndScript extends Script {
 
   private _sceneCamera: Camera;
   private _sceneCameraEntity: Entity;
-  private _controls: OrbitControl;
 
   private _backEntity: Entity;
   private _textRenderer: TextRenderer;
@@ -30,6 +36,8 @@ export class EndScript extends Script {
   private _tempVect: Vector3 = new Vector3();
   private _tempEyeVect: Vector3 = new Vector3();
   private _upVector: Vector3 = new Vector3(0, 1, 0);
+
+  private _disabledCompArray: Array<Component> = [];
 
   private AxisFactor = {
     x: {
@@ -80,24 +88,18 @@ export class EndScript extends Script {
   set camera(camera: Camera) {
     this._sceneCamera = camera;
     this._sceneCameraEntity = this._sceneCamera.entity;
-    this._controls = this._sceneCameraEntity.getComponent(OrbitControl);
   }
 
   /**
+   * target point for gizmo, default (0,0,0)
    * @return target point
    */
   get target(): Vector3 {
     return this._target;
   }
 
-  set target(target: Vector3) {
-    if (target) {
-      this._target.copyFrom(target);
-      this._isTargetMode = true;
-    } else {
-      this._isTargetMode = false;
-      this._target.copyFrom(EndScript._vector);
-    }
+  set target(value: Vector3) {
+    this._target.copyFrom(value);
   }
 
   onAwake() {
@@ -119,12 +121,7 @@ export class EndScript extends Script {
   }
 
   onPointerClick() {
-    if (this._controls) {
-      if (!this._isTargetMode) {
-        this._target.copyFrom(this._controls.target);
-      }
-      this._controls.enabled = false;
-    }
+    this._disableComponent();
 
     const currentAxisName = this.entity.name;
     this._startMat = this._sceneCameraEntity.transform.worldMatrix.clone();
@@ -144,11 +141,7 @@ export class EndScript extends Script {
         this._flipView = false;
         this._progress = 0;
 
-        if (this._controls) {
-          this._controls.enabled = true;
-          this._controls.target = this._target;
-          this._controls.up = this._upVector;
-        }
+        this._enableComponent();
       }
 
       Matrix.lerp(this._startMat, this._targetMat, t, this._currentMat);
@@ -171,5 +164,27 @@ export class EndScript extends Script {
     Matrix.lookAt(tempEyeVect, tempTargetVect, upVector, tempMat);
     tempMat.invert();
     return tempMat;
+  }
+
+  private _disableComponent() {
+    const components = [];
+    this._sceneCameraEntity.getComponents(Script, components);
+    for (let i = 0; i < components.length; i++) {
+      const currentComponent = components[i];
+      const proto = Object.getPrototypeOf(currentComponent);
+      if (proto.onUpdate || proto.onLateUpdate || proto.onPhysicsUpdate) {
+        if (currentComponent.enabled) {
+          currentComponent.enabled = false;
+          this._disabledCompArray.push(currentComponent);
+        }
+      }
+    }
+  }
+
+  private _enableComponent() {
+    for (let i = 0; i < this._disabledCompArray.length; i++) {
+      const currentComponent = this._disabledCompArray[i];
+      currentComponent.enabled = true;
+    }
   }
 }
