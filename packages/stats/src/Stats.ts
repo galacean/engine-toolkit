@@ -1,25 +1,19 @@
-import { EngineFeature, Engine, Scene } from "oasis-engine";
+import { Script, Camera } from "oasis-engine";
 import Monitor from "./Monitor";
 
 /**
- * Engine Feature: Display engine status data such as FPS.
+ * Display engine status data such as FPS.
  */
-export class Stats extends EngineFeature {
+export class Stats extends Script {
   private monitor: Monitor;
 
   /**
-   * Constructor of Stats.
+   * @override
+   * @param camera - The monitor camera
    */
-  constructor() {
-    super();
-  }
-
-  /**
-   * Tick pre-callback.
-   */
-  preTick(engine: Engine, currentScene: Scene): void {
+  onBeginRender(camera: Camera) {
     if (!this.monitor) {
-      const gl = currentScene.engine._hardwareRenderer.gl;
+      const gl = camera.engine._hardwareRenderer.gl;
       if (gl) {
         this.monitor = new Monitor(gl);
       }
@@ -27,9 +21,10 @@ export class Stats extends EngineFeature {
   }
 
   /**
-   * Tick post-callback.
+   * @override
+   * @param camera - The monitor camera
    */
-  postTick(engine: Engine, currentScene: Scene): void {
+  onEndRender(camera: Camera) {
     if (this.monitor) {
       this.monitor.update();
     }

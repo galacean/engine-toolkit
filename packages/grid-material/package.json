@@ -1,0 +1,24 @@
+{
+  "name": "@oasis-engine-toolkit/grid-material",
+  "version": "0.9.0-alpha.12",
+  "license": "MIT",
+  "scripts": {
+    "b:types": "tsc",
+    "lint:fix": "tslint --fix --project ./tsconfig.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "types": "types/index.d.ts",
+  "browser": "dist/browser.js",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "files": [
+    "dist/**/*",
+    "types/**/*"
+  ],
+  "peerDependencies": {
+    "oasis-engine": "^0.9.0-alpha"
+  }
+}

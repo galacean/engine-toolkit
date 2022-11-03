@@ -44,7 +44,7 @@ export class SkeletonViewer extends Script {
     if (!materialMap.get(engine)) {
       const material = new Material(entity.engine, Shader.find("skeleton-viewer"));
       material.renderState.rasterState.depthBias = -100000000;
-      material.renderQueueType = RenderQueueType.Transparent;
+      material.renderState.renderQueueType = RenderQueueType.Transparent;
       materialMap.set(engine, material);
     }
 
@@ -162,11 +162,12 @@ export class SkeletonViewer extends Script {
   }
 
   private _showSkeleton(renderer: SkinnedMeshRenderer): void {
-    if (!renderer.jointNodes) {
+    // @ts-ignore
+    if (!renderer._jointEntitys) {
       renderer.update(0);
     }
-
-    const joints = renderer.jointNodes;
+    // @ts-ignore
+    const joints: Entity[] = renderer._jointEntitys;
 
     const spheres: Entity[][] = [];
 

@@ -5,6 +5,7 @@ import {
   CapsuleColliderShape,
   Collider,
   ColliderShapeUpAxis,
+  Color,
   dependentComponents,
   DirectLight,
   Entity,
@@ -14,6 +15,8 @@ import {
   MeshTopology,
   ModelMesh,
   PointLight,
+  Quaternion,
+  Renderer,
   Script,
   SphereColliderShape,
   SpotLight,
@@ -38,6 +41,10 @@ export class WireframeManager extends Script {
     new Vector3(-1, -1, -1)
   ];
   private static _tempMatrix: Matrix = new Matrix();
+  private static _tempVector: Vector3 = new Vector3();
+  private static _tempRotation: Quaternion = new Quaternion();
+  private static _tempAxis: Quaternion = new Quaternion();
+  private static readonly _halfSqrt: number = 0.70710678118655;
 
   private _cameraPositions = [
     new Vector3(),
@@ -53,8 +60,10 @@ export class WireframeManager extends Script {
   private _globalPositions: Vector3[] = [];
   private _indices: Uint16Array | Uint32Array = null;
   private _indicesCount = 0;
+  private _boundsIndicesCount = 0;
   private _supportUint32Array: boolean;
 
+  private _wireframeRenderers: Renderer[] = [];
   private _wireframeElements: WireframeElement[] = [];
   private _renderer: MeshRenderer;
   private _material: UnlitMaterial;
@@ -73,9 +82,21 @@ export class WireframeManager extends Script {
   }
 
   /**
+   * Base color.
+   */
+  get baseColor(): Color {
+    return this._material.baseColor;
+  }
+
+  set baseColor(value: Color) {
+    this._material.baseColor = value;
+  }
+
+  /**
    * Clear all wireframe.
    */
   clear(): void {
+    this._wireframeRenderers.length = 0;
     this._wireframeElements.length = 0;
     this._localPositions.length = 0;
     this._globalPositions.length = 0;
@@ -264,6 +285,15 @@ export class WireframeManager extends Script {
   }
 
   /**
+   * Create auxiliary mesh for renderer axis-aligned boundingbox.
+   * @param renderer - The Renderer
+   */
+  addRendererWireframe(renderer: Renderer): void {
+    this._boundsIndicesCount += WireframePrimitive.cuboidIndexCount;
+    this._wireframeRenderers.push(renderer);
+  }
+
+  /**
    * Create auxiliary mesh for collider.
    * @param collider - The Collider
    */
@@ -288,7 +318,8 @@ export class WireframeManager extends Script {
   addBoxColliderShapeWireframe(shape: BoxColliderShape): void {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
-    const size = shape.size;
+    const { position, rotation, size } = shape;
+    const { _tempVector: tempVector, _tempRotation: tempRotation } = WireframeManager;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -305,7 +336,10 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    this._localTranslate(positionsOffset, shape.position);
+    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    this._localRotation(positionsOffset, tempRotation);
+    Vector3.multiply(position, worldScale, tempVector);
+    this._localTranslate(positionsOffset, tempVector);
 
     this._indicesCount += cuboidIndicesCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
@@ -318,7 +352,8 @@ export class WireframeManager extends Script {
   addSphereColliderShapeWireframe(shape: SphereColliderShape): void {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
-    const radius = shape.radius;
+    const { position, rotation, radius } = shape;
+    const { _tempVector: tempVector, _tempRotation: tempRotation } = WireframeManager;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -333,7 +368,10 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    this._localTranslate(positionsOffset, shape.position);
+    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    this._localRotation(positionsOffset, tempRotation);
+    Vector3.multiply(position, worldScale, tempVector);
+    this._localTranslate(positionsOffset, tempVector);
 
     this._indicesCount += sphereIndicesCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
@@ -347,9 +385,13 @@ export class WireframeManager extends Script {
     const transform = shape.collider.entity.transform;
     const worldScale = transform.lossyWorldScale;
     const maxScale = Math.max(worldScale.x, worldScale.y, worldScale.z);
-    const radius = shape.radius;
-    const height = shape.height;
-    const upAxis = shape.upAxis;
+    const { radius, height, upAxis, position, rotation } = shape;
+    const {
+      _tempVector: tempVector,
+      _tempRotation: tempRotation,
+      _tempAxis: tempAxis,
+      _halfSqrt: halfSqrt
+    } = WireframeManager;
 
     const localPositions = this._localPositions;
     const positionsOffset = localPositions.length;
@@ -367,12 +409,19 @@ export class WireframeManager extends Script {
     );
     switch (upAxis) {
       case ColliderShapeUpAxis.X:
-        this._rotateAroundZ(positionsOffset);
+        tempAxis.set(0, 0, halfSqrt, halfSqrt);
+        break;
+      case ColliderShapeUpAxis.Y:
+        tempAxis.set(0, 0, 0, 1);
         break;
       case ColliderShapeUpAxis.Z:
-        this._rotateAroundX(positionsOffset);
+        tempAxis.set(halfSqrt, 0, 0, halfSqrt);
     }
-    this._localTranslate(positionsOffset, shape.position);
+    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    Quaternion.multiply(tempRotation, tempAxis, tempRotation);
+    this._localRotation(positionsOffset, tempRotation);
+    Vector3.multiply(position, worldScale, tempVector);
+    this._localTranslate(positionsOffset, tempVector);
 
     this._indicesCount += capsuleIndicesCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
@@ -420,11 +469,16 @@ export class WireframeManager extends Script {
    * @param deltaTime
    */
   onUpdate(deltaTime: number): void {
-    const mesh = this._mesh;
-    const localPositions = this._localPositions;
-    const globalPositions = this._globalPositions;
-    const wireframeElements = this._wireframeElements;
+    const {
+      _mesh: mesh,
+      _localPositions: localPositions,
+      _globalPositions: globalPositions,
+      _wireframeElements: wireframeElements,
+      _wireframeRenderers: wireframeRenderers,
+      _indices: indices
+    } = this;
 
+    // update local to world geometry
     const localPositionLength = localPositions.length;
     globalPositions.length = localPositionLength;
     let positionIndex = 0;
@@ -452,11 +506,38 @@ export class WireframeManager extends Script {
       }
     }
 
-    if (needUpdate) {
+    // update world-space geometry
+    this._growthIndexMemory(this._boundsIndicesCount);
+    let indicesCount = this._indicesCount;
+    for (let i = 0; i < wireframeRenderers.length; i++) {
+      const renderer = wireframeRenderers[i];
+      const bounds = renderer.bounds;
+      const tempVector = WireframeManager._tempVector;
+      bounds.getExtent(tempVector);
+
+      const positionsOffset = globalPositions.length;
+      WireframePrimitive.createCuboidWireframe(
+        tempVector.x * 2,
+        tempVector.y * 2,
+        tempVector.z * 2,
+        globalPositions,
+        positionsOffset,
+        indices,
+        indicesCount
+      );
+      bounds.getCenter(tempVector);
+      for (let i = positionsOffset; i < globalPositions.length; i++) {
+        const position = globalPositions[i];
+        position.add(tempVector);
+      }
+      indicesCount += WireframePrimitive.cuboidIndexCount;
+    }
+
+    if (wireframeRenderers.length > 0 || needUpdate) {
       mesh.setPositions(globalPositions);
       mesh.setIndices(this._indices);
       mesh.uploadData(false);
-      mesh.subMesh.count = this._indicesCount;
+      mesh.subMesh.count = indicesCount;
     }
   }
 
@@ -483,6 +564,14 @@ export class WireframeManager extends Script {
     }
   }
 
+  private _localRotation(positionsOffset: number, rotation: Quaternion) {
+    const localPositions = this._localPositions;
+    for (let i = positionsOffset; i < localPositions.length; i++) {
+      const position = localPositions[i];
+      Vector3.transformByQuat(position, rotation, position);
+    }
+  }
+
   private _rotateAroundX(positionsOffset: number) {
     const localPositions = this._localPositions;
     for (let i = positionsOffset; i < localPositions.length; i++) {
@@ -491,17 +580,6 @@ export class WireframeManager extends Script {
       const pz = position.z;
       position.z = py;
       position.y = -pz;
-    }
-  }
-
-  private _rotateAroundZ(positionsOffset: number) {
-    const localPositions = this._localPositions;
-    for (let i = positionsOffset; i < localPositions.length; i++) {
-      const position = localPositions[i];
-      const px = position.x;
-      const py = position.y;
-      position.y = px;
-      position.x = -py;
     }
   }
 }
