@@ -98,8 +98,8 @@ export class EndScript extends Script {
     return this._target;
   }
 
-  set target(target: Vector3) {
-    this._target.copyFrom(target);
+  set target(value: Vector3) {
+    this._target.copyFrom(value);
   }
 
   onAwake() {

@@ -79,8 +79,8 @@ export class SphereScript extends Script {
     return this._target;
   }
 
-  set target(target: Vector3) {
-    this._target = target;
+  set target(value: Vector3) {
+    this._target.copyFrom(value);
   }
 
   onAwake() {

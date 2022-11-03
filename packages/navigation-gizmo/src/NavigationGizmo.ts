@@ -91,12 +91,12 @@ export class NavigationGizmo extends Script {
     return this._target;
   }
 
-  set target(target) {
-    this._target = target;
+  set target(value: Vector3) {
+    this._target.copyFrom(value);
 
-    this._sphereScript.target = target;
+    this._sphereScript.target.copyFrom(value);
     Object.keys(this._endScript).forEach((key) => {
-      this._endScript[key].target = target;
+      this._endScript[key].target.copyFrom(value);
     });
   }
 
