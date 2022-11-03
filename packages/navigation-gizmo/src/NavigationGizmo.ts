@@ -92,12 +92,14 @@ export class NavigationGizmo extends Script {
   }
 
   set target(value: Vector3) {
-    this._target.copyFrom(value);
+    if (value !== this._target) {
+      this._target.copyFrom(value);
 
-    this._sphereScript.target.copyFrom(value);
-    Object.keys(this._endScript).forEach((key) => {
-      this._endScript[key].target.copyFrom(value);
-    });
+      this._sphereScript.target.copyFrom(value);
+      Object.keys(this._endScript).forEach((key) => {
+        this._endScript[key].target.copyFrom(value);
+      });
+    }
   }
 
   /**
