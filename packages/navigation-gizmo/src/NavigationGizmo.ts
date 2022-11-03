@@ -159,6 +159,10 @@ export class NavigationGizmo extends Script {
     this._gizmoCamera = gizmoCamera;
 
     this._createGizmo();
+
+    this._setTarget = this._setTarget.bind(this);
+    //@ts-ignore
+    this._target._onValueChanged = this._setTarget;
   }
 
   onUpdate() {
@@ -273,5 +277,9 @@ export class NavigationGizmo extends Script {
 
     const endComponent = entity.addComponent(EndScript);
     this._endScript[axisName] = endComponent;
+  }
+
+  private _setTarget(): void {
+    this.target.copyFrom(this._target);
   }
 }
