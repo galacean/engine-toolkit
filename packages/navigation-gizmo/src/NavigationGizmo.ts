@@ -2,7 +2,6 @@ import {
   Camera,
   CameraClearFlags,
   Color,
-  Component,
   Entity,
   Font,
   FontStyle,
@@ -21,21 +20,15 @@ import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";
 
-export interface Control {
-  target: Vector3;
-  up: Vector3;
-  enabled: boolean;
-}
-
 export class NavigationGizmo extends Script {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
   private _previousSceneCullingMaskLayer: Layer = Layer.Nothing;
 
   private _gizmoCamera: Camera;
-  private _control: Control;
   private _gizmoEntity: Entity;
   private _utils: Utils;
+  private _target: Vector3 = new Vector3();
 
   private _sphereScript: SphereScript;
   private _endScript = {
@@ -91,6 +84,23 @@ export class NavigationGizmo extends Script {
   }
 
   /**
+   * target point for gizmo, default (0,0,0)
+   * @return target point
+   */
+  get target(): Vector3 {
+    return this._target;
+  }
+
+  set target(target) {
+    this._target = target;
+
+    this._sphereScript.target = target;
+    Object.keys(this._endScript).forEach((key) => {
+      this._endScript[key].target = target;
+    });
+  }
+
+  /**
    * gizmo layer, default Layer30
    * @return the layer for gizmo and gizmo camera's cullingMask
    * @remarks Layer duplicate warning, check whether this layer is taken
@@ -114,34 +124,6 @@ export class NavigationGizmo extends Script {
         sceneCamera.cullingMask ^= this._gizmoLayer;
       }
     }
-  }
-  /**
-   * @return target point of this gizmo, default (0,0,0)
-   */
-  get target(): Vector3 {
-    return this._sphereScript.target;
-  }
-
-  set target(target: Vector3) {
-    this._sphereScript.target = target;
-    Object.keys(this._endScript).forEach((key) => {
-      this._endScript[key].target = target;
-    });
-  }
-
-  /**
-   * @return control component on the same camera, such as orbitControl
-   */
-  get control(): Control {
-    return this._control;
-  }
-
-  set control(control: Control) {
-    this._control = control;
-    this._sphereScript.control = control;
-    Object.keys(this._endScript).forEach((key) => {
-      this._endScript[key].control = control;
-    });
   }
 
   /**
