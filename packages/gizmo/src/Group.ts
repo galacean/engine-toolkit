@@ -36,7 +36,7 @@ export class Group {
   _gizmoTransformDirty: boolean = true;
 
   private _entities: Entity[] = [];
-  private _listeners: { entity: Entity; fun: (entity: Entity) => void }[] = [];
+  private _listeners: { flagManager; fun: (entity: Entity) => void }[] = [];
   private _worldMatrix: Matrix = new Matrix();
   private _anchorType: AnchorType = AnchorType.Pivot;
   private _coordinateType: CoordinateType = CoordinateType.Local;
@@ -145,8 +145,7 @@ export class Group {
     const { _listeners: listeners } = this;
     for (let i = listeners.length - 1; i >= 0; i--) {
       const listener = listeners[i];
-      // @ts-ignore
-      listener.entity.transform._updateFlagManager.removeListener(listener.fun);
+      listener.flagManager.removeListener(listener.fun);
     }
     listeners.length = 0;
     this._dirtyFlag = GroupDirtyFlag.All;
@@ -221,8 +220,9 @@ export class Group {
     this._entities.push(entity);
     const fun = this._onEntityWorldTransformChange(entity);
     // @ts-ignore
-    entity.transform._updateFlagManager.addListener(fun);
-    this._listeners.push({ entity, fun });
+    const flagManager = entity.transform._updateFlagManager;
+    flagManager.addListener(fun);
+    this._listeners.push({ flagManager, fun });
     fun();
   }
 
@@ -237,8 +237,7 @@ export class Group {
       }
       this._entities.splice(index, 1);
       const listener = this._listeners[index];
-      // @ts-ignore
-      listener.entity.transform._updateFlagManager.removeListener(listener.fun);
+      listener.flagManager.removeListener(listener.fun);
       this._listeners.splice(index, 1);
     } else if (index > 0) {
       if (this._anchorType === AnchorType.Center) {
@@ -246,8 +245,7 @@ export class Group {
       }
       this._entities.splice(index, 1);
       const listener = this._listeners[index];
-      // @ts-ignore
-      listener.entity.transform._updateFlagManager.removeListener(listener.fun);
+      listener.flagManager.removeListener(listener.fun);
       this._listeners.splice(index, 1);
     }
   }
