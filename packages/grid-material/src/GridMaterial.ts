@@ -107,15 +107,15 @@ export class GridMaterial extends BaseMaterial {
 Shader.create(
   "grid",
   `
+#include <common>
 #include <common_vert>
 uniform mat4 u_viewInvMat;
-uniform mat4 u_projInvMat;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
 
-vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat) {
-    vec4 unprojectedPoint =  viewInvMat * u_projInvMat * vec4(x, y, z, 1.0);
+vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat, mat4 projInvMat) {
+    vec4 unprojectedPoint =  viewInvMat * projInvMat * vec4(x, y, z, 1.0);
     return unprojectedPoint.xyz / unprojectedPoint.w;
 }
 
@@ -125,9 +125,10 @@ void main() {
     if (abs(viewInvMat[3][1]) < tol) {
         viewInvMat[3][1] = tol;
     }
-    
-    nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0, viewInvMat);// unprojecting on the near plane
-    farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat);// unprojecting on the far plane
+    mat4 projInvMat = INVERSE_MAT(u_projMat);
+
+    nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0, viewInvMat, projInvMat);// unprojecting on the near plane
+    farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat, projInvMat);// unprojecting on the far plane
     gl_Position = vec4(POSITION, 1.0);// using directly the clipped coordinates
 }`,
   `
