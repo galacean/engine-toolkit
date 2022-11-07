@@ -11,7 +11,6 @@ import {
   Texture2D,
   TextureFilterMode,
   TextureFormat,
-  Transform,
   VertexBufferBinding,
   VertexElement
 } from "oasis-engine";
@@ -41,7 +40,7 @@ export class SketchRenderer extends SkinnedMeshRenderer {
   private static _worldNormalProp = Shader.getPropertyByName("u_worldNormal");
 
   private _worldNormalMatrix = new Matrix();
-  private _worldTransform: Transform = null;
+  private _worldMatrix: Matrix = null;
   private _targetMesh: ModelMesh = null;
   private _verticesTexture: Texture2D = null;
   private _indicesTexture: Texture2D = null;
@@ -69,10 +68,10 @@ export class SketchRenderer extends SkinnedMeshRenderer {
   /**
    * World matrix
    */
-  set worldTransform(value: Transform) {
-    if (value !== this._worldTransform) {
-      this._worldTransform = value;
-      this.shaderData.setMatrix(SketchRenderer._worldMatrixProp, value.worldMatrix);
+  set worldMatrix(value: Matrix) {
+    if (value !== this._worldMatrix) {
+      this._worldMatrix = value;
+      this.shaderData.setMatrix(SketchRenderer._worldMatrixProp, value);
     }
   }
 
@@ -198,11 +197,10 @@ export class SketchRenderer extends SkinnedMeshRenderer {
    */
   update(deltaTime: number) {
     super.update(deltaTime);
-    const worldTransform = this._worldTransform;
-    if (worldTransform) {
-      //@ts-ignore
+    const worldMatrix = this._worldMatrix;
+    if (worldMatrix) {
       const worldNormalMatrix = this._worldNormalMatrix;
-      Matrix.invert(worldTransform.worldMatrix, worldNormalMatrix);
+      Matrix.invert(worldMatrix, worldNormalMatrix);
       worldNormalMatrix.transpose();
       this.shaderData.setMatrix(SketchRenderer._worldNormalProp, worldNormalMatrix);
     }
