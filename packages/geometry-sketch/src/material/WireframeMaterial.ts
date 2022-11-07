@@ -52,10 +52,7 @@ void main() {
     #include <begin_normal_vert>
     #include <skinning_vert>
     
-    gl_Position = position;
-    #ifndef O3_HAS_SKIN
-        gl_Position = u_worldMatrix * gl_Position; 
-    #endif
+    gl_Position = u_worldMatrix * position; 
     gl_Position = u_VPMat * gl_Position; 
 }
 `,

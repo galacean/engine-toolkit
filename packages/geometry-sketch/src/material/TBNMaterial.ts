@@ -4,6 +4,7 @@ import { geometryTextureDefine, geometryTextureVert } from "./GeometryShader";
 Shader.create(
   "tbnShader",
   `
+#include <common>
    uniform float u_lineScale;
    uniform mat4 u_VPMat;
    uniform mat4 u_worldMatrix;
@@ -41,10 +42,7 @@ void main() {
     #include <begin_normal_vert>
     #include <skinning_vert>
 
-    gl_Position = position;
-    #ifndef O3_HAS_SKIN
-        gl_Position = u_worldMatrix * gl_Position; 
-    #endif
+    gl_Position = u_worldMatrix * position; 
     
 #if defined(SHOW_NORMAL) && defined(O3_HAS_NORMAL)
     if (gl_VertexID % 2 == 1) {
