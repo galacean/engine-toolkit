@@ -134,15 +134,16 @@ export class NavigationGizmo extends Script {
     this._gizmoCamera.priority = priority;
   }
 
-  onAwake() {
+  constructor(entity: Entity) {
+    super(entity);
     // @ts-ignore
-    if (!this.entity.engine.physicsManager._initialized) {
+    if (!entity.engine.physicsManager._initialized) {
       throw new Error("PhysicsManager is not initialized");
     }
 
     this._utils = new Utils(this.engine);
 
-    this._gizmoEntity = this.entity.createChild("navigation-gizmo");
+    this._gizmoEntity = entity.createChild("navigation-gizmo");
     this._gizmoEntity.layer = this._gizmoLayer;
 
     const gizmoCameraEntity = this._gizmoEntity.createChild("gizmo-camera");
