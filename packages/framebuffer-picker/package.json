@@ -1,6 +1,6 @@
 {
   "name": "@oasis-engine-toolkit/framebuffer-picker",
-  "version": "0.9.0-beta.3",
+  "version": "0.9.0-beta.4",
   "license": "MIT",
   "main": "dist/main.js",
   "module": "dist/module.js",
