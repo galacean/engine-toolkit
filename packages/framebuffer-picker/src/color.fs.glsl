@@ -1,5 +1,4 @@
 #include <common>
-#include <common_frag>
 
 uniform vec3 u_colorId;
 

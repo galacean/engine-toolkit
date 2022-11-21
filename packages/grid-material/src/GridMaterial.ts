@@ -131,8 +131,9 @@ void main() {
     farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat, projInvMat);// unprojecting on the far plane
     gl_Position = vec4(POSITION, 1.0);// using directly the clipped coordinates
 }`,
-  `
-#include <common_frag>
+
+`
+#include <transform_declare>
 
 uniform float u_far;
 uniform float u_near;
