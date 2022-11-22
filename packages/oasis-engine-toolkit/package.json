@@ -24,9 +24,8 @@
     "@oasis-engine-toolkit/gizmo": "workspace:*",
     "@oasis-engine-toolkit/lines": "workspace:*",
     "@oasis-engine-toolkit/outline": "workspace:*",
-    "@oasis-engine-toolkit/planar-shadow-material": "workspace:*",
     "@oasis-engine-toolkit/skeleton-viewer": "workspace:*",
-    "@oasis-engine-toolkit/grid-material": "workspace:*",
+    "@oasis-engine-toolkit/custom-material": "workspace:*",
     "@oasis-engine-toolkit/navigation-gizmo": "workspace:*",
     "@oasis-engine-toolkit/geometry-sketch": "workspace:*",
     "@oasis-engine-toolkit/stats": "workspace:*"

@@ -18,7 +18,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - ⭕️ &nbsp;**Outline** - Show outline of mesh renderers
 - 🖼 &nbsp;**Geometry Sketch** - Convert geometry into texture && sketch normal and mesh wireframe
 
-### Materials
+### Custom Materials
 
 - 🗳 &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
 - ⚔️ &nbsp;**Grid Material** - Infinity grid material
