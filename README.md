@@ -20,8 +20,9 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 
 ### Custom Materials
 
-- 🗳 &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
 - ⚔️ &nbsp;**Grid Material** - Infinity grid material
+- 🗳 &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
+- 🍞 &nbsp;**Bake PBR Material** - Bake texture with ibl lighting
 
 ## npm
 
