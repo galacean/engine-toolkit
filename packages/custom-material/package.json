@@ -11,9 +11,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "types": "types/index.d.ts",
-  "browser": "dist/browser.js",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
+  "module": "dist/index.js",
   "files": [
     "dist/**/*",
     "types/**/*"
