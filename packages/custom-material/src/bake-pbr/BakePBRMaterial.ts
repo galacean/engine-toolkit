@@ -8,6 +8,7 @@ export class BakePBRMaterial extends PBRBaseMaterial {
   private static _roughnessProp = Shader.getPropertyByName("u_roughness");
   private static _roughnessMetallicTextureProp = Shader.getPropertyByName("u_roughnessMetallicTexture");
   private static _shadowTextureProp = Shader.getPropertyByName("u_shadowTexture");
+  private static _shadowIntensityProp = Shader.getPropertyByName("u_shadowIntensity");
 
   /**
    * Metallic, default 1.0.
@@ -65,6 +66,17 @@ export class BakePBRMaterial extends PBRBaseMaterial {
   }
 
   /**
+   * shadow intensity, default 1.0.
+   */
+  get shadowIntensity(): number {
+    return this.shaderData.getFloat(BakePBRMaterial._shadowIntensityProp);
+  }
+
+  set shadowIntensity(value: number) {
+    this.shaderData.setFloat(BakePBRMaterial._shadowIntensityProp, value);
+  }
+
+  /**
    * Create a pbr metallic-roughness workflow material instance.
    * @param engine - Engine to which the material belongs
    */
@@ -72,6 +84,7 @@ export class BakePBRMaterial extends PBRBaseMaterial {
     super(engine, Shader.find("scene-material"));
     this.shaderData.setFloat(BakePBRMaterial._metallicProp, 1);
     this.shaderData.setFloat(BakePBRMaterial._roughnessProp, 1);
+    this.shaderData.setFloat(BakePBRMaterial._shadowIntensityProp, 1);
   }
 
   /**
@@ -119,13 +132,14 @@ void main() {
 #include <worldpos_share>
 
 #include <light_frag_define>
-#include <shadow_frag_share>
 #include <pbr_frag_define>
 #include <pbr_helper>
 
 #ifdef SHADOW_TEXTURE
     uniform sampler2D u_shadowTexture;
 #endif
+
+uniform float u_shadowIntensity;
 
 void main() {
 Geometry geometry;
@@ -138,6 +152,7 @@ initMaterial(material, geometry);
 float shadowAttenuation = 1.0;
 #ifdef OASIS_CALCULATE_SHADOWS
   shadowAttenuation = sampleShadowMap();
+  shadowAttenuation = shadowAttenuation * u_shadowIntensity + (1.0 - u_shadowIntensity);
 #endif
 
 #ifdef SHADOW_TEXTURE
