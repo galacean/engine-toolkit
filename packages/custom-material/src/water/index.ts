@@ -1,0 +1,1 @@
+export { RippleMaterial } from'./WaterRippleMaterial
