@@ -45,8 +45,8 @@ const fragmentSource = `
       vec4 edgeTex = texture2D(u_edgeTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
   
       float edge = pow((v_color.r + edgeTex.r) * v_color.r, 2.0);
-      edge = 1.0 - smoothstep(u_edgeParam.x - u_edgeParam.y,u_edgeParam.x + u_edgeParam.y,edge);
-      vec4 finalCol = mix(waterTex, u_edgeColor, 0.4);
+      edge = clamp(1.0 - smoothstep(u_edgeParam.x - u_edgeParam.y,u_edgeParam.x + u_edgeParam.y,edge)), 0.0, 1.0);
+      vec4 finalCol = mix(waterTex, u_edgeColor, edge);
   
       gl_FragColor = finalCol;
     }
