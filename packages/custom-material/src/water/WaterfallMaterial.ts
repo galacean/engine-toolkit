@@ -59,7 +59,7 @@ const fragmentSource = `
       edgeShape = clamp(smoothstep(u_edgeParam.x - u_edgeParam.y,u_edgeParam.x + u_edgeParam.y,edgeShape),0.0, 1.0);
   
       vec4 waterAll = mix(waterfallTex, waterTex, v_color.r);
-      // vec4 finalCol = mix(waterAll,u_edgeColor, edgeShape);
+      vec4 finalCol = mix(waterAll,u_edgeColor, edgeShape);
   
       gl_FragColor = waterAll;
     }
