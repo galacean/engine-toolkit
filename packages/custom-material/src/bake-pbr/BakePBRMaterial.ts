@@ -81,7 +81,7 @@ export class BakePBRMaterial extends PBRBaseMaterial {
    * @param engine - Engine to which the material belongs
    */
   constructor(engine: Engine) {
-    super(engine, Shader.find("scene-material"));
+    super(engine, Shader.find("bake-pbr"));
     this.shaderData.setFloat(BakePBRMaterial._metallicProp, 1);
     this.shaderData.setFloat(BakePBRMaterial._roughnessProp, 1);
     this.shaderData.setFloat(BakePBRMaterial._shadowIntensityProp, 1);
@@ -98,7 +98,7 @@ export class BakePBRMaterial extends PBRBaseMaterial {
 }
 
 Shader.create(
-  "scene-material",
+  "bake-pbr",
   `
 #include <common>
 #include <common_vert>
