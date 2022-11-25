@@ -2,9 +2,7 @@ import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4 } from "oasis
 
 const vertexSource = `
     attribute vec3 POSITION;
-    attribute vec4 COLOR_0;
     attribute vec2 TEXCOORD_0;
-    attribute vec2 TEXCOORD_1;
   
     uniform mat4 u_MVPMat;
     
@@ -14,20 +12,17 @@ const vertexSource = `
   
     varying vec2 waterTexCoords;
     varying vec2 normalTexCoords;
-    varying vec4 v_color;
   
     void main() {
       gl_Position = u_MVPMat * vec4(POSITION, 1.0);
   
-      waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * sin(u_time),u_water_speed.y * cos(u_time));
-      normalTexCoords = TEXCOORD_1 + vec2(u_distorsion_speed.x * cos(u_time),u_distorsion_speed.y * sin(u_time));
-     
-      v_color = COLOR_0;
+      waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * sin(u_time), u_water_speed.y * cos(u_time));
+      normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));     
     }
     `;
 
 const fragmentSource = `
-    varying vec4 v_color;
+    #include <common>
     varying vec2 waterTexCoords;
     varying vec2 normalTexCoords;
   
@@ -44,8 +39,8 @@ const fragmentSource = `
       vec4 waterTex = texture2D(u_waterTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
       vec4 edgeTex = texture2D(u_edgeTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
   
-      float edge = pow((v_color.r + edgeTex.r) * v_color.r, 2.0);
-      edge = clamp(1.0 - smoothstep(u_edgeParam.x - u_edgeParam.y,u_edgeParam.x + u_edgeParam.y,edge)), 0.0, 1.0);
+      float edge = pow(edgeTex.r, 2.0);
+      edge = saturate(smoothstep(u_edgeParam.x - u_edgeParam.y, u_edgeParam.x + u_edgeParam.y, edge));
       vec4 finalCol = mix(waterTex, u_edgeColor, edge);
   
       gl_FragColor = finalCol;
@@ -132,6 +127,7 @@ export class WaterMaterial extends BaseMaterial {
   set edgeParam(val: Vector2) {
     this.shaderData.setVector2(WaterMaterial._edgeParam, val);
   }
+
   /**
    * Distorsion Amount, must between -1 ~ 1
    */
@@ -156,12 +152,11 @@ export class WaterMaterial extends BaseMaterial {
 
   constructor(engine: Engine) {
     super(engine, Shader.find("water"));
-    this.isTransparent = true;
 
-    this.shaderData.setVector2(WaterMaterial._waterSpeed, new Vector2(0.3, 0.3));
-    this.shaderData.setVector4(WaterMaterial._edgeColor, new Vector4(0.5, 1.0, 1.0, 1.0));
+    this.shaderData.setVector2(WaterMaterial._waterSpeed, new Vector2(-0.02, 0.02));
+    this.shaderData.setVector4(WaterMaterial._edgeColor, new Vector4((69 + 255) / 510, (156 + 255) / 510, (247 + 255) / 510, 1));
     this.shaderData.setVector2(WaterMaterial._edgeParam, new Vector2(0.008, 0.002));
-    this.shaderData.setFloat(WaterMaterial._distorsionAmount, 0.03);
-    this.shaderData.setVector2(WaterMaterial._distorsionSpeed, new Vector2(1, 1));
+    this.shaderData.setFloat(WaterMaterial._distorsionAmount, 0.02);
+    this.shaderData.setVector2(WaterMaterial._distorsionSpeed, new Vector2(0.2, 0.2));
   }
 }
