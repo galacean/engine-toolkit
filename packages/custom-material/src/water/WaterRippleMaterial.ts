@@ -24,14 +24,13 @@ const fragmentSource = `
   uniform sampler2D u_normalTex;
   uniform sampler2D u_foamTex;
   uniform vec3 u_foamColor;
-  uniform vec2 u_foam_param;
+  uniform vec3 u_foam_param;
   uniform float u_distorsion_amount;
-  void main() {
-    float v_color = 0.7;
-  
+
+  void main() {  
     vec4 normalTex = texture2D(u_normalTex, normalTexCoords) * 2.0 - 1.0;
     vec4 waterTex = texture2D(u_foamTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
-    float alphaComp = v_color * waterTex.r * u_foam_param.x;
+    float alphaComp = u_foam_param.z * waterTex.r * u_foam_param.x;
     float alpha = pow(alphaComp,2.0);
     alpha = smoothstep(0.5 - u_foam_param.y, 0.5+ u_foam_param.y, alpha);
     alpha = saturate(alpha);
@@ -101,13 +100,14 @@ export class WaterRippleMaterial extends BaseMaterial {
    * Foam Param;
    * x for foam amount
    * y for foam smoothness, must between 0 ~ 0.5;
+   * z for color factor, default 0.7
    */
-  get foamParam(): Vector2 {
-    return this.shaderData.getVector2(WaterRippleMaterial._foamSpeed);
+  get foamParam(): Vector3 {
+    return this.shaderData.getVector3(WaterRippleMaterial._foamParam);
   }
 
-  set foamParam(val: Vector2) {
-    this.shaderData.setVector2(WaterRippleMaterial._foamSpeed, val);
+  set foamParam(val: Vector3) {
+    this.shaderData.setVector3(WaterRippleMaterial._foamParam, val);
   }
 
   /**
@@ -137,9 +137,12 @@ export class WaterRippleMaterial extends BaseMaterial {
     this.isTransparent = true;
 
     const shaderData = this.shaderData;
-    shaderData.setVector3(WaterRippleMaterial._foamColor, new Vector3((69 + 255) / 400, (156 + 255) / 400, (247 + 255) / 400));
+    shaderData.setVector3(
+      WaterRippleMaterial._foamColor,
+      new Vector3((69 + 255) / 400, (156 + 255) / 400, (247 + 255) / 400)
+    );
     shaderData.setVector2(WaterRippleMaterial._foamSpeed, new Vector2(-1, 0.3));
-    shaderData.setVector2(WaterRippleMaterial._foamParam, new Vector2(2.0, 0.05));
+    shaderData.setVector3(WaterRippleMaterial._foamParam, new Vector3(2.0, 0.05, 0.7));
     shaderData.setVector2(WaterRippleMaterial._distorsionSpeed, new Vector2(1.0, 0));
     shaderData.setFloat(WaterRippleMaterial._distorsionAmount, 0.03);
   }
