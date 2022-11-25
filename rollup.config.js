@@ -9,6 +9,7 @@ import { terser } from "rollup-plugin-terser";
 import serve from "rollup-plugin-serve";
 import replace from "@rollup/plugin-replace";
 import { binary2base64 } from "rollup-plugin-binary2base64";
+import miniProgramPlugin from "./rollup.miniprogram.plugin";
 
 const camelCase = require("camelcase");
 
@@ -59,7 +60,7 @@ const commonPlugins = [
 
 function config({ location, pkgJson }) {
   const input = path.join(location, "src", "index.ts");
-  const external = Object.keys(pkgJson.dependencies || {});
+  const external = Object.keys(Object.assign(pkgJson.dependencies ?? {}, pkgJson.peerDependencies ?? {}));
   const name = pkgJson.name;
   commonPlugins.push(
     replace({
@@ -100,7 +101,7 @@ function config({ location, pkgJson }) {
       };
     },
     mini: () => {
-      const plugins = [...commonPlugins];
+      const plugins = [...commonPlugins, ...miniProgramPlugin];
       return {
         input,
         output: [
@@ -110,7 +111,7 @@ function config({ location, pkgJson }) {
             sourcemap: false
           }
         ],
-        external: Object.keys(pkgJson.dependencies || {}).map((name) => `${name}/dist/miniprogram`),
+        external: external.map((name) => `${name}/dist/miniprogram`),
         plugins
       };
     },
