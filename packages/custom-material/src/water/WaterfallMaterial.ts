@@ -1,8 +1,9 @@
-import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4, Vector3 } from "oasis-engine";
+import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4 } from "oasis-engine";
 
 const vertexSource = `
     attribute vec3 POSITION;
     attribute vec2 TEXCOORD_0;
+    attribute vec4 COLOR_0;
   
     uniform mat4 u_MVPMat;
     
@@ -14,18 +15,22 @@ const vertexSource = `
     varying vec2 waterTexCoords;
     varying vec2 waterfallTexCoords;
     varying vec2 normalTexCoords;
-  
+    varying vec4 v_color;
+
     void main() {
       gl_Position = u_MVPMat * vec4(POSITION, 1.0);
   
       waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * u_time, u_water_speed.y * u_time);
       waterfallTexCoords = TEXCOORD_0 + vec2(u_waterfall_speed.x * u_time, u_waterfall_speed.y * u_time);
-      normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));     
+      normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));    
+      
+      v_color = COLOR_0; 
     }
     `;
 
 const fragmentSource = `
     #include <common>
+    varying vec4 v_color;
     varying vec2 waterTexCoords;
     varying vec2 waterfallTexCoords;
     varying vec2 normalTexCoords;
@@ -35,11 +40,9 @@ const fragmentSource = `
     uniform sampler2D u_waterfallTex;
     uniform sampler2D u_edgeNoiseTex;
   
-    uniform vec3 u_color
     uniform vec4 u_edgeColor;
     uniform vec2 u_edgeParam;
     uniform float u_distorsion_amount;
-
   
     void main() {      
       vec4 normalTex = texture2D(u_normalTex, normalTexCoords) * 2.0 - 1.0;
@@ -50,11 +53,11 @@ const fragmentSource = `
       vec4 streamEdge = texture2D(u_edgeNoiseTex, waterTexCoords);
       vec4 fallEdge = texture2D(u_edgeNoiseTex, waterfallTexCoords);
   
-      float edgeShape = mix(fallEdge.r, streamEdge.r, u_color.r);
-      edgeShape = saturate(edgeShape * u_color.g);
+      float edgeShape = mix(fallEdge.r, streamEdge.r, v_color.r);
+      edgeShape = saturate(edgeShape * v_color.g);
       edgeShape = saturate(smoothstep(u_edgeParam.x - u_edgeParam.y, u_edgeParam.x + u_edgeParam.y, edgeShape));
   
-      vec4 waterAll = mix(waterfallTex, waterTex, u_color.r);
+      vec4 waterAll = mix(waterfallTex, waterTex, v_color.r);
       vec4 finalCol = mix(waterAll, u_edgeColor, edgeShape);
   
       gl_FragColor = finalCol;
@@ -68,7 +71,6 @@ export class WaterFallMaterial extends BaseMaterial {
   private static _waterfallSpeed = Shader.getPropertyByName("u_waterfall_speed");
   private static _distorsionSpeed = Shader.getPropertyByName("u_distorsion_speed");
 
-  private static _waterColor = Shader.getPropertyByName("u_color");
   private static _edgeColor = Shader.getPropertyByName("u_edgeColor");
   private static _edgeParam = Shader.getPropertyByName("u_edgeParam");
   private static _distorsionAmount = Shader.getPropertyByName("u_distorsion_amount");
@@ -145,17 +147,6 @@ export class WaterFallMaterial extends BaseMaterial {
   }
 
   /**
-   * Water Color
-   */
-  get color(): Vector3 {
-    return this.shaderData.getVector3(WaterFallMaterial._waterColor);
-  }
-
-  set color(val: Vector3) {
-    this.shaderData.setVector3(WaterFallMaterial._waterColor, val);
-  }
-
-  /**
    * Water Edge Color
    */
   get edgeColor(): Vector4 {
@@ -206,7 +197,6 @@ export class WaterFallMaterial extends BaseMaterial {
 
     this.shaderData.setVector2(WaterFallMaterial._waterSpeed, new Vector2(0.2, 0.0));
     this.shaderData.setVector2(WaterFallMaterial._waterfallSpeed, new Vector2(0.9, 0));
-    this.shaderData.setVector3(WaterFallMaterial._waterColor, new Vector3(0.5, 1.0, 1.0));
     this.shaderData.setVector4(WaterFallMaterial._edgeColor, new Vector4(160 / 255, 250 / 255, 250 / 255, 1.0));
     this.shaderData.setVector2(WaterFallMaterial._edgeParam, new Vector2(0.7, 0.05));
     this.shaderData.setFloat(WaterFallMaterial._distorsionAmount, 0.03);

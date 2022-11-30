@@ -3,6 +3,7 @@ import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector3 } from "oasis
 const vertexSource = `
   attribute vec3 POSITION;
   attribute vec2 TEXCOORD_0;
+  attribute vec4 COLOR_0;
   uniform mat4 u_MVPMat;
   
   uniform float u_time;
@@ -10,27 +11,30 @@ const vertexSource = `
   uniform vec2 u_distorsion_speed; 
   varying vec2 waterTexCoords;
   varying vec2 normalTexCoords;
+  varying vec4 v_color;
+      
   void main() {
     gl_Position = u_MVPMat * vec4(POSITION, 1.0);
-    waterTexCoords = TEXCOORD_0 + vec2(u_foam_speed.x * u_time,u_foam_speed.y * u_time);
-    normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time),u_distorsion_speed.y * sin(u_time));
+    waterTexCoords = TEXCOORD_0 + vec2(u_foam_speed.x * u_time, u_foam_speed.y * u_time);
+    normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));
+    v_color = COLOR_0; 
   }
   `;
 
 const fragmentSource = `
   #include <common>
+  varying vec4 v_color;
   varying vec2 waterTexCoords;
   varying vec2 normalTexCoords;
   uniform sampler2D u_normalTex;
   uniform sampler2D u_foamTex;
   uniform vec3 u_foamColor;
-  uniform vec3 u_foam_param;
+  uniform vec2 u_foam_param;
   uniform float u_distorsion_amount;
-
   void main() {  
     vec4 normalTex = texture2D(u_normalTex, normalTexCoords) * 2.0 - 1.0;
     vec4 waterTex = texture2D(u_foamTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
-    float alphaComp = u_foam_param.z * waterTex.r * u_foam_param.x;
+    float alphaComp = v_color.r * waterTex.r * u_foam_param.x;
     float alpha = pow(alphaComp,2.0);
     alpha = smoothstep(0.5 - u_foam_param.y, 0.5+ u_foam_param.y, alpha);
     alpha = saturate(alpha);
@@ -100,25 +104,24 @@ export class WaterRippleMaterial extends BaseMaterial {
    * Foam Param;
    * x for foam amount
    * y for foam smoothness, must between 0 ~ 0.5;
-   * z for color factor, default 0.7
    */
-  get foamParam(): Vector3 {
-    return this.shaderData.getVector3(WaterRippleMaterial._foamParam);
+  get foamParam(): Vector2 {
+    return this.shaderData.getVector2(WaterRippleMaterial._foamParam);
   }
 
-  set foamParam(val: Vector3) {
-    this.shaderData.setVector3(WaterRippleMaterial._foamParam, val);
+  set foamParam(val: Vector2) {
+    this.shaderData.setVector2(WaterRippleMaterial._foamParam, val);
   }
 
   /**
    * Distorsion Speed on x direction and y direction
    */
-  get distorsionSpeed(): Vector3 {
-    return this.shaderData.getVector3(WaterRippleMaterial._distorsionSpeed);
+  get distorsionSpeed(): Vector2 {
+    return this.shaderData.getVector2(WaterRippleMaterial._distorsionSpeed);
   }
 
-  set distorsionSpeed(val: Vector3) {
-    this.shaderData.setVector3(WaterRippleMaterial._distorsionSpeed, val);
+  set distorsionSpeed(val: Vector2) {
+    this.shaderData.setVector2(WaterRippleMaterial._distorsionSpeed, val);
   }
 
   /**
@@ -142,7 +145,7 @@ export class WaterRippleMaterial extends BaseMaterial {
       new Vector3((69 + 255) / 400, (156 + 255) / 400, (247 + 255) / 400)
     );
     shaderData.setVector2(WaterRippleMaterial._foamSpeed, new Vector2(-1, 0.3));
-    shaderData.setVector3(WaterRippleMaterial._foamParam, new Vector3(2.0, 0.05, 0.7));
+    shaderData.setVector2(WaterRippleMaterial._foamParam, new Vector2(2.0, 0.05));
     shaderData.setVector2(WaterRippleMaterial._distorsionSpeed, new Vector2(1.0, 0));
     shaderData.setFloat(WaterRippleMaterial._distorsionAmount, 0.03);
   }
