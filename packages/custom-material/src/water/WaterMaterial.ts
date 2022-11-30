@@ -3,13 +3,15 @@ import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4 } from "oasis
 const vertexSource = `
     attribute vec3 POSITION;
     attribute vec2 TEXCOORD_0;
-  
+    attribute vec4 COLOR_0;
+
     uniform mat4 u_MVPMat;
     
     uniform float u_time;
     uniform vec2 u_water_speed; 
     uniform vec2 u_distorsion_speed; 
-  
+    
+    varying vec4 v_color;
     varying vec2 waterTexCoords;
     varying vec2 normalTexCoords;
   
@@ -18,11 +20,14 @@ const vertexSource = `
   
       waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * sin(u_time), u_water_speed.y * cos(u_time));
       normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));     
+      
+      v_color = COLOR_0;
     }
     `;
 
 const fragmentSource = `
     #include <common>
+    varying vec4 v_color;
     varying vec2 waterTexCoords;
     varying vec2 normalTexCoords;
   
@@ -39,8 +44,8 @@ const fragmentSource = `
       vec4 waterTex = texture2D(u_waterTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
       vec4 edgeTex = texture2D(u_edgeTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
   
-      float edge = pow(edgeTex.r, 2.0);
-      edge = saturate(smoothstep(u_edgeParam.x - u_edgeParam.y, u_edgeParam.x + u_edgeParam.y, edge));
+      float edge = pow((v_color.r + edgeTex.r) * v_color.r, 2.0);
+      edge = saturate(1.0 - smoothstep(u_edgeParam.x - u_edgeParam.y, u_edgeParam.x + u_edgeParam.y, edge));
       vec4 finalCol = mix(waterTex, u_edgeColor, edge);
   
       gl_FragColor = finalCol;
@@ -154,7 +159,10 @@ export class WaterMaterial extends BaseMaterial {
     super(engine, Shader.find("water"));
 
     this.shaderData.setVector2(WaterMaterial._waterSpeed, new Vector2(-0.02, 0.02));
-    this.shaderData.setVector4(WaterMaterial._edgeColor, new Vector4((69 + 255) / 510, (156 + 255) / 510, (247 + 255) / 510, 1));
+    this.shaderData.setVector4(
+      WaterMaterial._edgeColor,
+      new Vector4((69 + 255) / 510, (156 + 255) / 510, (247 + 255) / 510, 1)
+    );
     this.shaderData.setVector2(WaterMaterial._edgeParam, new Vector2(0.008, 0.002));
     this.shaderData.setFloat(WaterMaterial._distorsionAmount, 0.02);
     this.shaderData.setVector2(WaterMaterial._distorsionSpeed, new Vector2(0.2, 0.2));
