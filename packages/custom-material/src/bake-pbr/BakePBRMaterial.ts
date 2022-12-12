@@ -9,6 +9,7 @@ export class BakePBRMaterial extends PBRBaseMaterial {
   private static _roughnessMetallicTextureProp = Shader.getPropertyByName("u_roughnessMetallicTexture");
   private static _shadowTextureProp = Shader.getPropertyByName("u_shadowTexture");
   private static _shadowIntensityProp = Shader.getPropertyByName("u_shadowIntensity");
+  private static _exposureProp = Shader.getPropertyByName("u_exposure");
 
   /**
    * Metallic, default 1.0.
@@ -77,6 +78,17 @@ export class BakePBRMaterial extends PBRBaseMaterial {
   }
 
   /**
+   * exposure
+   */
+  get exposure(): number {
+    return this.shaderData.getFloat(BakePBRMaterial._exposureProp);
+  }
+
+  set exposure(value: number) {
+    this.shaderData.setFloat(BakePBRMaterial._exposureProp, value);
+  }
+
+  /**
    * Create a pbr metallic-roughness workflow material instance.
    * @param engine - Engine to which the material belongs
    */
@@ -85,6 +97,7 @@ export class BakePBRMaterial extends PBRBaseMaterial {
     this.shaderData.setFloat(BakePBRMaterial._metallicProp, 1);
     this.shaderData.setFloat(BakePBRMaterial._roughnessProp, 1);
     this.shaderData.setFloat(BakePBRMaterial._shadowIntensityProp, 1);
+    this.shaderData.setFloat(BakePBRMaterial._exposureProp, 1);
   }
 
   /**
@@ -140,6 +153,17 @@ void main() {
 #endif
 
 uniform float u_shadowIntensity;
+uniform float u_exposure;
+
+// The standard ACES tonemap function
+vec3 toneMapACES(vec3 x) {
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    return saturate((x*(a*x+b))/(x*(c*x+d)+e));
+}
 
 void main() {
 Geometry geometry;
@@ -226,6 +250,8 @@ vec3 totalRadiance =    reflectedLight.directDiffuse +
                         reflectedLight.directSpecular + 
                         reflectedLight.indirectSpecular + 
                         emissiveRadiance;
+                        
+totalRadiance = toneMapACES(totalRadiance * u_exposure);
 
 vec4 targetColor = vec4(totalRadiance * shadowAttenuation, material.opacity);
 #ifndef OASIS_COLORSPACE_GAMMA
