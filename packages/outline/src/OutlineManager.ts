@@ -108,6 +108,8 @@ export class OutlineManager extends Script {
     const replaceMaterial = new PlainColorMaterial(engine);
     const screenEntity = this.entity.createChild("screen");
     const screenRenderer = screenEntity.addComponent(MeshRenderer);
+    screenRenderer.receiveShadows = false;
+    screenRenderer.castShadows = false;
 
     replaceMaterial.baseColor = this._replaceColor;
     screenEntity.layer = this._layer;

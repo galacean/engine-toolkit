@@ -80,6 +80,8 @@ export class GridControl extends Script {
     const { engine, entity } = this;
 
     const gridRenderer = entity.addComponent(MeshRenderer);
+    gridRenderer.receiveShadows = false;
+    gridRenderer.castShadows = false;
     gridRenderer.mesh = GridControl.createGridPlane(engine);
     this._material = new GridMaterial(engine);
     gridRenderer.setMaterial(this._material);

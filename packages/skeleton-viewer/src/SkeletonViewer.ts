@@ -180,6 +180,8 @@ export class SkeletonViewer extends Script {
       // 球
       const entity = joint.createChild();
       const renderer = entity.addComponent(MeshRenderer);
+      renderer.receiveShadows = false;
+      renderer.castShadows = false;
       renderer.mesh = PrimitiveMesh.createSphere(this.engine, this.ballSize, 16);
       renderer.setMaterial(this._material);
       renderer.priority = 1;
@@ -202,6 +204,8 @@ export class SkeletonViewer extends Script {
 
         const entity = joint;
         const renderer = entity.addComponent(MeshRenderer);
+        renderer.receiveShadows = false;
+        renderer.castShadows = false;
         renderer.setMaterial(this._material);
         renderer.mesh = this._createSpur(direction);
         renderer.priority = 1;
