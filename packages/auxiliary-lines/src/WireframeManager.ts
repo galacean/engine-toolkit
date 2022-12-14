@@ -540,6 +540,12 @@ export class WireframeManager extends Script {
       mesh.uploadData(false);
       mesh.subMesh.count = indicesCount;
     }
+
+    if (indicesCount === 0) {
+      this._renderer.setMaterial(null);
+    } else {
+      this._renderer.setMaterial(this._material);
+    }
   }
 
   private _growthIndexMemory(length: number): void {
