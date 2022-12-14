@@ -1,5 +1,5 @@
 import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh } from "oasis-engine";
-import { UnlitMaterial } from "oasis-engine/types";
+import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
 
@@ -62,9 +62,9 @@ export const axisPlane = [
 export interface AxisProps {
   name: string;
   axisMesh: Array<ModelMesh>;
-  axisMaterial: UnlitMaterial;
+  axisMaterial: PlainColorMaterial;
   axisHelperMesh: Array<Mesh>;
-  axisHelperMaterial: UnlitMaterial;
+  axisHelperMaterial: PlainColorMaterial;
   axisRotation: Array<Vector3>;
   axisTranslation: Array<Vector3>;
   priority?: number;

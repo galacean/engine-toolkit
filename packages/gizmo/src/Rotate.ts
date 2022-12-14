@@ -126,18 +126,24 @@ export class RotateControl extends GizmoComponent {
     // rotate start line
     this._startLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperS");
     const startHelperRenderer = this._startLineHelperEntity.addComponent(MeshRenderer);
+    startHelperRenderer.receiveShadows = false;
+    startHelperRenderer.castShadows = false;
     startHelperRenderer.mesh = this._startLineMesh;
     startHelperRenderer.setMaterial(Utils.yellowMaterial);
 
     // rotate end line
     this._endLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperE");
     const endHelperRenderer = this._endLineHelperEntity.addComponent(MeshRenderer);
+    endHelperRenderer.receiveShadows = false;
+    endHelperRenderer.castShadows = false;
     endHelperRenderer.mesh = this._endLineMesh;
     endHelperRenderer.setMaterial(Utils.yellowMaterial);
 
     // rotate plane
     this._rotateHelperPlaneEntity = this._gizmoRotateHelperEntity.createChild("rotateHelperPlane");
     const planeHelperRenderer = this._rotateHelperPlaneEntity.addComponent(MeshRenderer);
+    planeHelperRenderer.receiveShadows = false;
+    planeHelperRenderer.castShadows = false;
     planeHelperRenderer.mesh = this._rotateHelperPlaneMesh;
     // @ts-ignore
     this._rotateHelperPlaneMesh._enableVAO = false;
