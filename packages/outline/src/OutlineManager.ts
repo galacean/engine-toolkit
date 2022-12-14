@@ -15,11 +15,11 @@ import {
   Shader,
   Texture2D,
   TextureWrapMode,
-  UnlitMaterial,
   Vector2
 } from "oasis-engine";
 import fs from "./outline.fs.glsl";
 import vs from "./outline.vs.glsl";
+import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 
 /**
  * Show outline of entities.
@@ -105,7 +105,7 @@ export class OutlineManager extends Script {
     super(entity);
     const engine = this.engine;
     const outlineMaterial = new BaseMaterial(engine, Shader.find("outline-postprocess-shader"));
-    const replaceMaterial = new UnlitMaterial(engine);
+    const replaceMaterial = new PlainColorMaterial(engine);
     const screenEntity = this.entity.createChild("screen");
     const screenRenderer = screenEntity.addComponent(MeshRenderer);
 
