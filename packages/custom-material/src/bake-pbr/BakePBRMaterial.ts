@@ -121,6 +121,9 @@ Shader.create(
 #include <normal_share>
 #include <worldpos_share>
 
+#include <ShadowVertexDeclaration>
+#include <FogVertexDeclaration>
+
 void main() {
 
     #include <begin_position_vert>
@@ -132,6 +135,9 @@ void main() {
     #include <normal_vert>
     #include <worldpos_vert>
     #include <position_vert>
+
+    #include <ShadowVertex>
+    #include <FogVertex>
 }
     `,
   `
@@ -257,6 +263,9 @@ vec4 targetColor = vec4(totalRadiance * shadowAttenuation, material.opacity);
 #ifndef OASIS_COLORSPACE_GAMMA
     targetColor = linearToGamma(targetColor);
 #endif
+
+#include <FogFragment>
+
 gl_FragColor = targetColor;
 
 }
