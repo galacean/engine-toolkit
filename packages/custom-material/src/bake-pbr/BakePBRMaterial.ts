@@ -260,11 +260,12 @@ vec3 totalRadiance =    reflectedLight.directDiffuse +
 totalRadiance = toneMapACES(totalRadiance * u_exposure);
 
 vec4 targetColor = vec4(totalRadiance * shadowAttenuation, material.opacity);
+
+#include <FogFragment>
+
 #ifndef OASIS_COLORSPACE_GAMMA
     targetColor = linearToGamma(targetColor);
 #endif
-
-#include <FogFragment>
 
 gl_FragColor = targetColor;
 
