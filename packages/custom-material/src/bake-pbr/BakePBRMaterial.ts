@@ -145,6 +145,8 @@ void main() {
 #include <common>
 #include <camera_declare>
 
+#include <FogFragmentDeclaration>
+
 #include <uv_share>
 #include <normal_share>
 #include <color_share>
