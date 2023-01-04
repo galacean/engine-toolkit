@@ -32,16 +32,25 @@ export class Core {
     this.shaderHook = new ShaderHook(gl);
   }
 
+  /**
+   * reset draw call hook
+   */
   public reset(): void {
     this.drawCallHook && this.drawCallHook.reset();
   }
 
+  /**
+   * release hook
+   */
   public release(): void {
     this.drawCallHook && this.drawCallHook.release();
     this.textureHook && this.textureHook.release();
     this.shaderHook && this.shaderHook.release();
   }
 
+  /**
+   * update performance data
+   */
   public update(): PerformanceData {
     this.updateCounter++;
     let now = performance.now();
