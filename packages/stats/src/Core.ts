@@ -9,10 +9,10 @@ declare global {
 }
 
 /**
- * @class Core
+ * Hook gl to calculate stats
  */
-export default class Core {
-  private gl: WebGLRenderingContext | WebGL2RenderingContext;
+export class Core {
+  private readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
   private drawCallHook: DrawCallHook;
   private textureHook: TextureHook;
   private shaderHook: ShaderHook;
@@ -26,23 +26,23 @@ export default class Core {
     this.hook(gl);
   }
 
-  private hook(gl: WebGLRenderingContext | WebGL2RenderingContext) {
+  private hook(gl: WebGLRenderingContext | WebGL2RenderingContext): void {
     this.drawCallHook = new DrawCallHook(gl);
     this.textureHook = new TextureHook(gl);
     this.shaderHook = new ShaderHook(gl);
   }
 
-  public reset() {
+  public reset(): void {
     this.drawCallHook && this.drawCallHook.reset();
   }
 
-  public release() {
+  public release(): void {
     this.drawCallHook && this.drawCallHook.release();
     this.textureHook && this.textureHook.release();
     this.shaderHook && this.shaderHook.release();
   }
 
-  public update() {
+  public update(): PerformanceData {
     this.updateCounter++;
     let now = performance.now();
     if (now - this.updateTime < 1000) {
@@ -57,7 +57,7 @@ export default class Core {
 
     this.samplingIndex = 0;
 
-    let data = {
+    let data: PerformanceData = {
       fps: Math.round((this.updateCounter * 1000) / (now - this.updateTime)),
       memory: performance.memory && (performance.memory.usedJSHeapSize / 1048576) >> 0,
       drawCall: this.drawCallHook.drawCall,
@@ -77,4 +77,16 @@ export default class Core {
 
     return data;
   }
+}
+
+interface PerformanceData {
+  fps: number;
+  memory: number;
+  drawCall: number;
+  triangles: number;
+  lines: number;
+  points: number;
+  textures: number;
+  shaders: number;
+  webglContext: string;
 }
