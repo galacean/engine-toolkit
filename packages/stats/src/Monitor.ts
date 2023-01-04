@@ -1,4 +1,4 @@
-import Core from "./Core";
+import { Core } from "./Core";
 
 let tpl = `
   <dl>
@@ -56,8 +56,8 @@ let css = `
 export default class Monitor {
   private core: Core;
   private doms: HTMLElement[];
-  private items: string[];
   private container: HTMLElement;
+  private readonly items: string[];
 
   constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
     this.core = new Core(gl);
@@ -67,7 +67,7 @@ export default class Monitor {
     this.update = this.update.bind(this);
   }
 
-  private createContainer() {
+  private createContainer(): void {
     let container = document.createElement("div");
     container.classList.add("gl-perf");
     container.innerHTML = tpl;
@@ -80,7 +80,7 @@ export default class Monitor {
     this.container = container;
   }
 
-  private createStyle() {
+  private createStyle(): HTMLStyleElement {
     let style: HTMLStyleElement = document.createElement("style");
 
     style.type = "text/css";
@@ -93,7 +93,7 @@ export default class Monitor {
   /**
    * Update per frame
    */
-  public update() {
+  public update(): void {
     let data = this.core.update();
 
     if (data) {
@@ -113,21 +113,21 @@ export default class Monitor {
   /**
    * reset all hooks
    */
-  public reset() {
+  public reset(): void {
     this.core.reset();
   }
 
   /**
    * release all hooks
    */
-  public release() {
+  public release(): void {
     this.core.release();
   }
 
   /**
    * destroy the instance
    */
-  public destroy() {
+  public destroy(): void {
     this.release();
     document.body.removeChild(this.container);
   }
