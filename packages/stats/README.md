@@ -15,7 +15,7 @@ Statistics toolkit to gather performance data
 
 ## npm
 
-The stats is published on npm with full typing support. To install, use:
+The `Stats` is published on npm with full typing support. To install, use:
 
 ```sh
 npm install @oasis-engine-toolkit/stats
@@ -32,6 +32,12 @@ or individual classes using:
 ```javascript
 import { Stats } from "@oasis-engine-toolkit/stats";
 ```
+
+If you don't want DOM panel, you can use Core directly:
+```javascript
+import { Core } from "@oasis-engine-toolkit/stats";
+```
+and call `update` manually.
 
 ## License
 
