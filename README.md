@@ -5,24 +5,24 @@
 Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script` and `Material`, welcome to enjoy!
 
 ## Features
-- 📊 &nbsp;**Stats** - Statistics rendering data
+- 📊 &nbsp;**[Stats](packages/stats)** - Statistics rendering data
 
-- 🛸 &nbsp;**Controls** - Some camera controllers
-- 🫧 &nbsp;**FrameBufferPicker** - Pixel-based object picking
-- ➡️ &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
-- 🧭 &nbsp;**Navigation Gizmo** - Three-view & visualized operation for camera control
+- 🛸 &nbsp;**[Controls](packages/controls)** - Some camera controllers
+- 🫧 &nbsp;**[FrameBufferPicker](packages/framebuffer-picker)** - Pixel-based object picking
+- ➡️ &nbsp;**[Gizmo](packages/gizmo)** - Operation tools for transforming (displacement, rotation, scaling)
+- 🧭 &nbsp;**[Navigation Gizmo](packages/navigation-gizmo)** - Three-view & visualized operation for camera control
 
-- 📐 &nbsp;**Lines** - 2D Solid Line & Dash Line
-- 🖇 &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
-- 🧍🏼 &nbsp;**Skeleton Helper** - Skeleton visualization
-- ⭕️ &nbsp;**Outline** - Show outline of mesh renderers
-- 🖼 &nbsp;**Geometry Sketch** - Convert geometry into texture && sketch normal and mesh wireframe
+- 📐 &nbsp;**[Lines](packages/lines)** - 2D Solid Line & Dash Line
+- 🖇 &nbsp;**[Auxiliary Lines](packages/auxiliary-lines)** - Draw wireframe for entity and component
+- 🧍🏼 &nbsp;**[Skeleton Helper](packages/skeleton-viewer)** - Skeleton visualization
+- ⭕️ &nbsp;**[Outline](packages/outline)** - Show outline of mesh renderers
+- 🖼 &nbsp;**[Geometry Sketch](packages/geometry-sketch)** - Convert geometry into texture && sketch normal and mesh wireframe
 
-### Custom Materials
+### [Custom Materials](packages/custom-material)
 
-- ⚔️ &nbsp;**Grid Material** - Infinity grid material
-- 🗳 &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
-- 🍞 &nbsp;**Bake PBR Material** - Bake texture with ibl lighting
+- ⚔️ &nbsp;**[Grid Material](packages/custom-material/grid)** - Infinity grid material
+- 🗳 &nbsp;**[Planar Shadow Material](packages/custom-material/planar-shadow)** - Two-pass shadow on the planar
+- 🍞 &nbsp;**[Bake PBR Material](packages/custom-material/bake-pbr)** - Bake texture with ibl lighting
 
 ## npm
 
