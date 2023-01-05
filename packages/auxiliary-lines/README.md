@@ -17,7 +17,7 @@ The `Auxiliary Lines` is published on npm with full typing support. To install, 
 npm install @oasis-engine-toolkit/auxiliary-lines
 ```
 
-This will allow you to import stats entirely using:
+This will allow you to import package entirely using:
 
 ```javascript
 import * as TOOLKIT from "@oasis-engine-toolkit/auxiliary-lines";
@@ -32,6 +32,7 @@ import { WireframeManager } from "@oasis-engine-toolkit/auxiliary-lines";
 ## playground
 The usage of this toolkit can be found in :
 - [physics-debug-draw](https://github.com/ant-galaxy/oasis-engine.github.io/blob/main/playground/physics-debug-draw.ts)
+- [live demo](https://oasisengine.cn/#/examples/latest/physics-debug-draw)
 
 ## License
 
