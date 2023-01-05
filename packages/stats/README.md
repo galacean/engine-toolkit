@@ -39,6 +39,13 @@ import { Core } from "@oasis-engine-toolkit/stats";
 ```
 and call `update` manually.
 
+## Links
+
+- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
+- [Examples](https://oasisengine.cn/#/examples/latest/skeleton-viewer)
+- [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
+- [API References](https://oasisengine.cn/#/api/latest/core)
+
 ## License
 
 The engine is released under the [MIT](https://opensource.org/licenses/MIT) license. See LICENSE file.

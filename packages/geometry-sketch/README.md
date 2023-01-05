@@ -50,6 +50,13 @@ The usage of this toolkit can be found in :
 - [geometry-sketch](https://github.com/ant-galaxy/oasis-engine.github.io/blob/main/playground/geometry-sketch.ts)
 - [live demo](https://oasisengine.cn/#/examples/latest/geometry-sketch)
 
+## Links
+
+- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
+- [Examples](https://oasisengine.cn/#/examples/latest/skeleton-viewer)
+- [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
+- [API References](https://oasisengine.cn/#/api/latest/core)
+
 ## License
 
 The engine is released under the [MIT](https://opensource.org/licenses/MIT) license. See LICENSE file.
