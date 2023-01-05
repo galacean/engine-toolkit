@@ -5,6 +5,9 @@
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
+  "homepage": "https://oasisengine.cn/",
+  "repository": "https://github.com/ant-galaxy/oasis-engine-toolkit",
+  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
