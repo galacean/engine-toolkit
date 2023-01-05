@@ -1,12 +1,15 @@
 {
   "name": "@oasis-engine-toolkit/geometry-sketch",
-  "version": "1.0.0-alpha.9",
+  "version": "1.0.0-alpha.10",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
   "homepage": "https://oasisengine.cn/",
-  "repository": { "type": "git", "url": "https://github.com/ant-galaxy/oasis-engine-toolkit" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+  },
   "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
   "license": "MIT",
   "scripts": {
