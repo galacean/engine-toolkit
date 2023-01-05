@@ -5,6 +5,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "homepage": "https://oasisengine.cn/",
+  "repository": "https://github.com/ant-galaxy/oasis-engine-toolkit",
+  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test": "cross-env TS_NODE_PROJECT=tsconfig.tests.json floss --path tests -r ts-node/register",
