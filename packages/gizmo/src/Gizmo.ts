@@ -20,7 +20,7 @@ import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
-import { State, AnchorType, CoordinateType } from "./enums/GizmoState";
+import { State } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
 import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
 /**
@@ -48,17 +48,12 @@ export class Gizmo extends Script {
   private _type: State = null;
 
   /**
-   * initial scene camera in gizmo
-   * @return camera - The scene camera
+   * initial scene camera & select group in gizmo
    */
-  get camera(): Camera {
-    return this._sceneCamera;
-  }
-
-  set camera(camera: Camera) {
+  init(camera: Camera, group: Group) {
     if (camera !== this._sceneCamera) {
       if (camera) {
-        const { _group: group } = this;
+        this._group = group;
         this._sceneCamera = camera;
         this._framebufferPicker.camera = camera;
 
@@ -66,7 +61,6 @@ export class Gizmo extends Script {
           gizmoControl.init(camera, this._group);
         });
 
-        group.reset();
         this._initialized = true;
       } else {
         this._initialized = false;
@@ -116,30 +110,6 @@ export class Gizmo extends Script {
     );
   }
 
-  /**
-   * toggle gizmo anchor type
-   * @return current anchor type - center or pivot, default center
-   */
-  get anchorType(): AnchorType {
-    return this._group.anchorType;
-  }
-
-  set anchorType(targetAnchor: AnchorType) {
-    this._group.anchorType = targetAnchor;
-  }
-
-  /**
-   * toggle gizmo orientation type
-   * @return current orientation type - global or local, default local
-   */
-  get coordType(): CoordinateType {
-    return this._group.coordinateType;
-  }
-
-  set coordType(targetCoord: CoordinateType) {
-    this._group.coordinateType = targetCoord;
-  }
-
   constructor(entity: Entity) {
     super(entity);
 
@@ -173,34 +143,6 @@ export class Gizmo extends Script {
     sphereCollider.addShape(colliderShape);
 
     this.state = this._type;
-    this.anchorType = AnchorType.Center;
-    this.coordType = CoordinateType.Local;
-  }
-
-  /**
-   * add entity to the group
-   * @param entity - the entity to add, could be empty
-   * @return boolean, true if the entity is the previous group, false if not
-   */
-  addEntity(entity: Entity): boolean {
-    const { _group: group } = this;
-    return entity && group.addEntity(entity);
-  }
-
-  /**
-   * remove entity from the group
-   * @param entity - the entity to remove
-   */
-  removeEntity(entity: Entity): void {
-    const { _group: group } = this;
-    entity && group.deleteEntity(entity);
-  }
-
-  /**
-   * clear all entities in the group
-   */
-  clearEntity(): void {
-    this._group.reset();
   }
 
   /** @internal */
@@ -251,7 +193,7 @@ export class Gizmo extends Script {
             }
           });
         } else {
-          this.camera.screenPointToRay(pointer.position, this._tempRay);
+          this._sceneCamera.screenPointToRay(pointer.position, this._tempRay);
           const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
           if (isHit) {
             this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
