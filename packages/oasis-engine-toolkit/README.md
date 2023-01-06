@@ -4,26 +4,6 @@
 
 Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script` and `Material`, welcome to enjoy!
 
-## Features
-- 📊 &nbsp;**[Stats](packages/stats)** - Statistics rendering data
-
-- 🛸 &nbsp;**[Controls](packages/controls)** - Some camera controllers
-- 🫧 &nbsp;**[FrameBufferPicker](packages/framebuffer-picker)** - Pixel-based object picking
-- ➡️ &nbsp;**[Gizmo](packages/gizmo)** - Operation tools for transforming (displacement, rotation, scaling)
-- 🧭 &nbsp;**[Navigation Gizmo](packages/navigation-gizmo)** - Three-view & visualized operation for camera control
-
-- 📐 &nbsp;**[Lines](packages/lines)** - 2D Solid Line & Dash Line
-- 🖇 &nbsp;**[Auxiliary Lines](packages/auxiliary-lines)** - Draw wireframe for entity and component
-- 🧍🏼 &nbsp;**[Skeleton Helper](packages/skeleton-viewer)** - Skeleton visualization
-- ⭕️ &nbsp;**[Outline](packages/outline)** - Show outline of mesh renderers
-- 🖼 &nbsp;**[Geometry Sketch](packages/geometry-sketch)** - Convert geometry into texture && sketch normal and mesh wireframe
-
-### [Custom Materials](packages/custom-material)
-
-- ⚔️ &nbsp;**[Grid Material](packages/custom-material/src/grid)** - Infinity grid material
-- 🗳 &nbsp;**[Planar Shadow Material](packages/custom-material/src/planar-shadow)** - Two-pass shadow on the planar
-- 🍞 &nbsp;**[Bake PBR Material](packages/custom-material/src/bake-pbr)** - Bake texture with ibl lighting
-
 ## npm
 
 The toolkit is published on npm with full typing support. To install, use:
@@ -71,7 +51,7 @@ npm run b:all
 
 ## Links
 
-- [Official Site](https://oasisengine.cn)
+- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
 - [Examples](https://oasisengine.cn/#/examples/latest/skeleton-viewer)
 - [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
 - [API References](https://oasisengine.cn/#/api/latest/core)
