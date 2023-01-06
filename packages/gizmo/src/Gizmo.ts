@@ -261,7 +261,7 @@ export class Gizmo extends Script {
   }
 
   private _triggerGizmoEnd(): void {
-    this._currentControl.onMoveEnd();
+    this._currentControl && this._currentControl.onMoveEnd();
     this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     this._traverseControl(this._type, (control) => {
       control.entity.isActive = true;
