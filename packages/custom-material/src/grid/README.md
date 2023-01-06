@@ -18,7 +18,7 @@ const grid = rootEntity.addComponent(GridControl);
 grid.camera = camera;
 ```
 
-Assigning values to the following properties triggers rotation when transformations in 2D-3D space are required.
+Assigning values to the following properties trigger grid rotation when transformations in 2D-3D space are required.
 
 ```ts
 grid.is2DGrid = true;

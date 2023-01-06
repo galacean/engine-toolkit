@@ -3,7 +3,7 @@
 Bake PBR is a special material based on PBR material, which basically inherits the characteristics of PBR, but does not
 accept the influence of direct light. Instead, it can set a baked light map, which is sampled based on UV2, so that it
 can support static batching of objects in the scene. At the same time, in order to compensate for the darker problem
-caused by the loss of direct light, support the adjustment of exposure parameters and use ACES toneMapping to correct
+caused by the loss of direct light, it supports the adjustment of exposure parameters and use ACES toneMapping to correct
 the highlights.
 
 ## Feature
