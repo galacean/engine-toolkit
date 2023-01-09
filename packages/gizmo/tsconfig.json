@@ -8,8 +8,9 @@
     "experimentalDecorators": true,
     "declarationDir": "types",
     "skipLibCheck": true,
-    "emitDeclarationOnly": true,
-    "sourceMap": true
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "outDir": "dist"
   },
   "include": ["src/**/*"]
 }

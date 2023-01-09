@@ -7,11 +7,12 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "declarationDir": "types",
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "sourceMap": true,
     "skipLibCheck": true,
     "strict": false,
-    "incremental": false
+    "incremental": false,
+    "outDir": "dist"
   },
   "include": [
     "src/**/*"

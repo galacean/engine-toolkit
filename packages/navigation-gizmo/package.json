@@ -25,7 +25,9 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^0.9.0-alpha",
+    "oasis-engine": "^0.9.0-alpha"
+  },
+  "dependencies": {
     "@oasis-engine-toolkit/controls": "workspace:*",
     "@oasis-engine-toolkit/custom-material": "workspace:*"
   }
