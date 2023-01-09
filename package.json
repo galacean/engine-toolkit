@@ -16,7 +16,6 @@
     "ci": "pnpm install && npm run build && npm run test-cov",
     "lint": "eslint packages/*/src --ext .ts",
     "watch": "cross-env NODE_ENV=development BUILD_TYPE=MODULE rollup -cw -m inline",
-    "watch:umd": "cross-env NODE_ENV=development BUILD_TYPE=UMD rollup -cw -m inline",
     "build": "pnpm -r --filter='./packages/*' run b:types",
     "clean": "pnpm -r exec rm -rf dist && pnpm -r exec rm -rf types"
   },
