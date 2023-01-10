@@ -248,6 +248,8 @@ export class OrbitControl extends Script {
 
   private _updateTransform(): void {
     const { cameraTransform, target, _tempVec3, _spherical, _sphericalDelta, _panOffset } = this;
+    cameraTransform.getWorldUp(_tempVec3);
+    this._atTheBack = _tempVec3.y <= 0;
     Vector3.subtract(cameraTransform.position, target, _tempVec3);
     _spherical.setFromVec3(_tempVec3, this._atTheBack);
     _spherical.theta += _sphericalDelta.theta;
