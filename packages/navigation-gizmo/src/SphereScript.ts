@@ -117,8 +117,6 @@ export class SphereScript extends Script {
 
   onPointerDown(pointer: Pointer) {
     this._disableComponent();
-
-    this._sceneCamera.isOrthographic = false;
     this._recoverTextColor();
 
     // get targetPoint
