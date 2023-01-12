@@ -117,8 +117,6 @@ export class SphereScript extends Script {
 
   onPointerDown(pointer: Pointer) {
     this._disableComponent();
-
-    this._sceneCamera.isOrthographic = false;
     this._recoverTextColor();
 
     // get targetPoint
@@ -188,7 +186,9 @@ export class SphereScript extends Script {
     let x = -this._deltaPointer.x * this._speedXFactor;
     let y = -this._deltaPointer.y * this._speedYFactor;
 
-    if (this._startRadian - y <= 0 || this._startRadian - y > Math.PI) {
+    const isBetween = this._startRadian - y > Math.PI && this._startRadian - y < 2 * Math.PI;
+
+    if (this._startRadian - y <= 0 || isBetween) {
       this._isBack = true;
     } else {
       this._isBack = false;
