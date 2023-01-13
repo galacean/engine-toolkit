@@ -146,7 +146,7 @@ export class OutlineManager extends Script {
     const outlineEntities = this._outlineEntities;
     if (!outlineEntities.length) return;
 
-    const needSubRender = outlineEntities.length === 1 && outlineEntities[0].childCount > 0;
+    const needSubRender = outlineEntities.length === 1 && outlineEntities[0].children.length > 0;
     if (needSubRender) {
       const parent = outlineEntities[0];
       this._renderEntity(camera, this.mainColor, parent);
