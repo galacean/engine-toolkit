@@ -27,7 +27,7 @@ export class SkeletonViewer extends Script {
   midWidthScale: number = 0.1;
   /** Ball size. */
   ballSize: number = 0.25;
-  /** Skeletal Decrease Factor. */
+  /** Skeleton Decrease Factor. */
   scaleFactor: number = 0.85;
   /** The min color.  */
   colorMin: Color = new Color(0.35, 0.35, 0.35, 1);

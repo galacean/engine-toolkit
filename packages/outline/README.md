@@ -15,7 +15,7 @@ The `Outline` tool uses an efficient method of `post-processing` to stroke entit
 The `Outline` is published on npm with full typing support. To install, use:
 
 ```sh
-npm install @oasis-engine-toolkit/outline
+$ npm install @oasis-engine-toolkit/outline
 ```
 
 This will allow you to import package entirely using:
