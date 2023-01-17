@@ -44,7 +44,7 @@ $ npm install @oasis-engine-toolkit/gizmo
 This will allow you to import package entirely using:
 
 ```javascript
-import { Gizmo, Group, AnchorType, CoordinateType, State } from "oasis-engine-toolkit";
+import { Gizmo, Group, AnchorType, CoordinateType, State } from "@oasis-engine-toolkit/gizmo";
 ```
 
 ## Usage
