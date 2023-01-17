@@ -1,6 +1,6 @@
 # Navigation Gizmo
 
-Navigation Gizmo shows the current orientation of the view. Dragging it with left mouse buttom will orbit the view. Clicking any of the axis labels will align the view to that axis.
+Navigation Gizmo displays the current orientation of the view. Dragging it with the left mouse button will orbit the view. To align the view to a specific axis, click on one of the axis labels.
 
 ![merge](https://mdn.alipayobjects.com/huamei_qbugvr/afts/img/A*Bpr9TKzbFeYAAAAAAAAAAAAADtKFAQ/original)
 

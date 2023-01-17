@@ -1,10 +1,10 @@
 # Gizmo
 
-Gizmos allow mouse-controlled translation, rotation and scaling in the 3D Viewport.
+Gizmos allow for mouse-controlled translation, rotation, and scaling within the 3D Viewport.
 
-There is a separate gizmo for each operation. Each gizmo can be used separately or in combination with the others.
+There is a distinct gizmo for each operation, which can be used individually or in conjunction with one another.
 
-A gizmo always has three color-coded axes: X (green), Y (blue), and Z (red). You can drag an axis with left mouse button to transform along it. The Move and Scale gizmos additionally have small colored squares for transforming along two axes in one go.
+Each gizmo features three color-coded axes: X (green), Y (blue), and Z (red). To transform along a specific axis, drag it with the left mouse button. The Move and Scale gizmos also have small, colored squares that allow for transforming along two axes simultaneously.
 
 **Translate**
 
