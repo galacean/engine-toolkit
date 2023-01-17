@@ -8,6 +8,8 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 
 `OrbitControl` is used to simulate orbital interaction, suitable for 360 rotation interaction around a target object, be sure to add the `OrbitControl` after adding the Camera component.
 
+![merge](https://user-images.githubusercontent.com/7768919/212805592-ebfc6226-62f5-4b9a-9526-952dc84b6693.gif)
+
 #### Feature
 
 |Attributes|Meaning|
@@ -38,6 +40,8 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 
 `FreeControl` are generally used for roaming control, often in game scenes, be sure to add the `FreeControl` after adding the Camera component.
 
+![merge](https://user-images.githubusercontent.com/7768919/212805777-9ceb676e-3c27-4880-962c-3be224dcc7c1.gif)
+
 #### Feature
 |Attributes|Meaning|
 |:--|:--|
@@ -63,6 +67,8 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 #### Example
 
 [OrthoControl-Examples](https://oasisengine.cn/#/examples/latest/ortho-control)
+
+![merge](https://user-images.githubusercontent.com/7768919/212807005-cba34313-1750-47e9-9855-fe7e6f8df148.gif)
 
 ## npm
 
