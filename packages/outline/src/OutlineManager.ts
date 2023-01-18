@@ -141,6 +141,21 @@ export class OutlineManager extends Script {
     }
   }
 
+  /**
+   * Remove the entity you do not want to outline.
+   * @param entity - The entity you wanna remove.
+   */
+  removeEntity(entity: Entity) {
+    const index = this._outlineEntities.indexOf(entity);
+    const len = this._outlineEntities.length;
+    if (index > -1) {
+      if (index < len - 1) {
+        this._outlineEntities[index] = this._outlineEntities[len - 1];
+      }
+      this._outlineEntities.length--;
+    }
+  }
+
   /** @internal */
   onEndRender(camera: Camera): void {
     const outlineEntities = this._outlineEntities;
