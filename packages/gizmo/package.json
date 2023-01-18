@@ -1,10 +1,16 @@
 {
   "name": "@oasis-engine-toolkit/gizmo",
-  "version": "0.9.0-beta.4",
+  "version": "1.0.0-alpha.11",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
+  "homepage": "https://oasisengine.cn/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+  },
+  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
@@ -19,7 +25,10 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^0.9.0-alpha",
-    "@oasis-engine-toolkit/framebuffer-picker": "workspace:*"
+    "oasis-engine": "^0.9.0-alpha"
+  },
+  "dependencies": {
+    "@oasis-engine-toolkit/framebuffer-picker": "workspace:*",
+    "@oasis-engine-toolkit/custom-material": "workspace:*"
   }
 }

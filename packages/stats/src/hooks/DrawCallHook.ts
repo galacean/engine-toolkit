@@ -9,9 +9,9 @@ export default class DrawCallHook {
   public lines: number = 0;
   public points: number = 0;
   private hooked: boolean;
-  private realDrawElements: any;
-  private realDrawArrays: any;
-  private gl: WebGLRenderingContext | WebGL2RenderingContext;
+  private readonly realDrawElements: any;
+  private readonly realDrawArrays: any;
+  private readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
 
   constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
     this.realDrawElements = gl.drawElements;
@@ -26,17 +26,17 @@ export default class DrawCallHook {
     log(`DrawCall is hooked.`);
   }
 
-  private hookedDrawElements(mode: number, count: number, type: number, offset: number) {
+  private hookedDrawElements(mode: number, count: number, type: number, offset: number): void {
     this.realDrawElements.call(this.gl, mode, count, type, offset);
     this.update(count, mode);
   }
 
-  private hookedDrawArrays(mode: number, first: number, count: number) {
+  private hookedDrawArrays(mode: number, first: number, count: number): void {
     this.realDrawArrays.call(this.gl, mode, first, count);
     this.update(count, mode);
   }
 
-  private update(count: number, mode: number) {
+  private update(count: number, mode: number): void {
     const { gl } = this;
 
     this.drawCall++;

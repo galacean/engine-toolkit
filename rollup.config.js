@@ -17,7 +17,7 @@ const { BUILD_TYPE, NODE_ENV } = process.env;
 const pkgsRoot = path.join(__dirname, "packages");
 const pkgs = fs
   .readdirSync(pkgsRoot)
-  .filter((dir) => dir !== "design")
+  .filter((dir) => dir !== "custom-material")
   .map((dir) => path.join(pkgsRoot, dir))
   .filter((dir) => fs.statSync(dir).isDirectory())
   .map((location) => {
