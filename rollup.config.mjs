@@ -5,6 +5,7 @@ import { swc, defineRollupSwcOption, minify } from "rollup-plugin-swc3";
 import camelCase from "camelcase";
 import fs from "fs";
 import path from "path";
+import replace from "@rollup/plugin-replace";
 
 function walk(dir) {
   let files = fs.readdirSync(dir);
@@ -76,7 +77,14 @@ function makeRollupConfig(pkg) {
         return [path.relative(path.join(pkg.location, "src"), item.replace(/\.[^/.]+$/, "")), item];
       })
   );
-  
+
+  plugins.push(
+    replace({
+      preventAssignment: true,
+      __buildVersion: pkg.pkgJson.version
+    })
+  );
+
   return [
     {
       input: path.join(pkg.location, "src", "index.ts"),
