@@ -69,6 +69,14 @@ function makeRollupConfig(pkg) {
     globals[external] = toGlobalName(external);
   });
 
+  const entries = Object.fromEntries(
+    walk(path.join(pkg.location, "src"))
+      .filter((file) => /^(?!.*\.d\.ts$).*\.ts$/.test(file))
+      .map((item) => {
+        return [path.relative(path.join(pkg.location, "src"), item.replace(/\.[^/.]+$/, "")), item];
+      })
+  );
+  
   return [
     {
       input: path.join(pkg.location, "src", "index.ts"),
@@ -83,7 +91,7 @@ function makeRollupConfig(pkg) {
       plugins: [...plugins, minify({ sourceMap: true })]
     },
     {
-      input: walk(path.join(pkg.location, "src")).filter((file) => /^(?!.*\.d\.ts$).*\.ts$/.test(file)),
+      input: entries,
       output: {
         dir: path.join(pkg.location, "dist", "es"),
         format: "es",

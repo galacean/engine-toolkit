@@ -9,7 +9,7 @@
     "declarationDir": "types",
     "outDir": "dist",
     "skipLibCheck": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "sourceMap": true
   },
   "include": [
