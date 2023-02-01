@@ -2,9 +2,8 @@
   "name": "@oasis-engine-toolkit/framebuffer-picker",
   "version": "1.0.0-alpha.11",
   "license": "MIT",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
-  "browser": "dist/browser.js",
+  "module": "dist/es/index.js",
+  "main": "dist/umd/browser.js",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"

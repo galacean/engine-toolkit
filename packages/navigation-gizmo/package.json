@@ -17,9 +17,8 @@
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
   "types": "types/index.d.ts",
-  "browser": "dist/browser.js",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
+  "main": "dist/umd/browser.js",
+  "module": "dist/es/index.js",
   "files": [
     "dist/**/*",
     "types/**/*"
