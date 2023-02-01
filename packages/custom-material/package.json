@@ -17,7 +17,8 @@
   },
   "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
   "types": "types/index.d.ts",
-  "module": "dist/index.js",
+  "main": "dist/umd/browser.js",
+  "module": "dist/es/index.js",
   "files": [
     "dist/**/*",
     "types/**/*"
