@@ -120,20 +120,11 @@ export class ScaleControl extends GizmoComponent {
   }
 
   onUpdate(isModified: boolean = false): void {
-    const { _tempVec0, _tempMat } = this;
-    const cameraPosition = this._camera.entity.transform.worldPosition;
-    this._group.getWorldMatrix(_tempMat);
-    const { elements: ele } = _tempMat;
-    _tempVec0.set(ele[12], ele[13], ele[14]);
+    this._resizeControl(isModified);
+  }
 
-    const s = isModified
-      ? Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor * 0.75
-      : Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
-
-    const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
-    const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
-    const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
-    this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(sx, sy, sz));
+  onSwitch() {
+    this._resizeControl();
   }
 
   private _initAxis(): void {
@@ -226,5 +217,28 @@ export class ScaleControl extends GizmoComponent {
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
     ray.getPoint(ray.intersectPlane(this._plane), out);
+  }
+
+  private _resizeControl(isModified: boolean = false): void {
+    const { _tempVec0, _tempMat } = this;
+    const cameraPosition = this._camera.entity.transform.worldPosition;
+    this._group.getWorldMatrix(_tempMat);
+
+    if (this._camera.isOrthographic) {
+      const s = this._camera.orthographicSize * Utils.scaleFactor * 3;
+      this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(s, s, s));
+    } else {
+      const { elements: ele } = _tempMat;
+      _tempVec0.set(ele[12], ele[13], ele[14]);
+
+      const s = isModified
+        ? Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor * 0.75
+        : Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
+
+      const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
+      const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
+      const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
+      this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(sx, sy, sz));
+    }
   }
 }

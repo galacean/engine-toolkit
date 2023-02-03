@@ -27,6 +27,7 @@ export class TranslateControl extends GizmoComponent {
   private _tempVec1: Vector3 = new Vector3();
   private _tempVec2: Vector3 = new Vector3();
   private _tempMat: Matrix = new Matrix();
+  private _tempScale: number = 1;
 
   constructor(entity: Entity) {
     super(entity);
@@ -113,14 +114,11 @@ export class TranslateControl extends GizmoComponent {
   }
 
   onUpdate(isModified: boolean = false): void {
-    const { _tempMat, _tempVec0 } = this;
-    const cameraPosition = this._camera.entity.transform.worldPosition;
-    this._group.getWorldMatrix(_tempMat);
-    _tempVec0.set(_tempMat.elements[12], _tempMat.elements[13], _tempMat.elements[14]);
-    const s = (this._scale = Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor);
-    this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
-      _tempVec0.set(s, s, s)
-    );
+    this._resizeControl();
+  }
+
+  onSwitch() {
+    this._resizeControl();
   }
 
   private _initAxis(): void {
@@ -237,5 +235,21 @@ export class TranslateControl extends GizmoComponent {
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
     ray.getPoint(ray.intersectPlane(this._plane), out);
+  }
+
+  private _resizeControl(): void {
+    const { _tempMat, _tempVec0 } = this;
+    const cameraPosition = this._camera.entity.transform.worldPosition;
+    this._group.getWorldMatrix(_tempMat);
+
+    if (this._camera.isOrthographic) {
+      this._tempScale = this._camera.orthographicSize * Utils.scaleFactor * 3;
+    } else {
+      _tempVec0.set(_tempMat.elements[12], _tempMat.elements[13], _tempMat.elements[14]);
+      this._tempScale = this._scale = Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
+    }
+    this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
+      _tempVec0.set(this._tempScale, this._tempScale, this._tempScale)
+    );
   }
 }

@@ -232,15 +232,12 @@ export class RotateControl extends GizmoComponent {
   }
 
   onUpdate(isModified: boolean = false): void {
-    this._group.getWorldMatrix(this._tempMatrix);
-
-    this._isModified = isModified;
-    const s = this._getGizmoScale();
-    this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = this._tempMatrix.scale(
-      this._tempVec.set(s, s, s)
-    );
-
+    this._resizeControl(isModified);
     this._updateAxisTransform();
+  }
+
+  onSwitch() {
+    this._resizeControl();
   }
 
   private _setAxisSelected(axis: axisType, isSelected: boolean): void {
@@ -289,9 +286,13 @@ export class RotateControl extends GizmoComponent {
   private _getGizmoScale(): number {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldPosition(this._tempVec);
-    return this._isModified
-      ? Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor * 0.8
-      : Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor;
+    if (this._camera.isOrthographic) {
+      return this._camera.orthographicSize * Utils.scaleFactor * 3;
+    } else {
+      return this._isModified
+        ? Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor * 0.8
+        : Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor;
+    }
   }
 
   private _updateAxisTransform(): void {
@@ -314,5 +315,15 @@ export class RotateControl extends GizmoComponent {
     Quaternion.rotationZ(Math.atan2(this._cameraPos.y, this._cameraPos.x), tempQuat);
     this._axisZ.transform.rotationQuaternion = tempQuat;
     this._axisZHelper.transform.rotationQuaternion = tempQuat;
+  }
+
+  private _resizeControl(isModified: boolean = false): void {
+    this._group.getWorldMatrix(this._tempMatrix);
+
+    this._isModified = isModified;
+    const s = this._getGizmoScale();
+    this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = this._tempMatrix.scale(
+      this._tempVec.set(s, s, s)
+    );
   }
 }
