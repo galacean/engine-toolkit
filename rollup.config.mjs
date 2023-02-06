@@ -49,7 +49,8 @@ const plugins = [
       exclude: /node_modules/,
       jsc: {
         loose: true,
-        externalHelpers: true
+        externalHelpers: true,
+        target: "es5"
       },
       sourceMaps: true
     })
