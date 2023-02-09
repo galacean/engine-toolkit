@@ -29,7 +29,7 @@ export abstract class GizmoComponent extends Component {
   /** Called when gizmo's transform is dirty.*/
   abstract onUpdate(isModified: boolean): void;
   /** Called when camera switch between ortho and perps.*/
-  abstract onSwitch(): void;
+  abstract onSwitch(isModified: boolean): void;
 }
 
 export enum axisType {

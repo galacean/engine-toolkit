@@ -114,7 +114,7 @@ export class TranslateControl extends GizmoComponent {
   }
 
   onUpdate(isModified: boolean = false): void {
-    this._resizeControl();
+    this._resizeControl(isModified);
   }
 
   onSwitch() {
@@ -237,7 +237,7 @@ export class TranslateControl extends GizmoComponent {
     ray.getPoint(ray.intersectPlane(this._plane), out);
   }
 
-  private _resizeControl(): void {
+  private _resizeControl(isModified: boolean = false): void {
     const { _tempMat, _tempVec0 } = this;
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldMatrix(_tempMat);

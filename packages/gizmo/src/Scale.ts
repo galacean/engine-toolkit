@@ -123,8 +123,8 @@ export class ScaleControl extends GizmoComponent {
     this._resizeControl(isModified);
   }
 
-  onSwitch() {
-    this._resizeControl();
+  onSwitch(isModified: boolean = false) {
+    this._resizeControl(isModified);
   }
 
   private _initAxis(): void {
@@ -225,7 +225,10 @@ export class ScaleControl extends GizmoComponent {
     this._group.getWorldMatrix(_tempMat);
 
     if (this._camera.isOrthographic) {
-      const s = this._camera.orthographicSize * Utils.scaleFactor * 3;
+      const s = isModified
+        ? this._camera.orthographicSize * Utils.scaleFactor * 3 * 0.75
+        : this._camera.orthographicSize * Utils.scaleFactor * 3;
+
       this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(s, s, s));
     } else {
       const { elements: ele } = _tempMat;

@@ -236,8 +236,8 @@ export class RotateControl extends GizmoComponent {
     this._updateAxisTransform();
   }
 
-  onSwitch() {
-    this._resizeControl();
+  onSwitch(isModified: boolean = false) {
+    this._resizeControl(isModified);
   }
 
   private _setAxisSelected(axis: axisType, isSelected: boolean): void {
@@ -287,7 +287,9 @@ export class RotateControl extends GizmoComponent {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     this._group.getWorldPosition(this._tempVec);
     if (this._camera.isOrthographic) {
-      return this._camera.orthographicSize * Utils.scaleFactor * 3;
+      return this._isModified
+        ? this._camera.orthographicSize * Utils.scaleFactor * 3 * 0.8
+        : this._camera.orthographicSize * Utils.scaleFactor * 3;
     } else {
       return this._isModified
         ? Vector3.distance(cameraPosition, this._tempVec) * Utils.scaleFactor * 0.8

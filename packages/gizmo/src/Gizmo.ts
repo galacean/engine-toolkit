@@ -159,7 +159,7 @@ export class Gizmo extends Script {
     if (this._lastIsOrtho !== this._sceneCamera.isOrthographic) {
       this._lastIsOrtho = this._sceneCamera.isOrthographic;
       this._traverseControl(this._type, (control) => {
-        this._type === State.all ? control.onSwitch() : control.onSwitch();
+        this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
       });
     }
 
