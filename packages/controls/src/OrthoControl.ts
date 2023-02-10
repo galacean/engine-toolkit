@@ -54,7 +54,7 @@ export class OrthoControl extends Script {
   /** The maximum radian in the horizontal direction, the default is positive infinity.  */
   maxAzimuthAngle: number = Infinity;
 
-  private _zoomScaleUnit: number = 25;
+  private _zoomScaleUnit: number = 2;
   private _scale: number = 1;
   private _panOffset: Vector3 = new Vector3();
   private _tempVec3: Vector3 = new Vector3();
@@ -165,10 +165,10 @@ export class OrthoControl extends Script {
     const { cameraTransform, camera, _panOffset } = this;
 
     // Update Zoom
-    const sizeDiff = this._zoomScaleUnit * (this._scale - 1);
+    const sizeDiff = this._zoomScaleUnit * Math.log1p(camera.orthographicSize) * (this._scale - 1);
     const size = camera.orthographicSize + sizeDiff;
     camera.orthographicSize = Math.max(this.minZoom, Math.min(this.maxZoom, size));
-    
+
     // Update X and Y
     const { width, height } = this.canvas;
     const { x, y } = _panOffset;
@@ -180,7 +180,7 @@ export class OrthoControl extends Script {
     curPosition.x = cameraPosition.x - (x * width3D) / width;
     curPosition.y = cameraPosition.y + (y * height3D) / height;
     curPosition.z = cameraPosition.z;
-    
+
     // Update camera transform
     cameraTransform.position = curPosition;
     /** Reset cache value. */
