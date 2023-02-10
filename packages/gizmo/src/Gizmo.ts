@@ -31,6 +31,8 @@ export class Gizmo extends Script {
   private _isStarted = false;
   private _isHovered = false;
   private _lastDistance: number = -1;
+  private _lastOrthoSize: number = -1;
+  private _lastIsOrtho: boolean = false;
 
   private _sceneCamera: Camera;
   private _layer: Layer;
@@ -112,7 +114,6 @@ export class Gizmo extends Script {
 
   constructor(entity: Entity) {
     super(entity);
-
     // @ts-ignore
     if (!this.entity.engine.physicsManager._initialized) {
       throw new Error("PhysicsManager is not initialized");
@@ -135,7 +136,6 @@ export class Gizmo extends Script {
     );
 
     this.layer = Layer.Layer29;
-
     // gizmo collider
     const sphereCollider = entity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
@@ -155,6 +155,14 @@ export class Gizmo extends Script {
     const pointer = pointers.find((pointer: Pointer) => {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
+
+    if (this._lastIsOrtho !== this._sceneCamera.isOrthographic) {
+      this._lastIsOrtho = this._sceneCamera.isOrthographic;
+      this._traverseControl(this._type, (control) => {
+        this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
+      });
+    }
+
     if (this._isStarted) {
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
@@ -179,7 +187,16 @@ export class Gizmo extends Script {
         this._lastDistance = currDistance;
       }
 
-      if (this._group._gizmoTransformDirty || distanceDirty) {
+      let orthoSizeDirty = false;
+      if (
+        this._sceneCamera.isOrthographic &&
+        Math.abs(this._lastOrthoSize - this._sceneCamera.orthographicSize) > MathUtil.zeroTolerance
+      ) {
+        orthoSizeDirty = true;
+        this._lastOrthoSize = this._sceneCamera.orthographicSize;
+      }
+
+      if (this._group._gizmoTransformDirty || distanceDirty || orthoSizeDirty) {
         this._traverseControl(this._type, (control) => {
           this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
         });
