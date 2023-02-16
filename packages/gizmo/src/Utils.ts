@@ -21,6 +21,7 @@ export class Utils {
   static yellowMaterial: PlainColorMaterial;
   static rotatePlaneMaterial: PlainColorMaterial;
   static invisibleMaterialRotate: PlainColorMaterial;
+  static sphereMaterial: PlainColorMaterial;
 
   static redMaterialScale: PlainColorMaterial;
   static greenMaterialScale: PlainColorMaterial;
@@ -65,6 +66,8 @@ export class Utils {
     Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialRotate = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
     Utils.invisibleMaterialRotate.renderState.rasterState.cullMode = CullMode.Off;
+    Utils.sphereMaterial = this._createPlainColorMaterial(engine, State.rotate, 0.9, 0.9, 0.9, 0);
+    Utils.sphereMaterial.renderState.rasterState.cullMode = CullMode.Off;
 
     // scale material
     Utils.redMaterialScale = this._createPlainColorMaterial(engine, State.scale, 1.0, 0.25, 0.25, 1.0);
@@ -78,7 +81,7 @@ export class Utils {
     Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.08, 0.3);
     Utils.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
     Utils.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.32, 0.32, 0.32);
-    Utils.axisSphereMesh = PrimitiveMesh.createSphere(engine, 0.2);
+    Utils.axisSphereMesh = PrimitiveMesh.createSphere(engine, 1.6, 48);
     Utils.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.25, 0.25, 0.25);
     Utils.axisXTorusMesh = GizmoMesh.createCircleTube(engine, Math.PI, 1.6, 0.02);
     Utils.axisYTorusMesh = GizmoMesh.createCircleTube(engine, Math.PI, 1.6, 0.02);

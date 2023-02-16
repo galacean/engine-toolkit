@@ -13,7 +13,8 @@ import {
   Script,
   MeshRenderElement,
   Pointer,
-  PointerPhase
+  PointerPhase,
+  Vector2
 } from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -206,7 +207,7 @@ export class Gizmo extends Script {
         if ((pointer.pressedButtons & PointerButton.Primary) !== 0) {
           this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
             if (result) {
-              this._selectHandler(result);
+              this._selectHandler(result, pointer.position);
             }
           });
         } else {
@@ -247,7 +248,7 @@ export class Gizmo extends Script {
     }
   }
 
-  private _triggerGizmoStart(currentType: State, axisName: string): void {
+  private _triggerGizmoStart(currentType: State, axisName: string, pointerPosition: Vector2): void {
     this._isStarted = true;
     this._onGizmoHoverEnd();
     const pointer = this.engine.inputManager.pointers.find((pointer: Pointer) => {
@@ -265,7 +266,7 @@ export class Gizmo extends Script {
         }
       );
 
-      this._currentControl.onMoveStart(this._tempRay, axisName);
+      this._currentControl.onMoveStart(this._tempRay, axisName, pointerPosition);
     }
   }
 
@@ -274,7 +275,7 @@ export class Gizmo extends Script {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
     this._sceneCamera.screenPointToRay(pointer.position, this._tempRay2);
-    this._currentControl.onMove(this._tempRay2);
+    this._currentControl.onMove(this._tempRay2, pointer.position);
   }
 
   private _triggerGizmoEnd(): void {
@@ -286,12 +287,12 @@ export class Gizmo extends Script {
     this._isStarted = false;
   }
 
-  private _selectHandler(result: MeshRenderElement): void {
+  private _selectHandler(result: MeshRenderElement, pointerPosition: Vector2): void {
     const currentControl = parseInt(result.material.name);
     const selectedEntity = result.component.entity;
     switch (selectedEntity.layer) {
       case this._layer:
-        this._triggerGizmoStart(currentControl, selectedEntity.name);
+        this._triggerGizmoStart(currentControl, selectedEntity.name, pointerPosition);
         break;
     }
   }
