@@ -1,4 +1,4 @@
-import { BaseMaterial, Color, Engine, Shader } from "oasis-engine";
+import { BaseMaterial, Color, CullMode, Engine, Shader } from "oasis-engine";
 
 /**
  * plain color Material. don't effected by light and fog.
@@ -30,6 +30,8 @@ export class PlainColorMaterial extends BaseMaterial {
     shaderData.enableMacro("OMIT_NORMAL");
 
     shaderData.setColor(PlainColorMaterial._baseColorProp, new Color(1, 1, 1, 1));
+
+    this.renderState.rasterState.cullMode = CullMode.Off;
   }
 
   /**
