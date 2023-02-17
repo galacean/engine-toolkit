@@ -126,7 +126,7 @@ export class TranslateControl extends GizmoComponent {
       {
         name: "x",
         axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.greenMaterialTrans,
+        axisMaterial: Utils.redMaterialTrans,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialTrans,
         axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90)],
@@ -135,7 +135,7 @@ export class TranslateControl extends GizmoComponent {
       {
         name: "y",
         axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.blueMaterialTrans,
+        axisMaterial: Utils.greenMaterialTrans,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialTrans,
         axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0)],
@@ -144,7 +144,7 @@ export class TranslateControl extends GizmoComponent {
       {
         name: "z",
         axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.redMaterialTrans,
+        axisMaterial: Utils.blueMaterialTrans,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialTrans,
         axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90)],
@@ -153,7 +153,7 @@ export class TranslateControl extends GizmoComponent {
       {
         name: "xy",
         axisMesh: [Utils.axisPlaneMesh],
-        axisMaterial: Utils.lightRedMaterial,
+        axisMaterial: Utils.lightBlueMaterial,
         axisHelperMesh: [Utils.axisHelperPlaneMesh],
         axisHelperMaterial: Utils.invisibleMaterialTrans,
         axisRotation: [new Vector3(0, 90, 90)],
@@ -162,7 +162,7 @@ export class TranslateControl extends GizmoComponent {
       {
         name: "yz",
         axisMesh: [Utils.axisPlaneMesh],
-        axisMaterial: Utils.lightGreenMaterial,
+        axisMaterial: Utils.lightRedMaterial,
         axisHelperMesh: [Utils.axisHelperPlaneMesh],
         axisHelperMaterial: Utils.invisibleMaterialTrans,
 
@@ -172,7 +172,7 @@ export class TranslateControl extends GizmoComponent {
       {
         name: "xz",
         axisMesh: [Utils.axisPlaneMesh],
-        axisMaterial: Utils.lightBlueMaterial,
+        axisMaterial: Utils.lightGreenMaterial,
         axisHelperMesh: [Utils.axisHelperPlaneMesh],
         axisHelperMaterial: Utils.invisibleMaterialTrans,
         axisRotation: [new Vector3(0, 0, 0)],
