@@ -132,7 +132,7 @@ export class ScaleControl extends GizmoComponent {
       {
         name: "x",
         axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.greenMaterialScale,
+        axisMaterial: Utils.redMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialScale,
         axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90)],
@@ -142,7 +142,7 @@ export class ScaleControl extends GizmoComponent {
       {
         name: "y",
         axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.blueMaterialScale,
+        axisMaterial: Utils.greenMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialScale,
         axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0)],
@@ -152,7 +152,7 @@ export class ScaleControl extends GizmoComponent {
       {
         name: "z",
         axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.redMaterialScale,
+        axisMaterial: Utils.blueMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialScale,
         axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90)],
