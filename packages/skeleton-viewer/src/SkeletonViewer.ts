@@ -163,11 +163,11 @@ export class SkeletonViewer extends Script {
 
   private _showSkeleton(renderer: SkinnedMeshRenderer): void {
     // @ts-ignore
-    if (!renderer._jointEntitys) {
+    if (!renderer._jointEntities) {
       renderer.update(0);
     }
     // @ts-ignore
-    const joints: Entity[] = renderer._jointEntitys;
+    const joints: Entity[] = renderer._jointEntities;
 
     const spheres: Entity[][] = [];
 
