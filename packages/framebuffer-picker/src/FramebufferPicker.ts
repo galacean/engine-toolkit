@@ -23,6 +23,7 @@ dependentComponents(Camera);
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
   private static _pickPixel = new Uint8Array(4);
+  private static _pickColorProperty = Shader.getPropertyByName("u_colorId");
 
   private _renderersMap: Renderer[] = [];
   private _camera: Camera;
@@ -74,12 +75,24 @@ export class FramebufferPicker extends Script {
     const renderersMap = this._renderersMap;
     const rootEntityRenderers = FramebufferPicker._rootEntityRenderers;
     const { rootEntities } = scene;
+    const pickColorProperty = FramebufferPicker._pickColorProperty;
 
     for (let i = 0, n = rootEntities.length; i < n; i++) {
       rootEntities[i].getComponentsIncludeChildren(Renderer, rootEntityRenderers);
       for (let j = 0, m = rootEntityRenderers.length; j < m; j++) {
         const renderer = rootEntityRenderers[j];
-        renderer.shaderData.setVector3("u_colorId", this._id2Color(++currentRendererIndex));
+        const shaderData = renderer.shaderData;
+
+        // Init pick color
+        let pickColor = shaderData.getVector3(pickColorProperty);
+        if (!pickColor) {
+          pickColor = new Vector3();
+          shaderData.setVector3(pickColorProperty, pickColor);
+        }
+
+        // Set pick color
+        this._uniqueId2Color(++currentRendererIndex, pickColor);
+
         renderersMap[currentRendererIndex] = renderer;
       }
     }
@@ -93,10 +106,8 @@ export class FramebufferPicker extends Script {
     const viewWidth = (viewport.z - viewport.x) * canvas.width;
     const viewHeight = (viewport.w - viewport.y) * canvas.height;
 
-    const nx = (x - viewport.x) / viewWidth;
-    const ny = (y - viewport.y) / viewHeight;
-    const left = Math.floor(nx * (pickRenderTarget.width - 1));
-    const bottom = Math.floor((1 - ny) * (pickRenderTarget.height - 1));
+    const left = Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1));
+    const bottom = Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1));
 
     const pickPixel = FramebufferPicker._pickPixel;
     (<Texture2D>pickRenderTarget.getColorTexture()).getPixelBuffer(left, bottom, 1, 1, 0, pickPixel);
@@ -104,20 +115,19 @@ export class FramebufferPicker extends Script {
   }
 
   private _getRendererByPixel(color: Uint8Array): Renderer {
-    return this._renderersMap[this._color2Id(color)];
+    return this._renderersMap[this._color2UniqueId(color)];
   }
 
-  private _id2Color(id: number): Vector3 {
-    if (id >= 0xffffff) {
+  private _uniqueId2Color(uniqueId: number, outColor: Vector3): void {
+    if (uniqueId >= 0xffffff) {
       Logger.warn("Framebuffer Picker encounter primitive's id greater than " + 0xffffff);
-      return new Vector3(0, 0, 0);
+      outColor.set(0, 0, 0);
     }
 
-    const color = new Vector3((id & 0xff) / 255, ((id & 0xff00) >> 8) / 255, ((id & 0xff0000) >> 16) / 255);
-    return color;
+    outColor.set((uniqueId & 0xff) / 255, ((uniqueId & 0xff00) >> 8) / 255, ((uniqueId & 0xff0000) >> 16) / 255);
   }
 
-  private _color2Id(pixel: Uint8Array): number {
-    return pixel[0] | (pixel[1] << 8) | (pixel[2] << 16);
+  private _color2UniqueId(color: Uint8Array): number {
+    return color[0] | (color[1] << 8) | (color[2] << 16);
   }
 }
