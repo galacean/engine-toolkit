@@ -9,6 +9,7 @@ import {
   Script,
   Shader,
   Texture2D,
+  TextureFormat,
   Vector2,
   Vector3
 } from "oasis-engine";
@@ -80,7 +81,12 @@ export class FramebufferPicker extends Script {
    */
   resizeFrameBuffer(width: number, height: number): void {
     this._pickRenderTarget.destroy();
-    this._pickRenderTarget = new RenderTarget(this.engine, width, height, new Texture2D(this.engine, width, height));
+    this._pickRenderTarget = new RenderTarget(
+      this.engine,
+      width,
+      height,
+      new Texture2D(this.engine, width, height, TextureFormat.R8G8B8A8, false)
+    );
   }
 
   private _updateRenderersPickColor(scene: Scene): void {
