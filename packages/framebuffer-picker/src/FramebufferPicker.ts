@@ -1,6 +1,7 @@
 import {
   Camera,
   dependentComponents,
+  DependentMode,
   Logger,
   Renderer,
   RenderTarget,
@@ -17,9 +18,10 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 
 /**
  * Framebuffer picker.
- * @remarks Can pick up renderer at pixel level.
+ * @decorator `@dependentComponents(DependentMode.CheckOnly, Camera)`
+ * @remarks Use GPU to pick up.
  */
-dependentComponents(Camera);
+@dependentComponents(DependentMode.CheckOnly, Camera)
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
   private static _pickPixel = new Uint8Array(4);
@@ -49,24 +51,21 @@ export class FramebufferPicker extends Script {
    */
   pick(x: number, y: number): Renderer {
     const camera = this._camera;
-    if (camera) {
-      this._updateRenderersPickColor(camera.scene);
-      // Prepare render target and shader
-      const lastRenderTarget = camera.renderTarget;
-      camera.renderTarget = this._pickRenderTarget;
-      camera.setReplacementShader(pickShader);
+    this._updateRenderersPickColor(camera.scene);
+    // Prepare render target and shader
+    const lastRenderTarget = camera.renderTarget;
+    camera.renderTarget = this._pickRenderTarget;
+    camera.setReplacementShader(pickShader);
 
-      camera.render();
+    camera.render();
 
-      // Revert render target and shader
-      camera.resetReplacementShader();
-      camera.renderTarget = lastRenderTarget;
+    // Revert render target and shader
+    camera.resetReplacementShader();
+    camera.renderTarget = lastRenderTarget;
 
-      // Pick up renderer
-      const pickPixel = this._readColorFromRenderTarget(camera, x, y);
-      return this._getRendererByPixel(pickPixel);
-    }
-    return null;
+    // Pick up renderer
+    const pickPixel = this._readColorFromRenderTarget(camera, x, y);
+    return this._getRendererByPixel(pickPixel);
   }
 
   private _updateRenderersPickColor(scene: Scene): void {
