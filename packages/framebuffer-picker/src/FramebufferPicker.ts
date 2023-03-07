@@ -9,6 +9,7 @@ import {
   Script,
   Shader,
   Texture2D,
+  Vector2,
   Vector3
 } from "oasis-engine";
 import fs from "./color.fs.glsl";
@@ -17,9 +18,8 @@ import vs from "./color.vs.glsl";
 const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 
 /**
- * Framebuffer picker.
+ * GPU Frame buffer picker.
  * @decorator `@dependentComponents(DependentMode.CheckOnly, Camera)`
- * @remarks Use GPU to pick up.
  */
 @dependentComponents(DependentMode.CheckOnly, Camera)
 export class FramebufferPicker extends Script {
@@ -30,16 +30,21 @@ export class FramebufferPicker extends Script {
   private _renderersMap: Renderer[] = [];
   private _camera: Camera;
   private _pickRenderTarget: RenderTarget;
+  private _frameBufferSize: Vector2 = new Vector2(1024, 1024);
+
+  get frameBufferSize(): Readonly<Vector2> {
+    return this._frameBufferSize;
+  }
 
   /**
    * @override
    */
   onAwake(): void {
-    const width = 1024;
-    const height = 1024;
-    const pickRenderTarget = new RenderTarget(this.engine, width, height, new Texture2D(this.engine, width, height));
-    const camera = this.entity.getComponent(Camera);
+    const size = this._frameBufferSize;
+    const pickRenderTarget = new RenderTarget(this.engine, size.x, size.y, new Texture2D(this.engine, size.x, size.y));
     this._pickRenderTarget = pickRenderTarget;
+
+    const camera = this.entity.getComponent(Camera);
     this._camera = camera;
   }
 
@@ -64,8 +69,18 @@ export class FramebufferPicker extends Script {
     camera.renderTarget = lastRenderTarget;
 
     // Pick up renderer
-    const pickPixel = this._readColorFromRenderTarget(camera, x, y);
-    return this._getRendererByPixel(pickPixel);
+    const pickedPixel = this._readPixelFromRenderTarget(camera, x, y);
+    return this._getRendererByPixel(pickedPixel);
+  }
+
+  /**
+   * Resize frame buffer size.
+   * @param width - The width of frame buffer
+   * @param height - The height of frame buffer
+   */
+  resizeFrameBuffer(width: number, height: number): void {
+    this._pickRenderTarget.destroy();
+    this._pickRenderTarget = new RenderTarget(this.engine, width, height, new Texture2D(this.engine, width, height));
   }
 
   private _updateRenderersPickColor(scene: Scene): void {
@@ -97,7 +112,7 @@ export class FramebufferPicker extends Script {
     }
   }
 
-  private _readColorFromRenderTarget(camera: Camera, x: number, y: number): Uint8Array {
+  private _readPixelFromRenderTarget(camera: Camera, x: number, y: number): Uint8Array {
     const pickRenderTarget = this._pickRenderTarget;
     const { canvas } = this.engine;
 
