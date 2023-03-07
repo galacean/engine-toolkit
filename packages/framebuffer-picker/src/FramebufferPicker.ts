@@ -48,28 +48,31 @@ export class FramebufferPicker extends Script {
    * Pick up renderer at screen coordinate.
    * @param x - The x coordinate of screen
    * @param y - The y coordinate of screen
-   * @returns Pike up renderer
+   * @returns Promise<Renderer>
    */
-  pick(x: number, y: number): Renderer {
-    // Check frame buffer size
-    this._checkFrameBufferSize();
+  pick(x: number, y: number): Promise<Renderer> {
+    return new Promise((resolve, reject) => {
+      // Check frame buffer size
+      this._checkFrameBufferSize();
 
-    const camera = this._camera;
-    this._updateRenderersPickColor(camera.scene);
-    // Prepare render target and shader
-    const lastRenderTarget = camera.renderTarget;
-    camera.renderTarget = this._pickRenderTarget;
-    camera.setReplacementShader(pickShader);
+      const camera = this._camera;
+      this._updateRenderersPickColor(camera.scene);
+      // Prepare render target and shader
+      const lastRenderTarget = camera.renderTarget;
+      camera.renderTarget = this._pickRenderTarget;
+      camera.setReplacementShader(pickShader);
 
-    camera.render();
+      camera.render();
 
-    // Revert render target and shader
-    camera.resetReplacementShader();
-    camera.renderTarget = lastRenderTarget;
+      // Revert render target and shader
+      camera.resetReplacementShader();
+      camera.renderTarget = lastRenderTarget;
 
-    // Pick up renderer
-    const pickedPixel = this._readPixelFromRenderTarget(camera, x, y);
-    return this._getRendererByPixel(pickedPixel);
+      // Pick up renderer
+      const pickedPixel = this._readPixelFromRenderTarget(camera, x, y);
+      const renderer = this._getRendererByPixel(pickedPixel);
+      resolve(renderer);
+    });
   }
 
   private _checkFrameBufferSize(): void {
