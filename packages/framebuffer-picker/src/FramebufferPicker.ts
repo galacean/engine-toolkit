@@ -1,69 +1,123 @@
-import { Camera, Entity, MeshRenderElement, RenderTarget, Script, Texture2D } from "oasis-engine";
-import { ColorRenderPass } from "./ColorRenderPass";
+import {
+  Camera,
+  dependentComponents,
+  Logger,
+  Renderer,
+  RenderTarget,
+  Scene,
+  Script,
+  Shader,
+  Texture2D,
+  Vector3
+} from "oasis-engine";
+import fs from "./color.fs.glsl";
+import vs from "./color.vs.glsl";
+
+const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 
 /**
  * Framebuffer picker.
  * @remarks Can pick up renderer at pixel level.
  */
+dependentComponents(Camera);
 export class FramebufferPicker extends Script {
-  public colorRenderTarget: RenderTarget;
-  public colorRenderPass: ColorRenderPass;
+  private static _rootEntityRenderers: Renderer[] = [];
+  private static _pickPixel = new Uint8Array(4);
 
+  private _renderersMap: Renderer[] = [];
   private _camera: Camera;
-  private _needPick: boolean;
-  private _pickPos: [number, number];
+  private _pickRenderTarget: RenderTarget;
 
   /**
-   * Camera.
+   * @override
    */
-  get camera(): Camera {
-    return this._camera;
-  }
-
-  set camera(value: Camera) {
-    if (this._camera !== value) {
-      this._camera = value;
-      //@ts-ignore
-      this.camera._renderPipeline.addRenderPass(this.colorRenderPass);
-    }
-  }
-
-  constructor(entity: Entity) {
-    super(entity);
+  onAwake(): void {
     const width = 1024;
     const height = 1024;
-    this.colorRenderTarget = new RenderTarget(this.engine, width, height, new Texture2D(this.engine, width, height));
-    this.colorRenderPass = new ColorRenderPass("ColorRenderTarget_FBP", -1, this.colorRenderTarget, 0, this.engine);
+    const pickRenderTarget = new RenderTarget(this.engine, width, height, new Texture2D(this.engine, width, height));
+    const camera = this.entity.getComponent(Camera);
+    this._pickRenderTarget = pickRenderTarget;
+    this._camera = camera;
   }
 
   /**
-   * Pick the object at the screen coordinate position.
-   * @param offsetX - Relative X coordinate of the drawingBuffer
-   * @param offsetY - Relative Y coordinate of the drawingBuffer
+   * Pick up renderer at screen coordinate.
+   * @param x - The x coordinate of screen
+   * @param y - The y coordinate of screen
+   * @returns Pike up renderer
    */
-  pick(offsetX: number, offsetY: number): Promise<MeshRenderElement> {
-    if (this.enabled) {
-      this._needPick = true;
-      this._pickPos = [offsetX, offsetY];
-      return new Promise((resolve) => {
-        this.colorRenderPass._pickResolve = resolve;
-      });
+  pick(x: number, y: number): Renderer {
+    const camera = this._camera;
+    if (camera) {
+      this._updateRenderersPickColor(camera.scene);
+      // Prepare render target and shader
+      const lastRenderTarget = camera.renderTarget;
+      camera.renderTarget = this._pickRenderTarget;
+      camera.setReplacementShader(pickShader);
+
+      camera.render();
+
+      // Revert render target and shader
+      camera.resetReplacementShader();
+      camera.renderTarget = lastRenderTarget;
+
+      // Pick up renderer
+      const pickPixel = this._readColorFromRenderTarget(camera, x, y);
+      return this._getRendererByPixel(pickPixel);
+    }
+    return null;
+  }
+
+  private _updateRenderersPickColor(scene: Scene): void {
+    let currentRendererIndex = 0;
+
+    const renderersMap = this._renderersMap;
+    const rootEntityRenderers = FramebufferPicker._rootEntityRenderers;
+    const { rootEntities } = scene;
+
+    for (let i = 0, n = rootEntities.length; i < n; i++) {
+      rootEntities[i].getComponentsIncludeChildren(Renderer, rootEntityRenderers);
+      for (let j = 0, m = rootEntityRenderers.length; j < m; j++) {
+        const renderer = rootEntityRenderers[j];
+        renderer.shaderData.setVector3("u_colorId", this._id2Color(++currentRendererIndex));
+        renderersMap[currentRendererIndex] = renderer;
+      }
     }
   }
 
-  onUpdate(deltaTime: number) {
-    super.onUpdate(deltaTime);
+  private _readColorFromRenderTarget(camera: Camera, x: number, y: number): Uint8Array {
+    const pickRenderTarget = this._pickRenderTarget;
+    const { canvas } = this.engine;
 
-    if (this.enabled && this._needPick) {
-      this.colorRenderPass.pick(this._pickPos[0], this._pickPos[1]);
-      this._needPick = false;
-    }
+    const viewport = camera.viewport;
+    const viewWidth = (viewport.z - viewport.x) * canvas.width;
+    const viewHeight = (viewport.w - viewport.y) * canvas.height;
+
+    const nx = (x - viewport.x) / viewWidth;
+    const ny = (y - viewport.y) / viewHeight;
+    const left = Math.floor(nx * (pickRenderTarget.width - 1));
+    const bottom = Math.floor((1 - ny) * (pickRenderTarget.height - 1));
+
+    const pickPixel = FramebufferPicker._pickPixel;
+    (<Texture2D>pickRenderTarget.getColorTexture()).getPixelBuffer(left, bottom, 1, 1, 0, pickPixel);
+    return pickPixel;
   }
 
-  onDestroy() {
-    if (!this.camera.destroyed) {
-      //@ts-ignore
-      this.camera._renderPipeline.removeRenderPass(this.colorRenderPass);
+  private _getRendererByPixel(color: Uint8Array): Renderer {
+    return this._renderersMap[this._color2Id(color)];
+  }
+
+  private _id2Color(id: number): Vector3 {
+    if (id >= 0xffffff) {
+      Logger.warn("Framebuffer Picker encounter primitive's id greater than " + 0xffffff);
+      return new Vector3(0, 0, 0);
     }
+
+    const color = new Vector3((id & 0xff) / 255, ((id & 0xff00) >> 8) / 255, ((id & 0xff0000) >> 16) / 255);
+    return color;
+  }
+
+  private _color2Id(pixel: Uint8Array): number {
+    return pixel[0] | (pixel[1] << 8) | (pixel[2] << 16);
   }
 }
