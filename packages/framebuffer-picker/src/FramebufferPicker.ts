@@ -33,18 +33,13 @@ export class FramebufferPicker extends Script {
   private _pickRenderTarget: RenderTarget;
   private _frameBufferSize: Vector2 = new Vector2(1024, 1024);
 
-  get frameBufferSize(): Readonly<Vector2> {
-    return this._frameBufferSize;
-  }
+  /** Frame buffer size.*/
+  frameBufferSize: Vector2 = new Vector2(1024, 1024);
 
   /**
    * @override
    */
   onAwake(): void {
-    const size = this._frameBufferSize;
-    const pickRenderTarget = new RenderTarget(this.engine, size.x, size.y, new Texture2D(this.engine, size.x, size.y));
-    this._pickRenderTarget = pickRenderTarget;
-
     const camera = this.entity.getComponent(Camera);
     this._camera = camera;
   }
@@ -56,6 +51,9 @@ export class FramebufferPicker extends Script {
    * @returns Pike up renderer
    */
   pick(x: number, y: number): Renderer {
+    // Check frame buffer size
+    this._checkFrameBufferSize();
+
     const camera = this._camera;
     this._updateRenderersPickColor(camera.scene);
     // Prepare render target and shader
@@ -74,19 +72,20 @@ export class FramebufferPicker extends Script {
     return this._getRendererByPixel(pickedPixel);
   }
 
-  /**
-   * Resize frame buffer size.
-   * @param width - The width of frame buffer
-   * @param height - The height of frame buffer
-   */
-  resizeFrameBuffer(width: number, height: number): void {
-    this._pickRenderTarget.destroy();
-    this._pickRenderTarget = new RenderTarget(
-      this.engine,
-      width,
-      height,
-      new Texture2D(this.engine, width, height, TextureFormat.R8G8B8A8, false)
-    );
+  private _checkFrameBufferSize(): void {
+    const pickRenderTarget = this._pickRenderTarget;
+    const engine = this.engine;
+    const size = this._frameBufferSize;
+
+    if (!pickRenderTarget || size.x != pickRenderTarget.width || size.y != pickRenderTarget.height) {
+      pickRenderTarget && pickRenderTarget.destroy();
+      this._pickRenderTarget = new RenderTarget(
+        engine,
+        size.x,
+        size.y,
+        new Texture2D(engine, size.x, size.y, TextureFormat.R8G8B8A8, false)
+      );
+    }
   }
 
   private _updateRenderersPickColor(scene: Scene): void {
