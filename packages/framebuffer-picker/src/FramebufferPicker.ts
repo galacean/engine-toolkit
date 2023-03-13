@@ -26,7 +26,7 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
   private static _pickPixel = new Uint8Array(4);
-  private static _pickColorProperty = Shader.getPropertyByName("u_colorId");
+  private static _pickColorProperty = Shader.getPropertyByName("u_pickColor");
 
   private _renderersMap: Renderer[] = [];
   private _camera: Camera;
