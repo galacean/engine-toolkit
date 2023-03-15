@@ -141,18 +141,6 @@ export class OutlineManager extends Script {
       this._outlineEntities.push(entity);
     }
   }
-  /**
-   * Add entities you want to outline.
-   * @param entities - entities you wanna add.
-   */
-  addEntities(entities: Array<Entity>) {
-    for (let i = 0; i < entities.length; i++) {
-      const entity = entities[i];
-      if (this._outlineEntities.indexOf(entity) === -1) {
-        this._outlineEntities.push(entity);
-      }
-    }
-  }
 
   /**
    * Remove the entity you do not want to outline.
