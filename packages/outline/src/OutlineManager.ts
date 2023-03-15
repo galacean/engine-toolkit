@@ -47,6 +47,7 @@ export class OutlineManager extends Script {
   private _outlineSubColor: Color = new Color(0.16, 0.67, 0.89, 1);
   private _layer: Layer = Layer.Layer11;
   private _outlineEntities: Entity[] = [];
+  private _subLineEntities: Entity[] = [];
 
   private _renderers: MeshRenderer[] = [];
   private _materialMap: Array<{ renderer: MeshRenderer; material: Material }> = [];
@@ -138,7 +139,21 @@ export class OutlineManager extends Script {
   addEntity(entity: Entity) {
     if (this._outlineEntities.indexOf(entity) === -1) {
       this._outlineEntities.push(entity);
+      this._calSublineEntites();
     }
+  }
+  /**
+   * Add entities you want to outline.
+   * @param entities - entities you wanna add.
+   */
+  addEntities(entities: Array<Entity>) {
+    for (let i = 0; i < entities.length; i++) {
+      const entity = entities[i];
+      if (this._outlineEntities.indexOf(entity) === -1) {
+        this._outlineEntities.push(entity);
+      }
+    }
+    this._calSublineEntites();
   }
 
   /**
@@ -153,6 +168,7 @@ export class OutlineManager extends Script {
         this._outlineEntities[index] = this._outlineEntities[len - 1];
       }
       this._outlineEntities.length--;
+      this._calSublineEntites();
     }
   }
 
@@ -160,15 +176,8 @@ export class OutlineManager extends Script {
   onEndRender(camera: Camera): void {
     const outlineEntities = this._outlineEntities;
     if (!outlineEntities.length) return;
-
-    const needSubRender = outlineEntities.length === 1 && outlineEntities[0].children.length > 0;
-    if (needSubRender) {
-      const parent = outlineEntities[0];
-      this._renderEntity(camera, this.mainColor, parent);
-      this._renderEntity(camera, this.subColor, null, parent.children);
-    } else {
-      this._renderEntity(camera, this.mainColor, null, outlineEntities);
-    }
+    this._renderEntity(camera, this.subColor, this._subLineEntities);
+    this._renderEntity(camera, this.mainColor, outlineEntities);
   }
 
   /** @internal */
@@ -183,7 +192,7 @@ export class OutlineManager extends Script {
     this._layerMap = null;
   }
 
-  private _renderEntity(camera: Camera, outlineColor: Color, entity?: Entity, entities?: readonly Entity[]) {
+  private _renderEntity(camera: Camera, outlineColor: Color, entities: readonly Entity[]) {
     const scene = camera.scene;
     const originalClearFlags = camera.clearFlags;
     const originalCullingMask = camera.cullingMask;
@@ -197,10 +206,12 @@ export class OutlineManager extends Script {
     materialMap.length = 0;
     layerMap.length = 0;
 
-    if (entity) {
-      entity.getComponents(MeshRenderer, renderers);
+    for (let i = entities.length - 1; i >= 0; i--) {
+      const entity = entities[i];
 
       // replace material
+      renderers.length = 0;
+      entity.getComponents(MeshRenderer, renderers);
       for (let j = renderers.length - 1; j >= 0; j--) {
         const renderer = renderers[j];
         materialMap.push({ renderer, material: renderer.getMaterial() });
@@ -213,28 +224,6 @@ export class OutlineManager extends Script {
         layer: entity.layer
       });
       entity.layer = this._layer;
-    } else if (entities) {
-      for (let i = entities.length - 1; i >= 0; i--) {
-        const entity = entities[i];
-
-        // replace material
-        renderers.length = 0;
-        entity.getComponentsIncludeChildren(MeshRenderer, renderers);
-        for (let j = renderers.length - 1; j >= 0; j--) {
-          const renderer = renderers[j];
-          materialMap.push({ renderer, material: renderer.getMaterial() });
-          renderer.setMaterial(this._replaceMaterial);
-        }
-
-        // replace layer
-        OutlineManager._traverseEntity(entity, (entity) => {
-          layerMap.push({
-            entity,
-            layer: entity.layer
-          });
-          entity.layer = this._layer;
-        });
-      }
     }
 
     // 1. render outline mesh with replace material
@@ -268,6 +257,15 @@ export class OutlineManager extends Script {
     camera.cullingMask = originalCullingMask;
     scene.background.solidColor = originalSolidColor;
     scene.background.mode = originalBackgroundMode;
+  }
+
+  private _calSublineEntites() {
+    this._subLineEntities.length = 0;
+    for (let i = 0; i < this._outlineEntities.length; i++) {
+      OutlineManager._traverseEntity(this._outlineEntities[i], (entity) => {
+        this._subLineEntities.push(entity);
+      });
+    }
   }
 }
 
