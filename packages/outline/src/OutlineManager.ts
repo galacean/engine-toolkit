@@ -139,7 +139,6 @@ export class OutlineManager extends Script {
   addEntity(entity: Entity) {
     if (this._outlineEntities.indexOf(entity) === -1) {
       this._outlineEntities.push(entity);
-      this._calSublineEntites();
     }
   }
   /**
@@ -153,7 +152,6 @@ export class OutlineManager extends Script {
         this._outlineEntities.push(entity);
       }
     }
-    this._calSublineEntites();
   }
 
   /**
@@ -168,15 +166,22 @@ export class OutlineManager extends Script {
         this._outlineEntities[index] = this._outlineEntities[len - 1];
       }
       this._outlineEntities.length--;
-      this._calSublineEntites();
     }
+  }
+  /**
+   * Outline children of the selected entities in subcolor
+   */
+  drawchilrenEntites(): void {
+    this._calSublineEntites();
   }
 
   /** @internal */
   onEndRender(camera: Camera): void {
     const outlineEntities = this._outlineEntities;
     if (!outlineEntities.length) return;
-    this._renderEntity(camera, this.subColor, this._subLineEntities);
+    if (this._subLineEntities.length) {
+      this._renderEntity(camera, this.subColor, this._subLineEntities);
+    }
     this._renderEntity(camera, this.mainColor, outlineEntities);
   }
 
