@@ -27,6 +27,8 @@ import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
  */
 @dependentComponents(Camera)
 export class OutlineManager extends Script {
+  /** whether outline children of selected entities with subColor, default false */
+  public isChildrenIncluded: boolean = false;
   private static _traverseEntity(entity: Entity, callback: (entity: Entity) => void) {
     callback(entity);
     for (let i = entity.children.length - 1; i >= 0; i--) {
@@ -139,6 +141,8 @@ export class OutlineManager extends Script {
   addEntity(entity: Entity) {
     if (this._outlineEntities.indexOf(entity) === -1) {
       this._outlineEntities.push(entity);
+
+      this.isChildrenIncluded && this._calSublineEntites();
     }
   }
 
@@ -154,22 +158,15 @@ export class OutlineManager extends Script {
         this._outlineEntities[index] = this._outlineEntities[len - 1];
       }
       this._outlineEntities.length--;
+      this.isChildrenIncluded && this._calSublineEntites();
     }
-  }
-  /**
-   * Outline children of the selected entities in subcolor
-   */
-  drawchilrenEntites(): void {
-    this._calSublineEntites();
   }
 
   /** @internal */
   onEndRender(camera: Camera): void {
     const outlineEntities = this._outlineEntities;
     if (!outlineEntities.length) return;
-    if (this._subLineEntities.length) {
-      this._renderEntity(camera, this.subColor, this._subLineEntities);
-    }
+    this._renderEntity(camera, this.subColor, this._subLineEntities);
     this._renderEntity(camera, this.mainColor, outlineEntities);
   }
 
