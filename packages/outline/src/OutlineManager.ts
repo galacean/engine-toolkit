@@ -15,7 +15,8 @@ import {
   Shader,
   Texture2D,
   TextureWrapMode,
-  Vector2
+  Vector2,
+  DependentMode
 } from "oasis-engine";
 import fs from "./outline.fs.glsl";
 import vs from "./outline.vs.glsl";
@@ -25,7 +26,7 @@ import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
  * Show outline of entities.
  * @decorator `@dependentComponents(Camera)`
  */
-@dependentComponents(Camera)
+@dependentComponents(DependentMode.CheckOnly, Camera)
 export class OutlineManager extends Script {
   /** whether outline children of selected entities with subColor, default false */
   public isChildrenIncluded: boolean = false;

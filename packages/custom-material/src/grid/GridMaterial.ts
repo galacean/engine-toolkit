@@ -11,6 +11,7 @@ export class GridMaterial extends BaseMaterial {
   private static _gridIntensityProperty = Shader.getPropertyByName("u_gridIntensity");
   private static _axisIntensityProperty = Shader.getPropertyByName("u_axisIntensity");
   private static _flipProgressProperty = Shader.getPropertyByName("u_flipProgress");
+  private static _fadeProperty = Shader.getPropertyByName("u_fade");
 
   /**
    * Near clip plane - the closest point to the camera when rendering occurs.
@@ -89,6 +90,17 @@ export class GridMaterial extends BaseMaterial {
     this.shaderData.setFloat(GridMaterial._flipProgressProperty, MathUtil.clamp(value, 0, 1));
   }
 
+  /**
+   * fade parameter.
+   */
+  get fade(): number {
+    return this.shaderData.getFloat(GridMaterial._fadeProperty);
+  }
+
+  set fade(value: number) {
+    this.shaderData.setFloat(GridMaterial._fadeProperty, MathUtil.clamp(value, 0, 1));
+  }
+
   constructor(engine: Engine) {
     super(engine, Shader.find("grid"));
     this.isTransparent = true;
@@ -101,6 +113,7 @@ export class GridMaterial extends BaseMaterial {
     shaderData.setFloat(GridMaterial._gridIntensityProperty, 0.2);
     shaderData.setFloat(GridMaterial._axisIntensityProperty, 0.1);
     shaderData.setFloat(GridMaterial._flipProgressProperty, 0.0);
+    shaderData.setFloat(GridMaterial._fadeProperty, 0.0);
   }
 }
 
@@ -132,7 +145,7 @@ void main() {
     gl_Position = vec4(POSITION, 1.0);// using directly the clipped coordinates
 }`,
 
-`
+  `
 #include <transform_declare>
 
 uniform float u_far;
@@ -142,18 +155,19 @@ uniform float u_secondaryScale;
 uniform float u_gridIntensity;
 uniform float u_axisIntensity;
 uniform float u_flipProgress;
+uniform float u_fade;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
   
-vec4 grid(vec3 fragPos3D, float scale, bool drawAxis) {
+vec4 grid(vec3 fragPos3D, float scale, float fade) {
     vec2 coord = mix(fragPos3D.xz, fragPos3D.xy, u_flipProgress) * scale;
     vec2 derivative = fwidth(coord);
     vec2 grid = abs(fract(coord - 0.5) - 0.5) / derivative;
     float line = min(grid.x, grid.y);
     float minimumz = min(derivative.y, 1.0);
     float minimumx = min(derivative.x, 1.0);
-    vec4 color = vec4(u_gridIntensity, u_gridIntensity, u_gridIntensity, 1.0 - min(line, 1.0));
+    vec4 color = vec4(u_gridIntensity, u_gridIntensity, u_gridIntensity, fade * (1.0 - min(line, 1.0)));
     // z-axis
     if (fragPos3D.x > -u_axisIntensity * minimumx && fragPos3D.x < u_axisIntensity * minimumx)
         color.z = 1.0;
@@ -189,7 +203,7 @@ void main() {
     float fading = max(0.0, (0.5 - linearDepth));
 
     // adding multiple resolution for the grid
-    gl_FragColor = (grid(fragPos3D, u_primaryScale, true) + grid(fragPos3D, u_secondaryScale, true));
+    gl_FragColor = (grid(fragPos3D, u_primaryScale, u_fade) + grid(fragPos3D, u_secondaryScale, 1.0 - u_fade));
     gl_FragColor.a *= fading;
 }
 `
