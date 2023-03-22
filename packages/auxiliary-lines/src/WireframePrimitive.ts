@@ -15,10 +15,24 @@ export class WireframePrimitive {
   }
 
   /**
+   * Get cuboid wire frame position count.
+   */
+  static get cuboidPositionCount(): number {
+    return 24;
+  }
+
+  /**
    * Get sphere wire frame index count.
    */
   static get sphereIndexCount(): number {
     return WireframePrimitive.circleIndexCount * 3;
+  }
+
+  /**
+   * Get sphere wire frame position count.
+   */
+  static get spherePositionCount(): number {
+    return WireframePrimitive.circlePositionCount * 3;
   }
 
   /**
@@ -29,10 +43,24 @@ export class WireframePrimitive {
   }
 
   /**
+   * Get cone wire frame position count.
+   */
+  static get conePositionCount(): number {
+    return WireframePrimitive.circlePositionCount + 5;
+  }
+
+  /**
    * Get unbound cylinder wire frame index count.
    */
   static get unboundCylinderIndexCount(): number {
     return WireframePrimitive.circleIndexCount + 16;
+  }
+
+  /**
+   * Get unbound cylinder wire frame position count.
+   */
+  static get unboundCylinderPositionCount(): number {
+    return WireframePrimitive.circlePositionCount + 16;
   }
 
   /**
@@ -43,6 +71,13 @@ export class WireframePrimitive {
   }
 
   /**
+   * Get capsule wire frame position count.
+   */
+  static get capsulePositionCount(): number {
+    return (WireframePrimitive.circlePositionCount + WireframePrimitive.ellipticPositionCount) * 2;
+  }
+
+  /**
    * Get circle wire frame index count.
    */
   static get circleIndexCount(): number {
@@ -50,10 +85,24 @@ export class WireframePrimitive {
   }
 
   /**
+   * Get circle wire frame position count.
+   */
+  static get circlePositionCount(): number {
+    return WireframePrimitive.circleVertexCount;
+  }
+
+  /**
    * Get elliptic wire frame index count.
    */
   static get ellipticIndexCount(): number {
     return WireframePrimitive.circleVertexCount * 2;
+  }
+
+  /**
+   * Get elliptic wire frame position count.
+   */
+  static get ellipticPositionCount(): number {
+    return WireframePrimitive.circleVertexCount;
   }
 
   /**
@@ -81,40 +130,41 @@ export class WireframePrimitive {
     const halfDepth: number = depth / 2;
 
     // Up
-    positions.push(new Vector3(-halfWidth, halfHeight, -halfDepth));
-    positions.push(new Vector3(halfWidth, halfHeight, -halfDepth));
-    positions.push(new Vector3(halfWidth, halfHeight, halfDepth));
-    positions.push(new Vector3(-halfWidth, halfHeight, halfDepth));
+    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
+    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
+    positions[positionOffset++].set(halfWidth, halfHeight, -halfDepth);
+    positions[positionOffset++].set(halfWidth, halfHeight, halfDepth);
+    positions[positionOffset++].set(-halfWidth, halfHeight, halfDepth);
 
     // Down
-    positions.push(new Vector3(-halfWidth, -halfHeight, -halfDepth));
-    positions.push(new Vector3(halfWidth, -halfHeight, -halfDepth));
-    positions.push(new Vector3(halfWidth, -halfHeight, halfDepth));
-    positions.push(new Vector3(-halfWidth, -halfHeight, halfDepth));
+    positions[positionOffset++].set(-halfWidth, -halfHeight, -halfDepth);
+    positions[positionOffset++].set(halfWidth, -halfHeight, -halfDepth);
+    positions[positionOffset++].set(halfWidth, -halfHeight, halfDepth);
+    positions[positionOffset++].set(-halfWidth, -halfHeight, halfDepth);
 
     // Left
-    positions.push(new Vector3(-halfWidth, halfHeight, -halfDepth));
-    positions.push(new Vector3(-halfWidth, halfHeight, halfDepth));
-    positions.push(new Vector3(-halfWidth, -halfHeight, halfDepth));
-    positions.push(new Vector3(-halfWidth, -halfHeight, -halfDepth));
+    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
+    positions[positionOffset++].set(-halfWidth, halfHeight, halfDepth);
+    positions[positionOffset++].set(-halfWidth, -halfHeight, halfDepth);
+    positions[positionOffset++].set(-halfWidth, -halfHeight, -halfDepth);
 
     // Right
-    positions.push(new Vector3(halfWidth, halfHeight, -halfDepth));
-    positions.push(new Vector3(halfWidth, halfHeight, halfDepth));
-    positions.push(new Vector3(halfWidth, -halfHeight, halfDepth));
-    positions.push(new Vector3(halfWidth, -halfHeight, -halfDepth));
+    positions[positionOffset++].set(halfWidth, halfHeight, -halfDepth);
+    positions[positionOffset++].set(halfWidth, halfHeight, halfDepth);
+    positions[positionOffset++].set(halfWidth, -halfHeight, halfDepth);
+    positions[positionOffset++].set(halfWidth, -halfHeight, -halfDepth);
 
     // Front
-    positions.push(new Vector3(-halfWidth, halfHeight, halfDepth));
-    positions.push(new Vector3(halfWidth, halfHeight, halfDepth));
-    positions.push(new Vector3(halfWidth, -halfHeight, halfDepth));
-    positions.push(new Vector3(-halfWidth, -halfHeight, halfDepth));
+    positions[positionOffset++].set(-halfWidth, halfHeight, halfDepth);
+    positions[positionOffset++].set(halfWidth, halfHeight, halfDepth);
+    positions[positionOffset++].set(halfWidth, -halfHeight, halfDepth);
+    positions[positionOffset++].set(-halfWidth, -halfHeight, halfDepth);
 
     // Back
-    positions.push(new Vector3(-halfWidth, halfHeight, -halfDepth));
-    positions.push(new Vector3(halfWidth, halfHeight, -halfDepth));
-    positions.push(new Vector3(halfWidth, -halfHeight, -halfDepth));
-    positions.push(new Vector3(-halfWidth, -halfHeight, -halfDepth));
+    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
+    positions[positionOffset++].set(halfWidth, halfHeight, -halfDepth);
+    positions[positionOffset++].set(halfWidth, -halfHeight, -halfDepth);
+    positions[positionOffset++].set(-halfWidth, -halfHeight, -halfDepth);
 
     // Up
     indices[indicesOffset++] = positionOffset;
@@ -245,11 +295,11 @@ export class WireframePrimitive {
     shift.y = -height;
     WireframePrimitive.createCircleWireframe(radius, 1, shift, positions, positionOffset, indices, indicesOffset);
 
-    positions.push(new Vector3());
-    positions.push(new Vector3(-radius, -height, 0));
-    positions.push(new Vector3(radius, -height, 0));
-    positions.push(new Vector3(0, -height, radius));
-    positions.push(new Vector3(0, -height, -radius));
+    positions[positionOffset++].set(0, 0, 0);
+    positions[positionOffset++].set(-radius, -height, 0);
+    positions[positionOffset++].set(radius, -height, 0);
+    positions[positionOffset++].set(0, -height, radius);
+    positions[positionOffset++].set(0, -height, -radius);
     const indexBegin = positionOffset + WireframePrimitive.circleVertexCount;
     indicesOffset += WireframePrimitive.circleIndexCount;
     indices[indicesOffset++] = indexBegin;
@@ -288,8 +338,8 @@ export class WireframePrimitive {
     indicesOffset += WireframePrimitive.circleIndexCount;
     for (let i = 0; i < 8; i++) {
       const radian = MathUtil.degreeToRadian(45 * i);
-      positions.push(new Vector3(radius * Math.cos(radian), 0, radius * Math.sin(radian)));
-      positions.push(new Vector3(radius * Math.cos(radian), -height, radius * Math.sin(radian)));
+      positions[positionOffset++].set(radius * Math.cos(radian), 0, radius * Math.sin(radian));
+      positions[positionOffset++].set(radius * Math.cos(radian), -height, radius * Math.sin(radian));
 
       indices[indicesOffset + i * 2] = indexBegin + 2 * i;
       indices[indicesOffset + i * 2 + 1] = indexBegin + 2 * i + 1;
@@ -387,18 +437,24 @@ export class WireframePrimitive {
 
       switch (axis) {
         case 0:
-          positions.push(
-            new Vector3(shift.x, radius * Math.cos(thetaDelta) + shift.y, radius * Math.sin(thetaDelta) + shift.z)
+          positions[positionOffset++].set(
+            shift.x,
+            radius * Math.cos(thetaDelta) + shift.y,
+            radius * Math.sin(thetaDelta) + shift.z
           );
           break;
         case 1:
-          positions.push(
-            new Vector3(radius * Math.cos(thetaDelta) + shift.x, shift.y, radius * Math.sin(thetaDelta) + shift.z)
+          positions[positionOffset++].set(
+            radius * Math.cos(thetaDelta) + shift.x,
+            shift.y,
+            radius * Math.sin(thetaDelta) + shift.z
           );
           break;
         case 2:
-          positions.push(
-            new Vector3(radius * Math.cos(thetaDelta) + shift.x, radius * Math.sin(thetaDelta) + shift.y, shift.z)
+          positions[positionOffset++].set(
+            radius * Math.cos(thetaDelta) + shift.x,
+            radius * Math.sin(thetaDelta) + shift.y,
+            shift.z
           );
           break;
       }
@@ -442,13 +498,13 @@ export class WireframePrimitive {
 
       switch (axis) {
         case 0:
-          positions.push(new Vector3(0, radius * Math.sin(thetaDelta) + height, radius * Math.cos(thetaDelta)));
+          positions[positionOffset++].set(0, radius * Math.sin(thetaDelta) + height, radius * Math.cos(thetaDelta));
           break;
         case 1:
-          positions.push(new Vector3(radius * Math.cos(thetaDelta), height, radius * Math.sin(thetaDelta)));
+          positions[positionOffset++].set(radius * Math.cos(thetaDelta), height, radius * Math.sin(thetaDelta));
           break;
         case 2:
-          positions.push(new Vector3(radius * Math.cos(thetaDelta), radius * Math.sin(thetaDelta) + height, 0));
+          positions[positionOffset++].set(radius * Math.cos(thetaDelta), radius * Math.sin(thetaDelta) + height, 0);
           break;
       }
 
