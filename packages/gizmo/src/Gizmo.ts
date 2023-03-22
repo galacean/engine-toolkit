@@ -3,18 +3,17 @@ import {
   Entity,
   Ray,
   Layer,
-  RenderTarget,
-  Texture2D,
   PointerButton,
   SphereColliderShape,
   StaticCollider,
   Vector3,
   MathUtil,
   Script,
-  MeshRenderElement,
   Pointer,
   PointerPhase,
-  Vector2
+  Vector2,
+  Component,
+  MeshRenderer
 } from "oasis-engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -50,6 +49,8 @@ export class Gizmo extends Script {
 
   private _type: State = null;
 
+  private _hoverEntity: Entity;
+
   /**
    * initial scene camera & select group in gizmo
    */
@@ -58,7 +59,8 @@ export class Gizmo extends Script {
       if (camera) {
         this._group = group;
         this._sceneCamera = camera;
-        this._framebufferPicker.camera = camera;
+        this._framebufferPicker = camera.entity.addComponent(FramebufferPicker);
+        this._framebufferPicker.frameBufferSize = new Vector2(256, 256);
 
         this._controlMap.forEach((gizmoControl) => {
           gizmoControl.init(camera, this._group);
@@ -83,7 +85,6 @@ export class Gizmo extends Script {
   set layer(layer: Layer) {
     if (this._layer !== layer) {
       this._layer = layer;
-      this._framebufferPicker.colorRenderPass.mask = layer;
       this._traverseEntity(this.entity, (entity) => {
         entity.layer = layer;
       });
@@ -127,18 +128,10 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.rotate, RotateControl);
     this._createGizmoControl(State.scale, ScaleControl);
 
-    // framebuffer picker
-    this._framebufferPicker = entity.addComponent(FramebufferPicker);
-    this._framebufferPicker.colorRenderTarget = new RenderTarget(
-      this.engine,
-      256,
-      256,
-      new Texture2D(this.engine, 256, 256)
-    );
-
     this.layer = Layer.Layer29;
-    // gizmo collider
-    const sphereCollider = entity.addComponent(StaticCollider);
+
+    this._hoverEntity = entity.createChild("hover");
+    const sphereCollider = this._hoverEntity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
     colliderShape.radius = Utils.rotateCircleRadius + 0.8;
     sphereCollider.addShape(colliderShape);
@@ -163,7 +156,8 @@ export class Gizmo extends Script {
         this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
       });
     }
-
+    this._group.getWorldPosition(this._tempVec);
+    this._hoverEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
     if (this._isStarted) {
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
@@ -213,8 +207,15 @@ export class Gizmo extends Script {
         } else {
           this._sceneCamera.screenPointToRay(pointer.position, this._tempRay);
           const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
+
           if (isHit) {
-            this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
+            const originLayer = this._sceneCamera.cullingMask;
+            this._sceneCamera.cullingMask = this._layer;
+
+            const result = this._framebufferPicker.pick(pointer.position.x, pointer.position.y);
+            this._sceneCamera.cullingMask = originLayer;
+
+            result.then((result) => {
               this._onGizmoHoverEnd();
               if (result) {
                 this._overHandler(result);
@@ -237,13 +238,14 @@ export class Gizmo extends Script {
       this._traverseControl(currentType, (control) => {
         this._currentControl = control;
       });
+
       this._currentControl.onHoverStart(axisName);
     }
   }
 
   private _onGizmoHoverEnd(): void {
     if (this._isHovered) {
-      this._currentControl.onHoverEnd();
+      this._currentControl && this._currentControl.onHoverEnd();
       this._isHovered = false;
     }
   }
@@ -287,9 +289,10 @@ export class Gizmo extends Script {
     this._isStarted = false;
   }
 
-  private _selectHandler(result: MeshRenderElement, pointerPosition: Vector2): void {
-    const currentControl = parseInt(result.material.name);
-    const selectedEntity = result.component.entity;
+  private _selectHandler(result: Component, pointerPosition: Vector2): void {
+    const material = (<MeshRenderer>result).getMaterial();
+    const currentControl = parseInt(material.name);
+    const selectedEntity = result.entity;
     switch (selectedEntity.layer) {
       case this._layer:
         this._triggerGizmoStart(currentControl, selectedEntity.name, pointerPosition);
@@ -297,9 +300,10 @@ export class Gizmo extends Script {
     }
   }
 
-  private _overHandler(result: MeshRenderElement): void {
-    const currentControl = parseInt(result.material.name);
-    const hoverEntity = result.component.entity;
+  private _overHandler(result: Component): void {
+    const material = (<MeshRenderer>result).getMaterial();
+    const currentControl = parseInt(material.name);
+    const hoverEntity = result.entity;
     this._onGizmoHoverStart(currentControl, hoverEntity.name);
   }
 
