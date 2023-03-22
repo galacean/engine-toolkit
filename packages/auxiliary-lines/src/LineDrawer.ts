@@ -18,7 +18,7 @@ import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
  */
 @dependentComponents(DependentMode.CheckOnly, MeshRenderer)
 export class LineDrawer extends Script {
-  private static _positions: Vector3[];
+  private static _positions: Vector3[] = [];
   private static _positionCount: number = 0;
   private static _indices: Uint16Array | Uint32Array;
   private static _indicesCount: number = 0;
@@ -221,7 +221,7 @@ export class LineDrawer extends Script {
     LineDrawer._supportUint32Array = supportUint32Array;
   }
 
-  onUpdate(deltaTime: number) {
+  onLateUpdate(deltaTime: number) {
     const { _mesh: mesh } = this;
 
     if (LineDrawer._positionCount > 0) {
