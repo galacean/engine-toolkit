@@ -33,8 +33,13 @@ export class FramebufferPicker extends Script {
   private _pickRenderTarget: RenderTarget;
   private _frameBufferSize: Vector2 = new Vector2(1024, 1024);
 
-  /** Frame buffer size.*/
-  frameBufferSize: Vector2 = new Vector2(1024, 1024);
+  get frameBufferSize(): Vector2 {
+    return this._frameBufferSize;
+  }
+
+  set frameBufferSize(value: Vector2) {
+    this._frameBufferSize = value;
+  }
 
   /**
    * @override
