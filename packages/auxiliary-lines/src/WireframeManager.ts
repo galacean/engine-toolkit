@@ -21,7 +21,8 @@ import {
   SphereColliderShape,
   SpotLight,
   Transform,
-  Vector3
+  Vector3,
+  DependentMode
 } from "oasis-engine";
 import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 import { WireframePrimitive } from "./WireframePrimitive";
@@ -30,7 +31,7 @@ import { WireframePrimitive } from "./WireframePrimitive";
  * Wireframe Auxiliary Manager.
  * @decorator `@dependentComponents(MeshRenderer)`
  */
-@dependentComponents(MeshRenderer)
+@dependentComponents(DependentMode.CheckOnly, MeshRenderer)
 export class WireframeManager extends Script {
   private static _positionPool: Vector3[] = [];
   private static _ndcPosition: Vector3[] = [
@@ -436,6 +437,7 @@ export class WireframeManager extends Script {
     const renderer = this.entity.getComponent(MeshRenderer);
     renderer.castShadows = false;
     renderer.receiveShadows = false;
+    // @ts-ignore
     const supportUint32Array = engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
 
     // @ts-ignore
