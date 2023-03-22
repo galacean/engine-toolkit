@@ -130,43 +130,42 @@ export class WireframePrimitive {
     const halfWidth: number = width / 2;
     const halfHeight: number = height / 2;
     const halfDepth: number = depth / 2;
-
+    let offset = positionOffset;
     // Up
-    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
-    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
-    positions[positionOffset++].set(halfWidth, halfHeight, -halfDepth);
-    positions[positionOffset++].set(halfWidth, halfHeight, halfDepth);
-    positions[positionOffset++].set(-halfWidth, halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, halfHeight, halfDepth);
 
     // Down
-    positions[positionOffset++].set(-halfWidth, -halfHeight, -halfDepth);
-    positions[positionOffset++].set(halfWidth, -halfHeight, -halfDepth);
-    positions[positionOffset++].set(halfWidth, -halfHeight, halfDepth);
-    positions[positionOffset++].set(-halfWidth, -halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, -halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, -halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, -halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, -halfHeight, halfDepth);
 
     // Left
-    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
-    positions[positionOffset++].set(-halfWidth, halfHeight, halfDepth);
-    positions[positionOffset++].set(-halfWidth, -halfHeight, halfDepth);
-    positions[positionOffset++].set(-halfWidth, -halfHeight, -halfDepth);
+    positions[offset++].set(-halfWidth, halfHeight, -halfDepth);
+    positions[offset++].set(-halfWidth, halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, -halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, -halfHeight, -halfDepth);
 
     // Right
-    positions[positionOffset++].set(halfWidth, halfHeight, -halfDepth);
-    positions[positionOffset++].set(halfWidth, halfHeight, halfDepth);
-    positions[positionOffset++].set(halfWidth, -halfHeight, halfDepth);
-    positions[positionOffset++].set(halfWidth, -halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, halfHeight, halfDepth);
+    positions[offset++].set(halfWidth, -halfHeight, halfDepth);
+    positions[offset++].set(halfWidth, -halfHeight, -halfDepth);
 
     // Front
-    positions[positionOffset++].set(-halfWidth, halfHeight, halfDepth);
-    positions[positionOffset++].set(halfWidth, halfHeight, halfDepth);
-    positions[positionOffset++].set(halfWidth, -halfHeight, halfDepth);
-    positions[positionOffset++].set(-halfWidth, -halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, halfHeight, halfDepth);
+    positions[offset++].set(halfWidth, halfHeight, halfDepth);
+    positions[offset++].set(halfWidth, -halfHeight, halfDepth);
+    positions[offset++].set(-halfWidth, -halfHeight, halfDepth);
 
     // Back
-    positions[positionOffset++].set(-halfWidth, halfHeight, -halfDepth);
-    positions[positionOffset++].set(halfWidth, halfHeight, -halfDepth);
-    positions[positionOffset++].set(halfWidth, -halfHeight, -halfDepth);
-    positions[positionOffset++].set(-halfWidth, -halfHeight, -halfDepth);
+    positions[offset++].set(-halfWidth, halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, halfHeight, -halfDepth);
+    positions[offset++].set(halfWidth, -halfHeight, -halfDepth);
+    positions[offset++].set(-halfWidth, -halfHeight, -halfDepth);
 
     // Up
     indices[indicesOffset++] = positionOffset;
@@ -310,13 +309,13 @@ export class WireframePrimitive {
       indices,
       indicesOffset
     );
-
-    positions[positionOffset++].set(0, 0, 0);
-    positions[positionOffset++].set(-radius, -height, 0);
-    positions[positionOffset++].set(radius, -height, 0);
-    positions[positionOffset++].set(0, -height, radius);
-    positions[positionOffset++].set(0, -height, -radius);
     const indexBegin = positionOffset + WireframePrimitive.circleVertexCount;
+    let offset = indexBegin;
+    positions[offset++].set(0, 0, 0);
+    positions[offset++].set(-radius, -height, 0);
+    positions[offset++].set(radius, -height, 0);
+    positions[offset++].set(0, -height, radius);
+    positions[offset++].set(0, -height, -radius);
     indicesOffset += WireframePrimitive.circleIndexCount;
     indices[indicesOffset++] = indexBegin;
     indices[indicesOffset++] = indexBegin + 1;
@@ -359,11 +358,12 @@ export class WireframePrimitive {
     );
 
     const indexBegin = positionOffset + WireframePrimitive.circleVertexCount;
+    let offset = indexBegin;
     indicesOffset += WireframePrimitive.circleIndexCount;
     for (let i = 0; i < 8; i++) {
       const radian = MathUtil.degreeToRadian(45 * i);
-      positions[positionOffset++].set(radius * Math.cos(radian), 0, radius * Math.sin(radian));
-      positions[positionOffset++].set(radius * Math.cos(radian), -height, radius * Math.sin(radian));
+      positions[offset++].set(radius * Math.cos(radian), 0, radius * Math.sin(radian));
+      positions[offset++].set(radius * Math.cos(radian), -height, radius * Math.sin(radian));
 
       indices[indicesOffset + i * 2] = indexBegin + 2 * i;
       indices[indicesOffset + i * 2 + 1] = indexBegin + 2 * i + 1;
@@ -462,27 +462,28 @@ export class WireframePrimitive {
 
     const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
+    let offset = positionOffset;
     for (let i = 0; i < vertexCount; ++i) {
       const v = i * countReciprocal;
       const thetaDelta = v * twoPi;
 
       switch (axis) {
         case 0:
-          positions[positionOffset++].set(
+          positions[offset++].set(
             shift.x,
             radius * Math.cos(thetaDelta) + shift.y,
             radius * Math.sin(thetaDelta) + shift.z
           );
           break;
         case 1:
-          positions[positionOffset++].set(
+          positions[offset++].set(
             radius * Math.cos(thetaDelta) + shift.x,
             shift.y,
             radius * Math.sin(thetaDelta) + shift.z
           );
           break;
         case 2:
-          positions[positionOffset++].set(
+          positions[offset++].set(
             radius * Math.cos(thetaDelta) + shift.x,
             radius * Math.sin(thetaDelta) + shift.y,
             shift.z
@@ -523,19 +524,20 @@ export class WireframePrimitive {
     const vertexCount = WireframePrimitive.circleVertexCount;
     const twoPi = Math.PI * 2;
     const countReciprocal = 1.0 / vertexCount;
+    let offset = positionOffset;
     for (let i = 0; i < vertexCount; ++i) {
       const v = i * countReciprocal;
       const thetaDelta = v * twoPi;
 
       switch (axis) {
         case 0:
-          positions[positionOffset++].set(0, radius * Math.sin(thetaDelta) + height, radius * Math.cos(thetaDelta));
+          positions[offset++].set(0, radius * Math.sin(thetaDelta) + height, radius * Math.cos(thetaDelta));
           break;
         case 1:
-          positions[positionOffset++].set(radius * Math.cos(thetaDelta), height, radius * Math.sin(thetaDelta));
+          positions[offset++].set(radius * Math.cos(thetaDelta), height, radius * Math.sin(thetaDelta));
           break;
         case 2:
-          positions[positionOffset++].set(radius * Math.cos(thetaDelta), radius * Math.sin(thetaDelta) + height, 0);
+          positions[offset++].set(radius * Math.cos(thetaDelta), radius * Math.sin(thetaDelta) + height, 0);
           break;
       }
 

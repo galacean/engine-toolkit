@@ -221,12 +221,12 @@ export class WireframeManager extends Script {
     const height = light.distance;
     const radius = Math.tan(light.angle / 2) * height;
 
-    const { _indices: indices, _localPositions: localPositions } = this;
-    const positionsOffset = localPositions.length;
+    const positionsOffset = this._localPositions.length;
     const coneIndicesCount = WireframePrimitive.coneIndexCount;
 
     this._growthIndexMemory(coneIndicesCount);
     this._growthPosition(WireframePrimitive.conePositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createConeWireframe(
       radius,
       height,
@@ -247,12 +247,12 @@ export class WireframeManager extends Script {
    * @param light - The PointLight
    */
   addPointLightWireframe(light: PointLight): void {
-    const { _indices: indices, _localPositions: localPositions } = this;
-    const positionsOffset = localPositions.length;
+    const positionsOffset = this._localPositions.length;
     const sphereIndicesCount = WireframePrimitive.sphereIndexCount;
 
     this._growthIndexMemory(sphereIndicesCount);
     this._growthPosition(WireframePrimitive.spherePositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createSphereWireframe(
       light.distance,
       localPositions,
@@ -270,12 +270,12 @@ export class WireframeManager extends Script {
    * @param light - The DirectLight
    */
   addDirectLightWireframe(light: DirectLight): void {
-    const { _indices: indices, _localPositions: localPositions } = this;
-    const positionsOffset = localPositions.length;
+    const positionsOffset = this._localPositions.length;
     const unboundCylinderIndicesCount = WireframePrimitive.unboundCylinderIndexCount;
 
     this._growthIndexMemory(unboundCylinderIndicesCount);
     this._growthPosition(WireframePrimitive.unboundCylinderPositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createUnboundCylinderWireframe(1, localPositions, positionsOffset, indices, this._indicesCount);
     this._indicesCount += unboundCylinderIndicesCount;
     // rotation to default transform forward direction(-Z)
@@ -321,12 +321,12 @@ export class WireframeManager extends Script {
     const { position, rotation, size } = shape;
     const { _tempVector: tempVector, _tempRotation: tempRotation } = WireframeManager;
 
-    const { _indices: indices, _localPositions: localPositions } = this;
-    const positionsOffset = localPositions.length;
+    const positionsOffset = this._localPositions.length;
 
     const cuboidIndicesCount = WireframePrimitive.cuboidIndexCount;
     this._growthIndexMemory(cuboidIndicesCount);
     this._growthPosition(WireframePrimitive.cuboidPositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createCuboidWireframe(
       worldScale.x * size.x,
       worldScale.y * size.y,
@@ -355,12 +355,12 @@ export class WireframeManager extends Script {
     const { position, rotation, radius } = shape;
     const { _tempVector: tempVector, _tempRotation: tempRotation } = WireframeManager;
 
-    const { _indices: indices, _localPositions: localPositions } = this;
-    const positionsOffset = localPositions.length;
+    const positionsOffset = this._localPositions.length;
 
     const sphereIndicesCount = WireframePrimitive.sphereIndexCount;
     this._growthIndexMemory(sphereIndicesCount);
     this._growthPosition(WireframePrimitive.spherePositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createSphereWireframe(
       Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
       localPositions,
@@ -393,12 +393,12 @@ export class WireframeManager extends Script {
       _halfSqrt: halfSqrt
     } = WireframeManager;
 
-    const { _indices: indices, _localPositions: localPositions } = this;
-    const positionsOffset = localPositions.length;
+    const positionsOffset = this._localPositions.length;
 
     const capsuleIndicesCount = WireframePrimitive.capsuleIndexCount;
     this._growthIndexMemory(capsuleIndicesCount);
     this._growthPosition(WireframePrimitive.capsulePositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createCapsuleWireframe(
       maxScale * radius,
       maxScale * height,
