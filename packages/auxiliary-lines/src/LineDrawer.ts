@@ -36,15 +36,97 @@ export class LineDrawer extends Script {
   }
 
   static drawSphere(radius: number, position: Vector3) {
-    LineDrawer._growthPosition(WireframePrimitive.spherePositionCount);
-    LineDrawer._growthIndexMemory(WireframePrimitive.sphereIndexCount);
+    const positionCount = WireframePrimitive.spherePositionCount;
+    const indexCount = WireframePrimitive.sphereIndexCount;
+    const globalPosition = LineDrawer._positions;
+
+    LineDrawer._growthPosition(positionCount);
+    LineDrawer._growthIndexMemory(indexCount);
     WireframePrimitive.createSphereWireframe(
       radius,
-      LineDrawer._positions,
+      globalPosition,
       LineDrawer._positionCount,
       LineDrawer._indices,
       LineDrawer._indicesCount
     );
+    for (let i = 0; i < positionCount; i++) {
+      globalPosition[LineDrawer._positionCount + i].add(position);
+    }
+
+    LineDrawer._positionCount += positionCount;
+    LineDrawer._indicesCount += indexCount;
+  }
+
+  static drawCuboid(width: number, height: number, depth: number, position: Vector3) {
+    const positionCount = WireframePrimitive.cuboidPositionCount;
+    const indexCount = WireframePrimitive.cuboidIndexCount;
+    const globalPosition = LineDrawer._positions;
+
+    LineDrawer._growthPosition(positionCount);
+    LineDrawer._growthIndexMemory(indexCount);
+    WireframePrimitive.createCuboidWireframe(
+      width,
+      height,
+      depth,
+      globalPosition,
+      LineDrawer._positionCount,
+      LineDrawer._indices,
+      LineDrawer._indicesCount
+    );
+    for (let i = 0; i < positionCount; i++) {
+      globalPosition[LineDrawer._positionCount + i].add(position);
+    }
+
+    LineDrawer._positionCount += positionCount;
+    LineDrawer._indicesCount += indexCount;
+  }
+
+  static drawCapsule(radius: number, height: number, depth: number, position: Vector3) {
+    const positionCount = WireframePrimitive.capsulePositionCount;
+    const indexCount = WireframePrimitive.capsuleIndexCount;
+    const globalPosition = LineDrawer._positions;
+
+    LineDrawer._growthPosition(positionCount);
+    LineDrawer._growthIndexMemory(indexCount);
+    WireframePrimitive.createCapsuleWireframe(
+      radius,
+      height,
+      globalPosition,
+      LineDrawer._positionCount,
+      LineDrawer._indices,
+      LineDrawer._indicesCount
+    );
+    for (let i = 0; i < positionCount; i++) {
+      globalPosition[LineDrawer._positionCount + i].add(position);
+    }
+
+    LineDrawer._positionCount += positionCount;
+    LineDrawer._indicesCount += indexCount;
+  }
+
+  static drawCircle(radius: number, axis: AxisType, position: Vector3) {
+    WireframePrimitive._shift.set(0, 0, 0);
+    const positionCount = WireframePrimitive.circlePositionCount;
+    const indexCount = WireframePrimitive.circleIndexCount;
+    const globalPosition = LineDrawer._positions;
+
+    LineDrawer._growthPosition(positionCount);
+    LineDrawer._growthIndexMemory(indexCount);
+    WireframePrimitive.createCircleWireframe(
+      radius,
+      axis,
+      WireframePrimitive._shift,
+      globalPosition,
+      LineDrawer._positionCount,
+      LineDrawer._indices,
+      LineDrawer._indicesCount
+    );
+    for (let i = 0; i < positionCount; i++) {
+      globalPosition[LineDrawer._positionCount + i].add(position);
+    }
+
+    LineDrawer._positionCount += positionCount;
+    LineDrawer._indicesCount += indexCount;
   }
 
   static flush() {
@@ -121,4 +203,10 @@ export class LineDrawer extends Script {
       }
     }
   }
+}
+
+export enum AxisType {
+  X,
+  Y,
+  Z
 }

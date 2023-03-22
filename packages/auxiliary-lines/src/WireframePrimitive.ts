@@ -4,6 +4,8 @@ import { MathUtil, Vector3 } from "oasis-engine";
  * Wireframe primitive.
  */
 export class WireframePrimitive {
+  static _shift = new Vector3();
+
   /** global settings for vertex count */
   static circleVertexCount = 40;
 
@@ -243,16 +245,23 @@ export class WireframePrimitive {
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
   ): void {
-    const shift = new Vector3();
-
+    WireframePrimitive._shift.set(0, 0, 0);
     // X
-    WireframePrimitive.createCircleWireframe(radius, 0, shift, positions, positionOffset, indices, indicesOffset);
+    WireframePrimitive.createCircleWireframe(
+      radius,
+      0,
+      WireframePrimitive._shift,
+      positions,
+      positionOffset,
+      indices,
+      indicesOffset
+    );
 
     // Y
     WireframePrimitive.createCircleWireframe(
       radius,
       1,
-      shift,
+      WireframePrimitive._shift,
       positions,
       positionOffset + WireframePrimitive.circleVertexCount,
       indices,
@@ -263,7 +272,7 @@ export class WireframePrimitive {
     WireframePrimitive.createCircleWireframe(
       radius,
       2,
-      shift,
+      WireframePrimitive._shift,
       positions,
       positionOffset + WireframePrimitive.circleVertexCount * 2,
       indices,
@@ -289,11 +298,18 @@ export class WireframePrimitive {
     indices: Uint16Array | Uint32Array,
     indicesOffset: number
   ): void {
-    const shift = new Vector3();
+    WireframePrimitive._shift.set(0, -height, 0);
 
     // Y
-    shift.y = -height;
-    WireframePrimitive.createCircleWireframe(radius, 1, shift, positions, positionOffset, indices, indicesOffset);
+    WireframePrimitive.createCircleWireframe(
+      radius,
+      1,
+      WireframePrimitive._shift,
+      positions,
+      positionOffset,
+      indices,
+      indicesOffset
+    );
 
     positions[positionOffset++].set(0, 0, 0);
     positions[positionOffset++].set(-radius, -height, 0);
@@ -329,10 +345,18 @@ export class WireframePrimitive {
     indicesOffset: number
   ): void {
     const height = 5;
-    const shift = new Vector3();
+    WireframePrimitive._shift.set(0, 0, 0);
 
     // Y
-    WireframePrimitive.createCircleWireframe(radius, 1, shift, positions, positionOffset, indices, indicesOffset);
+    WireframePrimitive.createCircleWireframe(
+      radius,
+      1,
+      WireframePrimitive._shift,
+      positions,
+      positionOffset,
+      indices,
+      indicesOffset
+    );
 
     const indexBegin = positionOffset + WireframePrimitive.circleVertexCount;
     indicesOffset += WireframePrimitive.circleIndexCount;
@@ -366,19 +390,26 @@ export class WireframePrimitive {
   ): void {
     const circleIndicesCount = WireframePrimitive.circleIndexCount;
     const vertexCount = WireframePrimitive.circleVertexCount;
-    const shift = new Vector3();
     const halfHeight = height / 2;
 
     // Y-Top
-    shift.y = halfHeight;
-    WireframePrimitive.createCircleWireframe(radius, 1, shift, positions, positionOffset, indices, indicesOffset);
-
-    // Y-Bottom
-    shift.y = -halfHeight;
+    WireframePrimitive._shift.set(0, halfHeight, 0);
     WireframePrimitive.createCircleWireframe(
       radius,
       1,
-      shift,
+      WireframePrimitive._shift,
+      positions,
+      positionOffset,
+      indices,
+      indicesOffset
+    );
+
+    // Y-Bottom
+    WireframePrimitive._shift.set(0, -halfHeight, 0);
+    WireframePrimitive.createCircleWireframe(
+      radius,
+      1,
+      WireframePrimitive._shift,
       positions,
       positionOffset + vertexCount,
       indices,
