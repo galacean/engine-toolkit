@@ -183,4 +183,4 @@ const planarShadow = new ShaderPass(
     }
     `
 );
-Shader.create("planarShadowShader", [Shader.find("pbr").passes[0], planarShadow]);
+Shader.create("planarShadowShader", [Shader.find("pbr").subShaders[0].passes[0], planarShadow]);

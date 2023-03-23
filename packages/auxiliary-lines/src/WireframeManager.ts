@@ -21,17 +21,17 @@ import {
   SphereColliderShape,
   SpotLight,
   Transform,
-  UnlitMaterial,
-  Vector3
+  Vector3,
+  DependentMode
 } from "oasis-engine";
-
+import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 import { WireframePrimitive } from "./WireframePrimitive";
 
 /**
  * Wireframe Auxiliary Manager.
  * @decorator `@dependentComponents(MeshRenderer)`
  */
-@dependentComponents(MeshRenderer)
+@dependentComponents(DependentMode.CheckOnly, MeshRenderer)
 export class WireframeManager extends Script {
   private static _positionPool: Vector3[] = [];
   private static _ndcPosition: Vector3[] = [
@@ -66,7 +66,7 @@ export class WireframeManager extends Script {
   private _wireframeRenderers: Renderer[] = [];
   private _wireframeElements: WireframeElement[] = [];
   private _renderer: MeshRenderer;
-  private _material: UnlitMaterial;
+  private _material: PlainColorMaterial;
   private _mesh: ModelMesh;
 
   private static _getPositionFromPool(positionIndex: number): Vector3 {
@@ -433,8 +433,11 @@ export class WireframeManager extends Script {
   onAwake(): void {
     const engine = this.engine;
     const mesh = new ModelMesh(engine);
-    const material = new UnlitMaterial(engine);
+    const material = new PlainColorMaterial(engine);
     const renderer = this.entity.getComponent(MeshRenderer);
+    renderer.castShadows = false;
+    renderer.receiveShadows = false;
+    // @ts-ignore
     const supportUint32Array = engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
 
     // @ts-ignore
@@ -538,6 +541,12 @@ export class WireframeManager extends Script {
       mesh.setIndices(this._indices);
       mesh.uploadData(false);
       mesh.subMesh.count = indicesCount;
+    }
+
+    if (indicesCount === 0) {
+      this._renderer.setMaterial(null);
+    } else {
+      this._renderer.setMaterial(this._material);
     }
   }
 

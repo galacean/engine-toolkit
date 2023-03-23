@@ -11,7 +11,7 @@ export class Stats extends Script {
    * @override
    * @param camera - The monitor camera
    */
-  onBeginRender(camera: Camera) {
+  onBeginRender(camera: Camera): void {
     if (!this.monitor) {
       const gl = camera.engine._hardwareRenderer.gl;
       if (gl) {
@@ -24,7 +24,7 @@ export class Stats extends Script {
    * @override
    * @param camera - The monitor camera
    */
-  onEndRender(camera: Camera) {
+  onEndRender(camera: Camera): void {
     if (this.monitor) {
       this.monitor.update();
     }

@@ -230,6 +230,8 @@ export class NavigationGizmo extends Script {
 
     const roundEntity = sphereEntity.createChild("round");
     const roundRenderer = roundEntity.addComponent(MeshRenderer);
+    roundRenderer.receiveShadows = false;
+    roundRenderer.castShadows = false;
     roundRenderer.mesh = utils.bgMesh;
     roundRenderer.setMaterial(utils.bgMaterial);
     roundEntity.isActive = false;
@@ -242,6 +244,8 @@ export class NavigationGizmo extends Script {
     entity.transform.setPosition(position.x, position.y, position.z);
 
     const axisXRenderer = entity.addComponent(MeshRenderer);
+    axisXRenderer.receiveShadows = false;
+    axisXRenderer.castShadows = false;
     axisXRenderer.mesh = this._utils.axisMesh;
     axisXRenderer.setMaterial(material);
   }
@@ -258,6 +262,8 @@ export class NavigationGizmo extends Script {
 
     const renderEntity = entity.createChild("back");
     const axisRenderer = renderEntity.addComponent(MeshRenderer);
+    axisRenderer.receiveShadows = false;
+    axisRenderer.castShadows = false;
     axisRenderer.mesh = utils.endMesh;
     axisRenderer.setMaterial(material);
     renderEntity.isActive = false;
@@ -265,6 +271,8 @@ export class NavigationGizmo extends Script {
     const textEntity = entity.createChild("text");
     textEntity.transform.setPosition(0, 0, 0.05);
     const axisXTextRenderer = textEntity.addComponent(TextRenderer);
+    axisXTextRenderer.receiveShadows = false;
+    axisXTextRenderer.castShadows = false;
     axisXTextRenderer.font = Font.createFromOS(this.engine, "Arial");
     axisXTextRenderer.text = axisName;
     axisXTextRenderer.fontStyle = FontStyle.Bold;

@@ -117,8 +117,6 @@ export class SphereScript extends Script {
 
   onPointerDown(pointer: Pointer) {
     this._disableComponent();
-
-    this._sceneCamera.isOrthographic = false;
     this._recoverTextColor();
 
     // get targetPoint
@@ -127,10 +125,10 @@ export class SphereScript extends Script {
     SphereScript._startQuat.copyFrom(this._directionEntity.transform.worldRotationQuaternion);
     SphereScript._startPointer.copyFrom(pointer.position);
 
-    this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
+    this._tempUpVec.copyFrom(this._sceneCameraEntity.transform.worldUp);
     this._isBack = this._tempUpVec.y <= 0;
     this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
-    this._sceneCameraEntity.transform.getWorldForward(SphereScript._startAxis);
+    SphereScript._startAxis.copyFrom(this._sceneCameraEntity.transform.worldForward);
     Vector3.cross(SphereScript._startAxis, this._upVec, SphereScript._startAxis);
 
     Vector3.subtract(SphereScript._startPos, this._target, this._tempUpVec);
@@ -188,7 +186,9 @@ export class SphereScript extends Script {
     let x = -this._deltaPointer.x * this._speedXFactor;
     let y = -this._deltaPointer.y * this._speedYFactor;
 
-    if (this._startRadian - y <= 0 || this._startRadian - y > Math.PI) {
+    const isBetween = this._startRadian - y > Math.PI && this._startRadian - y < 2 * Math.PI;
+
+    if (this._startRadian - y <= 0 || isBetween) {
       this._isBack = true;
     } else {
       this._isBack = false;

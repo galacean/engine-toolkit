@@ -1,7 +1,8 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh } from "oasis-engine";
-import { UnlitMaterial } from "oasis-engine/types";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Vector2 } from "oasis-engine";
+import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
+import { ArcMaterial } from "./GizmoMaterial";
 
 /**
  * @internal
@@ -21,13 +22,15 @@ export abstract class GizmoComponent extends Component {
   /** Called when pointer leaves gizmo. */
   abstract onHoverEnd(): void;
   /** Called when gizmo starts to move.*/
-  abstract onMoveStart(ray: Ray, axisName: string): void;
+  abstract onMoveStart(ray: Ray, axisName: string, pointerPosition?: Vector2): void;
   /** Called when gizmo is moving.*/
-  abstract onMove(ray: Ray): void;
+  abstract onMove(ray: Ray, pointerPosition?: Vector2): void;
   /** Called when gizmo movement ends.*/
   abstract onMoveEnd(): void;
   /** Called when gizmo's transform is dirty.*/
   abstract onUpdate(isModified: boolean): void;
+  /** Called when camera switch between ortho and perps.*/
+  abstract onSwitch(isModified: boolean): void;
 }
 
 export enum axisType {
@@ -62,9 +65,9 @@ export const axisPlane = [
 export interface AxisProps {
   name: string;
   axisMesh: Array<ModelMesh>;
-  axisMaterial: UnlitMaterial;
+  axisMaterial: ArcMaterial | PlainColorMaterial;
   axisHelperMesh: Array<Mesh>;
-  axisHelperMaterial: UnlitMaterial;
+  axisHelperMaterial: PlainColorMaterial;
   axisRotation: Array<Vector3>;
   axisTranslation: Array<Vector3>;
   priority?: number;

@@ -24,6 +24,9 @@ export class FreeControl extends Script {
   private _cameraTransform: Transform;
   private _spherical: Spherical = new Spherical();
   private _tempVec: Vector3 = new Vector3();
+  private _atTheBack: boolean = false;
+  private _topVec: Vector3 = new Vector3(0, 1, 0);
+  private _bottomVec: Vector3 = new Vector3(0, -1, 0);
 
   constructor(entity: Entity) {
     super(entity);
@@ -32,7 +35,7 @@ export class FreeControl extends Script {
     /** Init spherical. */
     const { _tempVec: tempVec, _spherical: spherical } = this;
     Vector3.transformByQuat(tempVec.set(0, 0, -1), transform.rotationQuaternion, tempVec);
-    spherical.setFromVec3(tempVec);
+    spherical.setFromVec3(tempVec, this._atTheBack);
   }
 
   onUpdate(deltaTime: number): void {
@@ -80,9 +83,11 @@ export class FreeControl extends Script {
       this._spherical.theta += MathUtil.degreeToRadian(deltaAlpha);
       this._spherical.phi += MathUtil.degreeToRadian(deltaPhi);
       this._spherical.makeSafe();
-      this._spherical.setToVec3(this._tempVec);
+      this._atTheBack = this._spherical.setToVec3(this._tempVec);
       Vector3.add(this._cameraTransform.position, this._tempVec, this._tempVec);
-      this._cameraTransform.lookAt(this._tempVec, new Vector3(0, 1, 0));
+      this._atTheBack
+        ? this._cameraTransform.lookAt(this._tempVec, this._bottomVec)
+        : this._cameraTransform.lookAt(this._tempVec, this._topVec);
     }
   }
 }

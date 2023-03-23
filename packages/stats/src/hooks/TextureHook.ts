@@ -1,14 +1,14 @@
-import { log, errorLog } from "../log";
+import { log } from "../log";
 
 /**
  * @class TextureHook
  */
 export default class TextureHook {
   public textures: number = 0;
-  private realCreateTexture: any;
-  private realDeleteTexture: any;
+  private readonly realCreateTexture: any;
+  private readonly realDeleteTexture: any;
+  private readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
   private hooked: boolean;
-  private gl: WebGLRenderingContext | WebGL2RenderingContext;
 
   constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
     this.realCreateTexture = gl.createTexture;
@@ -23,7 +23,7 @@ export default class TextureHook {
     log(`Texture is hooked.`);
   }
 
-  private hookedCreateTexture() {
+  private hookedCreateTexture(): void {
     let texture = this.realCreateTexture.call(this.gl);
 
     this.textures++;
@@ -33,7 +33,7 @@ export default class TextureHook {
     return texture;
   }
 
-  private hookedDeleteTexture(texture: any) {
+  private hookedDeleteTexture(texture: any): void {
     this.realDeleteTexture.call(this.gl, texture);
 
     this.textures--;
@@ -41,11 +41,11 @@ export default class TextureHook {
     log(`DeleteTexture. textures: ${this.textures}`);
   }
 
-  public reset() {
+  public reset(): void {
     this.textures = 0;
   }
 
-  public release() {
+  public release(): void {
     if (this.hooked) {
       this.gl.createTexture = this.realCreateTexture;
       this.gl.deleteTexture = this.realDeleteTexture;
