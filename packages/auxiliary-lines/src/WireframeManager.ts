@@ -31,7 +31,7 @@ import { WireframePrimitive } from "./WireframePrimitive";
  * Wireframe Auxiliary Manager.
  * @decorator `@dependentComponents(MeshRenderer)`
  */
-@dependentComponents(DependentMode.CheckOnly, MeshRenderer)
+@dependentComponents(DependentMode.AutoAdd, MeshRenderer)
 export class WireframeManager extends Script {
   private static _positionPool: Vector3[] = [];
   private static _ndcPosition: Vector3[] = [
