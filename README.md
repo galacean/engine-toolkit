@@ -11,6 +11,7 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 - 🫧 &nbsp;**[FrameBufferPicker](packages/framebuffer-picker)** - Pixel-based object picking
 - ➡️ &nbsp;**[Gizmo](packages/gizmo)** - Operation tools for transforming (displacement, rotation, scaling)
 - 🧭 &nbsp;**[Navigation Gizmo](packages/navigation-gizmo)** - Three-view & visualized operation for camera control
+- 🛣 &nbsp;**[Waypoint](packages/way-point)** - control entity move along waypoint
 
 - 📐 &nbsp;**[Lines](packages/lines)** - 2D Solid Line & Dash Line
 - 🖇 &nbsp;**[Auxiliary Lines](packages/auxiliary-lines)** - Draw wireframe for entity and component
