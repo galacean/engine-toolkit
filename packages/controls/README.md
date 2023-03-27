@@ -95,17 +95,17 @@ import { OrthoControl } from "@oasis-engine-toolkit/controls";
 ```ts
 import { OrbitControl } from "@oasis-engine-toolkit/controls";
 
-// Create engine object.
-const engine = new WebGLEngine("canvas");
+// Create engine
+const engine = await WebGLEngine.create({ canvas: "canvas-id" });
 engine.canvas.resizeByClientSize();
 
-// Initialize root.
+// Initialize root
 const rootEntity = engine.sceneManager.activeScene.createRootEntity();
 
-// Initialize camera entity.
+// Initialize camera entity
 const cameraEntity = rootEntity.createChild("camera");
 cameraEntity.addComponent(Camera);
-// Add OrbitControl.
+// Add OrbitControl
 cameraEntity.addComponent(OrbitControl);
 ```
 
