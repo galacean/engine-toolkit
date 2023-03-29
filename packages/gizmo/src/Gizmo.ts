@@ -50,6 +50,8 @@ export class Gizmo extends Script {
 
   private _type: State = null;
 
+  private _sphereColliderEntity: Entity;
+
   /**
    * initial scene camera & select group in gizmo
    */
@@ -138,7 +140,8 @@ export class Gizmo extends Script {
 
     this.layer = Layer.Layer29;
     // gizmo collider
-    const sphereCollider = entity.addComponent(StaticCollider);
+    this._sphereColliderEntity = entity.createChild("gizmoCollider");
+    const sphereCollider = this._sphereColliderEntity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
     colliderShape.radius = Utils.rotateCircleRadius + 0.8;
     sphereCollider.addShape(colliderShape);
@@ -180,6 +183,8 @@ export class Gizmo extends Script {
       }
     } else {
       this._group.getWorldPosition(this._tempVec);
+      this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
+
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
       const currDistance = Vector3.distance(cameraPosition, this._tempVec);
       let distanceDirty = false;
