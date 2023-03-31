@@ -440,8 +440,6 @@ export class WireframeManager extends Script {
     // @ts-ignore
     const supportUint32Array = engine._hardwareRenderer.canIUse(GLCapabilityType.elementIndexUint);
 
-    // @ts-ignore
-    mesh._enableVAO = false;
     mesh.addSubMesh(0, this._indicesCount, MeshTopology.Lines);
     renderer.mesh = mesh;
     renderer.setMaterial(material);
