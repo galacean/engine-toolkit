@@ -1,0 +1,29 @@
+{
+  "name": "@oasis-engine-toolkit/input-logger",
+  "version": "1.0.0-alpha.18",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "homepage": "https://oasisengine.cn/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+  },
+  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
+  "license": "MIT",
+  "scripts": {
+    "b:types": "tsc",
+    "lint:fix": "tslint --fix --project ./tsconfig.json"
+  },
+  "types": "types/index.d.ts",
+  "main": "dist/umd/browser.js",
+  "module": "dist/es/index.js",
+  "files": [
+    "dist/**/*",
+    "types/**/*"
+  ],
+  "peerDependencies": {
+    "oasis-engine": "^0.9.0-beta"
+  }
+}
