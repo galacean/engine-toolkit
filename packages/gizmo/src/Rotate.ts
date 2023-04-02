@@ -1,4 +1,15 @@
-import { Camera, Entity, Matrix, MeshRenderer, Quaternion, Ray, Vector3, Vector2, Transform } from "oasis-engine";
+import {
+  Camera,
+  Entity,
+  Matrix,
+  MeshRenderer,
+  Quaternion,
+  Ray,
+  Vector3,
+  Vector2,
+  Pointer,
+  Transform
+} from "oasis-engine";
 import { Axis } from "./Axis";
 import { Utils } from "./Utils";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";
@@ -59,10 +70,9 @@ export class RotateControl extends GizmoComponent {
   private _previousRad: number = 0;
   private _finalRad: number = 0;
 
-  private _startAxisX: Vector3 = new Vector3();
-  private _startAxisY: Vector3 = new Vector3();
-  private _speedXFactor: number = 0.02;
-  private _speedYFactor: number = 0.004;
+  private _verticalAxis: Vector3 = new Vector3(0, 1, 0);
+  private _horizontalAxis: Vector3 = new Vector3();
+  private _speedFactor: number = 0.01;
 
   private _tempVec30: Vector3 = new Vector3();
   private _tempVec31: Vector3 = new Vector3();
@@ -232,21 +242,11 @@ export class RotateControl extends GizmoComponent {
         this._rotateHelperPlaneEntity.transform.setRotation(0, 0, 0);
         break;
       case axisType.xyz:
-        this.gizmoHelperEntity.transform.worldMatrix = this._startMatrix;
-        this._setAxisSelected(this._selectedAxis, true);
-
-        startP.x = pointerPosition.x;
-        startP.y = pointerPosition.y;
-
-        this._camera.entity.transform.getWorldUp(this._startAxisY);
-        this._camera.entity.transform.getWorldForward(this._startAxisX);
-        Vector3.cross(this._startAxisX, this._startAxisY, this._startAxisX);
-
         break;
     }
   }
 
-  onMove(ray: Ray, pointerPosition: Vector2): void {
+  onMove(ray: Ray, pointer: Pointer): void {
     const { _startPointUnit: startP, _currPointUnit: currP, _tempPointerUnit: tempP, _tempMatrix: mat } = this;
 
     switch (this._selectedAxis) {
@@ -267,22 +267,23 @@ export class RotateControl extends GizmoComponent {
         this._endLineHelperEntity.transform.setRotation(d * localAxis.x, d * localAxis.y, d * localAxis.z);
         break;
       case axisType.xyz:
-        currP.x = pointerPosition.x;
-        currP.y = pointerPosition.y;
-        Vector3.subtract(startP, currP, tempP);
+        const { x, y } = pointer.deltaPosition;
 
-        let x = -tempP.x * this._speedXFactor;
-        let y = -tempP.y * this._speedYFactor;
+        this._camera.entity.transform.getWorldForward(this._horizontalAxis);
+        this._verticalAxis.set(0, 1, 0);
+        Vector3.cross(this._horizontalAxis, this._verticalAxis, this._horizontalAxis);
+        this._horizontalAxis.scale(y);
+        this._verticalAxis.scale(x);
 
-        const { _tempQuat: tempQuat, _tempQuat2: tempQuat2 } = this;
+        Vector3.add(this._horizontalAxis, this._verticalAxis, this._tempVec);
+        Vector3.transformNormal(this._tempVec, this._startInvMatrix, this._tempVec);
+        const angle = pointer.deltaPosition.length() * this._speedFactor;
 
-        Quaternion.rotationAxisAngle(this._startAxisX, y, tempQuat);
-        Quaternion.rotationAxisAngle(this._startAxisY, x, tempQuat2);
-        Quaternion.multiply(tempQuat, tempQuat2, tempQuat);
+        this._currQuat.copyFrom(this._startQuat).rotateAxisAngle(this._tempVec, angle);
 
-        Quaternion.multiply(this._startQuat, tempQuat, this._currQuat);
         Matrix.affineTransformation(this._startScale, this._currQuat, this._startTranslate, mat);
         this._group.setWorldMatrix(mat);
+        this._startQuat.copyFrom(this._currQuat);
         break;
     }
   }

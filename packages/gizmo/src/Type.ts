@@ -1,4 +1,4 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Vector2 } from "oasis-engine";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Vector2, Pointer } from "oasis-engine";
 import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
@@ -23,7 +23,7 @@ export abstract class GizmoComponent extends Component {
   /** Called when gizmo starts to move.*/
   abstract onMoveStart(ray: Ray, axisName: string, pointerPosition?: Vector2): void;
   /** Called when gizmo is moving.*/
-  abstract onMove(ray: Ray, pointerPosition?: Vector2): void;
+  abstract onMove(ray: Ray, pointer?: Pointer): void;
   /** Called when gizmo movement ends.*/
   abstract onMoveEnd(): void;
   /** Called when gizmo's transform is dirty.*/

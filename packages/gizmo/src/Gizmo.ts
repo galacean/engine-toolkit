@@ -280,7 +280,7 @@ export class Gizmo extends Script {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
     this._sceneCamera.screenPointToRay(pointer.position, this._tempRay2);
-    this._currentControl.onMove(this._tempRay2, pointer.position);
+    this._currentControl.onMove(this._tempRay2, pointer);
   }
 
   private _triggerGizmoEnd(): void {
