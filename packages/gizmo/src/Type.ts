@@ -36,10 +36,10 @@ export enum axisType {
   "x" = 0,
   "y" = 1,
   "z" = 2,
-  "xy" = 3,
-  "yz" = 4,
-  "xz" = 5,
-  "xyz" = 6
+  "xyz" = 3,
+  "xy" = 4,
+  "yz" = 5,
+  "xz" = 6
 }
 
 export const axisVector = [
