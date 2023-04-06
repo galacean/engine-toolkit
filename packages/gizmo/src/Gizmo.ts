@@ -49,7 +49,7 @@ export class Gizmo extends Script {
 
   private _type: State = null;
 
-  private _hoverEntity: Entity;
+  private _sphereColliderEntity: Entity;
 
   /**
    * initial scene camera & select group in gizmo
@@ -129,9 +129,9 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.scale, ScaleControl);
 
     this.layer = Layer.Layer29;
-
-    this._hoverEntity = entity.createChild("hover");
-    const sphereCollider = this._hoverEntity.addComponent(StaticCollider);
+    // gizmo collider
+    this._sphereColliderEntity = entity.createChild("gizmoCollider");
+    const sphereCollider = this._sphereColliderEntity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
     colliderShape.radius = Utils.rotateCircleRadius + 0.8;
     sphereCollider.addShape(colliderShape);
@@ -157,7 +157,7 @@ export class Gizmo extends Script {
       });
     }
     this._group.getWorldPosition(this._tempVec);
-    this._hoverEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
+    this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
     if (this._isStarted) {
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
@@ -174,6 +174,8 @@ export class Gizmo extends Script {
       }
     } else {
       this._group.getWorldPosition(this._tempVec);
+      this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
+
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
       const currDistance = Vector3.distance(cameraPosition, this._tempVec);
       let distanceDirty = false;
