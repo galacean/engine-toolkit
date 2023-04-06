@@ -3,18 +3,21 @@ import { AnimationClip, AnimationVector3Curve, Keyframe, Script, Transform, Vect
 export class WayPoint extends Script {
   duration: number = 1;
   currentNormalizedTime: number = 0;
-  private _animationClip: AnimationClip;
-  private _wayPointsPosition: Vector3[];
-  private _wayPointsRotation: Vector3[];
+  private _animationClip: AnimationClip = new AnimationClip("_wayPoint");
+  private _wayPointsPosition: Vector3[] = [];
+  private _wayPointsRotation: Vector3[] = [];
 
-  get wayPointsPosition() {
+  get wayPointsPosition(): Vector3[] {
     return this._wayPointsPosition;
   }
 
   set wayPointsPosition(positions: Vector3[]) {
+    this._copy(this._wayPointsPosition, positions);
+    const wayPointsPosition = this._wayPointsPosition;
+
     const wayPointPositionCurve = new AnimationVector3Curve();
-    const length = positions.length;
-    positions.forEach((position, index) => {
+    const length = wayPointsPosition.length;
+    wayPointsPosition.forEach((position, index) => {
       let keyframe = new Keyframe<Vector3>();
       keyframe.time = (index / (length - 1)) * this.duration;
       keyframe.value = position;
@@ -23,14 +26,17 @@ export class WayPoint extends Script {
     this._animationClip.addCurveBinding("", Transform, "position", wayPointPositionCurve);
   }
 
-  get wayPointsRotation() {
+  get wayPointsRotation(): Vector3[] {
     return this._wayPointsRotation;
   }
 
   set wayPointsRotation(rotations: Vector3[]) {
+    this._copy(this._wayPointsRotation, rotations);
+    const wayPointsRotation = this._wayPointsRotation;
+
     const wayPointRotationCurve = new AnimationVector3Curve();
-    const length = rotations.length;
-    rotations.forEach((rotation, index) => {
+    const length = wayPointsRotation.length;
+    wayPointsRotation.forEach((rotation, index) => {
       let keyframe = new Keyframe<Vector3>();
       keyframe.time = (index / (length - 1)) * this.duration;
       keyframe.value = rotation;
@@ -39,8 +45,19 @@ export class WayPoint extends Script {
     this._animationClip.addCurveBinding("", Transform, "rotation", wayPointRotationCurve);
   }
 
-  onAwake() {
-    this._animationClip = new AnimationClip("_wayPoint");
+  private _copy(dst: Vector3[], src: Vector3[]) {
+    if (dst.length < src.length) {
+      const count = src.length - dst.length;
+      for (let i = 0; i < count; i++) {
+        dst.push(new Vector3());
+      }
+    } else {
+      dst.length = src.length;
+    }
+
+    for (let i = 0; i < src.length; i++) {
+      dst[i].copyFrom(src[i]);
+    }
   }
 
   onUpdate() {

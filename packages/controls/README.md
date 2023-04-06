@@ -12,25 +12,25 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 
 #### Feature
 
-|Attributes|Meaning|
-|:--|:--|
-|`target`|Observation point|
-|`autoRotate`|Whether to rotate automatically, the default is `false`, the rotation speed can be adjusted by autoRotateSpeed|
-|`autoRotateSpeed`|Speed ​​of automatic rotation|
-|`enableDamping`| Whether to enable camera damping, the default is `true`|
-|`dampingFactor`| Rotation damping parameter, default is `0.1`|
-|`enableKeys` | Whether to support keyboard operation (up, down, left, and right keys)|
-|`enablePan` | Whether to support camera translation, the default is `true`| 
-|`keyPanSpeed` | The amplitude of the operation when the keyboard is continuously pressed| 
-|`enableRotate` | Whether to support camera rotation, the default is `true`| 
-|`rotateSpeed` | Camera rotation speed, the default is `1.0`| 
-|`enableZoom` | Whether to support camera zoom, the default is `true`| 
-|`minAzimuthAngle` | When `onUpdate`, the minimum radian of a reasonable range for horizontal operation, the default is negative infinity| 
-|`maxAzimuthAngle` | When `onUpdate`, the maximum radian of the reasonable range of horizontal operation, the default is positive infinity| 
-|`minDistance` | When `onUpdate`, the minimum value of the reasonable range of distance operation is judged| 
-|`maxDistance` | When `onUpdate`, the maximum value of the reasonable range of distance operation judged| 
-|`minPolarAngle` | When `onUpdate`, the minimum arc within a reasonable range of vertical operation| 
-|`maxPolarAngle` | When `onUpdate`, the maximum arc within a reasonable range of vertical operation|
+| Attributes | Meaning |
+| :-- | :-- |
+| `target` | Observation point |
+| `autoRotate` | Whether to rotate automatically, the default is `false`, the rotation speed can be adjusted by autoRotateSpeed |
+| `autoRotateSpeed` | Speed ​​of automatic rotation |
+| `enableDamping` | Whether to enable camera damping, the default is `true` |
+| `dampingFactor` | Rotation damping parameter, default is `0.1` |
+| `enableKeys` | Whether to support keyboard operation (up, down, left, and right keys) |
+| `enablePan` | Whether to support camera translation, the default is `true` |
+| `keyPanSpeed` | The amplitude of the operation when the keyboard is continuously pressed |
+| `enableRotate` | Whether to support camera rotation, the default is `true` |
+| `rotateSpeed` | Camera rotation speed, the default is `1.0` |
+| `enableZoom` | Whether to support camera zoom, the default is `true` |
+| `minAzimuthAngle` | When `onUpdate`, the minimum radian of a reasonable range for horizontal operation, the default is negative infinity |
+| `maxAzimuthAngle` | When `onUpdate`, the maximum radian of the reasonable range of horizontal operation, the default is positive infinity |
+| `minDistance` | When `onUpdate`, the minimum value of the reasonable range of distance operation is judged |
+| `maxDistance` | When `onUpdate`, the maximum value of the reasonable range of distance operation judged |
+| `minPolarAngle` | When `onUpdate`, the minimum arc within a reasonable range of vertical operation |
+| `maxPolarAngle` | When `onUpdate`, the maximum arc within a reasonable range of vertical operation |
 
 #### Example
 
@@ -43,12 +43,13 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 ![merge](https://user-images.githubusercontent.com/7768919/212805777-9ceb676e-3c27-4880-962c-3be224dcc7c1.gif)
 
 #### Feature
-|Attributes|Meaning|
-|:--|:--|
-|`floorMock`| Whether to simulate the ground, the default is `true` |
-|`floorY`| Use with `floorMock` to declare the location information of the ground |
-|`movementSpeed` | Speed ​​of movement |
-|`rotateSpeed`| Speed ​​of rotation |
+
+| Attributes      | Meaning                                                                |
+| :-------------- | :--------------------------------------------------------------------- |
+| `floorMock`     | Whether to simulate the ground, the default is `true`                  |
+| `floorY`        | Use with `floorMock` to declare the location information of the ground |
+| `movementSpeed` | Speed ​​of movement                                                    |
+| `rotateSpeed`   | Speed ​​of rotation                                                    |
 
 #### Example
 
@@ -60,9 +61,9 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 
 #### Feature
 
-|Attributes|Meaning|
-|:--|:--|
-|`zoomSpeed`| Zoom Speed |
+| Attributes  | Meaning    |
+| :---------- | :--------- |
+| `zoomSpeed` | Zoom Speed |
 
 #### Example
 
@@ -95,17 +96,17 @@ import { OrthoControl } from "@galacean/engine-toolkit-controls";
 ```ts
 import { OrbitControl } from "@galacean/engine-toolkit-controls";
 
-// Create engine object.
-const engine = new WebGLEngine("canvas");
+// Create engine
+const engine = await WebGLEngine.create({ canvas: "canvas" });
 engine.canvas.resizeByClientSize();
 
-// Initialize root.
+// Initialize root
 const rootEntity = engine.sceneManager.activeScene.createRootEntity();
 
-// Initialize camera entity.
+// Initialize camera entity
 const cameraEntity = rootEntity.createChild("camera");
 cameraEntity.addComponent(Camera);
-// Add OrbitControl.
+// Add OrbitControl
 cameraEntity.addComponent(OrbitControl);
 ```
 
