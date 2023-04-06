@@ -2,6 +2,7 @@ import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Vector
 import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
+import { ArcMaterial } from "./GizmoMaterial";
 
 /**
  * @internal
@@ -64,7 +65,7 @@ export const axisPlane = [
 export interface AxisProps {
   name: string;
   axisMesh: Array<ModelMesh>;
-  axisMaterial: PlainColorMaterial;
+  axisMaterial: ArcMaterial | PlainColorMaterial;
   axisHelperMesh: Array<Mesh>;
   axisHelperMaterial: PlainColorMaterial;
   axisRotation: Array<Vector3>;

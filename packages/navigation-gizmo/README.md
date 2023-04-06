@@ -37,7 +37,7 @@ import { NavigationGizmo } from "@oasis-engine-toolkit/navigation-gizmo";
 
 ```ts
 // LitePhysics must be initialized
-const engine = new WebGLEngine("canvas");
+const engine = await WebGLEngine.create({ canvas: "canvas" });
 engine.physicsManager.initialize(LitePhysics);
 const scene = engine.sceneManager.activeScene;
 const rootEntity = scene.createRootEntity();

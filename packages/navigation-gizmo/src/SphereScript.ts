@@ -125,10 +125,10 @@ export class SphereScript extends Script {
     SphereScript._startQuat.copyFrom(this._directionEntity.transform.worldRotationQuaternion);
     SphereScript._startPointer.copyFrom(pointer.position);
 
-    this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
+    this._tempUpVec.copyFrom(this._sceneCameraEntity.transform.worldUp);
     this._isBack = this._tempUpVec.y <= 0;
     this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
-    this._sceneCameraEntity.transform.getWorldForward(SphereScript._startAxis);
+    SphereScript._startAxis.copyFrom(this._sceneCameraEntity.transform.worldForward);
     Vector3.cross(SphereScript._startAxis, this._upVec, SphereScript._startAxis);
 
     Vector3.subtract(SphereScript._startPos, this._target, this._tempUpVec);

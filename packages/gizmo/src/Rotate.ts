@@ -238,8 +238,9 @@ export class RotateControl extends GizmoComponent {
         startP.x = pointerPosition.x;
         startP.y = pointerPosition.y;
 
-        this._camera.entity.transform.getWorldUp(this._startAxisY);
-        this._camera.entity.transform.getWorldForward(this._startAxisX);
+        this._startAxisY = this._camera.entity.transform.worldUp.clone();
+        this._startAxisX = this._camera.entity.transform.worldUp.clone();
+
         Vector3.cross(this._startAxisX, this._startAxisY, this._startAxisX);
 
         break;
