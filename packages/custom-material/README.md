@@ -19,19 +19,19 @@ principle and usage of each material, please refer to the README document under 
 The `Custom Material` is published on npm with full typing support. To install, use:
 
 ```sh
-npm install @oasis-engine-toolkit/custom-material
+npm install @galacean/engine-toolkit-custom-material
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import * as TOOLKIT from "@oasis-engine-toolkit/custom-material";
+import * as TOOLKIT from "@galacean/engine-toolkit-custom-material";
 ```
 
 or individual classes using:
 
 ```javascript
-import { PlanarShadowShaderFactory } from "@oasis-engine-toolkit/custom-material";
+import { PlanarShadowShaderFactory } from "@galacean/engine-toolkit-custom-material";
 ```
 
 ## Links

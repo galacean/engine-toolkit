@@ -9,19 +9,19 @@ The `Framebuffer Picker` tool using GPU frame picking technology, it can judge w
 The `Outline` is published on npm with full typing support. To install, use:
 
 ```sh
-$ npm install @oasis-engine-toolkit/framebuffer-picker
+$ npm install @galacean/engine-toolkit-framebuffer-picker
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import * as TOOLKIT from "@oasis-engine-toolkit/framebuffer-picker";
+import * as TOOLKIT from "@galacean/engine-toolkit-framebuffer-picker";
 ```
 
 or individual classes using:
 
 ```javascript
-import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
+import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
 ```
 
 ## Usage

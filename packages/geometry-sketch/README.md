@@ -28,19 +28,19 @@ Then your own shader can access all model mesh info in the vertex shader include
 The `Geometry Sketch` is published on npm with full typing support. To install, use:
 
 ```sh
-npm install @oasis-engine-toolkit/geometry-sketch
+npm install @galacean/engine-toolkit-geometry-sketch
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import * as TOOLKIT from "@oasis-engine-toolkit/geometry-sketch";
+import * as TOOLKIT from "@galacean/engine-toolkit-geometry-sketch";
 ```
 
 or individual classes using:
 
 ```javascript
-import { SketchRenderer } from "@oasis-engine-toolkit/geometry-sketch";
+import { SketchRenderer } from "@galacean/engine-toolkit-geometry-sketch";
 ```
 
 ## playground

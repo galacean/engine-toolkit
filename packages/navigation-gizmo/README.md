@@ -24,13 +24,13 @@ Navigation Gizmo displays the current orientation of the view. Dragging it with 
 The `Navigation Gizmo` is published on npm with full typing support. To install, use:
 
 ```sh
-$ npm install @oasis-engine-toolkit/navigation-gizmo
+$ npm install @galacean/engine-toolkit-navigation-gizmo
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import { NavigationGizmo } from "@oasis-engine-toolkit/navigation-gizmo";
+import { NavigationGizmo } from "@galacean/engine-toolkit-navigation-gizmo";
 ```
 
 ## Usage

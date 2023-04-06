@@ -15,19 +15,19 @@ The `Outline` tool uses an efficient method of `post-processing` to stroke entit
 The `Outline` is published on npm with full typing support. To install, use:
 
 ```sh
-$ npm install @oasis-engine-toolkit/outline
+$ npm install @galacean/engine-toolkit-outline
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import * as TOOLKIT from "@oasis-engine-toolkit/outline";
+import * as TOOLKIT from "@galacean/engine-toolkit-outline";
 ```
 
 or individual classes using:
 
 ```javascript
-import { OutlineManager } from "@oasis-engine-toolkit/outline";
+import { OutlineManager } from "@galacean/engine-toolkit-outline";
 ```
 
 ## Usage

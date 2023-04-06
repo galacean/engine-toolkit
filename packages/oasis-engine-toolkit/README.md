@@ -2,33 +2,33 @@
 
 <a href="https://www.npmjs.com/package/oasis-engine-toolkit"><img src="https://img.shields.io/npm/v/oasis-engine-toolkit"/></a> ![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine-toolkit) ![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit) [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine-toolkit)
 
-Some out-of-the-box utility features based on the [Oasis engine](https://github.com/oasis-engine/engine) `Script` and `Material`, welcome to enjoy!
+Some out-of-the-box utility features based on the [Galacean engine](https://github.com/galacean/engine/) `Script` and `Material`, welcome to enjoy!
 
 ## npm
 
 The toolkit is published on npm with full typing support. To install, use:
 
 ```sh
-npm install oasis-engine-toolkit
+npm install @galacean/engine-toolkit
 ```
 
 This will allow you to import toolkit entirely using:
 
 ```javascript
-import * as TOOLKIT from "oasis-engine-toolkit";
+import * as TOOLKIT from "@galacean/engine-toolkit";
 ```
 
 or individual classes using:
 
 ```javascript
-import { OrbitControl, FramebufferPicker } from "oasis-engine-toolkit";
+import { OrbitControl, FramebufferPicker } from "@galacean/engine-toolkit";
 ```
 
 ## Contributing
 
 Everyone is welcome to join us! Whether you find a bug, have a great feature request or you fancy owning a task from the road map feel free to get in touch.
 
-Make sure to read the [Contributing Guide](.github/HOW_TO_CONTRIBUTE.md) / [贡献指南](https://github.com/oasis-engine/engine/wiki/%E5%A6%82%E4%BD%95%E4%B8%8E%E6%88%91%E4%BB%AC%E5%85%B1%E5%BB%BA-Oasis-%E5%BC%80%E6%BA%90%E4%BA%92%E5%8A%A8%E5%BC%95%E6%93%8E) before submitting changes.
+Make sure to read the [Contributing Guide](.github/HOW_TO_CONTRIBUTE.md) / [贡献指南](https://github.com/galacean/engine/wiki/%E5%A6%82%E4%BD%95%E4%B8%8E%E6%88%91%E4%BB%AC%E5%85%B1%E5%BB%BA-Oasis-%E5%BC%80%E6%BA%90%E4%BA%92%E5%8A%A8%E5%BC%95%E6%93%8E) before submitting changes.
 
 ## Build
 

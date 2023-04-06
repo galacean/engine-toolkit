@@ -14,19 +14,19 @@ Auxiliary Lines toolkit to draw auxiliary frame for collider, frustum, light and
 The `Auxiliary Lines` is published on npm with full typing support. To install, use:
 
 ```sh
-npm install @oasis-engine-toolkit/auxiliary-lines
+npm install @galacean/engine-toolkit-auxiliary-lines
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import * as TOOLKIT from "@oasis-engine-toolkit/auxiliary-lines";
+import * as TOOLKIT from "@galacean/engine-toolkit-auxiliary-lines";
 ```
 
 or individual classes using:
 
 ```javascript
-import { WireframeManager } from "@oasis-engine-toolkit/auxiliary-lines";
+import { WireframeManager } from "@galacean/engine-toolkit-auxiliary-lines";
 ```
 
 ## playground

@@ -18,19 +18,19 @@ The `Skeleton Viewer` tool can help you display all bone entities in the model, 
 The `Outline` is published on npm with full typing support. To install, use:
 
 ```sh
-$ npm install @oasis-engine-toolkit/skeleton-viewer
+$ npm install @galacean/engine-toolkit-skeleton-viewer
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import * as TOOLKIT from "@oasis-engine-toolkit/skeleton-viewer";
+import * as TOOLKIT from "@galacean/engine-toolkit-skeleton-viewer";
 ```
 
 or individual classes using:
 
 ```javascript
-import { SkeletonViewer } from "@oasis-engine-toolkit/skeleton-viewer";
+import { SkeletonViewer } from "@galacean/engine-toolkit-skeleton-viewer";
 ```
 
 ## Usage
