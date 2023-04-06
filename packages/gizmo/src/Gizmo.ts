@@ -22,7 +22,7 @@ import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
 import { State, AnchorType, CoordinateType } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
-import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
+import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
