@@ -41,7 +41,7 @@ and call `update` manually.
 
 ## Links
 
-- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
+- [Repository](https://github.com/galacean/engine-toolkit)
 - [Examples](https://oasisengine.cn/#/examples/latest/skeleton-viewer)
 - [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
 - [API References](https://oasisengine.cn/#/api/latest/core)

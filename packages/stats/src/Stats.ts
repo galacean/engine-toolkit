@@ -1,4 +1,4 @@
-import { Script, Camera } from "oasis-engine";
+import { Script, Camera } from "@galacean/engine";
 import Monitor from "./Monitor";
 
 /**
@@ -13,6 +13,7 @@ export class Stats extends Script {
    */
   onBeginRender(camera: Camera): void {
     if (!this.monitor) {
+      // @ts-ignore
       const gl = camera.engine._hardwareRenderer.gl;
       if (gl) {
         this.monitor = new Monitor(gl);

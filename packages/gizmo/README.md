@@ -66,7 +66,7 @@ gizmo.state = State.translate;
 
 ## Links
 
-- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
+- [Repository](https://github.com/galacean/engine-toolkit)
 - [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
 - [API References](https://oasisengine.cn/#/api/latest/core)
 

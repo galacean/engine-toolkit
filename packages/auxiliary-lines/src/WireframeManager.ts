@@ -23,15 +23,15 @@ import {
   Transform,
   Vector3,
   DependentMode
-} from "oasis-engine";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+} from "@galacean/engine";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { WireframePrimitive } from "./WireframePrimitive";
 
 /**
  * Wireframe Auxiliary Manager.
  * @decorator `@dependentComponents(MeshRenderer)`
  */
-@dependentComponents(DependentMode.CheckOnly, MeshRenderer)
+@dependentComponents(MeshRenderer, DependentMode.CheckOnly)
 export class WireframeManager extends Script {
   private static _positionPool: Vector3[] = [];
   private static _ndcPosition: Vector3[] = [

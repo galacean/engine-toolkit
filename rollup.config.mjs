@@ -30,7 +30,7 @@ const pkgs = fs
     };
   });
 
-// "oasisEngine" 、 "@oasisEngine/controls" ...
+// "@galacean/engine-toolkit" 、 "@galacean/engine-toolkit-controls" ...
 function toGlobalName(pkgName) {
   return camelCase(pkgName);
 }
@@ -65,7 +65,7 @@ function makeRollupConfig(pkg) {
     Object.assign({}, pkg.pkgJson.dependencies, pkg.pkgJson.peerDependencies, pkg.pkgJson.devDependencies)
   );
   const globals = {
-    "oasis-engine": "oasisEngine"
+    "@galacean/engine": "oasisEngine"
   };
   externals.forEach((external) => {
     globals[external] = toGlobalName(external);
@@ -95,8 +95,8 @@ function makeRollupConfig(pkg) {
         name: toGlobalName(pkg.pkgJson.name),
         globals: globals
       },
-      // 总包只 external oasis-engine
-      external: pkg.pkgJson.name === "oasis-engine-toolkit" ? ["oasis-engine"] : externals,
+      // 总包只 external @galacean/engine
+      external: pkg.pkgJson.name === "@galacean/engine-toolkit" ? ["@galacean/engine"] : externals,
       plugins: [...plugins, minify({ sourceMap: true })]
     },
     {
