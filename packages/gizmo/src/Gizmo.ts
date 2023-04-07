@@ -252,7 +252,7 @@ export class Gizmo extends Script {
     }
   }
 
-  private _triggerGizmoStart(currentType: State, axisName: string, pointerPosition: Vector2): void {
+  private _triggerGizmoStart(currentType: State, axisName: string): void {
     this._isStarted = true;
     this._onGizmoHoverEnd();
     const pointer = this.engine.inputManager.pointers.find((pointer: Pointer) => {
@@ -270,7 +270,7 @@ export class Gizmo extends Script {
         }
       );
 
-      this._currentControl.onMoveStart(this._tempRay, axisName, pointerPosition);
+      this._currentControl.onMoveStart(this._tempRay, axisName);
     }
   }
 
@@ -279,7 +279,7 @@ export class Gizmo extends Script {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
     this._sceneCamera.screenPointToRay(pointer.position, this._tempRay2);
-    this._currentControl.onMove(this._tempRay2, pointer.position);
+    this._currentControl.onMove(this._tempRay2, pointer);
   }
 
   private _triggerGizmoEnd(): void {
@@ -297,7 +297,7 @@ export class Gizmo extends Script {
     const selectedEntity = result.entity;
     switch (selectedEntity.layer) {
       case this._layer:
-        this._triggerGizmoStart(currentControl, selectedEntity.name, pointerPosition);
+        this._triggerGizmoStart(currentControl, selectedEntity.name);
         break;
     }
   }
