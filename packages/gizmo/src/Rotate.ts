@@ -62,7 +62,6 @@ export class RotateControl extends GizmoComponent {
   private _tempVec32: Vector3 = new Vector3();
   private _tempMat41: Matrix = new Matrix();
 
-  private _isMoving: boolean = false;
   private _isAtBack: boolean = false;
 
   constructor(entity: Entity) {
@@ -197,20 +196,27 @@ export class RotateControl extends GizmoComponent {
 
   onMoveStart(ray: Ray, axisName: string): void {
     this._selectedAxis = axisType[axisName];
-    const { _group, _startPointUnit: startP, _tempVec: tempVec } = this;
-    _group.getWorldMatrix(this._startMatrix);
+    const {
+      _group: group,
+      _startPointUnit: startP,
+      _startMatrix: startMat,
+      _tempVec: tempVec,
+      _tempMat: tempMat
+    } = this;
+
+    group.getWorldMatrix(startMat);
+    Matrix.invert(startMat, this._startInvMatrix);
 
     const s = this._getGizmoScale();
-    this._startMatrix.scale(tempVec.set(s, s, s));
-    Matrix.invert(this._startMatrix, this._startInvMatrix);
-    this.gizmoEntity.transform.worldMatrix = this._startMatrix;
+    this._tempMat.copyFrom(startMat).scale(tempVec.set(s, s, s));
+    this.gizmoEntity.transform.worldMatrix = tempMat;
 
     switch (this._selectedAxis) {
       case axisType.x:
       case axisType.y:
       case axisType.z:
-        this.gizmoHelperEntity.transform.worldMatrix = this._startMatrix;
-        this._gizmoRotateHelperEntity.transform.worldMatrix = this._startMatrix;
+        this.gizmoHelperEntity.transform.worldMatrix = tempMat;
+        this._gizmoRotateHelperEntity.transform.worldMatrix = tempMat;
 
         this._calRayIntersection(ray, startP);
         this._setAxisSelected(this._selectedAxis, true);
@@ -227,7 +233,7 @@ export class RotateControl extends GizmoComponent {
         this._rotateHelperPlaneEntity.transform.setRotation(0, 0, 0);
         break;
       case axisType.xyz:
-        this.gizmoHelperEntity.transform.worldMatrix = this._startMatrix;
+        this.gizmoHelperEntity.transform.worldMatrix = tempMat;
         this._setAxisSelected(this._selectedAxis, true);
         this._isAtBack = this.gizmoEntity.transform.worldUp.y < 0;
         this._isAtBack ? this._verticalAxis.set(0, -1, 0) : this._verticalAxis.set(0, 1, 0);
@@ -236,9 +242,14 @@ export class RotateControl extends GizmoComponent {
   }
 
   onMove(ray: Ray, pointer: Pointer): void {
-    const { _startPointUnit: startP, _currPointUnit: currP, _tempMat2: mat, _group: group, _tempVec: tempVec } = this;
-
-    this._isMoving = true;
+    const {
+      _startPointUnit: startP,
+      _currPointUnit: currP,
+      _startMatrix: startMat,
+      _tempMat2: mat,
+      _group: group,
+      _tempVec: tempVec
+    } = this;
 
     switch (this._selectedAxis) {
       case axisType.x:
@@ -249,7 +260,7 @@ export class RotateControl extends GizmoComponent {
         const rad = this._getFinalRad(startP, currP, localAxis);
         GizmoMesh.updateCircle(this._rotateHelperPlaneMesh, startP, localAxis, rad);
 
-        Matrix.rotateAxisAngle(this._startMatrix, localAxis, rad, mat);
+        Matrix.rotateAxisAngle(startMat, localAxis, rad, mat);
         group.setWorldMatrix(mat);
 
         const d = (rad / Math.PI) * 180;
@@ -257,26 +268,26 @@ export class RotateControl extends GizmoComponent {
         break;
       case axisType.xyz:
         const { x, y } = pointer.deltaPosition;
-        this._horizontalAxis.copyFrom(this._camera.entity.transform.worldUp);
+        const { _horizontalAxis: hAxis, _verticalAxis: vAxis } = this;
+        hAxis.copyFrom(this._camera.entity.transform.worldUp);
 
-        Vector3.cross(this._horizontalAxis, this._verticalAxis, this._horizontalAxis);
-        this._isAtBack ? this._horizontalAxis.scale(-y) : this._horizontalAxis.scale(y);
+        Vector3.cross(hAxis, vAxis, hAxis);
+        this._isAtBack ? hAxis.scale(-y) : hAxis.scale(y);
 
-        tempVec.copyFrom(this._verticalAxis);
+        tempVec.copyFrom(vAxis);
         this._isAtBack ? tempVec.scale(-x) : tempVec.scale(x);
 
-        Vector3.add(this._horizontalAxis, tempVec, tempVec);
+        Vector3.add(hAxis, tempVec, tempVec);
         Vector3.transformNormal(tempVec, this._startInvMatrix, tempVec);
         const angle = pointer.deltaPosition.length() * this._speedFactor;
-        Matrix.rotateAxisAngle(this._startMatrix, tempVec, angle, mat);
-        group.setWorldMatrix(mat);
-        this._startMatrix.copyFrom(mat);
+        Matrix.rotateAxisAngle(startMat, tempVec, angle, startMat);
+        group.setWorldMatrix(startMat);
+        Matrix.invert(startMat, this._startInvMatrix);
         break;
     }
   }
 
   onMoveEnd(): void {
-    this._isMoving = false;
     this._finalRad = 0;
     this._previousRad = 0;
     // recover axis color
@@ -380,23 +391,20 @@ export class RotateControl extends GizmoComponent {
     const factor = MathUtil.radToDegreeFactor;
     const { x, y, z } = _tempVec2;
     // 用 yoz 投影计算 X 轴的局部旋转
-    this._axisX.transform.rotation.x = -Math.atan2(y, z) * factor;
-    this._axisXHelper.transform.rotation.x = -Math.atan2(y, z) * factor;
+    this._axisX.transform.rotation.x = this._axisXHelper.transform.rotation.x = -Math.atan2(y, z) * factor;
     // 用 xoz 投影计算 Y 轴的局部旋转
-    this._axisY.transform.rotation.y = Math.atan2(x, z) * factor;
-    this._axisYHelper.transform.rotation.y = Math.atan2(x, z) * factor;
-    // 用 yox 投影计算 Y 轴的局部旋转
-    this._axisZ.transform.rotation.z = Math.atan2(y, x) * factor;
-    this._axisZHelper.transform.rotation.z = Math.atan2(y, x) * factor;
+    this._axisY.transform.rotation.y = this._axisYHelper.transform.rotation.y = Math.atan2(x, z) * factor;
+    // 用 yox 投影计算 Z 轴的局部旋转
+    this._axisZ.transform.rotation.z = this._axisZHelper.transform.rotation.z = Math.atan2(y, x) * factor;
     // xyz 投影
     this._localLookAt(this._axisXYZ.transform, _tempVec2);
-    this._localLookAt(this._axisXYZHelper.transform, _tempVec2);
+    this._axisXYZHelper.transform.rotationQuaternion = this._axisXYZ.transform.rotationQuaternion;
   }
 
   private _resizeControl(isModified: boolean = false): void {
     this._group.getWorldMatrix(this._tempMat);
     this._isModified = isModified;
-    const s = this._isMoving ? 1 : this._getGizmoScale();
+    const s = this._getGizmoScale();
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = this._tempMat.scale(
       this._tempVec.set(s, s, s)
     );
