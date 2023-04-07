@@ -22,7 +22,7 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
  * GPU Frame buffer picker.
  * @decorator `@dependentComponents(DependentMode.CheckOnly, Camera)`
  */
-@dependentComponents(DependentMode.CheckOnly, Camera)
+@dependentComponents(Camera, DependentMode.CheckOnly)
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
   private static _pickPixel = new Uint8Array(4);
