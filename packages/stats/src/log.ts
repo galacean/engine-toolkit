@@ -1,9 +1,9 @@
-import { Logger } from "oasis-engine";
+import { Logger } from "@galacean/engine";
 
 export function log(...args: any): void {
-  Logger.info("🚀 [o3-engine-stats]", ...args);
+  Logger.info("🚀 [galacean engine--stats]", ...args);
 }
 
 export function errorLog(...args: any): void {
-  Logger.error("🚀 [o3-engine-stats]", ...args);
+  Logger.error("🚀 [galacean engine-stats]", ...args);
 }

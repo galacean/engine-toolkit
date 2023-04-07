@@ -1,4 +1,4 @@
-import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4 } from "oasis-engine";
+import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4 } from "@galacean/engine";
 
 const vertexSource = `
     attribute vec3 POSITION;

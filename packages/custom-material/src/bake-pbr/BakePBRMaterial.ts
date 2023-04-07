@@ -1,4 +1,4 @@
-import { Engine, PBRMaterial, Shader, Texture2D } from "oasis-engine";
+import { Engine, PBRMaterial, Shader, Texture2D } from "@galacean/engine";
 import fragment from "./fragment";
 import vertex from "./vertex";
 

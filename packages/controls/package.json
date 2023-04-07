@@ -1,5 +1,5 @@
 {
-  "name": "@oasis-engine-toolkit/controls",
+  "name": "@galacean/engine-toolkit-controls",
   "version": "1.0.0-alpha.18",
   "license": "MIT",
   "publishConfig": {
@@ -9,9 +9,9 @@
   "homepage": "https://oasisengine.cn/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+    "url": "https://github.com/galacean/engine-toolkit"
   },
-  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
+  "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "scripts": {
     "b:types": "tsc",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
@@ -24,6 +24,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^1.0.0-alpha"
+    "@galacean/engine": "^1.0.0-alpha"
   }
 }

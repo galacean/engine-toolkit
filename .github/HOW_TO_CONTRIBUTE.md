@@ -45,7 +45,7 @@ The following is a set of guidelines for contributing to Oasis. Please spend sev
 
 <br />You can test your change by the following ways:<br />
 
-- Clone the oasis playground repository and write a demo for your change.
+- Clone the galacean playground repository and write a demo for your change.
 - Write an uint test in the Oasis repository and run `npm run test` to execute the uint test.
 
 

@@ -12,7 +12,7 @@ import {
   TextureFormat,
   Vector2,
   Vector3
-} from "oasis-engine";
+} from "@galacean/engine";
 import fs from "./color.fs.glsl";
 import vs from "./color.vs.glsl";
 
@@ -20,7 +20,7 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 
 /**
  * GPU Frame buffer picker.
- * @decorator `@dependentComponents(DependentMode.CheckOnly, Camera)`
+ * @decorator `@dependentComponents(Camera, DependentMode.CheckOnly)`
  */
 @dependentComponents(Camera, DependentMode.CheckOnly)
 export class FramebufferPicker extends Script {

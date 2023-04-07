@@ -23,8 +23,8 @@ import {
   Transform,
   Vector3,
   DependentMode
-} from "oasis-engine";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+} from "@galacean/engine";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { WireframePrimitive } from "./WireframePrimitive";
 
 /**

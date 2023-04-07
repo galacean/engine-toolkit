@@ -1,4 +1,4 @@
-import { Camera, Entity, Matrix, MeshRenderer, Quaternion, Ray, Vector3, Vector2, Transform } from "oasis-engine";
+import { Camera, Entity, Matrix, MeshRenderer, Quaternion, Ray, Vector3, Vector2, Transform } from "@galacean/engine";
 import { Axis } from "./Axis";
 import { Utils } from "./Utils";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";

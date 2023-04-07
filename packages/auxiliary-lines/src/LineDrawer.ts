@@ -8,15 +8,15 @@ import {
   ModelMesh,
   Script,
   Vector3
-} from "oasis-engine";
+} from "@galacean/engine";
 import { WireframePrimitive } from "./WireframePrimitive";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 
 /**
  * Line Drawer.
  * @decorator `@dependentComponents(MeshRenderer)`
  */
-@dependentComponents(DependentMode.CheckOnly, MeshRenderer)
+@dependentComponents(MeshRenderer, DependentMode.CheckOnly)
 export class LineDrawer extends Script {
   private static _positions: Vector3[] = [];
   private static _positionCount: number = 0;

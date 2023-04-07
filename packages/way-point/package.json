@@ -1,5 +1,5 @@
 {
-  "name": "@oasis-engine-toolkit/way-point",
+  "name": "@galacean/engine-toolkit-way-point",
   "version": "1.0.0-alpha.18",
   "publishConfig": {
     "access": "public",
@@ -8,9 +8,9 @@
   "homepage": "https://oasisengine.cn/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+    "url": "https://github.com/galacean/engine-toolkit"
   },
-  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
+  "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
@@ -24,6 +24,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^1.0.0-alpha"
+    "@galacean/engine": "^1.0.0-alpha"
   }
 }

@@ -1,7 +1,7 @@
-import { Engine, PrimitiveMesh, ModelMesh, CullMode, Color } from "oasis-engine";
+import { Engine, PrimitiveMesh, ModelMesh, CullMode, Color } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { GizmoMesh } from "./GizmoMesh";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { ArcMaterial } from "./GizmoMaterial";
 
 export class Utils {
