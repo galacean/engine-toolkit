@@ -235,7 +235,8 @@ export class RotateControl extends GizmoComponent {
       case axisType.xyz:
         this.gizmoHelperEntity.transform.worldMatrix = tempMat;
         this._setAxisSelected(this._selectedAxis, true);
-        this._isAtBack = this.gizmoEntity.transform.worldUp.y < 0;
+        this.gizmoEntity.transform.getWorldUp(tempVec);
+        this._isAtBack = tempVec.y < 0;
         this._isAtBack ? this._verticalAxis.set(0, -1, 0) : this._verticalAxis.set(0, 1, 0);
         break;
     }
@@ -269,7 +270,7 @@ export class RotateControl extends GizmoComponent {
       case axisType.xyz:
         const { x, y } = pointer.deltaPosition;
         const { _horizontalAxis: hAxis, _verticalAxis: vAxis } = this;
-        hAxis.copyFrom(this._camera.entity.transform.worldUp);
+        this._camera.entity.transform.getWorldUp(hAxis);
 
         Vector3.cross(hAxis, vAxis, hAxis);
         this._isAtBack ? hAxis.scale(-y) : hAxis.scale(y);
