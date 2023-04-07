@@ -1,4 +1,4 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Vector2, Pointer } from "oasis-engine";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Pointer } from "oasis-engine";
 import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
@@ -21,7 +21,7 @@ export abstract class GizmoComponent extends Component {
   /** Called when pointer leaves gizmo. */
   abstract onHoverEnd(): void;
   /** Called when gizmo starts to move.*/
-  abstract onMoveStart(ray: Ray, axisName: string, pointerPosition?: Vector2): void;
+  abstract onMoveStart(ray: Ray, axisName: string): void;
   /** Called when gizmo is moving.*/
   abstract onMove(ray: Ray, pointer?: Pointer): void;
   /** Called when gizmo movement ends.*/
@@ -46,16 +46,17 @@ export const axisVector = [
   new Vector3(1, 0, 0),
   new Vector3(0, 1, 0),
   new Vector3(0, 0, 1),
+  new Vector3(1, 1, 1),
   new Vector3(1, 1, 0),
   new Vector3(0, 1, 1),
-  new Vector3(1, 0, 1),
-  new Vector3(1, 1, 1)
+  new Vector3(1, 0, 1)
 ];
 
 export const axisPlane = [
   new Plane(new Vector3(1, 0, 0), 0),
   new Plane(new Vector3(0, 1, 0), 0),
   new Plane(new Vector3(0, 0, 1), 0),
+  new Plane(new Vector3(0, 0, 0), 0),
   new Plane(new Vector3(0, 0, 1), 0),
   new Plane(new Vector3(1, 0, 0), 0),
   new Plane(new Vector3(0, 1, 0), 0)
