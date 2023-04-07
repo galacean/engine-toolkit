@@ -1,5 +1,5 @@
 import { WebGLEngine } from "oasis-engine";
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
+import { OrbitControl } from "@galacean/engine-toolkit-controls";
 import { expect } from "chai";
 
 const canvasDOM = document.createElement("canvas");

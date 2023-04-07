@@ -1,5 +1,5 @@
 {
-  "name": "oasis-engine-toolkit-root",
+  "name": "@galacean/engine-toolkit-root",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
@@ -53,7 +53,7 @@
     "husky": "^4.3.8",
     "lint-staged": "^10.5.4",
     "nyc": "^15.1.0",
-    "oasis-engine": "^0.9.0-alpha",
+    "oasis-engine": "0.9.0-beta.79",
     "prettier": "^2.7.1",
     "rollup": "^2.79.0",
     "rollup-plugin-binary2base64": "1.0.3",

@@ -28,19 +28,19 @@ Some out-of-the-box utility features based on the [Oasis engine](https://github.
 The toolkit is published on npm with full typing support. To install, use:
 
 ```sh
-npm install oasis-engine-toolkit
+npm install @galacean/engine-toolkit
 ```
 
 This will allow you to import toolkit entirely using:
 
 ```javascript
-import * as TOOLKIT from "oasis-engine-toolkit";
+import * as TOOLKIT from "@galacean/engine-toolkit";
 ```
 
 or individual classes using:
 
 ```javascript
-import { OrbitControl, FramebufferPicker } from "oasis-engine-toolkit";
+import { OrbitControl, FramebufferPicker } from "@galacean/engine-toolkit";
 ```
 
 ## Contributing
