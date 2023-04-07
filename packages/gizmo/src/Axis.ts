@@ -1,10 +1,9 @@
 import { Component, Entity, MeshRenderer, Color } from "oasis-engine";
 import { AxisProps } from "./Type";
 import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
-import { ArcMaterial } from "./GizmoMaterial";
 
 export class Axis extends Component {
-  private _material: PlainColorMaterial | ArcMaterial;
+  private _material: PlainColorMaterial;
   private _color: Color = new Color();
   private _highLightColor: Color = new Color();
   private _yellowColor: Color = new Color(1.0, 0.95, 0.0, 1.0);
