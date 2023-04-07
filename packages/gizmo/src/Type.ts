@@ -1,5 +1,5 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Pointer } from "oasis-engine";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Pointer } from "@galacean/engine";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
 

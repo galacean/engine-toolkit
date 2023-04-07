@@ -1,4 +1,4 @@
-import { Vector3, Quaternion, Engine, ModelMesh, MeshTopology } from "oasis-engine";
+import { Vector3, Quaternion, Engine, ModelMesh, MeshTopology } from "@galacean/engine";
 
 /**
  * create a circle mesh

@@ -1,4 +1,4 @@
-import { Camera, Engine, ModelMesh, Script, Vector3, MeshRenderer, MathUtil } from "oasis-engine";
+import { Camera, Engine, ModelMesh, Script, Vector3, MeshRenderer, MathUtil } from "@galacean/engine";
 import { GridMaterial } from "./GridMaterial";
 
 /**

@@ -1,8 +1,7 @@
-import { Engine, PrimitiveMesh, ModelMesh, CullMode } from "oasis-engine";
+import { Engine, PrimitiveMesh, ModelMesh, CullMode } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { GizmoMesh } from "./GizmoMesh";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
-
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 export class Utils {
   static rotateCircleRadius = 1.6;
   static scaleFactor = 0.05773502691896257;
