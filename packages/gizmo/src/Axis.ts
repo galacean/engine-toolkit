@@ -47,7 +47,7 @@ export class Axis extends Component {
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
       axisHelperRenderer.receiveShadows = false;
       axisHelperRenderer.castShadows = false;
-      axisHelperRenderer.priority = 100;
+      axisHelperRenderer.priority = value.priority ? value.priority : 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
       axisHelperRenderer.setMaterial(value.axisHelperMaterial);
     }
