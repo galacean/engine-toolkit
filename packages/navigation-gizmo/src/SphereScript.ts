@@ -13,7 +13,7 @@ import {
   TextRenderer,
   Vector2,
   Vector3
-} from "oasis-engine";
+} "@galacean/engine";
 
 /** @internal */
 export class SphereScript extends Script {

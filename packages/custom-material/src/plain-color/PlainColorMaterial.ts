@@ -1,4 +1,4 @@
-import { BaseMaterial, Color, CullMode, Engine, Shader } from "oasis-engine";
+import { BaseMaterial, Color, CullMode, Engine, Shader } "@galacean/engine";
 
 /**
  * plain color Material. don't effected by light and fog.

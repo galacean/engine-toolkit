@@ -1,4 +1,4 @@
-import { Camera, Entity, MeshRenderElement, RenderTarget, Script, Texture2D } from "oasis-engine";
+import { Camera, Entity, MeshRenderElement, RenderTarget, Script, Texture2D } "@galacean/engine";
 import { ColorRenderPass } from "./ColorRenderPass";
 
 /**

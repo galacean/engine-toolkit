@@ -1,4 +1,4 @@
-import { Material, Shader, Engine, CullMode, RenderQueueType, BlendFactor, BlendOperation } from "oasis-engine";
+import { Material, Shader, Engine, CullMode, RenderQueueType, BlendFactor, BlendOperation } "@galacean/engine";
 
 import "./lineShader";
 

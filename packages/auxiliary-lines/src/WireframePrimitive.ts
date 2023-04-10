@@ -1,4 +1,4 @@
-import { MathUtil, Vector3 } from "oasis-engine";
+import { MathUtil, Vector3 } "@galacean/engine";
 
 /**
  * Wireframe primitive.

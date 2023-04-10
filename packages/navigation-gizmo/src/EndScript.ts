@@ -9,7 +9,7 @@ import {
   Script,
   TextRenderer,
   Vector3
-} from "oasis-engine";
+} "@galacean/engine";
 
 /** @internal */
 export class EndScript extends Script {

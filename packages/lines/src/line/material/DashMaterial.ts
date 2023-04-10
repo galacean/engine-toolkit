@@ -1,4 +1,4 @@
-import { Shader, Engine } from "oasis-engine";
+import { Shader, Engine } "@galacean/engine";
 import { LineMaterial } from "./LineMaterial";
 import "./dashShader";
 

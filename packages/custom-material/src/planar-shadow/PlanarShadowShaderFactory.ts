@@ -8,7 +8,7 @@ import {
   ShaderPass,
   StencilOperation,
   Vector3
-} from "oasis-engine";
+} "@galacean/engine";
 
 export class PlanarShadowShaderFactory {
   private static _lightDirProp = Shader.getPropertyByName("u_lightDir");

@@ -13,7 +13,7 @@ import {
   TextureFormat,
   VertexBufferBinding,
   VertexElement
-} from "oasis-engine";
+} "@galacean/engine";
 import { SketchMode } from "./SketchMode";
 import { BiTangentMaterial, NormalMaterial, TangentMaterial, WireframeMaterial } from "./material";
 

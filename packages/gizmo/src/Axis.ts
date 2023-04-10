@@ -1,6 +1,6 @@
-import { Component, Entity, MeshRenderer, Color } from "oasis-engine";
+import { Component, Entity, MeshRenderer, Color } "@galacean/engine";
 import { AxisProps } from "./Type";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-it-custom-material";
 
 export class Axis extends Component {
   private _material: PlainColorMaterial;

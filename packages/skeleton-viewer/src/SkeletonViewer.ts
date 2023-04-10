@@ -13,7 +13,7 @@ import {
   Shader,
   SkinnedMeshRenderer,
   Vector3
-} from "oasis-engine";
+} "@galacean/engine";
 
 /**
  * Skeleton visualization.

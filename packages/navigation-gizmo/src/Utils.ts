@@ -1,6 +1,6 @@
-import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3 } from "oasis-engine";
+import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3 } "@galacean/engine";
 import { createCircleMesh } from "./CircleMesh";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 
 /** @internal */
 export class Utils {

@@ -1,4 +1,4 @@
-import { Color, Vector2, Texture2D } from "oasis-engine";
+import { Color, Vector2, Texture2D } "@galacean/engine";
 import { DashMaterial } from "./material/DashMaterial";
 import { Line } from "./Line";
 import { LineVertexBuilder } from "./vertexBuilder";

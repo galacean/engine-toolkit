@@ -1,4 +1,4 @@
-import { BoundingBox, Renderer, Vector3, Matrix, Entity } from "oasis-engine";
+import { BoundingBox, Renderer, Vector3, Matrix, Entity } "@galacean/engine";
 import { AnchorType, CoordinateType } from "./enums/GroupState";
 
 /**

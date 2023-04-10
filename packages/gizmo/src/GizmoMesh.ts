@@ -1,4 +1,4 @@
-import { Engine, MeshTopology, ModelMesh, Quaternion, Vector2, Vector3 } from "oasis-engine";
+import { Engine, MeshTopology, ModelMesh, Quaternion, Vector2, Vector3 } "@galacean/engine";
 
 export class GizmoMesh {
   private static _tempQuat: Quaternion = new Quaternion();
