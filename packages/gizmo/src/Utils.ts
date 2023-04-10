@@ -22,12 +22,12 @@ export class Utils {
   static rotatePlaneMaterial: PlainColorMaterial;
   static invisibleMaterialRotate: PlainColorMaterial;
   static invisibleMaterialCircle: PlainColorMaterial;
+  static lightMaterial: PlainColorMaterial;
 
   static redMaterialScale: PlainColorMaterial;
   static greenMaterialScale: PlainColorMaterial;
   static blueMaterialScale: PlainColorMaterial;
   static greyMaterial: PlainColorMaterial;
-  static lightMaterial: PlainColorMaterial;
   static invisibleMaterialScale: PlainColorMaterial;
 
   static lineMesh: ModelMesh;
@@ -65,17 +65,14 @@ export class Utils {
     Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialRotate = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
     Utils.invisibleMaterialRotate.renderState.rasterState.cullMode = CullMode.Off;
-
     Utils.invisibleMaterialCircle = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
+    Utils.lightMaterial = this._createPlainColorMaterial(engine, State.rotate, 0.7, 0.7, 0.7, 1.0);
 
     // scale material
     Utils.redMaterialScale = this._createPlainColorMaterial(engine, State.scale, 1.0, 0.25, 0.25, 1.0);
     Utils.greenMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0.5, 0.8, 0.2, 1.0);
     Utils.blueMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0.3, 0.5, 1.0, 1.0);
     Utils.greyMaterial = this._createPlainColorMaterial(engine, State.scale, 0.75, 0.75, 0.75, 1.0);
-
-    Utils.lightMaterial = this._createPlainColorMaterial(engine, State.scale, 0.7, 0.7, 0.7, 1.0);
-
     Utils.invisibleMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0, 0, 0, 0);
 
     Utils.lineMesh = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.5);
