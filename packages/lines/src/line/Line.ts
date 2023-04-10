@@ -10,7 +10,7 @@ import {
   Buffer,
   IndexFormat,
   Vector2
-} from "oasis-engine";
+} from "@galacean/engine";
 import { LineMaterial } from "./material/LineMaterial";
 import { LineCap, LineJoin } from "./constants";
 import { LineVertexBuilder } from "./vertexBuilder";

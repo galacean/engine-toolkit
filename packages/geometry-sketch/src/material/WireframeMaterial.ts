@@ -1,4 +1,4 @@
-import { BaseMaterial, Color, Engine, RenderFace, Shader } from "oasis-engine";
+import { BaseMaterial, Color, Engine, RenderFace, Shader } from "@galacean/engine";
 import { geometryTextureDefine, geometryTextureVert } from "./GeometryShader";
 
 Shader.create(

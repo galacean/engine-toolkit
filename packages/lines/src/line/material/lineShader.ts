@@ -1,4 +1,4 @@
-import { Shader } from "oasis-engine";
+import { Shader } from "@galacean/engine";
 
 //-- Shader 代码
 const vertexSource = `

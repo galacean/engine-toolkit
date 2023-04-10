@@ -38,13 +38,13 @@ Show the gizmo to control the scale. Dragging the center cube scales along all t
 The `Gizmo` is published on npm with full typing support. To install, use:
 
 ```sh
-$ npm install @oasis-engine-toolkit/gizmo
+$ npm install @galacean/engine-toolkit-/gizmo
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import { Gizmo, Group, AnchorType, CoordinateType, State } from "@oasis-engine-toolkit/gizmo";
+import { Gizmo, Group, AnchorType, CoordinateType, State } from "@galacean/engine-toolkit-gizmo";
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ gizmo.state = State.translate;
 
 ## Links
 
-- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
+- [Repository](https://github.com/galacean/engine-toolkit)
 - [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
 - [API References](https://oasisengine.cn/#/api/latest/core)
 

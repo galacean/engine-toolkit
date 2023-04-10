@@ -1,4 +1,4 @@
-import { Entity, InputManager, MathUtil, Script, Transform, Vector3 } from "oasis-engine";
+import { Entity, InputManager, MathUtil, Script, Transform, Vector3 } from "@galacean/engine";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
 import { ControlFreeKeyboard } from "./inputDevice/ControlFreeKeyboard";
 import { ControlFreePointer } from "./inputDevice/ControlFreePointer";

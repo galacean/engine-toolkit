@@ -15,7 +15,7 @@ import {
   Pointer,
   PointerPhase,
   Vector2
-} from "oasis-engine";
+} from "@galacean/engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
@@ -23,7 +23,7 @@ import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
 import { State } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
-import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
+import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
@@ -49,6 +49,8 @@ export class Gizmo extends Script {
   private _tempRay2: Ray = new Ray();
 
   private _type: State = null;
+
+  private _sphereColliderEntity: Entity;
 
   /**
    * initial scene camera & select group in gizmo
@@ -138,7 +140,8 @@ export class Gizmo extends Script {
 
     this.layer = Layer.Layer29;
     // gizmo collider
-    const sphereCollider = entity.addComponent(StaticCollider);
+    this._sphereColliderEntity = entity.createChild("gizmoCollider");
+    const sphereCollider = this._sphereColliderEntity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
     colliderShape.radius = Utils.rotateCircleRadius + 0.8;
     sphereCollider.addShape(colliderShape);
@@ -180,6 +183,8 @@ export class Gizmo extends Script {
       }
     } else {
       this._group.getWorldPosition(this._tempVec);
+      this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
+
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
       const currDistance = Vector3.distance(cameraPosition, this._tempVec);
       let distanceDirty = false;
@@ -248,7 +253,7 @@ export class Gizmo extends Script {
     }
   }
 
-  private _triggerGizmoStart(currentType: State, axisName: string, pointerPosition: Vector2): void {
+  private _triggerGizmoStart(currentType: State, axisName: string): void {
     this._isStarted = true;
     this._onGizmoHoverEnd();
     const pointer = this.engine.inputManager.pointers.find((pointer: Pointer) => {
@@ -266,7 +271,7 @@ export class Gizmo extends Script {
         }
       );
 
-      this._currentControl.onMoveStart(this._tempRay, axisName, pointerPosition);
+      this._currentControl.onMoveStart(this._tempRay, axisName);
     }
   }
 
@@ -275,7 +280,7 @@ export class Gizmo extends Script {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
     this._sceneCamera.screenPointToRay(pointer.position, this._tempRay2);
-    this._currentControl.onMove(this._tempRay2, pointer.position);
+    this._currentControl.onMove(this._tempRay2, pointer);
   }
 
   private _triggerGizmoEnd(): void {
@@ -292,7 +297,7 @@ export class Gizmo extends Script {
     const selectedEntity = result.component.entity;
     switch (selectedEntity.layer) {
       case this._layer:
-        this._triggerGizmoStart(currentControl, selectedEntity.name, pointerPosition);
+        this._triggerGizmoStart(currentControl, selectedEntity.name);
         break;
     }
   }

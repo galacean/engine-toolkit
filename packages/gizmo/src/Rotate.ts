@@ -1,4 +1,4 @@
-import { Camera, Entity, Matrix, MeshRenderer, Quaternion, Ray, Vector3, Vector2 } from "oasis-engine";
+import { Camera, Entity, Matrix, MeshRenderer, Ray, Vector3, Pointer, Transform, MathUtil } from "@galacean/engine";
 import { Axis } from "./Axis";
 import { Utils } from "./Utils";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";
@@ -17,7 +17,6 @@ export class RotateControl extends GizmoComponent {
 
   private _gizmoRotateHelperEntity: Entity;
 
-  private _tempMatrix: Matrix = new Matrix();
   private _axisX: Entity;
   private _axisY: Entity;
   private _axisZ: Entity;
@@ -38,34 +37,32 @@ export class RotateControl extends GizmoComponent {
   private _rotateHelperPlaneEntity: Entity;
   private _rotateHelperPlaneMesh = GizmoMesh.createCircle(this.engine);
 
-  private _freeHelperEntity: Entity;
-  private _freeHelperCircleMesh = GizmoMesh.createCircleTube(this.engine, 2 * Math.PI, 1.69, 0.02);
-
   private _selectedAxis: axisType;
-  private _startScale: Vector3 = new Vector3();
-  private _startQuat: Quaternion = new Quaternion();
-  private _startTranslate: Vector3 = new Vector3();
-  private _currQuat: Quaternion = new Quaternion();
   private _startMatrix: Matrix = new Matrix();
   private _startInvMatrix: Matrix = new Matrix();
 
   private _startPointUnit: Vector3 = new Vector3();
   private _currPointUnit: Vector3 = new Vector3();
 
-  private _tempVec: Vector3 = new Vector3();
-  private _tempQuat: Quaternion = new Quaternion();
-  private _tempQuat2: Quaternion = new Quaternion();
-  private _tempPointerUnit: Vector3 = new Vector3();
-
   private _cameraPos: Vector3 = new Vector3();
 
   private _previousRad: number = 0;
   private _finalRad: number = 0;
 
-  private _startAxisX: Vector3 = new Vector3();
-  private _startAxisY: Vector3 = new Vector3();
-  private _speedXFactor: number = 0.02;
-  private _speedYFactor: number = 0.004;
+  private _verticalAxis: Vector3 = new Vector3(0, 1, 0);
+  private _horizontalAxis: Vector3 = new Vector3();
+  private _speedFactor: number = 0.01;
+
+  private _tempMat: Matrix = new Matrix();
+  private _tempMat2: Matrix = new Matrix();
+  private _tempVec: Vector3 = new Vector3();
+  private _tempVec2: Vector3 = new Vector3();
+  private _tempVec30: Vector3 = new Vector3();
+  private _tempVec31: Vector3 = new Vector3();
+  private _tempVec32: Vector3 = new Vector3();
+  private _tempMat41: Matrix = new Matrix();
+
+  private _isAtBack: boolean = false;
 
   constructor(entity: Entity) {
     super(entity);
@@ -105,12 +102,13 @@ export class RotateControl extends GizmoComponent {
       },
       {
         name: "xyz",
-        axisMesh: [Utils.axisSphereMesh],
-        axisMaterial: Utils.sphereMaterial,
+        axisMesh: [Utils.axisXYZTorusMesh],
+        axisMaterial: Utils.lightMaterial,
         axisHelperMesh: [Utils.axisSphereMesh],
-        axisHelperMaterial: Utils.invisibleMaterialRotate,
+        axisHelperMaterial: Utils.invisibleMaterialCircle,
         axisRotation: [new Vector3(0, 0, 0)],
-        axisTranslation: [new Vector3(0, 0, 0)]
+        axisTranslation: [new Vector3(0, 0, 0)],
+        priority: 99
       }
     ];
   }
@@ -173,15 +171,6 @@ export class RotateControl extends GizmoComponent {
     this._rotateHelperPlaneMesh._enableVAO = false;
     planeHelperRenderer.setMaterial(Utils.rotatePlaneMaterial);
     this._rotateHelperPlaneEntity.isActive = false;
-
-    // free rotate circle
-    this._freeHelperEntity = this._gizmoRotateHelperEntity.createChild("freeRotateHelper");
-    const freeHelperRenderer = this._freeHelperEntity.addComponent(MeshRenderer);
-    freeHelperRenderer.receiveShadows = false;
-    freeHelperRenderer.castShadows = false;
-    freeHelperRenderer.mesh = this._freeHelperCircleMesh;
-    freeHelperRenderer.setMaterial(Utils.yellowMaterial);
-    this._freeHelperEntity.isActive = false;
   }
 
   init(camera: Camera, group: Group): void {
@@ -205,23 +194,29 @@ export class RotateControl extends GizmoComponent {
     this._selectedAxis = null;
   }
 
-  onMoveStart(ray: Ray, axisName: string, pointerPosition: Vector2): void {
+  onMoveStart(ray: Ray, axisName: string): void {
     this._selectedAxis = axisType[axisName];
-    const { _group, _startPointUnit: startP } = this;
-    _group.getWorldMatrix(this._startMatrix);
-    this._startMatrix.decompose(this._startTranslate, this._startQuat, this._startScale);
-    Matrix.invert(this._startMatrix, this._startInvMatrix);
+    const {
+      _group: group,
+      _startPointUnit: startP,
+      _startMatrix: startMat,
+      _tempVec: tempVec,
+      _tempMat: tempMat
+    } = this;
+
+    group.getWorldMatrix(startMat);
+    Matrix.invert(startMat, this._startInvMatrix);
 
     const s = this._getGizmoScale();
-    this._startMatrix.scale(this._tempVec.set(s, s, s));
-    this.gizmoEntity.transform.worldMatrix = this._startMatrix;
+    this._tempMat.copyFrom(startMat).scale(tempVec.set(s, s, s));
+    this.gizmoEntity.transform.worldMatrix = tempMat;
 
     switch (this._selectedAxis) {
       case axisType.x:
       case axisType.y:
       case axisType.z:
-        this.gizmoHelperEntity.transform.worldMatrix = this._startMatrix;
-        this._gizmoRotateHelperEntity.transform.worldMatrix = this._startMatrix;
+        this.gizmoHelperEntity.transform.worldMatrix = tempMat;
+        this._gizmoRotateHelperEntity.transform.worldMatrix = tempMat;
 
         this._calRayIntersection(ray, startP);
         this._setAxisSelected(this._selectedAxis, true);
@@ -238,23 +233,24 @@ export class RotateControl extends GizmoComponent {
         this._rotateHelperPlaneEntity.transform.setRotation(0, 0, 0);
         break;
       case axisType.xyz:
-        startP.x = pointerPosition.x;
-        startP.y = pointerPosition.y;
-
-        this._camera.entity.transform.getWorldUp(this._startAxisY);
-        this._camera.entity.transform.getWorldForward(this._startAxisX);
-        Vector3.cross(this._startAxisX, this._startAxisY, this._startAxisX);
-
-        this._freeHelperEntity.transform.worldMatrix = this._startMatrix;
-        this._freeHelperEntity.transform.rotation.copyFrom(this._camera.entity.transform.rotation);
-        this._freeHelperEntity.isActive = true;
-
+        this.gizmoHelperEntity.transform.worldMatrix = tempMat;
+        this._setAxisSelected(this._selectedAxis, true);
+        this.gizmoEntity.transform.getWorldUp(tempVec);
+        this._isAtBack = tempVec.y < 0;
+        this._isAtBack ? this._verticalAxis.set(0, -1, 0) : this._verticalAxis.set(0, 1, 0);
         break;
     }
   }
 
-  onMove(ray: Ray, pointerPosition: Vector2): void {
-    const { _startPointUnit: startP, _currPointUnit: currP, _tempPointerUnit: tempP, _tempMatrix: mat } = this;
+  onMove(ray: Ray, pointer: Pointer): void {
+    const {
+      _startPointUnit: startP,
+      _currPointUnit: currP,
+      _startMatrix: startMat,
+      _tempMat2: mat,
+      _group: group,
+      _tempVec: tempVec
+    } = this;
 
     switch (this._selectedAxis) {
       case axisType.x:
@@ -265,31 +261,29 @@ export class RotateControl extends GizmoComponent {
         const rad = this._getFinalRad(startP, currP, localAxis);
         GizmoMesh.updateCircle(this._rotateHelperPlaneMesh, startP, localAxis, rad);
 
-        this._currQuat.copyFrom(this._startQuat).rotateAxisAngle(localAxis, rad);
-
-        Matrix.affineTransformation(this._startScale, this._currQuat, this._startTranslate, mat);
-        this._group.setWorldMatrix(mat);
+        Matrix.rotateAxisAngle(startMat, localAxis, rad, mat);
+        group.setWorldMatrix(mat);
 
         const d = (rad / Math.PI) * 180;
         this._endLineHelperEntity.transform.setRotation(d * localAxis.x, d * localAxis.y, d * localAxis.z);
         break;
       case axisType.xyz:
-        currP.x = pointerPosition.x;
-        currP.y = pointerPosition.y;
-        Vector3.subtract(startP, currP, tempP);
+        const { x, y } = pointer.deltaPosition;
+        const { _horizontalAxis: hAxis, _verticalAxis: vAxis } = this;
+        this._camera.entity.transform.getWorldUp(hAxis);
 
-        let x = -tempP.x * this._speedXFactor;
-        let y = -tempP.y * this._speedYFactor;
+        Vector3.cross(hAxis, vAxis, hAxis);
+        this._isAtBack ? hAxis.scale(-y) : hAxis.scale(y);
 
-        const { _tempQuat: tempQuat, _tempQuat2: tempQuat2 } = this;
+        tempVec.copyFrom(vAxis);
+        this._isAtBack ? tempVec.scale(-x) : tempVec.scale(x);
 
-        Quaternion.rotationAxisAngle(this._startAxisX, y, tempQuat);
-        Quaternion.rotationAxisAngle(this._startAxisY, x, tempQuat2);
-        Quaternion.multiply(tempQuat, tempQuat2, tempQuat);
-
-        Quaternion.multiply(this._startQuat, tempQuat, this._currQuat);
-        Matrix.affineTransformation(this._startScale, this._currQuat, this._startTranslate, mat);
-        this._group.setWorldMatrix(mat);
+        Vector3.add(hAxis, tempVec, tempVec);
+        Vector3.transformNormal(tempVec, this._startInvMatrix, tempVec);
+        const angle = pointer.deltaPosition.length() * this._speedFactor;
+        Matrix.rotateAxisAngle(startMat, tempVec, angle, startMat);
+        group.setWorldMatrix(startMat);
+        Matrix.invert(startMat, this._startInvMatrix);
         break;
     }
   }
@@ -297,14 +291,15 @@ export class RotateControl extends GizmoComponent {
   onMoveEnd(): void {
     this._finalRad = 0;
     this._previousRad = 0;
+    // recover axis color
+    this._setAxisSelected(this._selectedAxis, false);
+    // recover arc line
+    const axisMesh = this._rotateControlMap[this._selectedAxis].axisMesh[0];
+
     switch (this._selectedAxis) {
       case axisType.x:
       case axisType.y:
       case axisType.z:
-        // recover axis color
-        this._setAxisSelected(this._selectedAxis, false);
-        // recover arc line
-        const axisMesh = this._rotateControlMap[this._selectedAxis].axisMesh[0];
         GizmoMesh.updateCircleTube(axisMesh, Math.PI);
         // hide helper entity
         this._endLineHelperEntity.isActive = false;
@@ -312,7 +307,7 @@ export class RotateControl extends GizmoComponent {
         this._rotateHelperPlaneEntity.isActive = false;
         break;
       case axisType.xyz:
-        this._freeHelperEntity.isActive = false;
+        GizmoMesh.updateCircleTube(axisMesh, 2 * Math.PI, 1.8);
         break;
     }
   }
@@ -384,34 +379,51 @@ export class RotateControl extends GizmoComponent {
   }
 
   private _updateAxisTransform(): void {
-    this._cameraPos.copyFrom(this._camera.entity.transform.position);
-    this._tempMatrix.getRotation(this._tempQuat);
-
-    const { _tempQuat: tempQuat } = this;
-
-    Quaternion.invert(tempQuat, tempQuat);
-    Vector3.transformByQuat(this._cameraPos, tempQuat, this._cameraPos);
-
-    Quaternion.rotationX(-Math.atan2(this._cameraPos.y, this._cameraPos.z), tempQuat);
-    this._axisX.transform.rotationQuaternion = tempQuat;
-    this._axisXHelper.transform.rotationQuaternion = tempQuat;
-
-    Quaternion.rotationY(Math.atan2(this._cameraPos.x, this._cameraPos.z), tempQuat);
-    this._axisY.transform.rotationQuaternion = tempQuat;
-    this._axisYHelper.transform.rotationQuaternion = tempQuat;
-
-    Quaternion.rotationZ(Math.atan2(this._cameraPos.y, this._cameraPos.x), tempQuat);
-    this._axisZ.transform.rotationQuaternion = tempQuat;
-    this._axisZHelper.transform.rotationQuaternion = tempQuat;
+    const { _tempMat: _tempMat, _tempVec, _tempVec2, _cameraPos } = this;
+    // 相机位置
+    _cameraPos.copyFrom(this._camera.entity.transform.worldPosition);
+    const gizmoTrans = this.gizmoEntity.transform;
+    // 获取参照向量(Gizmo 中点 -> 相机)（世界坐标）
+    Vector3.subtract(_cameraPos, gizmoTrans.worldPosition, _tempVec);
+    // 逆矩阵（世界 -> Gizmo）
+    Matrix.invert(gizmoTrans.worldMatrix, _tempMat);
+    // 将向量(Gizmo 中点 -> 相机)映射到 Gizmo 坐标系中，此处 XYZ 局部向量是相同的
+    Vector3.transformNormal(_tempVec, _tempMat, _tempVec2);
+    const factor = MathUtil.radToDegreeFactor;
+    const { x, y, z } = _tempVec2;
+    // 用 yoz 投影计算 X 轴的局部旋转
+    this._axisX.transform.rotation.x = this._axisXHelper.transform.rotation.x = -Math.atan2(y, z) * factor;
+    // 用 xoz 投影计算 Y 轴的局部旋转
+    this._axisY.transform.rotation.y = this._axisYHelper.transform.rotation.y = Math.atan2(x, z) * factor;
+    // 用 yox 投影计算 Z 轴的局部旋转
+    this._axisZ.transform.rotation.z = this._axisZHelper.transform.rotation.z = Math.atan2(y, x) * factor;
+    // xyz 投影
+    this._localLookAt(this._axisXYZ.transform, _tempVec2);
+    this._axisXYZHelper.transform.rotationQuaternion = this._axisXYZ.transform.rotationQuaternion;
   }
 
   private _resizeControl(isModified: boolean = false): void {
-    this._group.getWorldMatrix(this._tempMatrix);
-
+    this._group.getWorldMatrix(this._tempMat);
     this._isModified = isModified;
     const s = this._getGizmoScale();
-    this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = this._tempMatrix.scale(
+    this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = this._tempMat.scale(
       this._tempVec.set(s, s, s)
     );
+  }
+
+  private _localLookAt(transform: Transform, targetPosition: Vector3) {
+    const zAxis = this._tempVec30;
+    Vector3.subtract(transform.position, targetPosition, zAxis);
+    zAxis.normalize();
+    const xAxis = this._tempVec31.set(zAxis.z, 0, -zAxis.x).normalize();
+    const yAxis = this._tempVec32;
+    Vector3.cross(zAxis, xAxis, yAxis);
+    yAxis.normalize();
+    const rotMat = this._tempMat41;
+    const { elements: e } = rotMat;
+    (e[0] = xAxis.x), (e[1] = xAxis.y), (e[2] = xAxis.z);
+    (e[4] = yAxis.x), (e[5] = yAxis.y), (e[6] = yAxis.z);
+    (e[8] = zAxis.x), (e[9] = zAxis.y), (e[10] = zAxis.z);
+    rotMat.getRotation(transform.rotationQuaternion);
   }
 }

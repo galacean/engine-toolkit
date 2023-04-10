@@ -1,4 +1,4 @@
-import { Script, Camera } from "oasis-engine";
+import { Script, Camera } from "@galacean/engine";
 import Monitor from "./Monitor";
 
 /**
