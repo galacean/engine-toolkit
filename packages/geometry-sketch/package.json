@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-geometry-sketch",
-  "version": "1.0.0-alpha.15",
+  "version": "0.0.0-experimental-waypoint.3",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
