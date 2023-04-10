@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-outline",
-  "version": "1.0.0-alpha.18",
+  "version": "1.0.0-alpha.19",
   "license": "MIT",
   "module": "dist/es/index.js",
   "main": "dist/umd/browser.js",
