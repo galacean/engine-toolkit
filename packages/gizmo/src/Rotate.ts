@@ -1,4 +1,4 @@
-import { Camera, Entity, Matrix, MeshRenderer, Ray, Vector3, Transform, MathUtil } from "@galacean/engine";
+import { Camera, Entity, Matrix, MeshRenderer, Ray, Vector3, Transform, MathUtil, Pointer } from "@galacean/engine";
 import { Axis } from "./Axis";
 import { Utils } from "./Utils";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";
