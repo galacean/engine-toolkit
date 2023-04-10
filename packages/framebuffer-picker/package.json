@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-framebuffer-picker",
-  "version": "0.0.0-experimental-waypoint.3",
+  "version": "0.0.0-experimental-waypoint.4",
   "license": "MIT",
   "module": "dist/es/index.js",
   "main": "dist/umd/browser.js",
