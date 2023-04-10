@@ -1,4 +1,4 @@
-import { BaseMaterial, Engine, MathUtil, Shader } from "oasis-engine";
+import { BaseMaterial, Engine, MathUtil, Shader } from "@galacean/engine";
 
 /**
  * Grid Material.

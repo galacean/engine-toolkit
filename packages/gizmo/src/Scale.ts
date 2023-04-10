@@ -1,4 +1,4 @@
-import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
+import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "@galacean/engine";
 
 import { Axis } from "./Axis";
 import { Utils } from "./Utils";

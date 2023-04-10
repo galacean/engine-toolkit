@@ -1,4 +1,4 @@
-import { Engine, Logger, Material, MeshRenderElement, Shader, Vector3 } from "oasis-engine";
+import { Engine, Logger, Material, MeshRenderElement, Shader, Vector3 } from "@galacean/engine";
 import fs from "./color.fs.glsl";
 import vs from "./color.vs.glsl";
 

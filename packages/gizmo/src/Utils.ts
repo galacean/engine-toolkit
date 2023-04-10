@@ -1,4 +1,4 @@
-import { Mesh, Engine, PrimitiveMesh, ModelMesh, UnlitMaterial, CullMode } from "oasis-engine";
+import { Mesh, Engine, PrimitiveMesh, ModelMesh, UnlitMaterial, CullMode } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { GizmoMesh } from "./GizmoMesh";
 

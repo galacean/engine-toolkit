@@ -15,7 +15,7 @@ import {
   TextRenderer,
   Vector2,
   Vector3
-} from "oasis-engine";
+} from "@galacean/engine";
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";

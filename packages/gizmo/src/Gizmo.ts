@@ -14,7 +14,7 @@ import {
   MeshRenderElement,
   Pointer,
   PointerPhase
-} from "oasis-engine";
+} from "@galacean/engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
