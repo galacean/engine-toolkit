@@ -1,5 +1,5 @@
 {
-  "name": "oasis-engine-toolkit",
+  "name": "@galacean/engine-toolkit",
   "version": "1.0.0-alpha.15",
   "license": "MIT",
   "scripts": {
@@ -12,9 +12,9 @@
   "homepage": "https://oasisengine.cn/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+    "url": "https://github.com/galacean/engine-toolkit"
   },
-  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
+  "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "types": "types/index.d.ts",
   "module": "dist/es/index.js",
   "main": "dist/umd/browser.js",
@@ -23,16 +23,16 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine-toolkit/auxiliary-lines": "workspace:*",
-    "@oasis-engine-toolkit/controls": "workspace:*",
-    "@oasis-engine-toolkit/framebuffer-picker": "workspace:*",
-    "@oasis-engine-toolkit/gizmo": "workspace:*",
-    "@oasis-engine-toolkit/lines": "workspace:*",
-    "@oasis-engine-toolkit/outline": "workspace:*",
-    "@oasis-engine-toolkit/skeleton-viewer": "workspace:*",
-    "@oasis-engine-toolkit/custom-material": "workspace:*",
-    "@oasis-engine-toolkit/navigation-gizmo": "workspace:*",
-    "@oasis-engine-toolkit/geometry-sketch": "workspace:*",
-    "@oasis-engine-toolkit/stats": "workspace:*"
+    "@galacean/engine-toolkit-auxiliary-lines": "workspace:*",
+    "@galacean/engine-toolkit-controls": "workspace:*",
+    "@galacean/engine-toolkit-framebuffer-picker": "workspace:*",
+    "@galacean/engine-toolkit-gizmo": "workspace:*",
+    "@galacean/engine-toolkit-lines": "workspace:*",
+    "@galacean/engine-toolkit-outline": "workspace:*",
+    "@galacean/engine-toolkit-skeleton-viewer": "workspace:*",
+    "@galacean/engine-toolkit-custom-material": "workspace:*",
+    "@galacean/engine-toolkit-navigation-gizmo": "workspace:*",
+    "@galacean/engine-toolkit-geometry-sketch": "workspace:*",
+    "@galacean/engine-toolkit-stats": "workspace:*"
   }
 }

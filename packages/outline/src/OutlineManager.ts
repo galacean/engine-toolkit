@@ -16,10 +16,10 @@ import {
   Texture2D,
   TextureWrapMode,
   Vector2
-} from "oasis-engine";
+} from "@galacean/engine";
 import fs from "./outline.fs.glsl";
 import vs from "./outline.vs.glsl";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 
 /**
  * Show outline of entities.

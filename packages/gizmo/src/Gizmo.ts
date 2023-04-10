@@ -15,7 +15,7 @@ import {
   Pointer,
   PointerPhase,
   Vector2
-} from "oasis-engine";
+} from "@galacean/engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
@@ -23,7 +23,7 @@ import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
 import { State } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
-import { FramebufferPicker } from "@oasis-engine-toolkit/framebuffer-picker";
+import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
