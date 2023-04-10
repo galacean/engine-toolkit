@@ -1,5 +1,4 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh } from "oasis-engine";
-import { UnlitMaterial } from "oasis-engine/types";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, UnlitMaterial } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
 

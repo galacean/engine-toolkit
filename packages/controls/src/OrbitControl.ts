@@ -1,4 +1,4 @@
-import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "oasis-engine";
+import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "@galacean/engine";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
 import { IControlInput } from "./inputDevice/IControlInput";
 import { ControlKeyboard } from "./inputDevice/ControlKeyboard";

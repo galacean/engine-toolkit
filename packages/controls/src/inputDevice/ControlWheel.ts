@@ -1,4 +1,4 @@
-import { InputManager, Vector3 } from "oasis-engine";
+import { InputManager, Vector3 } from "@galacean/engine";
 import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { OrbitControl } from "../OrbitControl";
 import { IControlInput } from "./IControlInput";

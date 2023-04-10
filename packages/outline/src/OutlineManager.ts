@@ -17,7 +17,7 @@ import {
   TextureWrapMode,
   UnlitMaterial,
   Vector2
-} from "oasis-engine";
+} from "@galacean/engine";
 import fs from "./outline.fs.glsl";
 import vs from "./outline.vs.glsl";
 

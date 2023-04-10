@@ -19,7 +19,7 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "0.9.0-beta.79",
+    "@galacean/engine": "^0.9.0-alpha",
     "@galacean/engine-toolkit-controls": "workspace:*"
   }
 }

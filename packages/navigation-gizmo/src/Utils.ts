@@ -1,4 +1,4 @@
-import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3, UnlitMaterial } from "oasis-engine";
+import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3, UnlitMaterial } from "@galacean/engine";
 import { createCircleMesh } from "./CircleMesh";
 
 /** @internal */

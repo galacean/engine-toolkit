@@ -1,4 +1,4 @@
-import { WebGLEngine } from "oasis-engine";
+import { WebGLEngine } from "@galacean/engine";
 import { OrbitControl } from "@galacean/engine-toolkit-controls";
 import { expect } from "chai";
 

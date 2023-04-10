@@ -23,7 +23,7 @@ import {
   Transform,
   UnlitMaterial,
   Vector3
-} from "oasis-engine";
+} from "@galacean/engine";
 
 import { WireframePrimitive } from "./WireframePrimitive";
 

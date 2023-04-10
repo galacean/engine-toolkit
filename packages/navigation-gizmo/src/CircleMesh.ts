@@ -4,7 +4,7 @@ import {
   Engine,
   ModelMesh,
   MeshTopology,
-} from "oasis-engine";
+} from "@galacean/engine";
 
 /**
  * create a circle mesh

@@ -1,4 +1,4 @@
-import { Camera, Engine, Layer, RenderPass, RenderTarget, Texture2D } from "oasis-engine";
+import { Camera, Engine, Layer, RenderPass, RenderTarget, Texture2D } from "@galacean/engine";
 import { ColorMaterial } from "./ColorMaterial";
 
 /**
