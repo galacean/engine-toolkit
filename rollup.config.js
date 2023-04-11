@@ -9,6 +9,7 @@ import { terser } from "rollup-plugin-terser";
 import serve from "rollup-plugin-serve";
 import replace from "@rollup/plugin-replace";
 import { binary2base64 } from "rollup-plugin-binary2base64";
+const modify = require('rollup-plugin-modify');
 
 const camelCase = require("camelcase");
 
@@ -100,7 +101,6 @@ function config({ location, pkgJson }) {
       };
     },
     mini: () => {
-      const plugins = [...commonPlugins];
       return {
         input,
         output: [
@@ -110,8 +110,11 @@ function config({ location, pkgJson }) {
             sourcemap: false
           }
         ],
-        external: Object.keys(pkgJson.dependencies || {}).map((name) => `${name}/dist/miniprogram`),
-        plugins
+        external: external.map((name) => `${name}/dist/miniprogram`),
+        plugins: [...commonPlugins, modify({
+          find: /@galacean\/([\w-]*)/g,
+          replace: (match, moduleName) => `@galacean/${moduleName}/dist/miniprogram`
+        })]
       };
     },
     module: () => {
