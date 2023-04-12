@@ -6,18 +6,18 @@ Shader.create(
   `
 #include <common>
    uniform float u_lineScale;
-   uniform mat4 u_VPMat;
+   uniform mat4 galacean_VPMat;
    uniform mat4 u_worldMatrix;
    uniform mat4 u_worldNormal;
 
 #ifdef O3_HAS_SKIN
 #ifdef O3_USE_JOINT_TEXTURE
-    uniform sampler2D u_jointSampler;
-    uniform float u_jointCount;
+    uniform sampler2D galacean_JointSampler;
+    uniform float galacean_JointCount;
 
     mat4 getJointMatrix(sampler2D smp, float index) {
-        float base = index / u_jointCount;
-        float hf = 0.5 / u_jointCount;
+        float base = index / galacean_JointCount;
+        float hf = 0.5 / galacean_JointCount;
         float v = base + hf;
 
         vec4 m0 = texture2D(smp, vec2(0.125, v ));
@@ -28,7 +28,7 @@ Shader.create(
         return mat4(m0, m1, m2, m3);
     }
 #else
-    uniform mat4 u_jointMatrix[ O3_JOINTS_NUM ];
+    uniform mat4 galacean_JointMatrix[ O3_JOINTS_NUM ];
 #endif
 #endif
 
@@ -53,7 +53,7 @@ void main() {
     #include <skinning_vert>
     
     gl_Position = u_worldMatrix * position; 
-    gl_Position = u_VPMat * gl_Position; 
+    gl_Position = galacean_VPMat * gl_Position; 
 }
 `,
   `

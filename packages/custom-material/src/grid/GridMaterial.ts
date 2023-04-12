@@ -1,17 +1,17 @@
-import { BaseMaterial, Engine, MathUtil, Shader } from "@galacean/engine";
+import { BaseMaterial, Engine, MathUtil, Shader, ShaderProperty } from "@galacean/engine";
 
 /**
  * Grid Material.
  */
 export class GridMaterial extends BaseMaterial {
-  private static _farClipProperty = Shader.getPropertyByName("u_far");
-  private static _nearClipProperty = Shader.getPropertyByName("u_near");
-  private static _primaryScaleProperty = Shader.getPropertyByName("u_primaryScale");
-  private static _secondaryScaleProperty = Shader.getPropertyByName("u_secondaryScale");
-  private static _gridIntensityProperty = Shader.getPropertyByName("u_gridIntensity");
-  private static _axisIntensityProperty = Shader.getPropertyByName("u_axisIntensity");
-  private static _flipProgressProperty = Shader.getPropertyByName("u_flipProgress");
-  private static _fadeProperty = Shader.getPropertyByName("u_fade");
+  private static _farClipProperty = ShaderProperty.getByName("u_far");
+  private static _nearClipProperty = ShaderProperty.getByName("u_near");
+  private static _primaryScaleProperty = ShaderProperty.getByName("u_primaryScale");
+  private static _secondaryScaleProperty = ShaderProperty.getByName("u_secondaryScale");
+  private static _gridIntensityProperty = ShaderProperty.getByName("u_gridIntensity");
+  private static _axisIntensityProperty = ShaderProperty.getByName("u_axisIntensity");
+  private static _flipProgressProperty = ShaderProperty.getByName("u_flipProgress");
+  private static _fadeProperty = ShaderProperty.getByName("u_fade");
 
   /**
    * Near clip plane - the closest point to the camera when rendering occurs.
@@ -122,7 +122,7 @@ Shader.create(
   `
 #include <common>
 #include <common_vert>
-uniform mat4 u_viewInvMat;
+uniform mat4 galacean_ViewInvMat;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
@@ -134,11 +134,11 @@ vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat, mat4 projInvMat)
 
 void main() {
     float tol = 0.0001;
-    mat4 viewInvMat = u_viewInvMat;
+    mat4 viewInvMat = galacean_ViewInvMat;
     if (abs(viewInvMat[3][1]) < tol) {
         viewInvMat[3][1] = tol;
     }
-    mat4 projInvMat = INVERSE_MAT(u_projMat);
+    mat4 projInvMat = INVERSE_MAT(galacean_ProjMat);
 
     nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0, viewInvMat, projInvMat);// unprojecting on the near plane
     farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat, projInvMat);// unprojecting on the far plane
@@ -179,13 +179,13 @@ vec4 grid(vec3 fragPos3D, float scale, float fade) {
 }
 
 float computeDepth(vec3 pos) {
-    vec4 clip_space_pos = u_projMat * u_viewMat * vec4(pos.xyz, 1.0);
+    vec4 clip_space_pos = galacean_ProjMat * galacean_ViewMat * vec4(pos.xyz, 1.0);
     // map to 0-1
     return (clip_space_pos.z / clip_space_pos.w) * 0.5 + 0.5;
 }
 
 float computeLinearDepth(vec3 pos) {
-    vec4 clip_space_pos = u_projMat * u_viewMat * vec4(pos.xyz, 1.0);
+    vec4 clip_space_pos = galacean_ProjMat * galacean_ViewMat * vec4(pos.xyz, 1.0);
     float clip_space_depth = clip_space_pos.z / clip_space_pos.w;
     float linearDepth = (2.0 * u_near * u_far) / (u_far + u_near - clip_space_depth * (u_far - u_near));
     return linearDepth / u_far;// normalize

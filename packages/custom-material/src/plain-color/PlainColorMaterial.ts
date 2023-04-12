@@ -75,7 +75,7 @@ void main() {
 
     gl_FragColor = baseColor;
 
-     #ifndef OASIS_COLORSPACE_GAMMA
+     #ifndef GALACEAN_COLORSPACE_GAMMA
         gl_FragColor = linearToGamma(gl_FragColor);
     #endif
 }

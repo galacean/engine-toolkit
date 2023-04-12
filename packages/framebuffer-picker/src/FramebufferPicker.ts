@@ -1,17 +1,18 @@
 import {
   Camera,
-  dependentComponents,
   DependentMode,
   Logger,
-  Renderer,
   RenderTarget,
+  Renderer,
   Scene,
   Script,
   Shader,
+  ShaderProperty,
   Texture2D,
   TextureFormat,
   Vector2,
-  Vector3
+  Vector3,
+  dependentComponents
 } from "@galacean/engine";
 import fs from "./color.fs.glsl";
 import vs from "./color.vs.glsl";
@@ -26,7 +27,7 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
   private static _pickPixel = new Uint8Array(4);
-  private static _pickColorProperty = Shader.getPropertyByName("u_pickColor");
+  private static _pickColorProperty = ShaderProperty.getByName("u_pickColor");
 
   private _renderersMap: Renderer[] = [];
   private _camera: Camera;

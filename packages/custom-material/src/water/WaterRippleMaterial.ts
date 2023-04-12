@@ -1,10 +1,10 @@
-import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector3 } from "@galacean/engine";
+import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector3 } from "@galacean/engine";
 
 const vertexSource = `
   attribute vec3 POSITION;
   attribute vec2 TEXCOORD_0;
   attribute vec4 COLOR_0;
-  uniform mat4 u_MVPMat;
+  uniform mat4 galacean_MVPMat;
   
   uniform float u_time;
   uniform vec2 u_foam_speed; 
@@ -14,7 +14,7 @@ const vertexSource = `
   varying vec4 v_color;
       
   void main() {
-    gl_Position = u_MVPMat * vec4(POSITION, 1.0);
+    gl_Position = galacean_MVPMat * vec4(POSITION, 1.0);
     waterTexCoords = TEXCOORD_0 + vec2(u_foam_speed.x * u_time, u_foam_speed.y * u_time);
     normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));
     v_color = COLOR_0; 
@@ -46,14 +46,14 @@ const fragmentSource = `
 Shader.create("water-ripple", vertexSource, fragmentSource);
 
 export class WaterRippleMaterial extends BaseMaterial {
-  private static _foamColor = Shader.getPropertyByName("u_foamColor");
-  private static _foamSpeed = Shader.getPropertyByName("u_foam_speed");
-  private static _foamParam = Shader.getPropertyByName("u_foam_param");
-  private static _distorsionSpeed = Shader.getPropertyByName("u_distorsion_speed");
-  private static _distorsionAmount = Shader.getPropertyByName("u_distorsion_amount");
+  private static _foamColor = ShaderProperty.getByName("u_foamColor");
+  private static _foamSpeed = ShaderProperty.getByName("u_foam_speed");
+  private static _foamParam = ShaderProperty.getByName("u_foam_param");
+  private static _distorsionSpeed = ShaderProperty.getByName("u_distorsion_speed");
+  private static _distorsionAmount = ShaderProperty.getByName("u_distorsion_amount");
 
-  static _foamTextureProp = Shader.getPropertyByName("u_foamTex");
-  static _normalTextureProp = Shader.getPropertyByName("u_normalTex");
+  static _foamTextureProp = ShaderProperty.getByName("u_foamTex");
+  static _normalTextureProp = ShaderProperty.getByName("u_normalTex");
 
   /**
    * Foam Texture Map

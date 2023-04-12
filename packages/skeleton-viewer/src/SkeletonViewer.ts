@@ -240,14 +240,14 @@ Shader.create(
   attribute vec3 POSITION;
   attribute vec3 NORMAL;
 
-  uniform mat4 u_MVPMat;
-  uniform mat4 u_normalMat;
+  uniform mat4 galacean_MVPMat;
+  uniform mat4 galacean_NormalMat;
 
   varying vec3 v_normal;
 
   void main(){
-      gl_Position = u_MVPMat * vec4( POSITION , 1.0 );;
-      v_normal = normalize( mat3(u_normalMat) * NORMAL );
+      gl_Position = galacean_MVPMat * vec4( POSITION , 1.0 );;
+      v_normal = normalize( mat3(galacean_NormalMat) * NORMAL );
   }`,
   `
       uniform vec3 u_colorMin;

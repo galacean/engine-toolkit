@@ -75,7 +75,7 @@ void main(){
   // float sobelFactor = sobel();
   gl_FragColor = mix( vec4(0), vec4(u_outlineColor, 1.0), sobelFactor);
 
-    #ifndef OASIS_COLORSPACE_GAMMA
+    #ifndef GALACEAN_COLORSPACE_GAMMA
         gl_FragColor = linearToGamma(gl_FragColor);
     #endif
 

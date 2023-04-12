@@ -1,11 +1,11 @@
-import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4 } from "@galacean/engine";
+import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector4 } from "@galacean/engine";
 
 const vertexSource = `
     attribute vec3 POSITION;
     attribute vec2 TEXCOORD_0;
     attribute vec4 COLOR_0;
   
-    uniform mat4 u_MVPMat;
+    uniform mat4 galacean_MVPMat;
     
     uniform float u_time;
     uniform vec2 u_water_speed; 
@@ -18,7 +18,7 @@ const vertexSource = `
     varying vec4 v_color;
 
     void main() {
-      gl_Position = u_MVPMat * vec4(POSITION, 1.0);
+      gl_Position = galacean_MVPMat * vec4(POSITION, 1.0);
   
       waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * u_time, u_water_speed.y * u_time);
       waterfallTexCoords = TEXCOORD_0 + vec2(u_waterfall_speed.x * u_time, u_waterfall_speed.y * u_time);
@@ -67,18 +67,18 @@ const fragmentSource = `
 Shader.create("water-fall", vertexSource, fragmentSource);
 
 export class WaterFallMaterial extends BaseMaterial {
-  private static _waterSpeed = Shader.getPropertyByName("u_water_speed");
-  private static _waterfallSpeed = Shader.getPropertyByName("u_waterfall_speed");
-  private static _distorsionSpeed = Shader.getPropertyByName("u_distorsion_speed");
+  private static _waterSpeed = ShaderProperty.getByName("u_water_speed");
+  private static _waterfallSpeed = ShaderProperty.getByName("u_waterfall_speed");
+  private static _distorsionSpeed = ShaderProperty.getByName("u_distorsion_speed");
 
-  private static _edgeColor = Shader.getPropertyByName("u_edgeColor");
-  private static _edgeParam = Shader.getPropertyByName("u_edgeParam");
-  private static _distorsionAmount = Shader.getPropertyByName("u_distorsion_amount");
+  private static _edgeColor = ShaderProperty.getByName("u_edgeColor");
+  private static _edgeParam = ShaderProperty.getByName("u_edgeParam");
+  private static _distorsionAmount = ShaderProperty.getByName("u_distorsion_amount");
 
-  static _normalTextureProp = Shader.getPropertyByName("u_normalTex");
-  static _waterTextureProp = Shader.getPropertyByName("u_waterTex");
-  static _waterfallTextureProp = Shader.getPropertyByName("u_waterfallTex");
-  static _edgeTextureProp = Shader.getPropertyByName("u_edgeNoiseTex");
+  static _normalTextureProp = ShaderProperty.getByName("u_normalTex");
+  static _waterTextureProp = ShaderProperty.getByName("u_waterTex");
+  static _waterfallTextureProp = ShaderProperty.getByName("u_waterfallTex");
+  static _edgeTextureProp = ShaderProperty.getByName("u_edgeNoiseTex");
 
   /**
    *  Normal Texture Map
