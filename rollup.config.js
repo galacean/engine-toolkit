@@ -60,7 +60,6 @@ const commonPlugins = [
 function config({ location, pkgJson }) {
   const input = path.join(location, "src", "index.ts");
   const external = Object.keys(Object.assign(pkgJson.dependencies ?? {}, pkgJson.peerDependencies ?? {}));
-  const name = pkgJson.name;
   commonPlugins.push(
     replace({
       preventAssignment: true,
@@ -70,6 +69,7 @@ function config({ location, pkgJson }) {
 
   return {
     umd: (compress) => {
+      const umdConfig = pkgJson.umd;
       let file = path.join(location, "dist", "browser.js");
       const plugins = [...commonPlugins];
       if (compress) {
@@ -77,23 +77,18 @@ function config({ location, pkgJson }) {
         file = path.join(location, "dist", "browser.min.js");
       }
 
-      const globalName = toGlobalName(pkgJson.name);
-
-      const globals = {};
-      external.forEach((pkgName) => {
-        globals[pkgName] = toGlobalName(pkgName);
-      });
+      const umdExternal = Object.keys(umdConfig.globals ?? {});
 
       return {
         input,
-        external: [...external, "@galacean/engine"],
+        external: umdExternal,
         output: [
           {
             file,
-            name: globalName,
+            name: umdConfig.name,
             format: "umd",
-            sourcemap: false,
-            globals
+            globals: umdConfig.globals,
+            sourcemap: false
           }
         ],
         plugins
@@ -161,7 +156,7 @@ switch (BUILD_TYPE) {
 }
 
 function getUMD() {
-  const configs = pkgs.filter((pkg) => pkg.pkgJson.browser);
+  const configs = pkgs.filter((pkg) => pkg.pkgJson.umd);
   return configs
     .map((config) => makeRollupConfig({ ...config, type: "umd" }))
     .concat(

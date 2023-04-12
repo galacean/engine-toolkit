@@ -10,9 +10,15 @@
     "registry": "https://registry.npmjs.org"
   },
   "types": "types/index.d.ts",
-  "main": "dist/browser.min.js",
+  "main": "dist/main.js",
   "module": "dist/module.js",
-  "browser": "dist/browser.min.js",
+  "browser": "dist/browser.js",
+  "umd": {
+    "name": "Galacean.ToolKit",
+    "globals": {
+      "@galacean/engine": "Galacean"
+    }
+  },
   "files": [
     "dist/**/*",
     "types/**/*"
