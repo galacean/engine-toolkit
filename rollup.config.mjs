@@ -64,8 +64,8 @@ function makeRollupConfig(pkg) {
   const externals = Object.keys(
     Object.assign({}, pkg.pkgJson.dependencies, pkg.pkgJson.peerDependencies, pkg.pkgJson.devDependencies)
   );
-  const globals = {
-    "@galacean/engine": "oasisEngine"
+  let globals = {
+    "@galacean/engine": "Galacean"
   };
   externals.forEach((external) => {
     globals[external] = toGlobalName(external);
@@ -86,19 +86,9 @@ function makeRollupConfig(pkg) {
     })
   );
 
-  return [
-    {
-      input: path.join(pkg.location, "src", "index.ts"),
-      output: {
-        file: path.join(pkg.location, "dist", "umd", "browser.js"),
-        format: "umd",
-        name: toGlobalName(pkg.pkgJson.name),
-        globals: globals
-      },
-      // 总包只 external @galacean/engine
-      external: pkg.pkgJson.name === "@galacean/engine-toolkit" ? ["@galacean/engine"] : externals,
-      plugins: [...plugins, minify({ sourceMap: true })]
-    },
+  const umdConfig = pkg.pkgJson.umd;
+
+  const configs = [
     {
       input: entries,
       output: {
@@ -111,6 +101,22 @@ function makeRollupConfig(pkg) {
       plugins
     }
   ];
+
+  if (umdConfig) {
+    configs.push({
+      input: path.join(pkg.location, "src", "index.ts"),
+      output: {
+        file: path.join(pkg.location, "dist", "umd", "browser.js"),
+        format: "umd",
+        name: umdConfig.name,
+        globals: globals
+      },
+      external: Object.keys(umdConfig.globals ?? {}),
+      plugins: [...plugins, minify({ sourceMap: true })]
+    });
+  }
+
+  return configs;
 }
 
 export default Promise.all(pkgs.map(makeRollupConfig).flat());
