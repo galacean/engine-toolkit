@@ -14,4 +14,4 @@ export * from "@galacean/engine-toolkit-stats";
 //@ts-ignore
 export const version = `__buildVersion`;
 
-console.log(`oasis engine toolkit version: ${version}`);
+console.log(`galacean engine toolkit version: ${version}`);
