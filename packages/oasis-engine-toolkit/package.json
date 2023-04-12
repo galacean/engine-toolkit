@@ -9,15 +9,16 @@
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
-  "homepage": "https://oasisengine.cn/",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/galacean/engine-toolkit"
-  },
-  "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "types": "types/index.d.ts",
-  "module": "dist/es/index.js",
-  "main": "dist/umd/browser.js",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "browser": "dist/browser.js",
+  "umd": {
+    "name": "Galacean.ToolKit",
+    "globals": {
+      "@galacean/engine": "Galacean"
+    }
+  },
   "files": [
     "dist/**/*",
     "types/**/*"

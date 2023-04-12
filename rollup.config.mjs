@@ -1,116 +1,188 @@
+const fs = require("fs");
+const path = require("path");
+
 import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import babel from "@rollup/plugin-babel";
 import glslify from "rollup-plugin-glslify";
-import { binary2base64 } from "rollup-plugin-binary2base64";
-import { swc, defineRollupSwcOption, minify } from "rollup-plugin-swc3";
-import camelCase from "camelcase";
-import fs from "fs";
-import path from "path";
+import { terser } from "rollup-plugin-terser";
+import serve from "rollup-plugin-serve";
 import replace from "@rollup/plugin-replace";
+import { binary2base64 } from "rollup-plugin-binary2base64";
 
-function walk(dir) {
-  let files = fs.readdirSync(dir);
-  files = files.map((file) => {
-    const filePath = path.join(dir, file);
-    const stats = fs.statSync(filePath);
-    if (stats.isDirectory()) return walk(filePath);
-    else if (stats.isFile()) return filePath;
-  });
-  return files.reduce((all, folderContents) => all.concat(folderContents), []);
-}
+const camelCase = require("camelcase");
 
-const pkgsRoot = path.join(process.cwd(), "packages");
+const { BUILD_TYPE, NODE_ENV } = process.env;
+
+const pkgsRoot = path.join(__dirname, "packages");
 const pkgs = fs
   .readdirSync(pkgsRoot)
+  .filter((dir) => dir !== "design")
   .map((dir) => path.join(pkgsRoot, dir))
   .filter((dir) => fs.statSync(dir).isDirectory())
   .map((location) => {
     return {
       location: location,
-      pkgJson: JSON.parse(fs.readFileSync(path.resolve(location, "package.json"), { encoding: "utf-8" }))
+      pkgJson: require(path.resolve(location, "package.json"))
     };
   });
 
-// "@galacean/engine-toolkit" 、 "@galacean/engine-toolkit-controls" ...
+// "oasisEngine" 、 "@oasisEngine/controls" ...
 function toGlobalName(pkgName) {
   return camelCase(pkgName);
 }
 
 const extensions = [".js", ".jsx", ".ts", ".tsx"];
-const mainFields = ["module", "main"];
+const mainFields = NODE_ENV === "development" ? ["debug", "module", "main"] : undefined;
 
-const plugins = [
+const commonPlugins = [
   resolve({ extensions, preferBuiltins: true, mainFields }),
   glslify({
     include: [/\.glsl$/]
   }),
-  swc(
-    defineRollupSwcOption({
-      include: /\.[mc]?[jt]sx?$/,
-      exclude: /node_modules/,
-      jsc: {
-        loose: true,
-        externalHelpers: true,
-        target: "es5"
-      },
-      sourceMaps: true
-    })
-  ),
+  babel({
+    extensions,
+    babelHelpers: "bundled",
+    exclude: ["node_modules/**", "packages/**/node_modules/**"]
+  }),
+  commonjs(),
   binary2base64({
     include: ["**/*.wasm"]
-  })
+  }),
+  NODE_ENV === "development"
+    ? serve({
+        contentBase: "packages",
+        port: 9998
+      })
+    : null
 ];
 
-function makeRollupConfig(pkg) {
-  const externals = Object.keys(
-    Object.assign({}, pkg.pkgJson.dependencies, pkg.pkgJson.peerDependencies, pkg.pkgJson.devDependencies)
-  );
-  const globals = {
-    "@galacean/engine": "oasisEngine"
-  };
-  externals.forEach((external) => {
-    globals[external] = toGlobalName(external);
-  });
-
-  const entries = Object.fromEntries(
-    walk(path.join(pkg.location, "src"))
-      .filter((file) => /^(?!.*\.d\.ts$).*\.ts$/.test(file))
-      .map((item) => {
-        return [path.relative(path.join(pkg.location, "src"), item.replace(/\.[^/.]+$/, "")), item];
-      })
-  );
-
-  plugins.push(
+function config({ location, pkgJson }) {
+  const input = path.join(location, "src", "index.ts");
+  const external = Object.keys(Object.assign(pkgJson.dependencies ?? {}, pkgJson.peerDependencies ?? {}));
+  commonPlugins.push(
     replace({
       preventAssignment: true,
-      __buildVersion: pkg.pkgJson.version
+      __buildVersion: pkgJson.version
     })
   );
 
-  return [
-    {
-      input: path.join(pkg.location, "src", "index.ts"),
-      output: {
-        file: path.join(pkg.location, "dist", "umd", "browser.js"),
-        format: "umd",
-        name: toGlobalName(pkg.pkgJson.name),
-        globals: globals
-      },
-      // 总包只 external @galacean/engine
-      external: pkg.pkgJson.name === "@galacean/engine-toolkit" ? ["@galacean/engine"] : externals,
-      plugins: [...plugins, minify({ sourceMap: true })]
+  return {
+    umd: (compress) => {
+      const umdConfig = pkgJson.umd;
+      let file = path.join(location, "dist", "browser.js");
+      const plugins = [...commonPlugins];
+      if (compress) {
+        plugins.push(terser());
+        file = path.join(location, "dist", "browser.min.js");
+      }
+
+      const umdExternal = Object.keys(umdConfig.globals ?? {});
+
+      return {
+        input,
+        external: umdExternal,
+        output: [
+          {
+            file,
+            name: umdConfig.name,
+            format: "umd",
+            globals: umdConfig.globals,
+            sourcemap: false
+          }
+        ],
+        plugins
+      };
     },
-    {
-      input: entries,
-      output: {
-        dir: path.join(pkg.location, "dist", "es"),
-        format: "es",
-        sourcemap: true,
-        globals: globals
-      },
-      external: externals,
-      plugins
+    mini: () => {
+      const plugins = [...commonPlugins];
+      return {
+        input,
+        output: [
+          {
+            format: "cjs",
+            file: path.join(location, "dist/miniprogram.js"),
+            sourcemap: false
+          }
+        ],
+        external: Object.keys(pkgJson.dependencies || {}).map((name) => `${name}/dist/miniprogram`),
+        plugins
+      };
+    },
+    module: () => {
+      const plugins = [...commonPlugins];
+      return {
+        input,
+        external: [...external, "@galacean/engine"],
+        output: [
+          {
+            file: path.join(location, pkgJson.module),
+            format: "es",
+            sourcemap: true
+          },
+          {
+            file: path.join(location, pkgJson.main),
+            sourcemap: true,
+            format: "commonjs"
+          }
+        ],
+        plugins
+      };
     }
-  ];
+  };
 }
 
-export default Promise.all(pkgs.map(makeRollupConfig).flat());
+async function makeRollupConfig({ type, compress = true, visualizer = true, ..._ }) {
+  return config({ ..._ })[type](compress, visualizer);
+}
+
+let promises = [];
+
+switch (BUILD_TYPE) {
+  case "UMD":
+    promises.push(...getUMD());
+    break;
+  case "MODULE":
+    promises.push(...getModule());
+    break;
+  case "MINI":
+    promises.push(...getMini());
+    break;
+  case "ALL":
+    promises.push(...getAll());
+    break;
+  default:
+    break;
+}
+
+function getUMD() {
+  const configs = pkgs.filter((pkg) => pkg.pkgJson.umd);
+  return configs
+    .map((config) => makeRollupConfig({ ...config, type: "umd" }))
+    .concat(
+      configs.map((config) =>
+        makeRollupConfig({
+          ...config,
+          type: "umd",
+          compress: false,
+          visualizer: false
+        })
+      )
+    );
+}
+
+function getModule() {
+  const configs = [...pkgs];
+  return configs.map((config) => makeRollupConfig({ ...config, type: "module" }));
+}
+
+function getMini() {
+  const configs = [...pkgs];
+  return configs.map((config) => makeRollupConfig({ ...config, type: "mini" }));
+}
+
+function getAll() {
+  return [...getModule(), ...getMini(), ...getUMD()];
+}
+
+export default Promise.all(promises);
