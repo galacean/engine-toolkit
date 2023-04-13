@@ -19,7 +19,7 @@
   "module": "dist/es/index.js",
   "main": "dist/umd/browser.js",
   "umd": {
-    "name": "Galacean.ToolKit",
+    "name": "Galacean.Toolkit",
     "globals": {
       "@galacean/engine": "Galacean"
     }
