@@ -102,19 +102,19 @@ const planarShadow = new ShaderPass(
     uniform vec4 u_planarShadowColor;
     uniform float u_planarShadowFalloff;
 
-    uniform mat4 galacean_ModelMat;
-    uniform mat4 galacean_VPMat;
+    uniform mat4 renderer_ModelMat;
+    uniform mat4 camera_VPMat;
 
-    #ifdef O3_HAS_SKIN
+    #ifdef RENDERER_HAS_SKIN
       attribute vec4 JOINTS_0;
       attribute vec4 WEIGHTS_0;
 
-      #ifdef O3_USE_JOINT_TEXTURE
-        uniform sampler2D galacean_JointSampler;
-        uniform float galacean_JointCount;
+      #ifdef RENDERER_USE_JOINT_TEXTURE
+        uniform sampler2D renderer_JointSampler;
+        uniform float renderer_JointCount;
         mat4 getJointMatrix(sampler2D smp, float index) {
-            float base = index / galacean_JointCount;
-            float hf = 0.5 / galacean_JointCount;
+            float base = index / renderer_JointCount;
+            float hf = 0.5 / renderer_JointCount;
             float v = base + hf;
 
             vec4 m0 = texture2D(smp, vec2(0.125, v ));
@@ -125,7 +125,7 @@ const planarShadow = new ShaderPass(
             return mat4(m0, m1, m2, m3);
         }
       #else
-          uniform mat4 galacean_JointMatrix[ O3_JOINTS_NUM ];
+          uniform mat4 renderer_JointMatrix[ RENDERER_JOINTS_NUM ];
       #endif
     #endif
 
@@ -133,7 +133,7 @@ const planarShadow = new ShaderPass(
       vec3 shadowPos;
 
       // get the world space coordinates of the vertex
-      vec3 worldPos = (galacean_ModelMat * vertPos).xyz;
+      vec3 worldPos = (renderer_ModelMat * vertPos).xyz;
       
       // world space coordinates of the shadow (the part below the ground is unchanged)
       shadowPos.y = min(worldPos.y , u_planarHeight);
@@ -144,19 +144,19 @@ const planarShadow = new ShaderPass(
 
     void main() {
      vec4 position = vec4(POSITION.xyz, 1.0 );
-      #ifdef O3_HAS_SKIN
-          #ifdef O3_USE_JOINT_TEXTURE
+      #ifdef RENDERER_HAS_SKIN
+          #ifdef RENDERER_USE_JOINT_TEXTURE
               mat4 skinMatrix =
-                  WEIGHTS_0.x * getJointMatrix(galacean_JointSampler, JOINTS_0.x ) +
-                  WEIGHTS_0.y * getJointMatrix(galacean_JointSampler, JOINTS_0.y ) +
-                  WEIGHTS_0.z * getJointMatrix(galacean_JointSampler, JOINTS_0.z ) +
-                  WEIGHTS_0.w * getJointMatrix(galacean_JointSampler, JOINTS_0.w );
+                  WEIGHTS_0.x * getJointMatrix(renderer_JointSampler, JOINTS_0.x ) +
+                  WEIGHTS_0.y * getJointMatrix(renderer_JointSampler, JOINTS_0.y ) +
+                  WEIGHTS_0.z * getJointMatrix(renderer_JointSampler, JOINTS_0.z ) +
+                  WEIGHTS_0.w * getJointMatrix(renderer_JointSampler, JOINTS_0.w );
           #else
               mat4 skinMatrix =
-                  WEIGHTS_0.x * galacean_JointMatrix[ int( JOINTS_0.x ) ] +
-                  WEIGHTS_0.y * galacean_JointMatrix[ int( JOINTS_0.y ) ] +
-                  WEIGHTS_0.z * galacean_JointMatrix[ int( JOINTS_0.z ) ] +
-                  WEIGHTS_0.w * galacean_JointMatrix[ int( JOINTS_0.w ) ];
+                  WEIGHTS_0.x * renderer_JointMatrix[ int( JOINTS_0.x ) ] +
+                  WEIGHTS_0.y * renderer_JointMatrix[ int( JOINTS_0.y ) ] +
+                  WEIGHTS_0.z * renderer_JointMatrix[ int( JOINTS_0.z ) ] +
+                  WEIGHTS_0.w * renderer_JointMatrix[ int( JOINTS_0.w ) ];
           #endif
           position = skinMatrix * position;
       #endif
@@ -165,10 +165,10 @@ const planarShadow = new ShaderPass(
       vec3 shadowPos = ShadowProjectPos(position);
 
       // convert to clip space
-      gl_Position = galacean_VPMat * vec4(shadowPos, 1.0);
+      gl_Position = camera_VPMat * vec4(shadowPos, 1.0);
 
       // get the world coordinates of the center point
-      vec3 center = vec3(galacean_ModelMat[3].x, u_planarHeight, galacean_ModelMat[3].z);
+      vec3 center = vec3(renderer_ModelMat[3].x, u_planarHeight, renderer_ModelMat[3].z);
       // calculate shadow falloff
       float falloff = 0.5 - clamp(distance(shadowPos , center) * u_planarShadowFalloff, 0.0, 1.0);
 

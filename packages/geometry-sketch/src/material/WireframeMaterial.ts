@@ -6,18 +6,18 @@ Shader.create(
   `
 #include <common>
    uniform float u_lineScale;
-   uniform mat4 galacean_VPMat;
+   uniform mat4 camera_VPMat;
    uniform mat4 u_worldMatrix;
    uniform mat4 u_worldNormal;
 
-#ifdef O3_HAS_SKIN
-#ifdef O3_USE_JOINT_TEXTURE
-    uniform sampler2D galacean_JointSampler;
-    uniform float galacean_JointCount;
+#ifdef RENDERER_HAS_SKIN
+#ifdef RENDERER_USE_JOINT_TEXTURE
+    uniform sampler2D renderer_JointSampler;
+    uniform float renderer_JointCount;
 
     mat4 getJointMatrix(sampler2D smp, float index) {
-        float base = index / galacean_JointCount;
-        float hf = 0.5 / galacean_JointCount;
+        float base = index / renderer_JointCount;
+        float hf = 0.5 / renderer_JointCount;
         float v = base + hf;
 
         vec4 m0 = texture2D(smp, vec2(0.125, v ));
@@ -28,7 +28,7 @@ Shader.create(
         return mat4(m0, m1, m2, m3);
     }
 #else
-    uniform mat4 galacean_JointMatrix[ O3_JOINTS_NUM ];
+    uniform mat4 renderer_JointMatrix[ RENDERER_JOINTS_NUM ];
 #endif
 #endif
 
@@ -53,7 +53,7 @@ void main() {
     #include <skinning_vert>
     
     gl_Position = u_worldMatrix * position; 
-    gl_Position = galacean_VPMat * gl_Position; 
+    gl_Position = camera_VPMat * gl_Position; 
 }
 `,
   `
@@ -65,13 +65,13 @@ float edgeFactor(){
     return min(min(a3.x, a3.y), a3.z);
 }
 
-uniform vec4 u_baseColor;
+uniform vec4 material_BaseColor;
 void main() {
     if (gl_FrontFacing) {
-        gl_FragColor = vec4(u_baseColor.xyz, 1.0 - edgeFactor());
+        gl_FragColor = vec4(material_BaseColor.xyz, 1.0 - edgeFactor());
     } else {
         // fade back face
-        gl_FragColor = vec4(u_baseColor.xyz, (1.0 - edgeFactor()) * 0.3);
+        gl_FragColor = vec4(material_BaseColor.xyz, (1.0 - edgeFactor()) * 0.3);
     }
 }
 `

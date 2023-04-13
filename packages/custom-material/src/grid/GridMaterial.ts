@@ -122,7 +122,7 @@ Shader.create(
   `
 #include <common>
 #include <common_vert>
-uniform mat4 galacean_ViewInvMat;
+uniform mat4 camera_ViewInvMat;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
@@ -134,11 +134,11 @@ vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat, mat4 projInvMat)
 
 void main() {
     float tol = 0.0001;
-    mat4 viewInvMat = galacean_ViewInvMat;
+    mat4 viewInvMat = camera_ViewInvMat;
     if (abs(viewInvMat[3][1]) < tol) {
         viewInvMat[3][1] = tol;
     }
-    mat4 projInvMat = INVERSE_MAT(galacean_ProjMat);
+    mat4 projInvMat = INVERSE_MAT(camera_ProjMat);
 
     nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0, viewInvMat, projInvMat);// unprojecting on the near plane
     farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat, projInvMat);// unprojecting on the far plane
@@ -179,13 +179,13 @@ vec4 grid(vec3 fragPos3D, float scale, float fade) {
 }
 
 float computeDepth(vec3 pos) {
-    vec4 clip_space_pos = galacean_ProjMat * galacean_ViewMat * vec4(pos.xyz, 1.0);
+    vec4 clip_space_pos = camera_ProjMat * camera_ViewMat * vec4(pos.xyz, 1.0);
     // map to 0-1
     return (clip_space_pos.z / clip_space_pos.w) * 0.5 + 0.5;
 }
 
 float computeLinearDepth(vec3 pos) {
-    vec4 clip_space_pos = galacean_ProjMat * galacean_ViewMat * vec4(pos.xyz, 1.0);
+    vec4 clip_space_pos = camera_ProjMat * camera_ViewMat * vec4(pos.xyz, 1.0);
     float clip_space_depth = clip_space_pos.z / clip_space_pos.w;
     float linearDepth = (2.0 * u_near * u_far) / (u_far + u_near - clip_space_depth * (u_far - u_near));
     return linearDepth / u_far;// normalize

@@ -7,7 +7,7 @@ attribute vec2 a_normal;
 attribute vec2 a_data;
 attribute float a_lengthsofar;
 
-uniform mat4 galacean_MVPMat;
+uniform mat4 renderer_MVPMat;
 uniform float u_width;
 uniform vec2 u_dash;
 
@@ -35,7 +35,7 @@ void main() {
     }
     vec2 position = a_pos + a_normal * u_width;
     v_position = position;
-    gl_Position = galacean_MVPMat * vec4(position, 0.0, 1);
+    gl_Position = renderer_MVPMat * vec4(position, 0.0, 1);
 }
   `;
 

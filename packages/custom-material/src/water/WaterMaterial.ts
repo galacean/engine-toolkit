@@ -5,7 +5,7 @@ const vertexSource = `
     attribute vec2 TEXCOORD_0;
     attribute vec4 COLOR_0;
 
-    uniform mat4 galacean_MVPMat;
+    uniform mat4 renderer_MVPMat;
     
     uniform float u_time;
     uniform vec2 u_water_speed; 
@@ -16,7 +16,7 @@ const vertexSource = `
     varying vec2 normalTexCoords;
   
     void main() {
-      gl_Position = galacean_MVPMat * vec4(POSITION, 1.0);
+      gl_Position = renderer_MVPMat * vec4(POSITION, 1.0);
   
       waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * sin(u_time), u_water_speed.y * cos(u_time));
       normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));     

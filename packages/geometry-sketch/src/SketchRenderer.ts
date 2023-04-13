@@ -22,8 +22,8 @@ import { BiTangentMaterial, NormalMaterial, TangentMaterial, WireframeMaterial }
  * Sketch Renderer
  */
 export class SketchRenderer extends SkinnedMeshRenderer {
-  private static _weightMacro = ShaderMacro.getByName("O3_HAS_WEIGHT");
-  private static _jointMacro = ShaderMacro.getByName("O3_HAS_JOINT");
+  private static _weightMacro = ShaderMacro.getByName("RENDERER_HAS_WEIGHT");
+  private static _jointMacro = ShaderMacro.getByName("RENDERER_HAS_JOINT");
 
   private static _MAX_TEXTURE_ROWS = 512;
   private static _jointIndexBegin = -1;
