@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-outline",
-  "version": "0.0.0-experimental-waypoint.5",
+  "version": "0.0.0-experimental-waypoint.6",
   "license": "MIT",
   "module": "dist/es/index.js",
   "main": "dist/umd/browser.js",

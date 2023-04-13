@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-navigation-gizmo",
-  "version": "0.0.0-experimental-waypoint.5",
+  "version": "0.0.0-experimental-waypoint.6",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"

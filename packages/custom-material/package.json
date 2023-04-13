@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-custom-material",
-  "version": "0.0.0-experimental-waypoint.5",
+  "version": "0.0.0-experimental-waypoint.6",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
