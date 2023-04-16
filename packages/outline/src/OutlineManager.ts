@@ -38,9 +38,10 @@ export class OutlineManager extends Script {
       this._traverseEntity(entity.children[i], callback);
     }
   }
-  private static _outlineColorProp = ShaderProperty.getByName("u_outlineColor");
-  private static _texSizeProp = ShaderProperty.getByName("u_texSize");
-  private static _replaceColorProp = ShaderProperty.getByName("u_replaceColor");
+  private static _outlineColorProp = ShaderProperty.getByName("material_OutlineColor");
+  private static _outlineTextureProp = ShaderProperty.getByName("material_OutlineTexture");
+  private static _texSizeProp = ShaderProperty.getByName("material_TexSize");
+  private static _replaceColorProp = ShaderProperty.getByName("scene_OutlineReplaceColor");
 
   private _outlineMaterial: BaseMaterial;
   private _replaceShader: Shader;
@@ -101,7 +102,7 @@ export class OutlineManager extends Script {
     const renderColorTexture = new Texture2D(this.engine, offWidth, offHeight);
     const renderTarget = new RenderTarget(this.engine, offWidth, offHeight, renderColorTexture);
 
-    this._outlineMaterial.shaderData.setTexture("u_texture", renderColorTexture);
+    this._outlineMaterial.shaderData.setTexture(OutlineManager._outlineTextureProp, renderColorTexture);
     this._outlineMaterial.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / offWidth, 1 / offHeight));
     renderColorTexture.wrapModeU = renderColorTexture.wrapModeV = TextureWrapMode.Clamp;
     this._renderTarget = renderTarget;
