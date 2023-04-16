@@ -24,8 +24,5 @@
   ],
   "peerDependencies": {
     "@galacean/engine": "^1.0.0-alpha"
-  },
-  "dependencies": {
-    "@galacean/engine-toolkit-custom-material": "workspace:*"
   }
 }

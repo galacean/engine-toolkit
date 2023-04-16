@@ -4,23 +4,24 @@ import {
   Camera,
   CameraClearFlags,
   Color,
-  dependentComponents,
+  DependentMode,
   Entity,
   Layer,
-  Material,
   MeshRenderer,
   PrimitiveMesh,
   RenderTarget,
   Script,
   Shader,
+  ShaderProperty,
   Texture2D,
   TextureWrapMode,
   Vector2,
-  DependentMode
+  dependentComponents
 } from "@galacean/engine";
-import fs from "./outline.fs.glsl";
-import vs from "./outline.vs.glsl";
-import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
+import outlineFs from "./outline.fs.glsl";
+import outlineVs from "./outline.vs.glsl";
+import replaceFs from "./replace.fs.glsl";
+import replaceVs from "./replace.vs.glsl";
 
 /**
  * Show outline of entities.
@@ -29,18 +30,20 @@ import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 @dependentComponents(Camera, DependentMode.CheckOnly)
 export class OutlineManager extends Script {
   /** whether outline children of selected entities with subColor, default false */
-  public isChildrenIncluded: boolean = false;
+  isChildrenIncluded: boolean = false;
+
   private static _traverseEntity(entity: Entity, callback: (entity: Entity) => void) {
     callback(entity);
     for (let i = entity.children.length - 1; i >= 0; i--) {
       this._traverseEntity(entity.children[i], callback);
     }
   }
-  private static _outlineColorProp = Shader.getPropertyByName("u_outlineColor");
-  private static _texSizeProp = Shader.getPropertyByName("u_texSize");
+  private static _outlineColorProp = ShaderProperty.getByName("u_outlineColor");
+  private static _texSizeProp = ShaderProperty.getByName("u_texSize");
+  private static _replaceColorProp = ShaderProperty.getByName("u_replaceColor");
 
   private _outlineMaterial: BaseMaterial;
-  private _replaceMaterial: BaseMaterial;
+  private _replaceShader: Shader;
   private _renderTarget: RenderTarget;
   private _screenEntity: Entity;
   private _size: number = 1;
@@ -53,7 +56,6 @@ export class OutlineManager extends Script {
   private _subLineEntities: Entity[] = [];
 
   private _renderers: MeshRenderer[] = [];
-  private _materialMap: Array<{ renderer: MeshRenderer; material: Material }> = [];
   private _layerMap: Array<{ entity: Entity; layer: Layer }> = [];
 
   /** Outline main color. */
@@ -109,13 +111,12 @@ export class OutlineManager extends Script {
     super(entity);
     const engine = this.engine;
     const outlineMaterial = new BaseMaterial(engine, Shader.find("outline-postprocess-shader"));
-    const replaceMaterial = new PlainColorMaterial(engine);
+    const replaceShader = Shader.find("outline-replace-shader");
     const screenEntity = this.entity.createChild("screen");
     const screenRenderer = screenEntity.addComponent(MeshRenderer);
     screenRenderer.receiveShadows = false;
     screenRenderer.castShadows = false;
 
-    replaceMaterial.baseColor = this._replaceColor;
     screenEntity.layer = this._layer;
     screenEntity.isActive = false;
     screenRenderer.mesh = PrimitiveMesh.createPlane(engine, 2, 2);
@@ -123,7 +124,7 @@ export class OutlineManager extends Script {
     outlineMaterial.isTransparent = true;
 
     this._outlineMaterial = outlineMaterial;
-    this._replaceMaterial = replaceMaterial;
+    this._replaceShader = replaceShader;
     this._screenEntity = screenEntity;
     this.size = this._size;
   }
@@ -179,7 +180,6 @@ export class OutlineManager extends Script {
 
     this._outlineEntities = null;
     this._renderers = null;
-    this._materialMap = null;
     this._layerMap = null;
   }
 
@@ -192,9 +192,7 @@ export class OutlineManager extends Script {
     const originalBackgroundMode = scene.background.mode;
 
     const renderers = this._renderers;
-    const materialMap = this._materialMap;
     const layerMap = this._layerMap;
-    materialMap.length = 0;
     layerMap.length = 0;
 
     for (let i = entities.length - 1; i >= 0; i--) {
@@ -203,18 +201,15 @@ export class OutlineManager extends Script {
       // replace material
       renderers.length = 0;
       entity.getComponents(MeshRenderer, renderers);
-      for (let j = renderers.length - 1; j >= 0; j--) {
-        const renderer = renderers[j];
-        materialMap.push({ renderer, material: renderer.getMaterial() });
-        renderer.setMaterial(this._replaceMaterial);
-      }
 
       // replace layer
-      layerMap.push({
-        entity,
-        layer: entity.layer
-      });
-      entity.layer = this._layer;
+      if (renderers.length) {
+        layerMap.push({
+          entity,
+          layer: entity.layer
+        });
+        entity.layer = this._layer;
+      }
     }
 
     // 1. render outline mesh with replace material
@@ -223,7 +218,8 @@ export class OutlineManager extends Script {
     scene.background.solidColor = this._clearColor;
     scene.background.mode = BackgroundMode.SolidColor;
     camera.cullingMask = this._layer;
-    this._outlineMaterial.shaderData.setColor(OutlineManager._outlineColorProp, outlineColor);
+    camera.setReplacementShader(this._replaceShader);
+    scene.shaderData.setColor(OutlineManager._replaceColorProp, this._replaceColor);
     camera.render();
 
     // 2. render screen only
@@ -231,14 +227,13 @@ export class OutlineManager extends Script {
     camera.renderTarget = null;
     camera.clearFlags = CameraClearFlags.None;
     camera.enableFrustumCulling = false;
-    for (let i = materialMap.length - 1; i >= 0; i--) {
-      const { material, renderer } = materialMap[i];
-      renderer.setMaterial(material);
-    }
+    camera.resetReplacementShader();
+
     for (let i = layerMap.length - 1; i >= 0; i--) {
       const { entity, layer } = layerMap[i];
       entity.layer = layer;
     }
+    this._outlineMaterial.shaderData.setColor(OutlineManager._outlineColorProp, outlineColor);
     camera.render();
 
     // 3. restore
@@ -260,4 +255,5 @@ export class OutlineManager extends Script {
   }
 }
 
-Shader.create("outline-postprocess-shader", vs, fs);
+Shader.create("outline-postprocess-shader", outlineVs, outlineFs);
+Shader.create("outline-replace-shader", replaceVs, replaceFs);
