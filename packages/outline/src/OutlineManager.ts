@@ -41,7 +41,7 @@ export class OutlineManager extends Script {
   private static _outlineColorProp = ShaderProperty.getByName("material_OutlineColor");
   private static _outlineTextureProp = ShaderProperty.getByName("material_OutlineTexture");
   private static _texSizeProp = ShaderProperty.getByName("material_TexSize");
-  private static _replaceColorProp = ShaderProperty.getByName("scene_OutlineReplaceColor");
+  private static _replaceColorProp = ShaderProperty.getByName("camera_OutlineReplaceColor");
 
   private _outlineMaterial: BaseMaterial;
   private _replaceShader: Shader;
@@ -220,7 +220,7 @@ export class OutlineManager extends Script {
     scene.background.mode = BackgroundMode.SolidColor;
     camera.cullingMask = this._layer;
     camera.setReplacementShader(this._replaceShader);
-    scene.shaderData.setColor(OutlineManager._replaceColorProp, this._replaceColor);
+    camera.shaderData.setColor(OutlineManager._replaceColorProp, this._replaceColor);
     camera.render();
 
     // 2. render screen only
