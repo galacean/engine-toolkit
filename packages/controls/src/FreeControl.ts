@@ -38,7 +38,7 @@ export class FreeControl extends Script {
     spherical.setFromVec3(tempVec, this._atTheBack);
   }
 
-  onUpdate(deltaTime: number): void {
+  override onUpdate(deltaTime: number): void {
     if (this.enabled === false) return;
     let curHandlerType = ControlHandlerType.None;
     const { _tempVec: delta } = this;

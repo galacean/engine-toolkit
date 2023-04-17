@@ -8,7 +8,6 @@ import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class ScaleControl extends GizmoComponent {
-  type: State = State.scale;
   private _camera: Camera;
   private _group: Group;
   private _scaleFactor: number = 1;
@@ -30,6 +29,7 @@ export class ScaleControl extends GizmoComponent {
 
   constructor(entity: Entity) {
     super(entity);
+    this.type = State.scale;
     this._initAxis();
     this._createAxis(entity);
   }

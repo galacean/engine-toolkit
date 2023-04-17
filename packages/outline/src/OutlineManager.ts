@@ -164,16 +164,14 @@ export class OutlineManager extends Script {
     }
   }
 
-  /** @internal */
-  onEndRender(camera: Camera): void {
+  override onEndRender(camera: Camera): void {
     const outlineEntities = this._outlineEntities;
     if (!outlineEntities.length) return;
     this._renderEntity(camera, this.subColor, this._subLineEntities);
     this._renderEntity(camera, this.mainColor, outlineEntities);
   }
 
-  /** @internal */
-  onDestroy() {
+  override onDestroy() {
     this._renderTarget.getColorTexture().destroy(true);
     this._renderTarget.destroy();
     this._screenEntity.destroy();

@@ -427,10 +427,7 @@ export class WireframeManager extends Script {
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
   }
 
-  /**
-   * @override
-   */
-  onAwake(): void {
+  override onAwake(): void {
     const engine = this.engine;
     const mesh = new ModelMesh(engine);
     const material = new PlainColorMaterial(engine);
@@ -454,25 +451,15 @@ export class WireframeManager extends Script {
     this._supportUint32Array = supportUint32Array;
   }
 
-  /**
-   * @override
-   */
-  onEnable(): void {
+  override onEnable(): void {
     this._renderer.enabled = true;
   }
 
-  /**
-   * @override
-   */
-  onDisable(): void {
+  override onDisable(): void {
     this._renderer.enabled = false;
   }
 
-  /**
-   * @override
-   * @param deltaTime
-   */
-  onUpdate(deltaTime: number): void {
+  override onUpdate(deltaTime: number): void {
     const {
       _mesh: mesh,
       _localPositions: localPositions,

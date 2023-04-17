@@ -17,7 +17,7 @@
   "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "types": "types/index.d.ts",
   "module": "dist/es/index.js",
-  "main": "dist/umd/browser.js",
+  "main": "dist/commonjs/browser.js",
   "files": [
     "dist/**/*",
     "types/**/*"

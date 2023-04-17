@@ -26,13 +26,13 @@ const fragmentSource = `
   varying vec4 v_color;
   varying vec2 waterTexCoords;
   varying vec2 normalTexCoords;
-  uniform sampler2D u_normalTex;
+  uniform sampler2D material_NormalTexture;
   uniform sampler2D u_foamTex;
   uniform vec3 u_foamColor;
   uniform vec2 u_foam_param;
   uniform float u_distorsion_amount;
   void main() {  
-    vec4 normalTex = texture2D(u_normalTex, normalTexCoords) * 2.0 - 1.0;
+    vec4 normalTex = texture2D(material_NormalTexture, normalTexCoords) * 2.0 - 1.0;
     vec4 waterTex = texture2D(u_foamTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
     float alphaComp = v_color.r * waterTex.r * u_foam_param.x;
     float alpha = pow(alphaComp,2.0);
@@ -53,7 +53,6 @@ export class WaterRippleMaterial extends BaseMaterial {
   private static _distorsionAmount = ShaderProperty.getByName("u_distorsion_amount");
 
   static _foamTextureProp = ShaderProperty.getByName("u_foamTex");
-  static _normalTextureProp = ShaderProperty.getByName("u_normalTex");
 
   /**
    * Foam Texture Map

@@ -62,23 +62,20 @@ export class SkeletonViewer extends Script {
     }
   }
 
-  /** @internal */
-  onDestroy(): void {
+  override onDestroy(): void {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].destroy();
     }
     this._debugMesh.length = 0;
   }
 
-  /** @internal */
-  onEnable() {
+  override onEnable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = true;
     }
   }
 
-  /** @internal */
-  onDisable() {
+  override onDisable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = false;
     }

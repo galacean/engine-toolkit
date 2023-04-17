@@ -192,10 +192,7 @@ export class LineDrawer extends Script {
     LineDrawer._indicesCount = 0;
   }
 
-  /**
-   * @override
-   */
-  onAwake(): void {
+  override onAwake(): void {
     const engine = this.engine;
     const mesh = new ModelMesh(engine);
     const material = new PlainColorMaterial(engine);
@@ -221,7 +218,7 @@ export class LineDrawer extends Script {
     LineDrawer._supportUint32Array = supportUint32Array;
   }
 
-  onLateUpdate(deltaTime: number) {
+  override onLateUpdate(deltaTime: number) {
     const { _mesh: mesh } = this;
 
     if (LineDrawer._positionCount > 0) {

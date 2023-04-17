@@ -48,10 +48,7 @@ export class BakePBRMaterial extends PBRMaterial {
     this.shaderData.setFloat(BakePBRMaterial._lightMapIntensityProp, 1);
   }
 
-  /**
-   * @override
-   */
-  clone(): BakePBRMaterial {
+  override clone(): BakePBRMaterial {
     const dest = new BakePBRMaterial(this._engine);
     this.cloneTo(dest);
     return dest;

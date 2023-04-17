@@ -60,7 +60,7 @@ export class WayPoint extends Script {
     }
   }
 
-  onUpdate() {
+  override onUpdate() {
     // @ts-ignore
     this._animationClip._sampleAnimation(this.entity, this.currentNormalizedTime * this.duration);
   }

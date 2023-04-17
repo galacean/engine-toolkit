@@ -139,8 +139,7 @@ export class Gizmo extends Script {
     this.state = this._type;
   }
 
-  /** @internal */
-  onUpdate() {
+  override onUpdate() {
     if (!this._initialized) {
       return;
     }

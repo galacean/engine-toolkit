@@ -8,7 +8,6 @@ import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class RotateControl extends GizmoComponent {
-  type: State = State.rotate;
   private _group: Group;
   private _camera: Camera;
 
@@ -66,6 +65,7 @@ export class RotateControl extends GizmoComponent {
 
   constructor(entity: Entity) {
     super(entity);
+    this.type = State.rotate;
     this._initAxis();
     this._createAxis(entity);
   }
