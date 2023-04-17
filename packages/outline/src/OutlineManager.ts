@@ -208,12 +208,14 @@ export class OutlineManager extends Script {
         renderer.setMaterial(this._replaceMaterial);
       }
 
-      // replace layer
-      layerMap.push({
-        entity,
-        layer: entity.layer
-      });
-      entity.layer = this._layer;
+      if (renderers.length) {
+        // replace layer
+        layerMap.push({
+          entity,
+          layer: entity.layer
+        });
+        entity.layer = this._layer;
+      }
     }
 
     // 1. render outline mesh with replace material
