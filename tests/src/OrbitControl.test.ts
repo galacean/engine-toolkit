@@ -8,8 +8,8 @@ canvasDOM.height = 1024;
 
 describe("orbit control test", function () {
   let orbitControl: OrbitControl;
-  before(() => {
-    const engine = new WebGLEngine(canvasDOM);
+  before(async () => {
+    const engine = await WebGLEngine.create({ canvas: canvasDOM });
     const node = engine.sceneManager.activeScene.createRootEntity();
     orbitControl = node.addComponent(OrbitControl);
   });
