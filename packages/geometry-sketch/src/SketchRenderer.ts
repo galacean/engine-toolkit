@@ -5,7 +5,8 @@ import {
   Matrix,
   MeshTopology,
   ModelMesh,
-  Shader,
+  ShaderMacro,
+  ShaderProperty,
   SkinnedMeshRenderer,
   SubMesh,
   Texture2D,
@@ -21,23 +22,23 @@ import { BiTangentMaterial, NormalMaterial, TangentMaterial, WireframeMaterial }
  * Sketch Renderer
  */
 export class SketchRenderer extends SkinnedMeshRenderer {
-  private static _weightMacro = Shader.getMacroByName("O3_HAS_WEIGHT");
-  private static _jointMacro = Shader.getMacroByName("O3_HAS_JOINT");
+  private static _weightMacro = ShaderMacro.getByName("RENDERER_HAS_WEIGHT");
+  private static _jointMacro = ShaderMacro.getByName("RENDERER_HAS_JOINT");
 
   private static _MAX_TEXTURE_ROWS = 512;
   private static _jointIndexBegin = -1;
 
-  private static _verticesSamplerProp = Shader.getPropertyByName("u_verticesSampler");
-  private static _verticesTextureHeightProp = Shader.getPropertyByName("u_verticesTextureHeight");
-  private static _verticesTextureWidthProp = Shader.getPropertyByName("u_verticesTextureWidth");
+  private static _verticesSamplerProp = ShaderProperty.getByName("u_verticesSampler");
+  private static _verticesTextureHeightProp = ShaderProperty.getByName("u_verticesTextureHeight");
+  private static _verticesTextureWidthProp = ShaderProperty.getByName("u_verticesTextureWidth");
 
-  private static _indicesSamplerProp = Shader.getPropertyByName("u_indicesSampler");
-  private static _indicesTextureHeightProp = Shader.getPropertyByName("u_indicesTextureHeight");
-  private static _indicesTextureWidthProp = Shader.getPropertyByName("u_indicesTextureWidth");
+  private static _indicesSamplerProp = ShaderProperty.getByName("u_indicesSampler");
+  private static _indicesTextureHeightProp = ShaderProperty.getByName("u_indicesTextureHeight");
+  private static _indicesTextureWidthProp = ShaderProperty.getByName("u_indicesTextureWidth");
 
-  private static _lineScaleProp = Shader.getPropertyByName("u_lineScale");
-  private static _worldMatrixProp = Shader.getPropertyByName("u_worldMatrix");
-  private static _worldNormalProp = Shader.getPropertyByName("u_worldNormal");
+  private static _lineScaleProp = ShaderProperty.getByName("u_lineScale");
+  private static _worldMatrixProp = ShaderProperty.getByName("u_worldMatrix");
+  private static _worldNormalProp = ShaderProperty.getByName("u_worldNormal");
 
   private _worldNormalMatrix = new Matrix();
   private _worldMatrix: Matrix = null;
@@ -191,11 +192,7 @@ export class SketchRenderer extends SkinnedMeshRenderer {
     this.setMaterial(3, null);
   }
 
-  /**
-   * @override
-   * @param deltaTime - The delta-time
-   */
-  update(deltaTime: number) {
+  override update(deltaTime: number) {
     super.update(deltaTime);
     const worldMatrix = this._worldMatrix;
     if (worldMatrix) {

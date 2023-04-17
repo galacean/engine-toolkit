@@ -1,13 +1,14 @@
-import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3, UnlitMaterial } from "@galacean/engine";
+import { Mesh, Engine, PrimitiveMesh, ModelMesh, Vector3 } from "@galacean/engine";
 import { createCircleMesh } from "./CircleMesh";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 
 /** @internal */
 export class Utils {
-  public redMaterial: UnlitMaterial;
-  public greenMaterial: UnlitMaterial;
-  public blueMaterial: UnlitMaterial;
-  public bgMaterial: UnlitMaterial;
-  public greyMaterial: UnlitMaterial;
+  public redMaterial: PlainColorMaterial;
+  public greenMaterial: PlainColorMaterial;
+  public blueMaterial: PlainColorMaterial;
+  public bgMaterial: PlainColorMaterial;
+  public greyMaterial: PlainColorMaterial;
 
   public axisMesh: Mesh;
   public endMesh: ModelMesh;
@@ -31,27 +32,27 @@ export class Utils {
   public zEndTranslateVector: Vector3 = new Vector3();
 
   constructor(engine: Engine) {
-    const redMaterial = new UnlitMaterial(engine);
+    const redMaterial = new PlainColorMaterial(engine);
     redMaterial.isTransparent = true;
     redMaterial.baseColor.set(1.0, 0.25, 0.25, 1.0);
     this.redMaterial = redMaterial;
 
-    const greenMaterial = new UnlitMaterial(engine);
+    const greenMaterial = new PlainColorMaterial(engine);
     greenMaterial.isTransparent = true;
     greenMaterial.baseColor.set(0.5, 0.8, 0.2, 1.0);
     this.greenMaterial = greenMaterial;
 
-    const blueMaterial = new UnlitMaterial(engine);
+    const blueMaterial = new PlainColorMaterial(engine);
     blueMaterial.isTransparent = true;
     blueMaterial.baseColor.set(0.3, 0.5, 1.0, 1.0);
     this.blueMaterial = blueMaterial;
 
-    const bgMaterial = new UnlitMaterial(engine);
+    const bgMaterial = new PlainColorMaterial(engine);
     bgMaterial.isTransparent = true;
     bgMaterial.baseColor.set(1, 1, 1, 0.1);
     this.bgMaterial = bgMaterial;
 
-    const greyMaterial = new UnlitMaterial(engine);
+    const greyMaterial = new PlainColorMaterial(engine);
     greyMaterial.isTransparent = true;
     greyMaterial.baseColor.set(0.5, 0.5, 0.5, 1);
     this.greyMaterial = greyMaterial;

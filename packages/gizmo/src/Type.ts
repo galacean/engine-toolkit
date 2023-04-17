@@ -1,4 +1,5 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, UnlitMaterial } from "@galacean/engine";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Pointer } from "@galacean/engine";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
 
@@ -22,37 +23,40 @@ export abstract class GizmoComponent extends Component {
   /** Called when gizmo starts to move.*/
   abstract onMoveStart(ray: Ray, axisName: string): void;
   /** Called when gizmo is moving.*/
-  abstract onMove(ray: Ray): void;
+  abstract onMove(ray: Ray, pointer?: Pointer): void;
   /** Called when gizmo movement ends.*/
   abstract onMoveEnd(): void;
   /** Called when gizmo's transform is dirty.*/
   abstract onUpdate(isModified: boolean): void;
+  /** Called when camera switch between ortho and perps.*/
+  abstract onSwitch(isModified: boolean): void;
 }
 
 export enum axisType {
   "x" = 0,
   "y" = 1,
   "z" = 2,
-  "xy" = 3,
-  "yz" = 4,
-  "xz" = 5,
-  "xyz" = 6
+  "xyz" = 3,
+  "xy" = 4,
+  "yz" = 5,
+  "xz" = 6
 }
 
 export const axisVector = [
   new Vector3(1, 0, 0),
   new Vector3(0, 1, 0),
   new Vector3(0, 0, 1),
+  new Vector3(1, 1, 1),
   new Vector3(1, 1, 0),
   new Vector3(0, 1, 1),
-  new Vector3(1, 0, 1),
-  new Vector3(1, 1, 1)
+  new Vector3(1, 0, 1)
 ];
 
 export const axisPlane = [
   new Plane(new Vector3(1, 0, 0), 0),
   new Plane(new Vector3(0, 1, 0), 0),
   new Plane(new Vector3(0, 0, 1), 0),
+  new Plane(new Vector3(0, 0, 0), 0),
   new Plane(new Vector3(0, 0, 1), 0),
   new Plane(new Vector3(1, 0, 0), 0),
   new Plane(new Vector3(0, 1, 0), 0)
@@ -61,9 +65,9 @@ export const axisPlane = [
 export interface AxisProps {
   name: string;
   axisMesh: Array<ModelMesh>;
-  axisMaterial: UnlitMaterial;
+  axisMaterial: PlainColorMaterial;
   axisHelperMesh: Array<Mesh>;
-  axisHelperMaterial: UnlitMaterial;
+  axisHelperMaterial: PlainColorMaterial;
   axisRotation: Array<Vector3>;
   axisTranslation: Array<Vector3>;
   priority?: number;

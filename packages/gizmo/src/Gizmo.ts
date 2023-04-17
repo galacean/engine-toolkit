@@ -3,24 +3,24 @@ import {
   Entity,
   Ray,
   Layer,
-  RenderTarget,
-  Texture2D,
   PointerButton,
   SphereColliderShape,
   StaticCollider,
   Vector3,
   MathUtil,
   Script,
-  MeshRenderElement,
   Pointer,
-  PointerPhase
+  PointerPhase,
+  Vector2,
+  Component,
+  MeshRenderer
 } from "@galacean/engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
-import { State, AnchorType, CoordinateType } from "./enums/GizmoState";
+import { State } from "./enums/GizmoState";
 import { Group, GroupDirtyFlag } from "./Group";
 import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
 /**
@@ -31,6 +31,8 @@ export class Gizmo extends Script {
   private _isStarted = false;
   private _isHovered = false;
   private _lastDistance: number = -1;
+  private _lastOrthoSize: number = -1;
+  private _lastIsOrtho: boolean = false;
 
   private _sceneCamera: Camera;
   private _layer: Layer;
@@ -47,26 +49,23 @@ export class Gizmo extends Script {
 
   private _type: State = null;
 
-  /**
-   * initial scene camera in gizmo
-   * @return camera - The scene camera
-   */
-  get camera(): Camera {
-    return this._sceneCamera;
-  }
+  private _sphereColliderEntity: Entity;
 
-  set camera(camera: Camera) {
+  /**
+   * initial scene camera & select group in gizmo
+   */
+  init(camera: Camera, group: Group) {
     if (camera !== this._sceneCamera) {
       if (camera) {
-        const { _group: group } = this;
+        this._group = group;
         this._sceneCamera = camera;
-        this._framebufferPicker.camera = camera;
+        this._framebufferPicker = camera.entity.addComponent(FramebufferPicker);
+        this._framebufferPicker.frameBufferSize = new Vector2(256, 256);
 
         this._controlMap.forEach((gizmoControl) => {
           gizmoControl.init(camera, this._group);
         });
 
-        group.reset();
         this._initialized = true;
       } else {
         this._initialized = false;
@@ -86,7 +85,6 @@ export class Gizmo extends Script {
   set layer(layer: Layer) {
     if (this._layer !== layer) {
       this._layer = layer;
-      this._framebufferPicker.colorRenderPass.mask = layer;
       this._traverseEntity(this.entity, (entity) => {
         entity.layer = layer;
       });
@@ -116,33 +114,8 @@ export class Gizmo extends Script {
     );
   }
 
-  /**
-   * toggle gizmo anchor type
-   * @return current anchor type - center or pivot, default center
-   */
-  get anchorType(): AnchorType {
-    return this._group.anchorType;
-  }
-
-  set anchorType(targetAnchor: AnchorType) {
-    this._group.anchorType = targetAnchor;
-  }
-
-  /**
-   * toggle gizmo orientation type
-   * @return current orientation type - global or local, default local
-   */
-  get coordType(): CoordinateType {
-    return this._group.coordinateType;
-  }
-
-  set coordType(targetCoord: CoordinateType) {
-    this._group.coordinateType = targetCoord;
-  }
-
   constructor(entity: Entity) {
     super(entity);
-
     // @ts-ignore
     if (!this.entity.engine.physicsManager._initialized) {
       throw new Error("PhysicsManager is not initialized");
@@ -155,56 +128,18 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.rotate, RotateControl);
     this._createGizmoControl(State.scale, ScaleControl);
 
-    // framebuffer picker
-    this._framebufferPicker = entity.addComponent(FramebufferPicker);
-    this._framebufferPicker.colorRenderTarget = new RenderTarget(
-      this.engine,
-      256,
-      256,
-      new Texture2D(this.engine, 256, 256)
-    );
-
     this.layer = Layer.Layer29;
-
     // gizmo collider
-    const sphereCollider = entity.addComponent(StaticCollider);
+    this._sphereColliderEntity = entity.createChild("gizmoCollider");
+    const sphereCollider = this._sphereColliderEntity.addComponent(StaticCollider);
     const colliderShape = new SphereColliderShape();
     colliderShape.radius = Utils.rotateCircleRadius + 0.8;
     sphereCollider.addShape(colliderShape);
 
     this.state = this._type;
-    this.anchorType = AnchorType.Center;
-    this.coordType = CoordinateType.Local;
   }
 
-  /**
-   * add entity to the group
-   * @param entity - the entity to add, could be empty
-   * @return boolean, true if the entity is the previous group, false if not
-   */
-  addEntity(entity: Entity): boolean {
-    const { _group: group } = this;
-    return entity && group.addEntity(entity);
-  }
-
-  /**
-   * remove entity from the group
-   * @param entity - the entity to remove
-   */
-  removeEntity(entity: Entity): void {
-    const { _group: group } = this;
-    entity && group.deleteEntity(entity);
-  }
-
-  /**
-   * clear all entities in the group
-   */
-  clearEntity(): void {
-    this._group.reset();
-  }
-
-  /** @internal */
-  onUpdate() {
+  override onUpdate() {
     if (!this._initialized) {
       return;
     }
@@ -213,6 +148,15 @@ export class Gizmo extends Script {
     const pointer = pointers.find((pointer: Pointer) => {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
+
+    if (this._lastIsOrtho !== this._sceneCamera.isOrthographic) {
+      this._lastIsOrtho = this._sceneCamera.isOrthographic;
+      this._traverseControl(this._type, (control) => {
+        this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
+      });
+    }
+    this._group.getWorldPosition(this._tempVec);
+    this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
     if (this._isStarted) {
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
@@ -229,6 +173,8 @@ export class Gizmo extends Script {
       }
     } else {
       this._group.getWorldPosition(this._tempVec);
+      this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
+
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
       const currDistance = Vector3.distance(cameraPosition, this._tempVec);
       let distanceDirty = false;
@@ -237,7 +183,16 @@ export class Gizmo extends Script {
         this._lastDistance = currDistance;
       }
 
-      if (this._group._gizmoTransformDirty || distanceDirty) {
+      let orthoSizeDirty = false;
+      if (
+        this._sceneCamera.isOrthographic &&
+        Math.abs(this._lastOrthoSize - this._sceneCamera.orthographicSize) > MathUtil.zeroTolerance
+      ) {
+        orthoSizeDirty = true;
+        this._lastOrthoSize = this._sceneCamera.orthographicSize;
+      }
+
+      if (this._group._gizmoTransformDirty || distanceDirty || orthoSizeDirty) {
         this._traverseControl(this._type, (control) => {
           this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
         });
@@ -247,14 +202,21 @@ export class Gizmo extends Script {
         if ((pointer.pressedButtons & PointerButton.Primary) !== 0) {
           this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
             if (result) {
-              this._selectHandler(result);
+              this._selectHandler(result, pointer.position);
             }
           });
         } else {
-          this.camera.screenPointToRay(pointer.position, this._tempRay);
+          this._sceneCamera.screenPointToRay(pointer.position, this._tempRay);
           const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
+
           if (isHit) {
-            this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
+            const originLayer = this._sceneCamera.cullingMask;
+            this._sceneCamera.cullingMask = this._layer;
+
+            const result = this._framebufferPicker.pick(pointer.position.x, pointer.position.y);
+            this._sceneCamera.cullingMask = originLayer;
+
+            result.then((result) => {
               this._onGizmoHoverEnd();
               if (result) {
                 this._overHandler(result);
@@ -277,13 +239,14 @@ export class Gizmo extends Script {
       this._traverseControl(currentType, (control) => {
         this._currentControl = control;
       });
+
       this._currentControl.onHoverStart(axisName);
     }
   }
 
   private _onGizmoHoverEnd(): void {
     if (this._isHovered) {
-      this._currentControl.onHoverEnd();
+      this._currentControl && this._currentControl.onHoverEnd();
       this._isHovered = false;
     }
   }
@@ -315,11 +278,11 @@ export class Gizmo extends Script {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
     this._sceneCamera.screenPointToRay(pointer.position, this._tempRay2);
-    this._currentControl.onMove(this._tempRay2);
+    this._currentControl.onMove(this._tempRay2, pointer);
   }
 
   private _triggerGizmoEnd(): void {
-    this._currentControl.onMoveEnd();
+    this._currentControl && this._currentControl.onMoveEnd();
     this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     this._traverseControl(this._type, (control) => {
       control.entity.isActive = true;
@@ -327,9 +290,10 @@ export class Gizmo extends Script {
     this._isStarted = false;
   }
 
-  private _selectHandler(result: MeshRenderElement): void {
-    const currentControl = parseInt(result.material.name);
-    const selectedEntity = result.component.entity;
+  private _selectHandler(result: Component, pointerPosition: Vector2): void {
+    const material = (<MeshRenderer>result).getMaterial();
+    const currentControl = parseInt(material.name);
+    const selectedEntity = result.entity;
     switch (selectedEntity.layer) {
       case this._layer:
         this._triggerGizmoStart(currentControl, selectedEntity.name);
@@ -337,9 +301,10 @@ export class Gizmo extends Script {
     }
   }
 
-  private _overHandler(result: MeshRenderElement): void {
-    const currentControl = parseInt(result.material.name);
-    const hoverEntity = result.component.entity;
+  private _overHandler(result: Component): void {
+    const material = (<MeshRenderer>result).getMaterial();
+    const currentControl = parseInt(material.name);
+    const hoverEntity = result.entity;
     this._onGizmoHoverStart(currentControl, hoverEntity.name);
   }
 

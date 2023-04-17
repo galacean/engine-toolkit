@@ -54,6 +54,11 @@ export class GridControl extends Script {
   camera: Camera = null;
 
   /**
+   * target distance
+   */
+  distance: number = 8;
+
+  /**
    * Grid Material.
    */
   get material(): GridMaterial {
@@ -73,27 +78,33 @@ export class GridControl extends Script {
     this._flipGrid = true;
   }
 
-  /**
-   * @override
-   */
-  onAwake() {
+  override onAwake() {
     const { engine, entity } = this;
 
     const gridRenderer = entity.addComponent(MeshRenderer);
+    gridRenderer.receiveShadows = false;
+    gridRenderer.castShadows = false;
     gridRenderer.mesh = GridControl.createGridPlane(engine);
     this._material = new GridMaterial(engine);
     gridRenderer.setMaterial(this._material);
   }
 
-  /**
-   * @override
-   */
-  onUpdate(deltaTime: number) {
+  override onUpdate(deltaTime: number) {
     const { _material: material, camera } = this;
     if (camera === null) return;
 
     material.nearClipPlane = camera.nearClipPlane;
     material.farClipPlane = camera.farClipPlane;
+
+    const logDistance = Math.log2(this.distance);
+    const upperDistance = Math.pow(2, Math.floor(logDistance) + 1);
+    const lowerDistance = Math.pow(2, Math.floor(logDistance));
+    material.fade = (this.distance - lowerDistance) / (upperDistance - lowerDistance);
+
+    const level = -Math.floor(logDistance);
+    material.primaryScale = Math.pow(2, level);
+    material.secondaryScale = Math.pow(2, level + 1);
+    material.axisIntensity = 0.3 / material.primaryScale;
 
     if (this._flipGrid) {
       this._progress += deltaTime / 1000;

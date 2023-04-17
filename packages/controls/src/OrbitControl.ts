@@ -156,7 +156,7 @@ export class OrbitControl extends Script {
     }
   }
 
-  onAwake(): void {
+  override onAwake(): void {
     const { engine, entity } = this;
     this.canvas = engine.canvas;
     this.input = engine.inputManager;
@@ -166,7 +166,7 @@ export class OrbitControl extends Script {
     this._atTheBack = false;
   }
 
-  onUpdate(deltaTime: number): void {
+  override onUpdate(deltaTime: number): void {
     /** Update this._sphericalDelta, this._scale and this._panOffset. */
     this._updateInputDelta(deltaTime);
     /** Update camera's transform. */
@@ -248,6 +248,8 @@ export class OrbitControl extends Script {
 
   private _updateTransform(): void {
     const { cameraTransform, target, _tempVec3, _spherical, _sphericalDelta, _panOffset } = this;
+    _tempVec3.copyFrom(cameraTransform.worldUp);
+    this._atTheBack = _tempVec3.y <= 0;
     Vector3.subtract(cameraTransform.position, target, _tempVec3);
     _spherical.setFromVec3(_tempVec3, this._atTheBack);
     _spherical.theta += _sphericalDelta.theta;

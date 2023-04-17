@@ -83,7 +83,7 @@ export class SphereScript extends Script {
     this._target.copyFrom(value);
   }
 
-  onAwake() {
+  override onAwake() {
     const gizmoEntity = this.entity.parent;
     this._directionEntity = gizmoEntity.findByName("direction");
     this._roundEntity = this.entity.findByName("round");
@@ -99,14 +99,14 @@ export class SphereScript extends Script {
     this._getTextColor();
   }
 
-  onPointerEnter() {
+  override onPointerEnter() {
     this._roundEntity.isActive = true;
     this._xEntity.isActive = true;
     this._yEntity.isActive = true;
     this._zEntity.isActive = true;
   }
 
-  onPointerExit() {
+  override onPointerExit() {
     if (!this._isTriggered) {
       this._roundEntity.isActive = false;
       this._xEntity.isActive = false;
@@ -115,10 +115,8 @@ export class SphereScript extends Script {
     }
   }
 
-  onPointerDown(pointer: Pointer) {
+  override onPointerDown(pointer: Pointer) {
     this._disableComponent();
-
-    this._sceneCamera.isOrthographic = false;
     this._recoverTextColor();
 
     // get targetPoint
@@ -127,10 +125,10 @@ export class SphereScript extends Script {
     SphereScript._startQuat.copyFrom(this._directionEntity.transform.worldRotationQuaternion);
     SphereScript._startPointer.copyFrom(pointer.position);
 
-    this._sceneCameraEntity.transform.getWorldUp(this._tempUpVec);
+    this._tempUpVec.copyFrom(this._sceneCameraEntity.transform.worldUp);
     this._isBack = this._tempUpVec.y <= 0;
     this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
-    this._sceneCameraEntity.transform.getWorldForward(SphereScript._startAxis);
+    SphereScript._startAxis.copyFrom(this._sceneCameraEntity.transform.worldForward);
     Vector3.cross(SphereScript._startAxis, this._upVec, SphereScript._startAxis);
 
     Vector3.subtract(SphereScript._startPos, this._target, this._tempUpVec);
@@ -146,11 +144,11 @@ export class SphereScript extends Script {
     this._navigateCamera(pointer);
   }
 
-  onPointerDrag(pointer: Pointer) {
+  override onPointerDrag(pointer: Pointer) {
     this._navigateCamera(pointer);
   }
 
-  onPointerUp(pointer: Pointer) {
+  override onPointerUp(pointer: Pointer) {
     if (this._isTriggered) {
       this._gizmoCamera.screenPointToRay(pointer.position, this._ray);
       const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
@@ -165,7 +163,7 @@ export class SphereScript extends Script {
       this._enableComponent();
     }
   }
-  onUpdate() {
+  override onUpdate() {
     if (this._isTriggered) {
       this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
       Matrix.lookAt(this._currentPos, this._target, this._upVec, this._tempMat);
@@ -188,11 +186,9 @@ export class SphereScript extends Script {
     let x = -this._deltaPointer.x * this._speedXFactor;
     let y = -this._deltaPointer.y * this._speedYFactor;
 
-    if (this._startRadian - y <= 0 || this._startRadian - y > Math.PI) {
-      this._isBack = true;
-    } else {
-      this._isBack = false;
-    }
+    const isBetween = this._startRadian - y > Math.PI && this._startRadian - y < 2 * Math.PI;
+
+    this._isBack = this._startRadian - y <= 0 || isBetween;
 
     const { _tempQuat: tempQuat, _tempQuat2: tempQuat2 } = this;
 

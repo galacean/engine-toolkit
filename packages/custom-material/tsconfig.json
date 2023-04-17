@@ -7,8 +7,10 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "declarationDir": "types",
+    "outDir": "dist",
     "skipLibCheck": true,
     "emitDeclarationOnly": true,
+    "noImplicitOverride": true,
     "sourceMap": true
   },
   "include": [

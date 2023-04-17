@@ -74,27 +74,27 @@ export const geometryTextureVert = `
         vec3 POSITION = vec3(rows[0].x, rows[0].y, rows[0].z);        
         int row_index = 0;
         int value_index = 2;
-#ifdef O3_HAS_NORMAL 
+#ifdef RENDERER_HAS_NORMAL 
         vec3 NORMAL = getVec3(rows, row_index, value_index);
 #endif
 
-#ifdef O3_HAS_VERTEXCOLOR
+#ifdef RENDERER_HAS_VERTEXCOLOR
         vec4 COLOR_0 = getVec4(rows, row_index, value_index);
 #endif
 
-#ifdef O3_HAS_WEIGHT
+#ifdef RENDERER_HAS_WEIGHT
         vec4 WEIGHTS_0 = getVec4(rows, row_index, value_index);
 #endif
 
-#ifdef O3_HAS_JOINT
+#ifdef RENDERER_HAS_JOINT
         vec4 JOINTS_0 = getVec4(rows, row_index, value_index);
 #endif
 
-#ifdef O3_HAS_TANGENT
+#ifdef RENDERER_HAS_TANGENT
         vec4 TANGENT = getVec4(rows, row_index, value_index);
 #endif
 
-#ifdef O3_HAS_UV
+#ifdef RENDERER_HAS_UV
         vec2 TEXCOORD_0 = getVec2(rows, row_index, value_index);
 #endif
 `;

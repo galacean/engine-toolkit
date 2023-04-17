@@ -1,14 +1,19 @@
 {
   "name": "@galacean/engine-toolkit-framebuffer-picker",
-  "version": "0.9.0-beta.8",
+  "version": "1.0.0-alpha.20",
   "license": "MIT",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
-  "browser": "dist/browser.js",
+  "module": "dist/es/index.js",
+  "main": "dist/commonjs/browser.js",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
+  "homepage": "https://oasisengine.cn/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/galacean/engine-toolkit"
+  },
+  "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "scripts": {
     "b:types": "tsc"
   },
@@ -18,6 +23,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "@galacean/engine": "^0.9.0-alpha"
+    "@galacean/engine": "^1.0.0-alpha"
   }
 }

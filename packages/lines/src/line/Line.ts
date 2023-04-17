@@ -1,15 +1,15 @@
 import {
+  Buffer,
   BufferBindFlag,
   BufferMesh,
   BufferUsage,
   Color,
+  IndexFormat,
   MeshRenderer,
   Script,
+  Vector2,
   VertexElement,
-  VertexElementFormat,
-  Buffer,
-  IndexFormat,
-  Vector2
+  VertexElementFormat
 } from "@galacean/engine";
 import { LineMaterial } from "./material/LineMaterial";
 import { LineCap, LineJoin } from "./constants";
@@ -108,7 +108,7 @@ export class Line extends Script {
   /**
    * @internal
    */
-  onAwake(): void {
+  override onAwake(): void {
     this._renderer = this.entity.addComponent(MeshRenderer);
     this.color = this._color;
     this.join = this._join;
@@ -131,7 +131,7 @@ export class Line extends Script {
   /**
    * @internal
    */
-  onUpdate(): void {
+  override onUpdate(): void {
     if (this._needUpdate) {
       this._render();
       this._needUpdate = false;
@@ -141,21 +141,21 @@ export class Line extends Script {
   /**
    * @internal
    */
-  onEnable(): void {
+  override onEnable(): void {
     this._renderer.enabled = true;
   }
 
   /**
    * @internal
    */
-  onDisable(): void {
+  override onDisable(): void {
     this._renderer.enabled = false;
   }
 
   /**
    * @internal
    */
-  onDestroy() {
+  override onDestroy() {
     this._renderer.destroy();
   }
 
@@ -189,8 +189,7 @@ export class Line extends Script {
   }
 
   protected _initMaterial() {
-    const material = new LineMaterial(this.engine);
-    this._material = material;
+    this._material = new LineMaterial(this.engine);
     this._renderer.setMaterial(this._material);
   }
 }

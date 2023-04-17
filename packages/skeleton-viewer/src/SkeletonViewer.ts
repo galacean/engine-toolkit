@@ -27,7 +27,7 @@ export class SkeletonViewer extends Script {
   midWidthScale: number = 0.1;
   /** Ball size. */
   ballSize: number = 0.25;
-  /** Skeletal Decrease Factor. */
+  /** Skeleton Decrease Factor. */
   scaleFactor: number = 0.85;
   /** The min color.  */
   colorMin: Color = new Color(0.35, 0.35, 0.35, 1);
@@ -62,23 +62,20 @@ export class SkeletonViewer extends Script {
     }
   }
 
-  /** @internal */
-  onDestroy(): void {
+  override onDestroy(): void {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].destroy();
     }
     this._debugMesh.length = 0;
   }
 
-  /** @internal */
-  onEnable() {
+  override onEnable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = true;
     }
   }
 
-  /** @internal */
-  onDisable() {
+  override onDisable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = false;
     }
@@ -163,11 +160,11 @@ export class SkeletonViewer extends Script {
 
   private _showSkeleton(renderer: SkinnedMeshRenderer): void {
     // @ts-ignore
-    if (!renderer._jointEntitys) {
+    if (!renderer._jointEntities) {
       renderer.update(0);
     }
     // @ts-ignore
-    const joints: Entity[] = renderer._jointEntitys;
+    const joints: Entity[] = renderer._jointEntities;
 
     const spheres: Entity[][] = [];
 
@@ -180,6 +177,8 @@ export class SkeletonViewer extends Script {
       // 球
       const entity = joint.createChild();
       const renderer = entity.addComponent(MeshRenderer);
+      renderer.receiveShadows = false;
+      renderer.castShadows = false;
       renderer.mesh = PrimitiveMesh.createSphere(this.engine, this.ballSize, 16);
       renderer.setMaterial(this._material);
       renderer.priority = 1;
@@ -202,6 +201,8 @@ export class SkeletonViewer extends Script {
 
         const entity = joint;
         const renderer = entity.addComponent(MeshRenderer);
+        renderer.receiveShadows = false;
+        renderer.castShadows = false;
         renderer.setMaterial(this._material);
         renderer.mesh = this._createSpur(direction);
         renderer.priority = 1;
@@ -236,14 +237,14 @@ Shader.create(
   attribute vec3 POSITION;
   attribute vec3 NORMAL;
 
-  uniform mat4 u_MVPMat;
-  uniform mat4 u_normalMat;
+  uniform mat4 renderer_MVPMat;
+  uniform mat4 renderer_NormalMat;
 
   varying vec3 v_normal;
 
   void main(){
-      gl_Position = u_MVPMat * vec4( POSITION , 1.0 );;
-      v_normal = normalize( mat3(u_normalMat) * NORMAL );
+      gl_Position = renderer_MVPMat * vec4( POSITION , 1.0 );;
+      v_normal = normalize( mat3(renderer_NormalMat) * NORMAL );
   }`,
   `
       uniform vec3 u_colorMin;

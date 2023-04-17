@@ -1,14 +1,14 @@
-import { log, errorLog } from "../log";
+import { log } from "../log";
 
 /**
  * @class ShaderHook
  */
 export default class ShaderHook {
   public shaders: number = 0;
-  private realAttachShader: any;
-  private realDetachShader: any;
+  private readonly realAttachShader: any;
+  private readonly realDetachShader: any;
+  private readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
   private hooked: boolean;
-  private gl: WebGLRenderingContext | WebGL2RenderingContext;
 
   constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
     this.realAttachShader = gl.attachShader;
@@ -23,7 +23,7 @@ export default class ShaderHook {
     log(`Shader is hooked.`);
   }
 
-  private hookedAttachShader(program: any, shader: any) {
+  private hookedAttachShader(program: any, shader: any): void {
     this.realAttachShader.call(this.gl, program, shader);
 
     this.shaders++;
@@ -31,7 +31,7 @@ export default class ShaderHook {
     log(`AttachShader:`, shader, `shaders: ${this.shaders}`);
   }
 
-  private hookedDetachShader(program: any, shader: any) {
+  private hookedDetachShader(program: any, shader: any): void {
     this.realDetachShader.call(this.gl, program, shader);
 
     this.shaders--;
@@ -39,11 +39,11 @@ export default class ShaderHook {
     log(`DetachShader. shaders: ${this.shaders}`);
   }
 
-  public reset() {
+  public reset(): void {
     this.shaders = 0;
   }
 
-  public release() {
+  public release(): void {
     if (this.hooked) {
       this.gl.attachShader = this.realAttachShader;
       this.gl.detachShader = this.realDetachShader;

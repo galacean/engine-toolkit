@@ -8,7 +8,6 @@ import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class ScaleControl extends GizmoComponent {
-  type: State = State.scale;
   private _camera: Camera;
   private _group: Group;
   private _scaleFactor: number = 1;
@@ -30,6 +29,7 @@ export class ScaleControl extends GizmoComponent {
 
   constructor(entity: Entity) {
     super(entity);
+    this.type = State.scale;
     this._initAxis();
     this._createAxis(entity);
   }
@@ -120,20 +120,11 @@ export class ScaleControl extends GizmoComponent {
   }
 
   onUpdate(isModified: boolean = false): void {
-    const { _tempVec0, _tempMat } = this;
-    const cameraPosition = this._camera.entity.transform.worldPosition;
-    this._group.getWorldMatrix(_tempMat);
-    const { elements: ele } = _tempMat;
-    _tempVec0.set(ele[12], ele[13], ele[14]);
+    this._resizeControl(isModified);
+  }
 
-    const s = isModified
-      ? Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor * 0.75
-      : Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
-
-    const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
-    const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
-    const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
-    this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(sx, sy, sz));
+  onSwitch(isModified: boolean = false) {
+    this._resizeControl(isModified);
   }
 
   private _initAxis(): void {
@@ -141,7 +132,7 @@ export class ScaleControl extends GizmoComponent {
       {
         name: "x",
         axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.greenMaterialScale,
+        axisMaterial: Utils.redMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialScale,
         axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90)],
@@ -151,7 +142,7 @@ export class ScaleControl extends GizmoComponent {
       {
         name: "y",
         axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.blueMaterialScale,
+        axisMaterial: Utils.greenMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialScale,
         axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0)],
@@ -161,7 +152,7 @@ export class ScaleControl extends GizmoComponent {
       {
         name: "z",
         axisMesh: [Utils.lineMeshShort, Utils.axisEndCubeMesh],
-        axisMaterial: Utils.redMaterialScale,
+        axisMaterial: Utils.blueMaterialScale,
         axisHelperMesh: [Utils.axisHelperLineMesh],
         axisHelperMaterial: Utils.invisibleMaterialScale,
         axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90)],
@@ -226,5 +217,31 @@ export class ScaleControl extends GizmoComponent {
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
     ray.getPoint(ray.intersectPlane(this._plane), out);
+  }
+
+  private _resizeControl(isModified: boolean = false): void {
+    const { _tempVec0, _tempMat } = this;
+    const cameraPosition = this._camera.entity.transform.worldPosition;
+    this._group.getWorldMatrix(_tempMat);
+
+    if (this._camera.isOrthographic) {
+      const s = isModified
+        ? this._camera.orthographicSize * Utils.scaleFactor * 3 * 0.75
+        : this._camera.orthographicSize * Utils.scaleFactor * 3;
+
+      this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(s, s, s));
+    } else {
+      const { elements: ele } = _tempMat;
+      _tempVec0.set(ele[12], ele[13], ele[14]);
+
+      const s = isModified
+        ? Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor * 0.75
+        : Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
+
+      const sx = s / Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
+      const sy = s / Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
+      const sz = s / Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
+      this.entity.transform.worldMatrix = this._tempMat.scale(this._tempVec0.set(sx, sy, sz));
+    }
   }
 }

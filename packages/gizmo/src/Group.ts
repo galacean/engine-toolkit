@@ -1,5 +1,5 @@
 import { BoundingBox, Renderer, Vector3, Matrix, Entity } from "@galacean/engine";
-import { AnchorType, CoordinateType } from "./enums/GizmoState";
+import { AnchorType, CoordinateType } from "./enums/GroupState";
 
 /**
  * dirty flag for the group

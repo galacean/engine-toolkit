@@ -1,16 +1,17 @@
-import { BaseMaterial, Engine, MathUtil, Shader } from "@galacean/engine";
+import { BaseMaterial, Engine, MathUtil, Shader, ShaderProperty } from "@galacean/engine";
 
 /**
  * Grid Material.
  */
 export class GridMaterial extends BaseMaterial {
-  private static _farClipProperty = Shader.getPropertyByName("u_far");
-  private static _nearClipProperty = Shader.getPropertyByName("u_near");
-  private static _primaryScaleProperty = Shader.getPropertyByName("u_primaryScale");
-  private static _secondaryScaleProperty = Shader.getPropertyByName("u_secondaryScale");
-  private static _gridIntensityProperty = Shader.getPropertyByName("u_gridIntensity");
-  private static _axisIntensityProperty = Shader.getPropertyByName("u_axisIntensity");
-  private static _flipProgressProperty = Shader.getPropertyByName("u_flipProgress");
+  private static _farClipProperty = ShaderProperty.getByName("u_far");
+  private static _nearClipProperty = ShaderProperty.getByName("u_near");
+  private static _primaryScaleProperty = ShaderProperty.getByName("u_primaryScale");
+  private static _secondaryScaleProperty = ShaderProperty.getByName("u_secondaryScale");
+  private static _gridIntensityProperty = ShaderProperty.getByName("u_gridIntensity");
+  private static _axisIntensityProperty = ShaderProperty.getByName("u_axisIntensity");
+  private static _flipProgressProperty = ShaderProperty.getByName("u_flipProgress");
+  private static _fadeProperty = ShaderProperty.getByName("u_fade");
 
   /**
    * Near clip plane - the closest point to the camera when rendering occurs.
@@ -89,6 +90,17 @@ export class GridMaterial extends BaseMaterial {
     this.shaderData.setFloat(GridMaterial._flipProgressProperty, MathUtil.clamp(value, 0, 1));
   }
 
+  /**
+   * fade parameter.
+   */
+  get fade(): number {
+    return this.shaderData.getFloat(GridMaterial._fadeProperty);
+  }
+
+  set fade(value: number) {
+    this.shaderData.setFloat(GridMaterial._fadeProperty, MathUtil.clamp(value, 0, 1));
+  }
+
   constructor(engine: Engine) {
     super(engine, Shader.find("grid"));
     this.isTransparent = true;
@@ -101,6 +113,7 @@ export class GridMaterial extends BaseMaterial {
     shaderData.setFloat(GridMaterial._gridIntensityProperty, 0.2);
     shaderData.setFloat(GridMaterial._axisIntensityProperty, 0.1);
     shaderData.setFloat(GridMaterial._flipProgressProperty, 0.0);
+    shaderData.setFloat(GridMaterial._fadeProperty, 0.0);
   }
 }
 
@@ -109,7 +122,7 @@ Shader.create(
   `
 #include <common>
 #include <common_vert>
-uniform mat4 u_viewInvMat;
+uniform mat4 camera_ViewInvMat;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
@@ -121,18 +134,18 @@ vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat, mat4 projInvMat)
 
 void main() {
     float tol = 0.0001;
-    mat4 viewInvMat = u_viewInvMat;
+    mat4 viewInvMat = camera_ViewInvMat;
     if (abs(viewInvMat[3][1]) < tol) {
         viewInvMat[3][1] = tol;
     }
-    mat4 projInvMat = INVERSE_MAT(u_projMat);
+    mat4 projInvMat = INVERSE_MAT(camera_ProjMat);
 
     nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0, viewInvMat, projInvMat);// unprojecting on the near plane
     farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat, projInvMat);// unprojecting on the far plane
     gl_Position = vec4(POSITION, 1.0);// using directly the clipped coordinates
 }`,
 
-`
+  `
 #include <transform_declare>
 
 uniform float u_far;
@@ -142,18 +155,19 @@ uniform float u_secondaryScale;
 uniform float u_gridIntensity;
 uniform float u_axisIntensity;
 uniform float u_flipProgress;
+uniform float u_fade;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
   
-vec4 grid(vec3 fragPos3D, float scale, bool drawAxis) {
+vec4 grid(vec3 fragPos3D, float scale, float fade) {
     vec2 coord = mix(fragPos3D.xz, fragPos3D.xy, u_flipProgress) * scale;
     vec2 derivative = fwidth(coord);
     vec2 grid = abs(fract(coord - 0.5) - 0.5) / derivative;
     float line = min(grid.x, grid.y);
     float minimumz = min(derivative.y, 1.0);
     float minimumx = min(derivative.x, 1.0);
-    vec4 color = vec4(u_gridIntensity, u_gridIntensity, u_gridIntensity, 1.0 - min(line, 1.0));
+    vec4 color = vec4(u_gridIntensity, u_gridIntensity, u_gridIntensity, fade * (1.0 - min(line, 1.0)));
     // z-axis
     if (fragPos3D.x > -u_axisIntensity * minimumx && fragPos3D.x < u_axisIntensity * minimumx)
         color.z = 1.0;
@@ -165,13 +179,13 @@ vec4 grid(vec3 fragPos3D, float scale, bool drawAxis) {
 }
 
 float computeDepth(vec3 pos) {
-    vec4 clip_space_pos = u_projMat * u_viewMat * vec4(pos.xyz, 1.0);
+    vec4 clip_space_pos = camera_ProjMat * camera_ViewMat * vec4(pos.xyz, 1.0);
     // map to 0-1
     return (clip_space_pos.z / clip_space_pos.w) * 0.5 + 0.5;
 }
 
 float computeLinearDepth(vec3 pos) {
-    vec4 clip_space_pos = u_projMat * u_viewMat * vec4(pos.xyz, 1.0);
+    vec4 clip_space_pos = camera_ProjMat * camera_ViewMat * vec4(pos.xyz, 1.0);
     float clip_space_depth = clip_space_pos.z / clip_space_pos.w;
     float linearDepth = (2.0 * u_near * u_far) / (u_far + u_near - clip_space_depth * (u_far - u_near));
     return linearDepth / u_far;// normalize
@@ -189,7 +203,7 @@ void main() {
     float fading = max(0.0, (0.5 - linearDepth));
 
     // adding multiple resolution for the grid
-    gl_FragColor = (grid(fragPos3D, u_primaryScale, true) + grid(fragPos3D, u_secondaryScale, true));
+    gl_FragColor = (grid(fragPos3D, u_primaryScale, u_fade) + grid(fragPos3D, u_secondaryScale, 1.0 - u_fade));
     gl_FragColor.a *= fading;
 }
 `

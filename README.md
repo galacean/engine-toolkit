@@ -1,27 +1,29 @@
-# Engine Toolkit
+# Galacean Engine Toolkit
 
 <a href="https://www.npmjs.com/package/oasis-engine-toolkit"><img src="https://img.shields.io/npm/v/oasis-engine-toolkit"/></a> ![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine-toolkit) ![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit) [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine-toolkit)
 
-Some out-of-the-box utility features based on the [galacean engine](https://github.com/galacean/engine) `Script` and `Material`, welcome to enjoy!
+Some out-of-the-box utility features based on the [Galacean engine](https://github.com/galacean/engine) `Script` and `Material`, welcome to enjoy!
 
 ## Features
-- 📊 &nbsp;**Stats** - Statistics rendering data
+- 📊 &nbsp;**[Stats](packages/stats)** - Statistics rendering data
 
-- 🛸 &nbsp;**Controls** - Some camera controllers
-- 🫧 &nbsp;**FrameBufferPicker** - Pixel-based object picking
-- ➡️ &nbsp;**Gizmo** - Operation tools for transforming (displacement, rotation, scaling)
-- 🧭 &nbsp;**Navigation Gizmo** - Three-view & visualized operation for camera control
+- 🛸 &nbsp;**[Controls](packages/controls)** - Some camera controllers
+- 🫧 &nbsp;**[FrameBufferPicker](packages/framebuffer-picker)** - Pixel-based object picking
+- ➡️ &nbsp;**[Gizmo](packages/gizmo)** - Operation tools for transforming (displacement, rotation, scaling)
+- 🧭 &nbsp;**[Navigation Gizmo](packages/navigation-gizmo)** - Three-view & visualized operation for camera control
+- 🛣 &nbsp;**[Waypoint](packages/way-point)** - control entity move along waypoint
 
-- 📐 &nbsp;**Lines** - 2D Solid Line & Dash Line
-- 🖇 &nbsp;**Auxiliary Lines** - Draw wireframe for entity and component
-- 🧍🏼 &nbsp;**Skeleton Helper** - Skeleton visualization
-- ⭕️ &nbsp;**Outline** - Show outline of mesh renderers
-- 🖼 &nbsp;**Geometry Sketch** - Convert geometry into texture && sketch normal and mesh wireframe
+- 📐 &nbsp;**[Lines](packages/lines)** - 2D Solid Line & Dash Line
+- 🖇 &nbsp;**[Auxiliary Lines](packages/auxiliary-lines)** - Draw wireframe for entity and component
+- 🧍🏼 &nbsp;**[Skeleton Helper](packages/skeleton-viewer)** - Skeleton visualization
+- ⭕️ &nbsp;**[Outline](packages/outline)** - Show outline of mesh renderers
+- 🖼 &nbsp;**[Geometry Sketch](packages/geometry-sketch)** - Convert geometry into texture && sketch normal and mesh wireframe
 
-### Materials
+### [Custom Materials](packages/custom-material)
 
-- 🗳 &nbsp;**Planar Shadow Material** - Two-pass shadow on the planar
-- ⚔️ &nbsp;**Grid Material** - Infinity grid material
+- ⚔️ &nbsp;**[Grid Material](packages/custom-material/src/grid)** - Infinity grid material
+- 🗳 &nbsp;**[Planar Shadow Material](packages/custom-material/src/planar-shadow)** - Two-pass shadow on the planar
+- 🍞 &nbsp;**[Bake PBR Material](packages/custom-material/src/bake-pbr)** - Bake texture with ibl lighting
 
 ## npm
 
@@ -71,9 +73,9 @@ npm run b:all
 ## Links
 
 - [Official Site](https://oasisengine.cn)
-- [Examples](https://oasisengine.cn/0.6/examples)
-- [Documentation](https://oasisengine.cn/0.6/docs/install-cn)
-- [API References](https://oasisengine.cn/0.6/api/core/index)
+- [Examples](https://oasisengine.cn/#/examples/latest/skeleton-viewer)
+- [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
+- [API References](https://oasisengine.cn/#/api/latest/core)
 
 ## License
 

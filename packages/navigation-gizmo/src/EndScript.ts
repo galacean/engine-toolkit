@@ -102,7 +102,7 @@ export class EndScript extends Script {
     this._target.copyFrom(value);
   }
 
-  onAwake() {
+  override onAwake() {
     const textEntity = this.entity.findByName("text");
     this._textRenderer = textEntity.getComponent(TextRenderer);
     this._textColor.copyFrom(this._textRenderer.color);
@@ -110,17 +110,17 @@ export class EndScript extends Script {
     this._backEntity = this.entity.findByName("back");
   }
 
-  onPointerEnter() {
+  override onPointerEnter() {
     this._textRenderer.color.set(1, 1, 1, 1);
     this._backEntity.isActive = true;
   }
 
-  onPointerExit() {
+  override onPointerExit() {
     this._textRenderer.color.copyFrom(this._textColor);
     this._backEntity.isActive = false;
   }
 
-  onPointerClick() {
+  override onPointerClick() {
     this._disableComponent();
 
     const currentAxisName = this.entity.name;
@@ -131,7 +131,7 @@ export class EndScript extends Script {
     this._flipView = true;
   }
 
-  onUpdate(deltaTime: number) {
+  override onUpdate(deltaTime: number) {
     this.entity.transform.worldRotationQuaternion = this._normalQuat;
 
     if (this._flipView) {
