@@ -11,6 +11,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "strict": false,
+    "noImplicitOverride": true,
     "incremental": false
   },
   "include": [

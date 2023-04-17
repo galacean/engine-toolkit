@@ -110,7 +110,7 @@ export class OrthoControl extends Script {
     this.enableRotate = false;
   }
 
-  onAwake(): void {
+  override onAwake(): void {
     const { engine, entity } = this;
     this.canvas = engine.canvas;
     this.input = engine.inputManager;
@@ -118,7 +118,7 @@ export class OrthoControl extends Script {
     this.cameraTransform = entity.transform;
   }
 
-  onUpdate(deltaTime: number): void {
+  override onUpdate(deltaTime: number): void {
     /** Update this._sphericalDelta, this._scale and this._panOffset. */
     this._updateInputDelta(deltaTime);
     /** Update camera's transform. */

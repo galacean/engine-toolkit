@@ -192,11 +192,7 @@ export class SketchRenderer extends SkinnedMeshRenderer {
     this.setMaterial(3, null);
   }
 
-  /**
-   * @override
-   * @param deltaTime - The delta-time
-   */
-  update(deltaTime: number) {
+  override update(deltaTime: number) {
     super.update(deltaTime);
     const worldMatrix = this._worldMatrix;
     if (worldMatrix) {

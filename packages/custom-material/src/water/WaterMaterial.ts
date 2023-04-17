@@ -31,7 +31,7 @@ const fragmentSource = `
     varying vec2 waterTexCoords;
     varying vec2 normalTexCoords;
   
-    uniform sampler2D u_normalTex;
+    uniform sampler2D material_NormalTexture;
     uniform sampler2D u_waterTex;
     uniform sampler2D u_edgeTex;
   
@@ -40,7 +40,7 @@ const fragmentSource = `
     uniform float u_distorsion_amount;
   
     void main() {
-      vec4 normalTex = texture2D(u_normalTex, normalTexCoords) * 2.0 - 1.0;
+      vec4 normalTex = texture2D(material_NormalTexture, normalTexCoords) * 2.0 - 1.0;
       vec4 waterTex = texture2D(u_waterTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
       vec4 edgeTex = texture2D(u_edgeTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
   
@@ -61,7 +61,6 @@ export class WaterMaterial extends BaseMaterial {
   private static _distorsionAmount = ShaderProperty.getByName("u_distorsion_amount");
   private static _distorsionSpeed = ShaderProperty.getByName("u_distorsion_speed");
 
-  static _normalTextureProp = ShaderProperty.getByName("u_normalTex");
   static _waterTextureProp = ShaderProperty.getByName("u_waterTex");
   static _edgeTextureProp = ShaderProperty.getByName("u_edgeTex");
 

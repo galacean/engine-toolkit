@@ -1,9 +1,10 @@
 import {
   Camera,
+  dependentComponents,
   DependentMode,
   Logger,
-  RenderTarget,
   Renderer,
+  RenderTarget,
   Scene,
   Script,
   Shader,
@@ -11,8 +12,7 @@ import {
   Texture2D,
   TextureFormat,
   Vector2,
-  Vector3,
-  dependentComponents
+  Vector3
 } from "@galacean/engine";
 import fs from "./color.fs.glsl";
 import vs from "./color.vs.glsl";
@@ -42,12 +42,8 @@ export class FramebufferPicker extends Script {
     this._frameBufferSize = value;
   }
 
-  /**
-   * @override
-   */
-  onAwake(): void {
-    const camera = this.entity.getComponent(Camera);
-    this._camera = camera;
+  override onAwake(): void {
+    this._camera = this.entity.getComponent(Camera);
   }
 
   /**

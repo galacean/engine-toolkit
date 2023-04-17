@@ -34,10 +34,7 @@ export class PlainColorMaterial extends BaseMaterial {
     this.renderState.rasterState.cullMode = CullMode.Off;
   }
 
-  /**
-   * @override
-   */
-  clone(): PlainColorMaterial {
+  override clone(): PlainColorMaterial {
     const dest = new PlainColorMaterial(this._engine);
     this.cloneTo(dest);
     return dest;
