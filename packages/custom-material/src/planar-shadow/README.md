@@ -1,6 +1,6 @@
 # Planar Shadow
 
-The cascaded shadows provided by Oasis Engine have a relatively large impact on performance. For the case where the
+The cascaded shadows provided by Galacean Engine have a relatively large impact on performance. For the case where the
 **shadow acceptor is a plane**, planar shadows can support shadow drawing with higher performance due to advantages such
 as
 not relying on the creation of Framebuffer.

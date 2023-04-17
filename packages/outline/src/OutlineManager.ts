@@ -18,10 +18,12 @@ import {
   Vector2,
   dependentComponents
 } from "@galacean/engine";
+
 import outlineFs from "./outline.fs.glsl";
 import outlineVs from "./outline.vs.glsl";
 import replaceFs from "./replace.fs.glsl";
 import replaceVs from "./replace.vs.glsl";
+
 
 /**
  * Show outline of entities.
@@ -38,10 +40,12 @@ export class OutlineManager extends Script {
       this._traverseEntity(entity.children[i], callback);
     }
   }
+
   private static _outlineColorProp = ShaderProperty.getByName("material_OutlineColor");
   private static _outlineTextureProp = ShaderProperty.getByName("material_OutlineTexture");
   private static _texSizeProp = ShaderProperty.getByName("material_TexSize");
   private static _replaceColorProp = ShaderProperty.getByName("camera_OutlineReplaceColor");
+
 
   private _outlineMaterial: BaseMaterial;
   private _replaceShader: Shader;
@@ -165,16 +169,14 @@ export class OutlineManager extends Script {
     }
   }
 
-  /** @internal */
-  onEndRender(camera: Camera): void {
+  override onEndRender(camera: Camera): void {
     const outlineEntities = this._outlineEntities;
     if (!outlineEntities.length) return;
     this._renderEntity(camera, this.subColor, this._subLineEntities);
     this._renderEntity(camera, this.mainColor, outlineEntities);
   }
 
-  /** @internal */
-  onDestroy() {
+  override onDestroy() {
     this._renderTarget.getColorTexture().destroy(true);
     this._renderTarget.destroy();
     this._screenEntity.destroy();

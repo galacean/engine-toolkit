@@ -8,6 +8,7 @@ import {
   Scene,
   Script,
   Shader,
+  ShaderProperty,
   Texture2D,
   TextureFormat,
   Vector2,
@@ -26,7 +27,7 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
   private static _pickPixel = new Uint8Array(4);
-  private static _pickColorProperty = Shader.getPropertyByName("u_pickColor");
+  private static _pickColorProperty = ShaderProperty.getByName("u_pickColor");
 
   private _renderersMap: Renderer[] = [];
   private _camera: Camera;
@@ -41,12 +42,8 @@ export class FramebufferPicker extends Script {
     this._frameBufferSize = value;
   }
 
-  /**
-   * @override
-   */
-  onAwake(): void {
-    const camera = this.entity.getComponent(Camera);
-    this._camera = camera;
+  override onAwake(): void {
+    this._camera = this.entity.getComponent(Camera);
   }
 
   /**
