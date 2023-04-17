@@ -6,18 +6,18 @@ Shader.create(
   `
 #include <common>
    uniform float u_lineScale;
-   uniform mat4 u_VPMat;
+   uniform mat4 camera_VPMat;
    uniform mat4 u_worldMatrix;
    uniform mat4 u_worldNormal;
 
-#ifdef O3_HAS_SKIN
-#ifdef O3_USE_JOINT_TEXTURE
-    uniform sampler2D u_jointSampler;
-    uniform float u_jointCount;
+#ifdef RENDERER_HAS_SKIN
+#ifdef RENDERER_USE_JOINT_TEXTURE
+    uniform sampler2D renderer_JointSampler;
+    uniform float renderer_JointCount;
 
     mat4 getJointMatrix(sampler2D smp, float index) {
-        float base = index / u_jointCount;
-        float hf = 0.5 / u_jointCount;
+        float base = index / renderer_JointCount;
+        float hf = 0.5 / renderer_JointCount;
         float v = base + hf;
 
         vec4 m0 = texture2D(smp, vec2(0.125, v ));
@@ -28,7 +28,7 @@ Shader.create(
         return mat4(m0, m1, m2, m3);
     }
 #else
-    uniform mat4 u_jointMatrix[ O3_JOINTS_NUM ];
+    uniform mat4 renderer_JointMatrix[ RENDERER_JOINTS_NUM ];
 #endif
 #endif
 
@@ -44,21 +44,21 @@ void main() {
 
     gl_Position = u_worldMatrix * position; 
     
-#if defined(SHOW_NORMAL) && defined(O3_HAS_NORMAL)
+#if defined(SHOW_NORMAL) && defined(RENDERER_HAS_NORMAL)
     if (gl_VertexID % 2 == 1) {
         vec3 normalW = normalize( mat3(u_worldNormal) * normal.xyz );
         gl_Position.xyz += normalize(normalW) * u_lineScale;
     }
 #endif
 
-#if defined(SHOW_TANGENT) && defined(O3_HAS_TANGENT)
+#if defined(SHOW_TANGENT) && defined(RENDERER_HAS_TANGENT)
     if (gl_VertexID % 2 == 1) {
         vec3 tangentW = normalize( mat3(u_worldNormal) * tangent.xyz );
         gl_Position.xyz += normalize(tangentW) * u_lineScale;
     }
 #endif
 
-#if defined(SHOW_BITANGENT) && defined(O3_HAS_TANGENT) && defined(O3_HAS_NORMAL)
+#if defined(SHOW_BITANGENT) && defined(RENDERER_HAS_TANGENT) && defined(RENDERER_HAS_NORMAL)
     if (gl_VertexID % 2 == 1) {
         vec3 normalW = normalize( mat3(u_worldNormal) * normal.xyz );
         vec3 tangentW = normalize( mat3(u_worldNormal) * tangent.xyz );
@@ -67,13 +67,13 @@ void main() {
     }
 #endif
     
-    gl_Position = u_VPMat * gl_Position; 
+    gl_Position = camera_VPMat * gl_Position; 
 }
 `,
   `
-uniform vec4 u_baseColor;
+uniform vec4 material_BaseColor;
 void main() {
-    gl_FragColor = u_baseColor;
+    gl_FragColor = material_BaseColor;
 }
 `
 );

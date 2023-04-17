@@ -27,7 +27,7 @@ export class PlainColorMaterial extends BaseMaterial {
 
     const shaderData = this.shaderData;
 
-    shaderData.enableMacro("OMIT_NORMAL");
+    shaderData.enableMacro("MATERIAL_OMIT_NORMAL");
 
     shaderData.setColor(PlainColorMaterial._baseColorProp, new Color(1, 1, 1, 1));
 
@@ -62,20 +62,20 @@ void main() {
   `
 #include <common>
 
-uniform vec4 u_baseColor;
+uniform vec4 material_BaseColor;
 
 void main() {
-     vec4 baseColor = u_baseColor;
+     vec4 baseColor = material_BaseColor;
 
-    #ifdef ALPHA_CUTOFF
-        if( baseColor.a < u_alphaCutoff ) {
+    #ifdef MATERIAL_IS_ALPHA_CUTOFF
+        if( baseColor.a < material_AlphaCutoff ) {
             discard;
         }
     #endif
 
     gl_FragColor = baseColor;
 
-     #ifndef OASIS_COLORSPACE_GAMMA
+     #ifndef ENGINE_IS_COLORSPACE_GAMMA
         gl_FragColor = linearToGamma(gl_FragColor);
     #endif
 }

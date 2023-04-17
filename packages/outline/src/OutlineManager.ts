@@ -4,7 +4,7 @@ import {
   Camera,
   CameraClearFlags,
   Color,
-  dependentComponents,
+  DependentMode,
   Entity,
   Layer,
   Material,
@@ -13,14 +13,15 @@ import {
   RenderTarget,
   Script,
   Shader,
+  ShaderProperty,
   Texture2D,
   TextureWrapMode,
   Vector2,
-  DependentMode
+  dependentComponents
 } from "@galacean/engine";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import fs from "./outline.fs.glsl";
 import vs from "./outline.vs.glsl";
-import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 
 /**
  * Show outline of entities.
@@ -36,8 +37,8 @@ export class OutlineManager extends Script {
       this._traverseEntity(entity.children[i], callback);
     }
   }
-  private static _outlineColorProp = Shader.getPropertyByName("u_outlineColor");
-  private static _texSizeProp = Shader.getPropertyByName("u_texSize");
+  private static _outlineColorProp = ShaderProperty.getByName("u_outlineColor");
+  private static _texSizeProp = ShaderProperty.getByName("u_texSize");
 
   private _outlineMaterial: BaseMaterial;
   private _replaceMaterial: BaseMaterial;

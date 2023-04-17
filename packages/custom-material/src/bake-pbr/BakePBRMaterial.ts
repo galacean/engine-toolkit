@@ -1,4 +1,4 @@
-import { Engine, PBRMaterial, Shader, Texture2D } from "@galacean/engine";
+import { Engine, PBRMaterial, Shader, ShaderProperty, Texture2D } from "@galacean/engine";
 import fragment from "./fragment";
 import vertex from "./vertex";
 
@@ -8,8 +8,8 @@ Shader.create("bake-pbr", vertex, fragment);
  * Bake PBR Material.
  */
 export class BakePBRMaterial extends PBRMaterial {
-  private static _lightMapTextureProp = Shader.getPropertyByName("u_lightMapTexture");
-  private static _lightMapIntensityProp = Shader.getPropertyByName("u_lightMapIntensity");
+  private static _lightMapTextureProp = ShaderProperty.getByName("u_lightMapTexture");
+  private static _lightMapIntensityProp = ShaderProperty.getByName("u_lightMapIntensity");
 
   /**
    * Light map texture.
