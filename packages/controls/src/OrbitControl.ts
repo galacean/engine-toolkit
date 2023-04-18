@@ -41,7 +41,7 @@ export class OrbitControl extends Script {
   /** Maximum zoom speed, the default is positive infinity. */
   maxZoom: number = Infinity;
   /** The minimum radian in the vertical direction, the default is 1 degree. */
-  minPolarAngle: number = 1;
+  minPolarAngle: number = (1 / 180) * Math.PI;
   /** The maximum radian in the vertical direction,  the default is 179 degree.  */
   maxPolarAngle: number = (179 / 180) * Math.PI;
   /** The minimum radian in the horizontal direction, the default is negative infinity. */
