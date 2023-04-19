@@ -19,13 +19,13 @@ Input Logger outputs `keyboard` and `pointer` information in real time for devel
 The `Input Logger` is published on npm with full typing support. To install, use:
 
 ```sh
-$ npm install @oasis-engine-toolkit/input-logger
+$ npm install @galacean/engine-toolkit-input-logger
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import { InputLogger } from "@oasis-engine-toolkit/input-logger";
+import { InputLogger } from "@galacean/engine-toolkit-input-logger";
 ```
 
 ## Usage
@@ -40,9 +40,9 @@ new InputLogger(engine);
 
 ## Links
 
-- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
-- [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
-- [API References](https://oasisengine.cn/#/api/latest/core)
+- [Repository](https://github.com/galacean/engine-toolkit)
+- [Documentation](https://galacean.antgroup.com/#/docs/latest/cn/install)
+- [API References](https://galacean.antgroup.com/#/api/latest/core)
 
 ## License
 

@@ -11,7 +11,7 @@ import {
   TextRenderer,
   TextVerticalAlignment,
   Vector2
-} from "oasis-engine";
+} from "@galacean/engine";
 import { InputLoggerControl } from "./InputLoggerControl";
 
 export class InputLogger {

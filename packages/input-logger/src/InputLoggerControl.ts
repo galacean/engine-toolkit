@@ -1,4 +1,4 @@
-import { InputManager, Keys, PointerButton, Script, TextRenderer } from "oasis-engine";
+import { Canvas, InputManager, Keys, PointerButton, Script, TextRenderer } from "@galacean/engine";
 
 export class InputLoggerControl extends Script {
   // @internal
@@ -7,9 +7,11 @@ export class InputLoggerControl extends Script {
   _showPointer: boolean = true;
   private _inputManager: InputManager;
   private _textRenderer: TextRenderer;
+  private _canvas: Canvas;
   private _stateMap = ["按下", "移动", "固定", "抬起", "离开"];
 
   onStart() {
+    this._canvas = this.engine.canvas;
     this._textRenderer = this.entity.getComponent(TextRenderer);
     this._inputManager = this.engine.inputManager;
   }
@@ -42,7 +44,7 @@ export class InputLoggerControl extends Script {
   }
 
   private _getPointerLog(): string {
-    const { _inputManager: inputManager } = this;
+    const { _inputManager: inputManager, _canvas: canvas } = this;
     const { pointers } = inputManager;
     let info = ` *** 当前触控信息(${
       // @ts-ignore
@@ -56,8 +58,8 @@ export class InputLoggerControl extends Script {
       info += `id:${pointer.id} \n`;
       info += `状态:${this._stateMap[pointer.phase]} \n`;
       info += `坐标:${Math.round(pointer.position.x)}, ${Math.round(pointer.position.y)} \n`;
-      info += `归一化:${Math.round((pointer.position.x / this.engine.canvas.width) * 100) / 100}, ${
-        Math.round((pointer.position.y / this.engine.canvas.height) * 100) / 100
+      info += `归一化:${Math.round((pointer.position.x / canvas.width) * 100) / 100}, ${
+        Math.round((pointer.position.y / canvas.height) * 100) / 100
       } \n`;
       let buttonInfo: string = "";
       const { pressedButtons: buttons } = pointer;
