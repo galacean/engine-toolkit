@@ -10,13 +10,13 @@ export class InputLoggerControl extends Script {
   private _canvas: Canvas;
   private _stateMap = ["按下", "移动", "固定", "抬起", "离开"];
 
-  onStart() {
+  override onStart() {
     this._canvas = this.engine.canvas;
     this._textRenderer = this.entity.getComponent(TextRenderer);
     this._inputManager = this.engine.inputManager;
   }
 
-  onUpdate(deltaTime: number): void {
+  override onUpdate(deltaTime: number): void {
     let log = "";
     this._showKeyboard && (log += this._getKeyboardLog());
     this._showPointer && (log += this._getPointerLog());
