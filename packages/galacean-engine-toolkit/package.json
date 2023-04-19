@@ -1,0 +1,44 @@
+{
+  "name": "@galacean/engine-toolkit",
+  "version": "1.0.0-beta.0",
+  "license": "MIT",
+  "scripts": {
+    "b:types": "tsc"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "homepage": "https://oasisengine.cn/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/galacean/engine-toolkit"
+  },
+  "bugs": "https://github.com/galacean/engine-toolkit/issues",
+  "types": "types/index.d.ts",
+  "module": "dist/es/index.js",
+  "main": "dist/umd/browser.js",
+  "umd": {
+    "name": "Galacean.ToolKit",
+    "globals": {
+      "@galacean/engine": "Galacean"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "types/**/*"
+  ],
+  "dependencies": {
+    "@galacean/engine-toolkit-auxiliary-lines": "workspace:*",
+    "@galacean/engine-toolkit-controls": "workspace:*",
+    "@galacean/engine-toolkit-framebuffer-picker": "workspace:*",
+    "@galacean/engine-toolkit-gizmo": "workspace:*",
+    "@galacean/engine-toolkit-lines": "workspace:*",
+    "@galacean/engine-toolkit-outline": "workspace:*",
+    "@galacean/engine-toolkit-skeleton-viewer": "workspace:*",
+    "@galacean/engine-toolkit-custom-material": "workspace:*",
+    "@galacean/engine-toolkit-navigation-gizmo": "workspace:*",
+    "@galacean/engine-toolkit-geometry-sketch": "workspace:*",
+    "@galacean/engine-toolkit-stats": "workspace:*"
+  }
+}

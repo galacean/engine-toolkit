@@ -1,5 +1,5 @@
-import { WebGLEngine } from "oasis-engine";
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
+import { WebGLEngine } from "@galacean/engine";
+import { OrbitControl } from "@galacean/engine-toolkit-controls";
 import { expect } from "chai";
 
 const canvasDOM = document.createElement("canvas");
@@ -8,8 +8,8 @@ canvasDOM.height = 1024;
 
 describe("orbit control test", function () {
   let orbitControl: OrbitControl;
-  before(() => {
-    const engine = new WebGLEngine(canvasDOM);
+  before(async () => {
+    const engine = await WebGLEngine.create({ canvas: canvasDOM });
     const node = engine.sceneManager.activeScene.createRootEntity();
     orbitControl = node.addComponent(OrbitControl);
   });

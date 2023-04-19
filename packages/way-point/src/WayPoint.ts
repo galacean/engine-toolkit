@@ -1,4 +1,4 @@
-import { AnimationClip, AnimationVector3Curve, Keyframe, Script, Transform, Vector3 } from "oasis-engine";
+import { AnimationClip, AnimationVector3Curve, Keyframe, Script, Transform, Vector3 } from "@galacean/engine";
 
 export class WayPoint extends Script {
   duration: number = 1;
@@ -60,7 +60,7 @@ export class WayPoint extends Script {
     }
   }
 
-  onUpdate() {
+  override onUpdate() {
     // @ts-ignore
     this._animationClip._sampleAnimation(this.entity, this.currentNormalizedTime * this.duration);
   }

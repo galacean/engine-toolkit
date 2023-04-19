@@ -1,6 +1,6 @@
-uniform vec3 u_outlineColor;
-uniform sampler2D u_texture;
-uniform vec2 u_texSize;
+uniform vec3 material_OutlineColor;
+uniform sampler2D material_OutlineTexture;
+uniform vec2 material_TexSize;
 varying vec2 v_uv;
 
 float luminance(vec4 color) {
@@ -47,18 +47,18 @@ float sobel() {
   float edgeY = 0.0;
   vec2 uv[9];
 
-  uv[0] = v_uv + u_texSize.xy * vec2(-1, -1);
-  uv[1] = v_uv + u_texSize.xy * vec2(0, -1);
-  uv[2] = v_uv + u_texSize.xy * vec2(1, -1);
-  uv[3] = v_uv + u_texSize.xy * vec2(-1, 0);
-  uv[4] = v_uv + u_texSize.xy * vec2(0, 0);
-  uv[5] = v_uv + u_texSize.xy * vec2(1, 0);
-  uv[6] = v_uv + u_texSize.xy * vec2(-1, 1);
-  uv[7] = v_uv + u_texSize.xy * vec2(0, 1);
-  uv[8] = v_uv + u_texSize.xy * vec2(1, 1);
+  uv[0] = v_uv + material_TexSize.xy * vec2(-1, -1);
+  uv[1] = v_uv + material_TexSize.xy * vec2(0, -1);
+  uv[2] = v_uv + material_TexSize.xy * vec2(1, -1);
+  uv[3] = v_uv + material_TexSize.xy * vec2(-1, 0);
+  uv[4] = v_uv + material_TexSize.xy * vec2(0, 0);
+  uv[5] = v_uv + material_TexSize.xy * vec2(1, 0);
+  uv[6] = v_uv + material_TexSize.xy * vec2(-1, 1);
+  uv[7] = v_uv + material_TexSize.xy * vec2(0, 1);
+  uv[8] = v_uv + material_TexSize.xy * vec2(1, 1);
 
   for (int i = 0; i < 9; i++) {
-    texColor = luminance(texture2D(u_texture, uv[i]));
+    texColor = luminance(texture2D(material_OutlineTexture, uv[i]));
     edgeX += texColor * Gx[i];
     edgeY += texColor * Gy[i];
   }
@@ -73,9 +73,9 @@ vec4 linearToGamma(vec4 linearIn){
 void main(){
   float sobelFactor = step(1.0, sobel());
   // float sobelFactor = sobel();
-  gl_FragColor = mix( vec4(0), vec4(u_outlineColor, 1.0), sobelFactor);
+  gl_FragColor = mix( vec4(0), vec4(material_OutlineColor, 1.0), sobelFactor);
 
-    #ifndef OASIS_COLORSPACE_GAMMA
+    #ifndef ENGINE_IS_COLORSPACE_GAMMA
         gl_FragColor = linearToGamma(gl_FragColor);
     #endif
 

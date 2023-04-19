@@ -1,4 +1,4 @@
-import { Engine, PBRMaterial, Shader, Texture2D } from "oasis-engine";
+import { Engine, PBRMaterial, Shader, ShaderProperty, Texture2D } from "@galacean/engine";
 import fragment from "./fragment";
 import vertex from "./vertex";
 
@@ -8,8 +8,8 @@ Shader.create("bake-pbr", vertex, fragment);
  * Bake PBR Material.
  */
 export class BakePBRMaterial extends PBRMaterial {
-  private static _lightMapTextureProp = Shader.getPropertyByName("u_lightMapTexture");
-  private static _lightMapIntensityProp = Shader.getPropertyByName("u_lightMapIntensity");
+  private static _lightMapTextureProp = ShaderProperty.getByName("u_lightMapTexture");
+  private static _lightMapIntensityProp = ShaderProperty.getByName("u_lightMapIntensity");
 
   /**
    * Light map texture.
@@ -48,10 +48,7 @@ export class BakePBRMaterial extends PBRMaterial {
     this.shaderData.setFloat(BakePBRMaterial._lightMapIntensityProp, 1);
   }
 
-  /**
-   * @override
-   */
-  clone(): BakePBRMaterial {
+  override clone(): BakePBRMaterial {
     const dest = new BakePBRMaterial(this._engine);
     this.cloneTo(dest);
     return dest;

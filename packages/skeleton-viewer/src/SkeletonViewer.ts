@@ -13,7 +13,7 @@ import {
   Shader,
   SkinnedMeshRenderer,
   Vector3
-} from "oasis-engine";
+} from "@galacean/engine";
 
 /**
  * Skeleton visualization.
@@ -62,23 +62,20 @@ export class SkeletonViewer extends Script {
     }
   }
 
-  /** @internal */
-  onDestroy(): void {
+  override onDestroy(): void {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].destroy();
     }
     this._debugMesh.length = 0;
   }
 
-  /** @internal */
-  onEnable() {
+  override onEnable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = true;
     }
   }
 
-  /** @internal */
-  onDisable() {
+  override onDisable() {
     for (let i = 0, length = this._debugMesh.length; i < length; i++) {
       this._debugMesh[i].enabled = false;
     }
@@ -240,14 +237,14 @@ Shader.create(
   attribute vec3 POSITION;
   attribute vec3 NORMAL;
 
-  uniform mat4 u_MVPMat;
-  uniform mat4 u_normalMat;
+  uniform mat4 renderer_MVPMat;
+  uniform mat4 renderer_NormalMat;
 
   varying vec3 v_normal;
 
   void main(){
-      gl_Position = u_MVPMat * vec4( POSITION , 1.0 );;
-      v_normal = normalize( mat3(u_normalMat) * NORMAL );
+      gl_Position = renderer_MVPMat * vec4( POSITION , 1.0 );;
+      v_normal = normalize( mat3(renderer_NormalMat) * NORMAL );
   }`,
   `
       uniform vec3 u_colorMin;

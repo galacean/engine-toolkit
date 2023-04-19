@@ -1,6 +1,6 @@
 {
-  "name": "@oasis-engine-toolkit/stats",
-  "version": "1.0.0-alpha.18",
+  "name": "@galacean/engine-toolkit-stats",
+  "version": "1.0.0-beta.0",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
@@ -12,17 +12,17 @@
   "homepage": "https://oasisengine.cn/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+    "url": "https://github.com/galacean/engine-toolkit"
   },
-  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
+  "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "types": "types/index.d.ts",
   "module": "dist/es/index.js",
-  "main": "dist/umd/browser.js",
+  "main": "dist/commonjs/browser.js",
   "files": [
     "dist/**/*",
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^0.9.0-alpha"
+    "@galacean/engine": "^1.0.0-alpha"
   }
 }

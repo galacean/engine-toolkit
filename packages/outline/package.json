@@ -1,9 +1,9 @@
 {
-  "name": "@oasis-engine-toolkit/outline",
-  "version": "1.0.0-alpha.18",
+  "name": "@galacean/engine-toolkit-outline",
+  "version": "1.0.0-beta.0",
   "license": "MIT",
   "module": "dist/es/index.js",
-  "main": "dist/umd/browser.js",
+  "main": "dist/commonjs/browser.js",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -11,9 +11,9 @@
   "homepage": "https://oasisengine.cn/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ant-galaxy/oasis-engine-toolkit"
+    "url": "https://github.com/galacean/engine-toolkit"
   },
-  "bugs": "https://github.com/ant-galaxy/oasis-engine-toolkit/issues",
+  "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "scripts": {
     "b:types": "tsc"
   },
@@ -23,9 +23,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "oasis-engine": "^1.0.0-alpha"
-  },
-  "dependencies": {
-    "@oasis-engine-toolkit/custom-material": "workspace:*"
+    "@galacean/engine": "^1.0.0-alpha"
   }
 }

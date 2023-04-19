@@ -1,4 +1,4 @@
-import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "oasis-engine";
+import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "@galacean/engine";
 
 import { Axis } from "./Axis";
 import { Utils } from "./Utils";
@@ -8,7 +8,6 @@ import { State } from "./enums/GizmoState";
 
 /** @internal */
 export class TranslateControl extends GizmoComponent {
-  type: State = State.translate;
   private _scale: number = 1;
   private _camera: Camera;
   private _group: Group;
@@ -31,6 +30,7 @@ export class TranslateControl extends GizmoComponent {
 
   constructor(entity: Entity) {
     super(entity);
+    this.type = State.translate;
     this._initAxis();
     this._createAxis(entity);
   }

@@ -12,8 +12,7 @@ function walk(dir) {
   files = files.map((file) => {
     const filePath = path.join(dir, file);
     const stats = fs.statSync(filePath);
-    if (stats.isDirectory()) return walk(filePath);
-    else if (stats.isFile()) return filePath;
+    if (stats.isDirectory()) return walk(filePath); else if (stats.isFile()) return filePath;
   });
   return files.reduce((all, folderContents) => all.concat(folderContents), []);
 }
@@ -30,7 +29,7 @@ const pkgs = fs
     };
   });
 
-// "oasisEngine" 、 "@oasisEngine/controls" ...
+// "@galacean/engine-toolkit" 、 "@galacean/engine-toolkit-controls" ...
 function toGlobalName(pkgName) {
   return camelCase(pkgName);
 }
@@ -38,79 +37,61 @@ function toGlobalName(pkgName) {
 const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const mainFields = ["module", "main"];
 
-const plugins = [
-  resolve({ extensions, preferBuiltins: true, mainFields }),
-  glslify({
-    include: [/\.glsl$/]
-  }),
-  swc(
-    defineRollupSwcOption({
-      include: /\.[mc]?[jt]sx?$/,
-      exclude: /node_modules/,
-      jsc: {
-        loose: true,
-        externalHelpers: true,
-        target: "es5"
-      },
-      sourceMaps: true
-    })
-  ),
-  binary2base64({
-    include: ["**/*.wasm"]
-  })
-];
+const plugins = [resolve({ extensions, preferBuiltins: true, mainFields }), glslify({
+  include: [/\.glsl$/]
+}), swc(defineRollupSwcOption({
+  include: /\.[mc]?[jt]sx?$/, exclude: /node_modules/, jsc: {
+    loose: true, externalHelpers: true, target: "es5"
+  }, sourceMaps: true
+})), binary2base64({
+  include: ["**/*.wasm"]
+})];
 
 function makeRollupConfig(pkg) {
-  const externals = Object.keys(
-    Object.assign({}, pkg.pkgJson.dependencies, pkg.pkgJson.peerDependencies, pkg.pkgJson.devDependencies)
-  );
-  const globals = {
-    "oasis-engine": "oasisEngine"
+  const externals = Object.keys(Object.assign({}, pkg.pkgJson.dependencies, pkg.pkgJson.peerDependencies, pkg.pkgJson.devDependencies));
+  let globals = {
+    "@galacean/engine": "Galacean"
   };
   externals.forEach((external) => {
     globals[external] = toGlobalName(external);
   });
 
-  const entries = Object.fromEntries(
-    walk(path.join(pkg.location, "src"))
-      .filter((file) => /^(?!.*\.d\.ts$).*\.ts$/.test(file))
-      .map((item) => {
-        return [path.relative(path.join(pkg.location, "src"), item.replace(/\.[^/.]+$/, "")), item];
-      })
-  );
+  const entries = Object.fromEntries(walk(path.join(pkg.location, "src"))
+    .filter((file) => /^(?!.*\.d\.ts$).*\.ts$/.test(file))
+    .map((item) => {
+      return [path.relative(path.join(pkg.location, "src"), item.replace(/\.[^/.]+$/, "")), item];
+    }));
 
-  plugins.push(
-    replace({
-      preventAssignment: true,
-      __buildVersion: pkg.pkgJson.version
-    })
-  );
+  plugins.push(replace({
+    preventAssignment: true, __buildVersion: pkg.pkgJson.version
+  }));
 
-  return [
-    {
-      input: path.join(pkg.location, "src", "index.ts"),
-      output: {
+  const umdConfig = pkg.pkgJson.umd;
+
+  const configs = [{
+    input: entries, output: {
+      dir: path.join(pkg.location, "dist", "es"), format: "es", sourcemap: true, globals: globals
+    }, external: externals, plugins
+  }];
+
+  configs.push({
+    input: path.join(pkg.location, "src", "index.ts"), output: {
+      file: path.join(pkg.location, pkg.pkgJson.main), sourcemap: true, format: "commonjs"
+    }, external: externals, plugins
+  });
+
+  if (umdConfig) {
+    configs.push({
+      input: path.join(pkg.location, "src", "index.ts"), output: {
         file: path.join(pkg.location, "dist", "umd", "browser.js"),
         format: "umd",
-        name: toGlobalName(pkg.pkgJson.name),
+        name: umdConfig.name,
         globals: globals
-      },
-      // 总包只 external oasis-engine
-      external: pkg.pkgJson.name === "oasis-engine-toolkit" ? ["oasis-engine"] : externals,
-      plugins: [...plugins, minify({ sourceMap: true })]
-    },
-    {
-      input: entries,
-      output: {
-        dir: path.join(pkg.location, "dist", "es"),
-        format: "es",
-        sourcemap: true,
-        globals: globals
-      },
-      external: externals,
-      plugins
-    }
-  ];
+      }, external: Object.keys(umdConfig.globals ?? {}), plugins: [...plugins, minify({ sourceMap: true })]
+    });
+  }
+
+  return configs;
 }
 
 export default Promise.all(pkgs.map(makeRollupConfig).flat());

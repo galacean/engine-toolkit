@@ -1,4 +1,4 @@
-import { Entity, InputManager, MathUtil, Script, Transform, Vector3 } from "oasis-engine";
+import { Entity, InputManager, MathUtil, Script, Transform, Vector3 } from "@galacean/engine";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
 import { ControlFreeKeyboard } from "./inputDevice/ControlFreeKeyboard";
 import { ControlFreePointer } from "./inputDevice/ControlFreePointer";
@@ -38,7 +38,7 @@ export class FreeControl extends Script {
     spherical.setFromVec3(tempVec, this._atTheBack);
   }
 
-  onUpdate(deltaTime: number): void {
+  override onUpdate(deltaTime: number): void {
     if (this.enabled === false) return;
     let curHandlerType = ControlHandlerType.None;
     const { _tempVec: delta } = this;

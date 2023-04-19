@@ -1,4 +1,4 @@
-import { Camera, Engine, ModelMesh, Script, Vector3, MeshRenderer, MathUtil } from "oasis-engine";
+import { Camera, Engine, ModelMesh, Script, Vector3, MeshRenderer, MathUtil } from "@galacean/engine";
 import { GridMaterial } from "./GridMaterial";
 
 /**
@@ -78,10 +78,7 @@ export class GridControl extends Script {
     this._flipGrid = true;
   }
 
-  /**
-   * @override
-   */
-  onAwake() {
+  override onAwake() {
     const { engine, entity } = this;
 
     const gridRenderer = entity.addComponent(MeshRenderer);
@@ -92,10 +89,7 @@ export class GridControl extends Script {
     gridRenderer.setMaterial(this._material);
   }
 
-  /**
-   * @override
-   */
-  onUpdate(deltaTime: number) {
+  override onUpdate(deltaTime: number) {
     const { _material: material, camera } = this;
     if (camera === null) return;
 

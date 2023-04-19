@@ -1,10 +1,9 @@
-import { Component, Entity, MeshRenderer, Color } from "oasis-engine";
+import { Component, Entity, MeshRenderer, Color } from "@galacean/engine";
 import { AxisProps } from "./Type";
-import { PlainColorMaterial } from "@oasis-engine-toolkit/custom-material";
-import { ArcMaterial } from "./GizmoMaterial";
+import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 
 export class Axis extends Component {
-  private _material: PlainColorMaterial | ArcMaterial;
+  private _material: PlainColorMaterial;
   private _color: Color = new Color();
   private _highLightColor: Color = new Color();
   private _yellowColor: Color = new Color(1.0, 0.95, 0.0, 1.0);
@@ -48,7 +47,7 @@ export class Axis extends Component {
       const axisHelperRenderer = axisHelperEntity.addComponent(MeshRenderer);
       axisHelperRenderer.receiveShadows = false;
       axisHelperRenderer.castShadows = false;
-      axisHelperRenderer.priority = 100;
+      axisHelperRenderer.priority = value.priority ? value.priority : 100;
       axisHelperRenderer.mesh = value.axisHelperMesh[i];
       axisHelperRenderer.setMaterial(value.axisHelperMaterial);
     }

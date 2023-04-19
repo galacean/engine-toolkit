@@ -8,11 +8,12 @@ import {
   Scene,
   Script,
   Shader,
+  ShaderProperty,
   Texture2D,
   TextureFormat,
   Vector2,
   Vector3
-} from "oasis-engine";
+} from "@galacean/engine";
 import fs from "./color.fs.glsl";
 import vs from "./color.vs.glsl";
 
@@ -20,13 +21,13 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 
 /**
  * GPU Frame buffer picker.
- * @decorator `@dependentComponents(DependentMode.CheckOnly, Camera)`
+ * @decorator `@dependentComponents(Camera, DependentMode.CheckOnly)`
  */
-@dependentComponents(DependentMode.CheckOnly, Camera)
+@dependentComponents(Camera, DependentMode.CheckOnly)
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
   private static _pickPixel = new Uint8Array(4);
-  private static _pickColorProperty = Shader.getPropertyByName("u_pickColor");
+  private static _pickColorProperty = ShaderProperty.getByName("u_pickColor");
 
   private _renderersMap: Renderer[] = [];
   private _camera: Camera;
@@ -41,12 +42,8 @@ export class FramebufferPicker extends Script {
     this._frameBufferSize = value;
   }
 
-  /**
-   * @override
-   */
-  onAwake(): void {
-    const camera = this.entity.getComponent(Camera);
-    this._camera = camera;
+  override onAwake(): void {
+    this._camera = this.entity.getComponent(Camera);
   }
 
   /**

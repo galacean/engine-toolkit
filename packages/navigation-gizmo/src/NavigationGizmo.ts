@@ -15,7 +15,7 @@ import {
   TextRenderer,
   Vector2,
   Vector3
-} from "oasis-engine";
+} from "@galacean/engine";
 import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";
@@ -163,7 +163,7 @@ export class NavigationGizmo extends Script {
     this._target._onValueChanged = this._setTarget;
   }
 
-  onUpdate() {
+  override onUpdate() {
     this._gizmoCamera.viewport.set(this.position.x, this.position.y, this.size.x, this.size.y);
   }
 
@@ -281,8 +281,7 @@ export class NavigationGizmo extends Script {
     axisXTextRenderer.color.copyFrom(fontColor);
     axisXTextRenderer.horizontalAlignment = TextHorizontalAlignment.Center;
 
-    const endComponent = entity.addComponent(EndScript);
-    this._endScript[axisName] = endComponent;
+    this._endScript[axisName] = entity.addComponent(EndScript);
   }
 
   private _setTarget(): void {

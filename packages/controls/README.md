@@ -76,25 +76,25 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 The `Control` is published on npm with full typing support. To install, use:
 
 ```sh
-$ npm install @oasis-engine-toolkit/controls
+$ npm install @galacean/engine-toolkit-controls
 ```
 
 This will allow you to import package entirely using:
 
 ```javascript
-import * as Controls from "@oasis-engine-toolkit/controls";
+import * as Controls from "@galacean/engine-toolkit-controls";
 ```
 
 or individual classes using:
 
 ```javascript
-import { OrthoControl } from "@oasis-engine-toolkit/controls";
+import { OrthoControl } from "@galacean/engine-toolkit-controls";
 ```
 
 ## Usage
 
 ```ts
-import { OrbitControl } from "@oasis-engine-toolkit/controls";
+import { OrbitControl } from "@galacean/engine-toolkit-controls";
 
 // Create engine
 const engine = await WebGLEngine.create({ canvas: "canvas" });
@@ -112,7 +112,7 @@ cameraEntity.addComponent(OrbitControl);
 
 ## Links
 
-- [Repository](https://github.com/ant-galaxy/oasis-engine-toolkit)
+- [Repository](https://github.com/galacean/engine-toolkit)
 - [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
 - [API References](https://oasisengine.cn/#/api/latest/core)
 

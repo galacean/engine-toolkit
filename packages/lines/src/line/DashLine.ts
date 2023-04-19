@@ -1,4 +1,4 @@
-import { Color, Vector2, Texture2D } from "oasis-engine";
+import { Color, Vector2, Texture2D } from "@galacean/engine";
 import { DashMaterial } from "./material/DashMaterial";
 import { Line } from "./Line";
 import { LineVertexBuilder } from "./vertexBuilder";
@@ -7,7 +7,7 @@ import { LineVertexBuilder } from "./vertexBuilder";
  * Dash Line.
  */
 export class DashLine extends Line {
-  protected _material: DashMaterial = null;
+  protected override _material: DashMaterial = null;
   private _dash: Vector2;
 
   /**
@@ -29,17 +29,11 @@ export class DashLine extends Line {
     super(entity);
   }
 
-  /**
-   * @override
-   */
-  protected async _generateData() {
+  protected override async _generateData() {
     return await LineVertexBuilder.instance.dashLine(this._flattenPoints, this._join, this._cap, 0, -1);
   }
 
-  /**
-   * @override
-   */
-  protected _initMaterial() {
+  protected override _initMaterial() {
     const material = new DashMaterial(this.engine);
     this._renderer.setMaterial(material);
     this._material = material;

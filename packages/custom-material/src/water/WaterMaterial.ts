@@ -1,11 +1,11 @@
-import { Shader, Texture2D, Engine, BaseMaterial, Vector2, Vector4 } from "oasis-engine";
+import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector4 } from "@galacean/engine";
 
 const vertexSource = `
     attribute vec3 POSITION;
     attribute vec2 TEXCOORD_0;
     attribute vec4 COLOR_0;
 
-    uniform mat4 u_MVPMat;
+    uniform mat4 renderer_MVPMat;
     
     uniform float u_time;
     uniform vec2 u_water_speed; 
@@ -16,7 +16,7 @@ const vertexSource = `
     varying vec2 normalTexCoords;
   
     void main() {
-      gl_Position = u_MVPMat * vec4(POSITION, 1.0);
+      gl_Position = renderer_MVPMat * vec4(POSITION, 1.0);
   
       waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * sin(u_time), u_water_speed.y * cos(u_time));
       normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));     
@@ -31,7 +31,7 @@ const fragmentSource = `
     varying vec2 waterTexCoords;
     varying vec2 normalTexCoords;
   
-    uniform sampler2D u_normalTex;
+    uniform sampler2D material_NormalTexture;
     uniform sampler2D u_waterTex;
     uniform sampler2D u_edgeTex;
   
@@ -40,7 +40,7 @@ const fragmentSource = `
     uniform float u_distorsion_amount;
   
     void main() {
-      vec4 normalTex = texture2D(u_normalTex, normalTexCoords) * 2.0 - 1.0;
+      vec4 normalTex = texture2D(material_NormalTexture, normalTexCoords) * 2.0 - 1.0;
       vec4 waterTex = texture2D(u_waterTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
       vec4 edgeTex = texture2D(u_edgeTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
   
@@ -55,15 +55,14 @@ const fragmentSource = `
 Shader.create("water", vertexSource, fragmentSource);
 
 export class WaterMaterial extends BaseMaterial {
-  private static _waterSpeed = Shader.getPropertyByName("u_water_speed");
-  private static _edgeColor = Shader.getPropertyByName("u_edgeColor");
-  private static _edgeParam = Shader.getPropertyByName("u_edgeParam");
-  private static _distorsionAmount = Shader.getPropertyByName("u_distorsion_amount");
-  private static _distorsionSpeed = Shader.getPropertyByName("u_distorsion_speed");
+  private static _waterSpeed = ShaderProperty.getByName("u_water_speed");
+  private static _edgeColor = ShaderProperty.getByName("u_edgeColor");
+  private static _edgeParam = ShaderProperty.getByName("u_edgeParam");
+  private static _distorsionAmount = ShaderProperty.getByName("u_distorsion_amount");
+  private static _distorsionSpeed = ShaderProperty.getByName("u_distorsion_speed");
 
-  static _normalTextureProp = Shader.getPropertyByName("u_normalTex");
-  static _waterTextureProp = Shader.getPropertyByName("u_waterTex");
-  static _edgeTextureProp = Shader.getPropertyByName("u_edgeTex");
+  static _waterTextureProp = ShaderProperty.getByName("u_waterTex");
+  static _edgeTextureProp = ShaderProperty.getByName("u_edgeTex");
 
   /**
    *  Normal Texture Map

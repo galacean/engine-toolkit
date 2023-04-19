@@ -1,4 +1,4 @@
-import { Script, Camera } from "oasis-engine";
+import { Script, Camera } from "@galacean/engine";
 import Monitor from "./Monitor";
 
 /**
@@ -7,12 +7,9 @@ import Monitor from "./Monitor";
 export class Stats extends Script {
   private monitor: Monitor;
 
-  /**
-   * @override
-   * @param camera - The monitor camera
-   */
-  onBeginRender(camera: Camera): void {
+  override onBeginRender(camera: Camera): void {
     if (!this.monitor) {
+      // @ts-ignore
       const gl = camera.engine._hardwareRenderer.gl;
       if (gl) {
         this.monitor = new Monitor(gl);
@@ -20,11 +17,7 @@ export class Stats extends Script {
     }
   }
 
-  /**
-   * @override
-   * @param camera - The monitor camera
-   */
-  onEndRender(camera: Camera): void {
+  override onEndRender(camera: Camera): void {
     if (this.monitor) {
       this.monitor.update();
     }

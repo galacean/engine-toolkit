@@ -1,4 +1,4 @@
-import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "oasis-engine";
+import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "@galacean/engine";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
 import { IControlInput } from "./inputDevice/IControlInput";
 import { ControlKeyboard } from "./inputDevice/ControlKeyboard";
@@ -41,7 +41,7 @@ export class OrbitControl extends Script {
   /** Maximum zoom speed, the default is positive infinity. */
   maxZoom: number = Infinity;
   /** The minimum radian in the vertical direction, the default is 1 degree. */
-  minPolarAngle: number = 1;
+  minPolarAngle: number = (1 / 180) * Math.PI;
   /** The maximum radian in the vertical direction,  the default is 179 degree.  */
   maxPolarAngle: number = (179 / 180) * Math.PI;
   /** The minimum radian in the horizontal direction, the default is negative infinity. */
@@ -156,7 +156,7 @@ export class OrbitControl extends Script {
     }
   }
 
-  onAwake(): void {
+  override onAwake(): void {
     const { engine, entity } = this;
     this.canvas = engine.canvas;
     this.input = engine.inputManager;
@@ -166,7 +166,7 @@ export class OrbitControl extends Script {
     this._atTheBack = false;
   }
 
-  onUpdate(deltaTime: number): void {
+  override onUpdate(deltaTime: number): void {
     /** Update this._sphericalDelta, this._scale and this._panOffset. */
     this._updateInputDelta(deltaTime);
     /** Update camera's transform. */
