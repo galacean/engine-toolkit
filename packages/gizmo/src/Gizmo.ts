@@ -127,7 +127,6 @@ export class Gizmo extends Script {
   set size(value: number) {
     this._scalor = MathUtil.clamp(value, 0.01, Infinity);
     Utils.scaleFactor = this._scalor * 0.05773502691896257;
-    Utils.rotateCircleRadius = this._scalor * 1.6;
   }
 
   constructor(entity: Entity) {
