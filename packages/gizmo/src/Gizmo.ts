@@ -49,6 +49,7 @@ export class Gizmo extends Script {
   private _tempRay2: Ray = new Ray();
 
   private _type: State = null;
+  private _scalor: number = 1;
 
   private _sphereColliderEntity: Entity;
 
@@ -113,6 +114,20 @@ export class Gizmo extends Script {
         control.entity.isActive = false;
       }
     );
+  }
+
+  /**
+   * change gizmo size
+   * @return current gizmo size - min 0.01, default 1
+   */
+  get size(): number {
+    return this._scalor;
+  }
+
+  set size(value: number) {
+    this._scalor = MathUtil.clamp(value, 0.01, Infinity);
+    Utils.scaleFactor = this._scalor * 0.05773502691896257;
+    Utils.rotateCircleRadius = this._scalor * 1.6;
   }
 
   constructor(entity: Entity) {
