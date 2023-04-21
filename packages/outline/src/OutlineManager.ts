@@ -16,6 +16,7 @@ import {
   Texture2D,
   TextureWrapMode,
   Vector2,
+  Vector4,
   dependentComponents
 } from "@galacean/engine";
 
@@ -23,7 +24,6 @@ import outlineFs from "./outline.fs.glsl";
 import outlineVs from "./outline.vs.glsl";
 import replaceFs from "./replace.fs.glsl";
 import replaceVs from "./replace.vs.glsl";
-
 
 /**
  * Show outline of entities.
@@ -46,7 +46,6 @@ export class OutlineManager extends Script {
   private static _texSizeProp = ShaderProperty.getByName("material_TexSize");
   private static _replaceColorProp = ShaderProperty.getByName("camera_OutlineReplaceColor");
 
-
   private _outlineMaterial: BaseMaterial;
   private _replaceShader: Shader;
   private _renderTarget: RenderTarget;
@@ -62,6 +61,8 @@ export class OutlineManager extends Script {
 
   private _renderers: MeshRenderer[] = [];
   private _layerMap: Array<{ entity: Entity; layer: Layer }> = [];
+  private _cameraViewport: Vector4 = new Vector4();
+  private _outLineViewport: Vector4 = new Vector4(0, 0, 1, 1);
 
   /** Outline main color. */
   get mainColor(): Color {
@@ -217,6 +218,8 @@ export class OutlineManager extends Script {
 
     // 1. render outline mesh with replace material
     this._screenEntity.isActive = false;
+   
+  
     camera.renderTarget = this._renderTarget;
     scene.background.solidColor = this._clearColor;
     scene.background.mode = BackgroundMode.SolidColor;
@@ -226,8 +229,10 @@ export class OutlineManager extends Script {
     camera.render();
 
     // 2. render screen only
+    this._cameraViewport.copyFrom(camera.viewport);
     this._screenEntity.isActive = true;
     camera.renderTarget = null;
+    camera.viewport = this._outLineViewport;
     camera.clearFlags = CameraClearFlags.None;
     camera.enableFrustumCulling = false;
     camera.resetReplacementShader();
@@ -244,6 +249,8 @@ export class OutlineManager extends Script {
     camera.clearFlags = originalClearFlags;
     camera.enableFrustumCulling = originalEnableFrustumCulling;
     camera.cullingMask = originalCullingMask;
+    camera.viewport = this._cameraViewport;
+    
     scene.background.solidColor = originalSolidColor;
     scene.background.mode = originalBackgroundMode;
   }

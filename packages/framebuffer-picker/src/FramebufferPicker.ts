@@ -127,8 +127,8 @@ export class FramebufferPicker extends Script {
     const { canvas } = this.engine;
 
     const viewport = camera.viewport;
-    const viewWidth = (viewport.z - viewport.x) * canvas.width;
-    const viewHeight = (viewport.w - viewport.y) * canvas.height;
+    const viewWidth = canvas.width;
+    const viewHeight = canvas.height;
 
     const left = Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1));
     const bottom = Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1));
