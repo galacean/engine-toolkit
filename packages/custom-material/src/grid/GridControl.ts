@@ -107,7 +107,7 @@ export class GridControl extends Script {
     material.axisIntensity = 0.3 / material.primaryScale;
 
     if (this._flipGrid) {
-      this._progress += deltaTime / 1000;
+      this._progress += deltaTime;
       let percent = MathUtil.clamp(this._progress * this.speed, 0, 1);
       if (percent >= 1) {
         this._flipGrid = false;
