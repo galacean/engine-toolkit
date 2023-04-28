@@ -63,9 +63,9 @@ export class FramebufferPicker extends Script {
       const lastRenderTarget = camera.renderTarget;
       camera.renderTarget = this._pickRenderTarget;
       camera.setReplacementShader(pickShader);
-
+      this.scene.castShadows = false;
       camera.render();
-
+      this.scene.castShadows = true;
       // Revert render target and shader
       camera.resetReplacementShader();
       camera.renderTarget = lastRenderTarget;
