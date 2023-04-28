@@ -209,7 +209,7 @@ export class OrbitControl extends Script {
       }
     }
     if (curHandlerType === ControlHandlerType.None && this.autoRotate) {
-      const rotateAngle = (this.autoRotateSpeed / 1000) * deltaTime;
+      const rotateAngle = this.autoRotateSpeed * deltaTime;
       _sphericalDelta.theta -= rotateAngle;
     }
   }
