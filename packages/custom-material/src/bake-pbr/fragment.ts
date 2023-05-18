@@ -25,7 +25,7 @@ void main() {
     Material material;
     ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
     
-    initGeometry(geometry);
+    initGeometry(geometry, gl_FrontFacing);
     initMaterial(material, geometry);
     
     addTotalDirectRadiance(geometry, material, reflectedLight);
