@@ -39,6 +39,8 @@
     "@galacean/engine-toolkit-custom-material": "workspace:*",
     "@galacean/engine-toolkit-navigation-gizmo": "workspace:*",
     "@galacean/engine-toolkit-geometry-sketch": "workspace:*",
-    "@galacean/engine-toolkit-stats": "workspace:*"
+    "@galacean/engine-toolkit-stats": "workspace:*",
+    "@galacean/engine-toolkit-way-point": "workspace:*",
+    "@galacean/engine-toolkit-input-logger": "workspace:*"
   }
 }
