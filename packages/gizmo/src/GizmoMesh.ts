@@ -1,4 +1,5 @@
 import { Engine, MeshTopology, ModelMesh, Quaternion, Vector2, Vector3 } from "@galacean/engine";
+import { CircleRestoreInfo, CircleTubeRestoreInfo, GizmoMeshRestorer, LineRestoreInfo } from "./GizmoMeshRestore";
 
 export class GizmoMesh {
   private static _tempQuat: Quaternion = new Quaternion();
@@ -13,6 +14,9 @@ export class GizmoMesh {
   ): ModelMesh {
     const mesh = new ModelMesh(engine);
     GizmoMesh.updateCircle(mesh, startPoint, normal, thetaLength, center);
+    engine.resourceManager.addContentRestorer(
+      new GizmoMeshRestorer(mesh, new CircleRestoreInfo(startPoint, normal, thetaLength, center))
+    );
     return mesh;
   }
 
@@ -63,6 +67,9 @@ export class GizmoMesh {
   ): ModelMesh {
     const mesh = new ModelMesh(engine);
     GizmoMesh.updateCircleTube(mesh, arc, radius, tubeRadius, tubularSegments, radialSegments);
+    engine.resourceManager.addContentRestorer(
+      new GizmoMeshRestorer(mesh, new CircleTubeRestoreInfo(arc, radius, tubeRadius, tubularSegments, radialSegments))
+    );
     return mesh;
   }
 
@@ -137,6 +144,7 @@ export class GizmoMesh {
   static createLine(engine: Engine, points: Array<Vector3>): ModelMesh {
     const mesh = new ModelMesh(engine);
     GizmoMesh.updateLine(mesh, points);
+    engine.resourceManager.addContentRestorer(new GizmoMeshRestorer(mesh, new LineRestoreInfo(points)));
     return mesh;
   }
 
