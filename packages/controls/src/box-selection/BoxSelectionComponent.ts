@@ -1,7 +1,7 @@
 import { Component } from "@galacean/engine";
 
 export class BoxSelectionComponent extends Component {
-  _isSelected = false;
+  private _isSelected = false;
 
   get isSelect() {
     return this._isSelected;
