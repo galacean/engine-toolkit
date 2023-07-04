@@ -50,17 +50,13 @@ export class BoxSelectionControls extends Script {
   isDeep = true;
   helper: undefined | IBoxSelectionHelper;
 
-  onAwake(): void {
+  override onAwake(): void {
     const { engine, entity } = this;
     this.camera = entity.getComponent(Camera);
     this.input = engine.inputManager;
   }
 
-  onUpdate() {
-    this._updateInputDelta();
-  }
-
-  private _updateInputDelta(): void {
+  override onUpdate() {
     const p = this.input.pointers[0];
     if (!p) {
       return;
