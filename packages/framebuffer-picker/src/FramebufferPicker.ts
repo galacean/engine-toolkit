@@ -26,7 +26,8 @@ const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
 @dependentComponents(Camera, DependentMode.CheckOnly)
 export class FramebufferPicker extends Script {
   private static _rootEntityRenderers: Renderer[] = [];
-  private static _pickPixel = new Uint8Array(4);
+  private static _pickPixel: Uint8Array = new Uint8Array(4);
+  private static _pickIds: Set<number> = new Set();
   private static _pickColorProperty = ShaderProperty.getByName("u_pickColor");
 
   private _renderersMap: Renderer[] = [];
@@ -54,25 +55,27 @@ export class FramebufferPicker extends Script {
    */
   pick(x: number, y: number): Promise<Renderer> {
     return new Promise((resolve, reject) => {
-      // Check frame buffer size
-      this._checkFrameBufferSize();
-
-      const camera = this._camera;
-      this._updateRenderersPickColor(camera.scene);
-      // Prepare render target and shader
-      const lastRenderTarget = camera.renderTarget;
-      camera.renderTarget = this._pickRenderTarget;
-      camera.setReplacementShader(pickShader);
-
-      camera.render();
-
-      // Revert render target and shader
-      camera.resetReplacementShader();
-      camera.renderTarget = lastRenderTarget;
-
+      this._setupRenderTarget();
       // Pick up renderer
-      const pickedPixel = this._readPixelFromRenderTarget(camera, x, y);
+      const pickedPixel = this._readPixelFromRenderTarget(x, y);
       const renderer = this._getRendererByPixel(pickedPixel);
+      resolve(renderer);
+    });
+  }
+
+  /**
+   * Pick up renderers in a rectangular region of the screen.
+   * @param startX - The start x coordinate of screen
+   * @param startY - The start y coordinate of screen
+   * @param endX - The end x coordinate of screen
+   * @param endY - The end y coordinate of screen
+   * @returns Promise<Array<Renderer>>
+   */
+  regionPick(startX: number, startY: number, endX: number, endY: number): Promise<Array<Renderer>> {
+    return new Promise((resolve, reject) => {
+      this._setupRenderTarget();
+      const pickedPixel = this._readPixelFromRenderTarget(startX, startY, endX, endY);
+      const renderer = this._getRenderersByPixel(pickedPixel);
       resolve(renderer);
     });
   }
@@ -122,24 +125,72 @@ export class FramebufferPicker extends Script {
     }
   }
 
-  private _readPixelFromRenderTarget(camera: Camera, x: number, y: number): Uint8Array {
+  private _setupRenderTarget() {
+    // Check frame buffer size
+    this._checkFrameBufferSize();
+
+    const camera = this._camera;
+    this._updateRenderersPickColor(camera.scene);
+    // Prepare render target and shader
+    const lastRenderTarget = camera.renderTarget;
+    camera.renderTarget = this._pickRenderTarget;
+    camera.setReplacementShader(pickShader);
+
+    camera.render();
+
+    // Revert render target and shader
+    camera.resetReplacementShader();
+    camera.renderTarget = lastRenderTarget;
+  }
+
+  private _readPixelFromRenderTarget(x: number, y: number, xEnd?: number, yEnd?: number): Uint8Array {
+    let pickPixel: Uint8Array, width: number, height: number;
+    this._getCoordOnRenderTarget(x, y);
+    const argsLength = arguments.length;
+
+    if (argsLength === 2) {
+      pickPixel = FramebufferPicker._pickPixel;
+      width = height = 1;
+    } else if (argsLength === 4) {
+      this._getCoordOnRenderTarget(xEnd, yEnd);
+
+      width = Math.abs(xEnd - x);
+      height = Math.abs(yEnd - y);
+
+      x = x < xEnd ? x : xEnd;
+      y = y < yEnd ? y : yEnd;
+
+      pickPixel = new Uint8Array(width * height * 4);
+    }
+
+    (<Texture2D>this._pickRenderTarget.getColorTexture()).getPixelBuffer(x, y, width, height, 0, pickPixel);
+    return pickPixel;
+  }
+
+  private _getCoordOnRenderTarget(x: number, y: number) {
     const pickRenderTarget = this._pickRenderTarget;
     const { canvas } = this.engine;
 
-    const viewport = camera.viewport;
+    const viewport = this._camera.viewport;
     const viewWidth = (viewport.z - viewport.x) * canvas.width;
     const viewHeight = (viewport.w - viewport.y) * canvas.height;
 
-    const left = Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1));
-    const bottom = Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1));
-
-    const pickPixel = FramebufferPicker._pickPixel;
-    (<Texture2D>pickRenderTarget.getColorTexture()).getPixelBuffer(left, bottom, 1, 1, 0, pickPixel);
-    return pickPixel;
+    x = Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1));
+    y = Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1));
   }
 
   private _getRendererByPixel(color: Uint8Array): Renderer {
     return this._renderersMap[this._color2UniqueId(color)];
+  }
+
+  private _getRenderersByPixel(color: Uint8Array): Array<Renderer> {
+    let pickedRenderers = [];
+    const rendererIds = this._color2UniqueIds(color);
+    rendererIds.forEach((value) => {
+      this._renderersMap[value] && pickedRenderers.push(this._renderersMap[value]);
+    });
+
+    return pickedRenderers;
   }
 
   private _uniqueId2Color(uniqueId: number, outColor: Vector3): void {
@@ -153,5 +204,14 @@ export class FramebufferPicker extends Script {
 
   private _color2UniqueId(color: Uint8Array): number {
     return color[0] | (color[1] << 8) | (color[2] << 16);
+  }
+
+  private _color2UniqueIds(color: Uint8Array): Set<number> {
+    FramebufferPicker._pickIds.clear();
+    for (let i = 0; i < color.length; i += 4) {
+      const a = color[i] | (color[i + 1] << 8) | (color[i + 2] << 16);
+      FramebufferPicker._pickIds.add(a);
+    }
+    return FramebufferPicker._pickIds;
   }
 }
