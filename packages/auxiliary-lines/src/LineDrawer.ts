@@ -1,4 +1,5 @@
 import {
+  Color,
   dependentComponents,
   DependentMode,
   GLCapabilityType,
@@ -35,6 +36,14 @@ export class LineDrawer extends Script {
   static matrix: Matrix = null;
 
   /**
+   * Color of the material.
+   * By default, color is (1,1,1,1).
+   */
+  set color(value: Color) {
+    this._material.baseColor.copyFrom(value);
+  }
+
+  /**
    * Draws a line starting at from towards to.
    * @param from - from position
    * @param to - to position
@@ -50,6 +59,38 @@ export class LineDrawer extends Script {
     } else {
       Vector3.transformCoordinate(from, LineDrawer.matrix, LineDrawer._positions[LineDrawer._positionCount++]);
       Vector3.transformCoordinate(to, LineDrawer.matrix, LineDrawer._positions[LineDrawer._positionCount++]);
+    }
+  }
+
+  /**
+   * Draws a rectangle at four vertex
+   * @param leftTop - left top position
+   * @param rightTop - right top position
+   * @param rightBottom - right bottom position
+   * @param leftBottom - left bottom position
+   */
+  static drawRect(leftTop: Vector3, rightTop: Vector3, rightBottom: Vector3, leftBottom: Vector3) {
+    LineDrawer._growthPosition(4);
+    LineDrawer._growthIndexMemory(8);
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount;
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount + 1;
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount + 2;
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount + 1;
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount + 2;
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount + 3;
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount;
+    LineDrawer._indices[LineDrawer._indicesCount++] = LineDrawer._positionCount + 3;
+
+    if (LineDrawer.matrix == null) {
+      LineDrawer._positions[LineDrawer._positionCount++].copyFrom(leftTop);
+      LineDrawer._positions[LineDrawer._positionCount++].copyFrom(rightTop);
+      LineDrawer._positions[LineDrawer._positionCount++].copyFrom(rightBottom);
+      LineDrawer._positions[LineDrawer._positionCount++].copyFrom(leftBottom);
+    } else {
+      Vector3.transformCoordinate(leftTop, LineDrawer.matrix, LineDrawer._positions[LineDrawer._positionCount++]);
+      Vector3.transformCoordinate(rightTop, LineDrawer.matrix, LineDrawer._positions[LineDrawer._positionCount++]);
+      Vector3.transformCoordinate(rightBottom, LineDrawer.matrix, LineDrawer._positions[LineDrawer._positionCount++]);
+      Vector3.transformCoordinate(leftBottom, LineDrawer.matrix, LineDrawer._positions[LineDrawer._positionCount++]);
     }
   }
 
