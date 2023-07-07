@@ -145,29 +145,36 @@ export class FramebufferPicker extends Script {
 
   private _readPixelFromRenderTarget(x: number, y: number, xEnd?: number, yEnd?: number): Uint8Array {
     let pickPixel: Uint8Array, width: number, height: number;
-    this._getCoordOnRenderTarget(x, y);
+    let startCoord = this._getCoordOnRenderTarget(x, y);
     const argsLength = arguments.length;
 
     if (argsLength === 2) {
       pickPixel = FramebufferPicker._pickPixel;
       width = height = 1;
     } else if (argsLength === 4) {
-      this._getCoordOnRenderTarget(xEnd, yEnd);
+      let endCoord = this._getCoordOnRenderTarget(xEnd, yEnd);
 
-      width = Math.abs(xEnd - x);
-      height = Math.abs(yEnd - y);
+      width = Math.abs(startCoord.x - endCoord.x);
+      height = Math.abs(startCoord.y - endCoord.y);
 
-      x = x < xEnd ? x : xEnd;
-      y = y < yEnd ? y : yEnd;
+      startCoord.x = startCoord.x < endCoord.x ? startCoord.x : endCoord.x;
+      startCoord.y = startCoord.y < endCoord.y ? startCoord.y : endCoord.y;
 
       pickPixel = new Uint8Array(width * height * 4);
     }
 
-    (<Texture2D>this._pickRenderTarget.getColorTexture()).getPixelBuffer(x, y, width, height, 0, pickPixel);
+    (<Texture2D>this._pickRenderTarget.getColorTexture()).getPixelBuffer(
+      startCoord.x,
+      startCoord.y,
+      width,
+      height,
+      0,
+      pickPixel
+    );
     return pickPixel;
   }
 
-  private _getCoordOnRenderTarget(x: number, y: number) {
+  private _getCoordOnRenderTarget(x: number, y: number): { x: number; y: number } {
     const pickRenderTarget = this._pickRenderTarget;
     const { canvas } = this.engine;
 
@@ -175,8 +182,10 @@ export class FramebufferPicker extends Script {
     const viewWidth = (viewport.z - viewport.x) * canvas.width;
     const viewHeight = (viewport.w - viewport.y) * canvas.height;
 
-    x = Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1));
-    y = Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1));
+    const a = Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1));
+    const b = Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1));
+
+    return { x: a, y: b };
   }
 
   private _getRendererByPixel(color: Uint8Array): Renderer {
