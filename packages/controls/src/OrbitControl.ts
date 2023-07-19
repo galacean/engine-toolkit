@@ -166,7 +166,7 @@ export class OrbitControl extends Script {
     this._atTheBack = false;
   }
 
-  override onUpdate(deltaTime: number): void {
+  override onLateUpdate(deltaTime: number): void {
     /** Update this._sphericalDelta, this._scale and this._panOffset. */
     this._updateInputDelta(deltaTime);
     /** Update camera's transform. */
