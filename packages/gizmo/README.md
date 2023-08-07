@@ -29,6 +29,11 @@ Show the gizmo to control the scale. Dragging the center cube scales along all t
 | `CoordinateType` | Gizmo Rotation. **Local** aligns to the selection's local space. **Global** aligns to the world space orientation |
 | `State` | Gizmo State. **translate** **rotate** **scale** **all** |
 
+| Event              | Meaning                                                                      |
+| :----------------- | :--------------------------------------------------------------------------- |
+| `gizmo-move-start` | Fire when gizmo moving start. Could get the triggered axis from event value. |
+| `gizmo-move-end`   | Fire when gizmo moving end.                                                  |
+
 ## Example
 
 [Gizmo-Examples](https://oasisengine.cn/#/examples/latest/gizmo)

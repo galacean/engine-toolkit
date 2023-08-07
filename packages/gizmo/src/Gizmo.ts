@@ -284,6 +284,7 @@ export class Gizmo extends Script {
       );
 
       this._currentControl.onMoveStart(this._tempRay, axisName);
+      this.engine.dispatch("gizmo-move-start", axisName);
     }
   }
 
@@ -302,6 +303,7 @@ export class Gizmo extends Script {
       control.entity.isActive = true;
     });
     this._isStarted = false;
+    this.engine.dispatch("gizmo-move-end");
   }
 
   private _selectHandler(result: Component, pointerPosition: Vector2): void {
