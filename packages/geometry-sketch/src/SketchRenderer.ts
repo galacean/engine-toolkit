@@ -1,6 +1,5 @@
 import {
   Entity,
-  IndexBufferBinding,
   IndexFormat,
   Matrix,
   MeshTopology,
@@ -11,9 +10,7 @@ import {
   SubMesh,
   Texture2D,
   TextureFilterMode,
-  TextureFormat,
-  VertexBufferBinding,
-  VertexElement
+  TextureFormat
 } from "@galacean/engine";
 import { SketchMode } from "./SketchMode";
 import { BiTangentMaterial, NormalMaterial, TangentMaterial, WireframeMaterial } from "./material";
@@ -27,6 +24,7 @@ export class SketchRenderer extends SkinnedMeshRenderer {
 
   private static _MAX_TEXTURE_ROWS = 512;
   private static _jointIndexBegin = -1;
+  private static _jointBufferIndex = -1;
 
   private static _verticesSamplerProp = ShaderProperty.getByName("u_verticesSampler");
   private static _verticesTextureHeightProp = ShaderProperty.getByName("u_verticesTextureHeight");
@@ -45,6 +43,10 @@ export class SketchRenderer extends SkinnedMeshRenderer {
   private _targetMesh: ModelMesh = null;
   private _verticesTexture: Texture2D = null;
   private _indicesTexture: Texture2D = null;
+  private _vertexElementOrder: Array<number | { order: number; idx: number }> = [
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1
+  ];
 
   private _showState = [false, false, false, false];
   private readonly _wireframeMaterial: WireframeMaterial;
@@ -194,6 +196,11 @@ export class SketchRenderer extends SkinnedMeshRenderer {
 
   override update(deltaTime: number) {
     super.update(deltaTime);
+    // @ts-ignore
+    this.shaderData.enableMacro(SketchRenderer._normalMacro);
+    // @ts-ignore
+    this.shaderData.enableMacro(SketchRenderer._tangentMacro);
+
     const worldMatrix = this._worldMatrix;
     if (worldMatrix) {
       const worldNormalMatrix = this._worldNormalMatrix;
@@ -205,11 +212,10 @@ export class SketchRenderer extends SkinnedMeshRenderer {
 
   private _uploadIndicesBuffer(value: ModelMesh) {
     //@ts-ignore
-    const indexBuffer = (<IndexBufferBinding>value._indexBufferBinding).buffer;
+    const indexBuffer = value._indexBufferBinding._buffer;
     const byteLength = indexBuffer.byteLength;
     const buffer = new Uint8Array(byteLength);
     indexBuffer.getData(buffer);
-
     //@ts-ignore
     const indexFormat = <IndexFormat>value._indicesFormat;
     let triangleCount = 0;
@@ -280,48 +286,81 @@ export class SketchRenderer extends SkinnedMeshRenderer {
   }
 
   private _uploadVerticesBuffer(value: ModelMesh) {
-    //@ts-ignore
-    const vertexBufferBinding = <VertexBufferBinding>value._vertexBufferBindings[0];
+    let buffers: Array<Float32Array> = [];
+    let uint8Buffers: Array<Uint8Array> = [];
+    let elementCounts: number[] = [];
+
     const vertexCount = value.vertexCount;
-    const elementCount = this._updateMeshElement(value);
-    const jointIndexBegin = SketchRenderer._jointIndexBegin;
-    let newElementCount = elementCount;
-    if (jointIndexBegin !== -1) {
-      newElementCount += 3;
+    const vertexBufferBindings = value.vertexBufferBindings;
+
+    let totalElementCount = 0;
+    let totalNewElementCount = 0;
+
+    for (let i = 0; i < vertexBufferBindings.length; i++) {
+      const vertexBufferBinding = value.vertexBufferBindings[i];
+
+      const elementCount = this._updateMeshElement(value, i);
+      let newElementCount = elementCount;
+
+      const buffer = new Float32Array(elementCount * vertexCount);
+      vertexBufferBinding.buffer.getData(buffer);
+      const uint8Buffer = new Uint8Array(buffer.buffer);
+
+      buffers.push(buffer);
+      uint8Buffers.push(uint8Buffer);
+      elementCounts.push(elementCount);
+      totalElementCount += elementCount;
+      totalNewElementCount += newElementCount;
     }
 
-    const buffer = new Float32Array(elementCount * vertexCount);
-    vertexBufferBinding.buffer.getData(buffer);
-    const uint8Buffer = new Uint8Array(buffer.buffer);
+    for (let i = 0; i < this._vertexElementOrder.length; i++) {
+      if (this._vertexElementOrder[i] === -1) {
+        this._vertexElementOrder.splice(i, 1);
+        i--;
+      }
+    }
 
-    const alignElementCount = Math.ceil(newElementCount / 4) * 4;
+    if (SketchRenderer._jointIndexBegin !== -1) {
+      totalNewElementCount += 3;
+    }
+
+    const alignElementCount = Math.ceil(totalNewElementCount / 4) * 4;
     this.shaderData.enableMacro("ELEMENT_COUNT", (alignElementCount / 4).toString());
 
     const width = Math.min(vertexCount, SketchRenderer._MAX_TEXTURE_ROWS) * alignElementCount;
     const height = Math.ceil(vertexCount / SketchRenderer._MAX_TEXTURE_ROWS);
     const alignBuffer = new Float32Array(width * height);
 
+    const { _jointIndexBegin: jointIndexBegin, _jointBufferIndex: jointBufferIndex } = SketchRenderer;
+
     for (let i = 0; i < vertexCount; i++) {
-      for (let j = 0; j < newElementCount; j++) {
-        if (jointIndexBegin !== -1 && j === jointIndexBegin) {
-          alignBuffer[i * alignElementCount + j] = uint8Buffer[i * elementCount * 4 + jointIndexBegin * 4];
-        } else if (jointIndexBegin !== -1 && j === jointIndexBegin + 1) {
-          alignBuffer[i * alignElementCount + j] = uint8Buffer[i * elementCount * 4 + jointIndexBegin * 4 + 1];
-        } else if (jointIndexBegin !== -1 && j === jointIndexBegin + 2) {
-          alignBuffer[i * alignElementCount + j] = uint8Buffer[i * elementCount * 4 + jointIndexBegin * 4 + 2];
-        } else if (jointIndexBegin !== -1 && j === jointIndexBegin + 3) {
-          alignBuffer[i * alignElementCount + j] = uint8Buffer[i * elementCount * 4 + jointIndexBegin * 4 + 3];
+      for (let j = 0; j < totalElementCount; j++) {
+        // @ts-ignore
+        const bufferIdx = this._vertexElementOrder[j].idx;
+        // @ts-ignore
+        const elementIdx = this._vertexElementOrder[j].order;
+        const currBuffer = buffers[bufferIdx];
+        const currUnit8Buffer = uint8Buffers[bufferIdx];
+        const currElementCount = elementCounts[bufferIdx];
+
+        if (bufferIdx === jointBufferIndex && elementIdx === jointIndexBegin) {
+          alignBuffer[i * alignElementCount + j] = currUnit8Buffer[i * currElementCount * 4 + jointIndexBegin * 4];
+          alignBuffer[i * alignElementCount + j + 1] =
+            currUnit8Buffer[i * currElementCount * 4 + jointIndexBegin * 4 + 1];
+          alignBuffer[i * alignElementCount + j + 2] =
+            currUnit8Buffer[i * currElementCount * 4 + jointIndexBegin * 4 + 2];
+          alignBuffer[i * alignElementCount + j + 3] =
+            currUnit8Buffer[i * currElementCount * 4 + jointIndexBegin * 4 + 3];
+          j = j + 3;
         } else {
-          if (jointIndexBegin !== -1 && j > jointIndexBegin + 3) {
-            alignBuffer[i * alignElementCount + j] = buffer[i * elementCount + j - 3];
-          } else {
-            alignBuffer[i * alignElementCount + j] = buffer[i * elementCount + j];
-          }
+          alignBuffer[i * alignElementCount + j] = currBuffer[i * currElementCount + elementIdx];
         }
       }
     }
+
     this._createVerticesTexture(alignBuffer, width / 4, height);
     SketchRenderer._jointIndexBegin = -1;
+    SketchRenderer._jointBufferIndex = -1;
   }
 
   private _createVerticesTexture(vertexBuffer: ArrayBufferView, width: number, height: number) {
@@ -334,12 +373,12 @@ export class SketchRenderer extends SkinnedMeshRenderer {
     this.shaderData.setFloat(SketchRenderer._verticesTextureHeightProp, height);
   }
 
-  private _updateMeshElement(value: ModelMesh): number {
+  private _updateMeshElement(value: ModelMesh, idx: number): number {
     const shaderData = this.shaderData;
     //@ts-ignore
     shaderData.disableMacro(SketchRenderer._normalMacro);
     //@ts-ignore
-    shaderData.disableMacro(SketchRenderer._vertexColorMacro);
+    this.enableVertexColor && shaderData.disableMacro(SketchRenderer._enableVertexColorMacro);
     //@ts-ignore
     shaderData.disableMacro(SketchRenderer._tangentMacro);
     //@ts-ignore
@@ -351,63 +390,103 @@ export class SketchRenderer extends SkinnedMeshRenderer {
 
     let elementCount = 0;
     //@ts-ignore
-    const vertexElements = <VertexElement[]>value._vertexElements;
+    const vertexElements = value.vertexElements;
+    const { _vertexElementOrder: elementOrder } = this;
     for (let i = 0, n = vertexElements.length; i < n; i++) {
-      const { semantic } = vertexElements[i];
+      const { semantic, offset, bindingIndex } = vertexElements[i];
+      if (bindingIndex !== idx) continue;
       switch (semantic) {
         case "POSITION":
           elementCount += 3;
+          elementOrder[0] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[1] = { idx: bindingIndex, order: offset / 4 + 1 };
+          elementOrder[2] = { idx: bindingIndex, order: offset / 4 + 2 };
           break;
         case "NORMAL":
           elementCount += 3;
+          elementOrder[3] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[4] = { idx: bindingIndex, order: offset / 4 + 1 };
+          elementOrder[5] = { idx: bindingIndex, order: offset / 4 + 2 };
           //@ts-ignore
           shaderData.enableMacro(SketchRenderer._normalMacro);
           break;
         case "COLOR_0":
-          elementCount += 4;
-          //@ts-ignore
-          shaderData.enableMacro(SketchRenderer._vertexColorMacro);
+          if (this.enableVertexColor) {
+            elementCount += 4;
+            elementOrder[6] = { idx: bindingIndex, order: offset / 4 };
+            elementOrder[7] = { idx: bindingIndex, order: offset / 4 + 1 };
+            elementOrder[8] = { idx: bindingIndex, order: offset / 4 + 2 };
+            elementOrder[9] = { idx: bindingIndex, order: offset / 4 + 3 };
+            //@ts-ignore
+            shaderData.enableMacro(SketchRenderer._enableVertexColorMacro);
+          }
           break;
         case "WEIGHTS_0":
           elementCount += 4;
+          elementOrder[10] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[11] = { idx: bindingIndex, order: offset / 4 + 1 };
+          elementOrder[12] = { idx: bindingIndex, order: offset / 4 + 2 };
+          elementOrder[13] = { idx: bindingIndex, order: offset / 4 + 3 };
           shaderData.enableMacro(SketchRenderer._weightMacro);
           break;
         case "JOINTS_0":
           SketchRenderer._jointIndexBegin = elementCount;
+          SketchRenderer._jointBufferIndex = bindingIndex;
           elementCount += 1;
+          elementOrder[14] = { idx: bindingIndex, order: offset / 4 };
           shaderData.enableMacro(SketchRenderer._jointMacro);
           break;
         case "TANGENT":
           //@ts-ignore
           shaderData.enableMacro(SketchRenderer._tangentMacro);
+          elementOrder[15] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[16] = { idx: bindingIndex, order: offset / 4 + 1 };
+          elementOrder[17] = { idx: bindingIndex, order: offset / 4 + 2 };
+          elementOrder[18] = { idx: bindingIndex, order: offset / 4 + 3 };
           elementCount += 4;
           break;
         case "TEXCOORD_0":
           //@ts-ignore
           shaderData.enableMacro(SketchRenderer._uvMacro);
+          elementOrder[19] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[20] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
         case "TEXCOORD_1":
           //@ts-ignore
           shaderData.enableMacro(SketchRenderer._uv1Macro);
+          elementOrder[21] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[22] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
         case "TEXCOORD_2":
+          elementOrder[23] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[24] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
         case "TEXCOORD_3":
+          elementOrder[25] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[26] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
         case "TEXCOORD_4":
+          elementOrder[27] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[28] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
         case "TEXCOORD_5":
+          elementOrder[29] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[30] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
         case "TEXCOORD_6":
+          elementOrder[31] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[32] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
         case "TEXCOORD_7":
+          elementOrder[33] = { idx: bindingIndex, order: offset / 4 };
+          elementOrder[34] = { idx: bindingIndex, order: offset / 4 + 1 };
           elementCount += 2;
           break;
       }
