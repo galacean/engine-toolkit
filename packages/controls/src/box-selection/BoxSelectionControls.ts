@@ -13,7 +13,7 @@ import {
   Vector2
 } from "@galacean/engine";
 import { BoxSelectionComponent } from './BoxSelectionComponent';
-import { IBoxSelectionHelper } from "./BoxSelectionHelper";
+import { IBoxSelectionHelper } from "./types";
 
 const _frustum = new BoundingFrustum();
 const _center = new Vector3();
