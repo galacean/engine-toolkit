@@ -1,3 +1,4 @@
 export * from './BoxSelectionComponent';
 export * from './BoxSelectionControls';
-export * from './BoxSelectionHelper';
+export * from './BoxSelectionDomHelper';
+export * from './BoxSelectionSSHelper';
