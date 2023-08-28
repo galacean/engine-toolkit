@@ -10,9 +10,11 @@ import {
   Script,
   InputManager,
   PointerButton,
+  WebGLEngine,
   Vector2
 } from "@galacean/engine";
 import { BoxSelectionComponent } from './BoxSelectionComponent';
+import { BoxSelectionSSHelper } from "./BoxSelectionSSHelper";
 import { IBoxSelectionHelper } from "./types";
 
 const _frustum = new BoundingFrustum();
@@ -32,9 +34,8 @@ const _vectemp2 = new Vector3();
 const _vectemp3 = new Vector3();
 
 const pojectInvertMatrix = new Matrix();
-function unproject(vec: Vector3, entity: Entity, camera: Camera) {
-  pojectInvertMatrix.copyFrom(camera.projectionMatrix);
-  Vector3.transformCoordinate(vec, pojectInvertMatrix.invert(), vec);
+function unproject(vec: Vector3, entity: Entity) {
+  Vector3.transformCoordinate(vec, pojectInvertMatrix, vec);
   return Vector3.transformCoordinate(vec, entity.transform.worldMatrix, vec);
 }
 
@@ -54,6 +55,7 @@ export class BoxSelectionControls extends Script {
     const { engine, entity } = this;
     this.camera = entity.getComponent(Camera);
     this.input = engine.inputManager;
+    this.helper = new BoxSelectionSSHelper(this.engine as WebGLEngine, this.scene.getRootEntity()!);
   }
 
   override onUpdate() {
@@ -88,8 +90,10 @@ export class BoxSelectionControls extends Script {
     this.endPoint = endPoint || this.endPoint;
     this.collection.length = 0;
 
+    pojectInvertMatrix.copyFrom(this.camera.projectionMatrix);
+    pojectInvertMatrix.invert();
     this.updateBoundingFrustum(this.startPoint, this.endPoint);
-    return this.searchChildInBoundingFrustum(_frustum, this.scene.getRootEntity(), this.isDeep);
+    return this.searchChildInBoundingFrustum(_frustum, this.scene.getRootEntity()!, this.isDeep);
   }
 
   updateBoundingFrustum(startPoint: Vector2, endPoint: Vector2) {
@@ -115,10 +119,10 @@ export class BoxSelectionControls extends Script {
       _vecDownRight.set(endPoint.x, endPoint.y, 0.5);
       _vecDownLeft.set(_tmpPoint.x, endPoint.y, 0);
 
-      unproject(_vecTopLeft, this.entity, this.camera);
-      unproject(_vecTopRight, this.entity, this.camera);
-      unproject(_vecDownRight, this.entity, this.camera);
-      unproject(_vecDownLeft, this.entity, this.camera);
+      unproject(_vecTopLeft, this.entity);
+      unproject(_vecTopRight, this.entity);
+      unproject(_vecDownRight, this.entity);
+      unproject(_vecDownLeft, this.entity);
 
       _vectemp1.copyFrom(_vecTopLeft).subtract(_vecNear);
       _vectemp2.copyFrom(_vecTopRight).subtract(_vecNear);
@@ -157,15 +161,15 @@ export class BoxSelectionControls extends Script {
       _vecFarDownRight.set(right, down, 1);
       _vecFarDownLeft.set(left, down, 1);
 
-      unproject(_vecTopLeft, this.entity, this.camera);
-      unproject(_vecTopRight, this.entity, this.camera);
-      unproject(_vecDownRight, this.entity, this.camera);
-      unproject(_vecDownLeft, this.entity, this.camera);
+      unproject(_vecTopLeft, this.entity);
+      unproject(_vecTopRight, this.entity);
+      unproject(_vecDownRight, this.entity);
+      unproject(_vecDownLeft, this.entity);
 
-      unproject(_vecFarTopLeft, this.entity, this.camera);
-      unproject(_vecFarTopRight, this.entity, this.camera);
-      unproject(_vecFarDownRight, this.entity, this.camera);
-      unproject(_vecFarDownLeft, this.entity, this.camera);
+      unproject(_vecFarTopLeft, this.entity);
+      unproject(_vecFarTopRight, this.entity);
+      unproject(_vecFarDownRight, this.entity);
+      unproject(_vecFarDownLeft, this.entity);
 
       Plane.fromPoints(_vecTopLeft, _vecFarTopLeft, _vecFarTopRight, _frustum.top);
       Plane.fromPoints(_vecTopRight, _vecFarTopRight, _vecFarDownRight, _frustum.right);
