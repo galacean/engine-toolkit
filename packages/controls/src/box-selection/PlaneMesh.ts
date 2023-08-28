@@ -8,20 +8,18 @@ export class PlaneMesh {
   }
 
   static _initGeometryData(mesh: ModelMesh) {
-    const positions = new Array<Vector3>(6);
-    positions[0] = new Vector3(1, 1, 0);
-    positions[1] = new Vector3(-1, -1, 0);
-    positions[2] = new Vector3(-1, 1, 0);
-    positions[3] = new Vector3(-1, -1, 0);
-    positions[4] = new Vector3(1, 1, 0);
-    positions[5] = new Vector3(1, -1, 0);
+    const positions = new Array<Vector3>(4);
+    positions[0] = new Vector3(-1, -1, 0);
+    positions[1] = new Vector3(1, -1, 0);
+    positions[2] = new Vector3(1, 1, 0);
+    positions[3] = new Vector3(-1, 1, 0);
 
     const indices = new Uint8Array(6);
-    indices[0] = 2;
+    indices[0] = 0;
     indices[1] = 1;
-    indices[2] = 0;
-    indices[3] = 5;
-    indices[4] = 4;
+    indices[2] = 2;
+    indices[3] = 0;
+    indices[4] = 2;
     indices[5] = 3;
 
     mesh.setPositions(positions);
