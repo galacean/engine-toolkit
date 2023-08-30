@@ -137,7 +137,7 @@ export class NavigationGizmo extends Script {
   constructor(entity: Entity) {
     super(entity);
     // @ts-ignore
-    if (!entity.engine.physicsManager._physicsInitialized) {
+    if (!entity.engine.physicsManager) {
       throw new Error("PhysicsManager is not initialized");
     }
 
