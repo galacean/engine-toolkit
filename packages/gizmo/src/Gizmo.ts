@@ -117,7 +117,7 @@ export class Gizmo extends Script {
   constructor(entity: Entity) {
     super(entity);
     // @ts-ignore
-    if (!this.entity.engine.physicsManager._initialized) {
+    if (!this.entity.engine._physicsInitialized) {
       throw new Error("PhysicsManager is not initialized");
     }
 
