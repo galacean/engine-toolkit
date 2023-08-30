@@ -145,14 +145,14 @@ export class FramebufferPicker extends Script {
 
   private _readPixelFromRenderTarget(x: number, y: number, xEnd?: number, yEnd?: number): Uint8Array {
     let pickPixel: Uint8Array, width: number, height: number;
-    let startCoord = this._getCoordOnRenderTarget(x, y);
+    const startCoord = this._getCoordOnRenderTarget(x, y);
     const argsLength = arguments.length;
 
     if (argsLength === 2) {
       pickPixel = FramebufferPicker._pickPixel;
       width = height = 1;
     } else if (argsLength === 4) {
-      let endCoord = this._getCoordOnRenderTarget(xEnd, yEnd);
+      const endCoord = this._getCoordOnRenderTarget(xEnd, yEnd);
 
       width = Math.abs(startCoord.x - endCoord.x);
       height = Math.abs(startCoord.y - endCoord.y);
@@ -162,7 +162,6 @@ export class FramebufferPicker extends Script {
 
       pickPixel = new Uint8Array(width * height * 4);
     }
-
     (<Texture2D>this._pickRenderTarget.getColorTexture()).getPixelBuffer(
       startCoord.x,
       startCoord.y,
@@ -182,10 +181,10 @@ export class FramebufferPicker extends Script {
     const viewWidth = (viewport.z - viewport.x) * canvas.width;
     const viewHeight = (viewport.w - viewport.y) * canvas.height;
 
-    const a = Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1));
-    const b = Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1));
-
-    return { x: a, y: b };
+    return {
+      x: Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1)),
+      y: Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1))
+    };
   }
 
   private _getRendererByPixel(color: Uint8Array): Renderer {

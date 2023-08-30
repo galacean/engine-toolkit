@@ -30,4 +30,4 @@ control `flipProgress` to adjust the progress of 2D-3D switching.
 # Showcase
 
 - [infinity-grid](https://github.com/ant-galaxy/oasis-engine.github.io/blob/main/playground/infinity-grid.ts)
-- [infinity-grid live demo](https://oasisengine.cn/#/examples/latest/infinity-grid)
+- [infinity-grid live demo](https://galacean.antgroup.com/#/examples/latest/infinity-grid)

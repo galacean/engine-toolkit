@@ -135,7 +135,7 @@ export class EndScript extends Script {
     this.entity.transform.worldRotationQuaternion = this._normalQuat;
 
     if (this._flipView) {
-      this._progress += deltaTime / 1000;
+      this._progress += deltaTime;
       let t = MathUtil.clamp(this._progress * this._flipSpeed, 0, 1);
       if (t >= 1) {
         this._flipView = false;

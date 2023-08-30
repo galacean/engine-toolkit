@@ -1,6 +1,8 @@
 import resolve from "@rollup/plugin-node-resolve";
 import glslify from "rollup-plugin-glslify";
 import { binary2base64 } from "rollup-plugin-binary2base64";
+import commonjs from "@rollup/plugin-commonjs";
+import miniProgramPlugin from "./rollup.miniprogram.plugin.mjs";
 import { swc, defineRollupSwcOption, minify } from "rollup-plugin-swc3";
 import camelCase from "camelcase";
 import fs from "fs";
@@ -45,7 +47,7 @@ const plugins = [resolve({ extensions, preferBuiltins: true, mainFields }), glsl
   }, sourceMaps: true
 })), binary2base64({
   include: ["**/*.wasm"]
-})];
+}), commonjs()];
 
 function makeRollupConfig(pkg) {
   const externals = Object.keys(Object.assign({}, pkg.pkgJson.dependencies, pkg.pkgJson.peerDependencies, pkg.pkgJson.devDependencies));
@@ -90,6 +92,19 @@ function makeRollupConfig(pkg) {
       }, external: Object.keys(umdConfig.globals ?? {}), plugins: [...plugins, minify({ sourceMap: true })]
     });
   }
+
+  configs.push({
+    input: path.join(pkg.location, "src", "index.ts"),
+    output: {
+      file: path.join(pkg.location, "dist", "miniprogram.js"),
+      sourcemap: false,
+      format: "cjs"
+    },
+    external: Object.keys(Object.assign(pkg.pkgJson.dependencies ?? {}, pkg.pkgJson.peerDependencies ?? {}))
+      .concat("@galacean/engine-miniprogram-adapter")
+      .map((name) => `${name}/dist/miniprogram`),
+    plugins: [...plugins, ...miniProgramPlugin]
+  });
 
   return configs;
 }

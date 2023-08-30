@@ -19,6 +19,8 @@ Some out-of-the-box utility features based on the [Galacean engine](https://gith
 - 🧍🏼 &nbsp;**[Skeleton Helper](packages/skeleton-viewer)** - Skeleton visualization
 - ⭕️ &nbsp;**[Outline](packages/outline)** - Show outline of mesh renderers
 - 🖼 &nbsp;**[Geometry Sketch](packages/geometry-sketch)** - Convert geometry into texture && sketch normal and mesh wireframe
+- 🖱 &nbsp;**[Input Logger](packages/input-logger)** - Outputs `keyboard` and `pointer` information in real time for developers
+
 
 ### [Custom Materials](packages/custom-material)
 

@@ -38,7 +38,7 @@ export class FreeControl extends Script {
     spherical.setFromVec3(tempVec, this._atTheBack);
   }
 
-  override onUpdate(deltaTime: number): void {
+  override onLateUpdate(deltaTime: number): void {
     if (this.enabled === false) return;
     let curHandlerType = ControlHandlerType.None;
     const { _tempVec: delta } = this;
@@ -70,7 +70,7 @@ export class FreeControl extends Script {
   }
 
   private _pan(moveDelta: Vector3, delta: number): void {
-    const actualMoveSpeed = (delta / 1000) * this.movementSpeed;
+    const actualMoveSpeed = delta * this.movementSpeed;
     moveDelta.normalize().scale(actualMoveSpeed);
     this._cameraTransform.translate(moveDelta, true);
   }
