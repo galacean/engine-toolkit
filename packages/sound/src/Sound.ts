@@ -16,7 +16,7 @@ export class Sound extends ReferResource {
     this.buffer = buffer;
   }
 
-  destroy(): boolean {
+  override destroy(): boolean {
     if (this._destroyed) {
       return false;
     }
