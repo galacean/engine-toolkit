@@ -6,7 +6,6 @@ import {
   resourceLoader,
   ResourceManager
 } from "@galacean/engine";
-import { RequestConfig } from "@galacean/engine-core/types/asset/request";
 import { GlobalAudioContext } from "./global";
 import { Sound } from "./Sound";
 import { AudioContentRestorer } from "./SoundContentStore";
@@ -28,7 +27,7 @@ class SoundLoader extends Loader<Sound> {
     }
     return new AssetPromise((resolve, reject) => {
       const url = item.url!;
-      const requestConfig = <RequestConfig>{
+      const requestConfig = <any>{
         ...item,
         type: "arraybuffer"
       };
