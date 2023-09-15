@@ -1,5 +1,4 @@
 import { AssetPromise, ContentRestorer, request } from "@galacean/engine";
-import { RequestConfig } from "@galacean/engine-core/types/asset/request";
 import { GlobalAudioContext } from "./global";
 import { Sound } from "./Sound";
 
@@ -10,7 +9,7 @@ export class AudioContentRestorer extends ContentRestorer<Sound> {
   constructor(
     resource: Sound,
     public url: string,
-    public requestConfig: RequestConfig
+    public requestConfig: any
   ) {
     super(resource);
   }
