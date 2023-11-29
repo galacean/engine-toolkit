@@ -179,30 +179,31 @@ export class Group {
   }
 
   /**
-   * set group's world matrix
-   * @param value the new world matrix for the group
+   * 从上个状态的矩阵变换到目标矩阵
+   * from 矩阵计算所有节点的在本次变换中的 local 姿态
+   * to 矩阵计算所有节点的在本次变换后的 world 姿态
+   * @param from - 初始矩阵
+   * @param to - 目标矩阵
    */
-  setWorldMatrix(value: Matrix): void {
-    if (this.getWorldMatrix()) {
-      const { _worldMatrix: worldMatrix } = this;
-      if (!Matrix.equals(worldMatrix, value)) {
-        // old worldMatrix.
-        const { _tempMat0: groupWorldInvMat, _tempMat1: nodeMat } = Group;
-        Matrix.invert(worldMatrix, groupWorldInvMat);
-        // new worldMatrix.
-        worldMatrix.copyFrom(value);
-        const { _entities: entities } = this;
-        // update entities worldMatrix
-        for (let i = entities.length - 1; i >= 0; i--) {
-          const nodeTrans = entities[i].transform;
-          // get entity's localMatrix.
-          Matrix.multiply(groupWorldInvMat, nodeTrans.worldMatrix, nodeMat);
-          // update entity's worldMatrix.
-          Matrix.multiply(worldMatrix, nodeMat, nodeMat);
-          nodeTrans.worldMatrix = nodeMat;
-        }
-      }
-      this._dirtyFlag = GroupDirtyFlag.None;
+  applyTransform(from: Matrix, to: Matrix): void {
+    const { _entities: entities } = this;
+    if (this._entities.length <= 0) {
+      return;
+    }
+    if (Matrix.equals(from, to)) {
+      return;
+    }
+    // old worldMatrix.
+    const { _tempMat0: groupWorldInvMat, _tempMat1: nodeMat } = Group;
+    Matrix.invert(from, groupWorldInvMat);
+    // update entities worldMatrix
+    for (let i = entities.length - 1; i >= 0; i--) {
+      const nodeTrans = entities[i].transform;
+      // get entity's localMatrix.
+      Matrix.multiply(groupWorldInvMat, nodeTrans.worldMatrix, nodeMat);
+      // update entity's worldMatrix.
+      Matrix.multiply(to, nodeMat, nodeMat);
+      nodeTrans.worldMatrix = nodeMat;
     }
   }
 
@@ -210,7 +211,6 @@ export class Group {
    * force update group dirty flag
    * @param flag - group dirty flag
    */
-
   setDirtyFlagTrue(flag: GroupDirtyFlag): void {
     this._dirtyFlag |= flag;
     this._gizmoTransformDirty = true;
