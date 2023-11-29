@@ -153,6 +153,7 @@ export class RotateControl extends GizmoComponent {
     startHelperRenderer.castShadows = false;
     startHelperRenderer.mesh = this._startLineMesh;
     startHelperRenderer.setMaterial(Utils.yellowMaterial);
+    startHelperRenderer.priority = 90;
 
     // rotate end line
     this._endLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperE");
@@ -161,6 +162,7 @@ export class RotateControl extends GizmoComponent {
     endHelperRenderer.castShadows = false;
     endHelperRenderer.mesh = this._endLineMesh;
     endHelperRenderer.setMaterial(Utils.yellowMaterial);
+    endHelperRenderer.priority = 90;
 
     // rotate plane
     this._rotateHelperPlaneEntity = this._gizmoRotateHelperEntity.createChild("rotateHelperPlane");
@@ -171,6 +173,7 @@ export class RotateControl extends GizmoComponent {
     // @ts-ignore
     this._rotateHelperPlaneMesh._enableVAO = false;
     planeHelperRenderer.setMaterial(Utils.rotatePlaneMaterial);
+    planeHelperRenderer.priority = 90;
     this._rotateHelperPlaneEntity.isActive = false;
   }
 
