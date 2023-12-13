@@ -459,7 +459,7 @@ export class WireframeManager extends Script {
     this._renderer.enabled = false;
   }
 
-  override onUpdate(deltaTime: number): void {
+  override onLateUpdate(deltaTime: number): void {
     const {
       _mesh: mesh,
       _localPositions: localPositions,
