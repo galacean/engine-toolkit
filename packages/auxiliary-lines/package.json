@@ -23,9 +23,9 @@
     "dist/**/*",
     "types/**/*"
   ],
-   "peerDependencies": {
+  "peerDependencies": {
     "@galacean/engine": "^1.1.0-beta"
-  },,
+  },
   "dependencies": {
     "@galacean/engine-toolkit-custom-material": "workspace:*"
   }
