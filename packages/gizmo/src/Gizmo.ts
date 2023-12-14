@@ -75,7 +75,7 @@ export class Gizmo extends Script {
   }
 
   /**
-   * gizmo layer, default Layer29
+   * gizmo layer, default Layer31
    * @return the layer for gizmo entity and gizmo's inner framebuffer picker
    * @remarks Layer duplicate warning, check whether this layer is taken
    */
@@ -142,7 +142,7 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.rotate, RotateControl);
     this._createGizmoControl(State.scale, ScaleControl);
 
-    this.layer = Layer.Layer29;
+    this.layer = Layer.Layer31;
     // gizmo collider
     this._sphereColliderEntity = entity.createChild("gizmoCollider");
     const sphereCollider = this._sphereColliderEntity.addComponent(StaticCollider);
