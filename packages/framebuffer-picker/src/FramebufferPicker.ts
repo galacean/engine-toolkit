@@ -170,7 +170,6 @@ export class FramebufferPicker extends Script {
       0,
       pickPixel
     );
-
     return pickPixel;
   }
 

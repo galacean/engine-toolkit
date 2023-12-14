@@ -338,6 +338,9 @@ export class Group {
         }
       }
     }
+    if (tempBoundBox.getExtent(out).length() <= 0) {
+      isEffective = false;
+    }
     if (isEffective) {
       tempBoundBox.getCenter(out);
     } else {

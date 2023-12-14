@@ -8,10 +8,12 @@ Some out-of-the-box utility features based on the [Galacean engine](https://gith
 - 📊 &nbsp;**[Stats](packages/stats)** - Statistics rendering data
 
 - 🛸 &nbsp;**[Controls](packages/controls)** - Some camera controllers
+- 🎥 &nbsp;**[Tween](packages/tween)** - Library for tween animation
 - 🫧 &nbsp;**[FrameBufferPicker](packages/framebuffer-picker)** - Pixel-based object picking
 - ➡️ &nbsp;**[Gizmo](packages/gizmo)** - Operation tools for transforming (displacement, rotation, scaling)
 - 🧭 &nbsp;**[Navigation Gizmo](packages/navigation-gizmo)** - Three-view & visualized operation for camera control
 - 🛣 &nbsp;**[Waypoint](packages/way-point)** - control entity move along waypoint
+- 🪁 &nbsp;**[Dynamic Bone](packages/dynamic-bone)** - use dynamic spring movement to enhance skeleton animation
 
 - 📐 &nbsp;**[Lines](packages/lines)** - 2D Solid Line & Dash Line
 - 🖇 &nbsp;**[Auxiliary Lines](packages/auxiliary-lines)** - Draw wireframe for entity and component
