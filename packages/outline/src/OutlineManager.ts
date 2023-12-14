@@ -55,7 +55,7 @@ export class OutlineManager extends Script {
   private _replaceColor: Color = new Color(1, 0, 0, 1);
   private _outlineMainColor: Color = new Color(0.95, 0.35, 0.14, 1);
   private _outlineSubColor: Color = new Color(0.16, 0.67, 0.89, 1);
-  private _layer: Layer = Layer.Layer11;
+  private _layer: Layer = Layer.Layer29;
   private _outlineEntities: Entity[] = [];
   private _subLineEntities: Entity[] = [];
 
@@ -63,6 +63,17 @@ export class OutlineManager extends Script {
   private _layerMap: Array<{ entity: Entity; layer: Layer }> = [];
   private _cameraViewport: Vector4 = new Vector4();
   private _outLineViewport: Vector4 = new Vector4(0, 0, 1, 1);
+
+  /**
+   * Outline layer, default Layer29.
+   */
+  set layer(value: Layer) {
+    this._layer = value;
+  }
+
+  get layer(): Layer {
+    return this.layer;
+  }
 
   /** Outline main color. */
   get mainColor(): Color {
@@ -218,8 +229,7 @@ export class OutlineManager extends Script {
 
     // 1. render outline mesh with replace material
     this._screenEntity.isActive = false;
-   
-  
+
     camera.renderTarget = this._renderTarget;
     scene.background.solidColor = this._clearColor;
     scene.background.mode = BackgroundMode.SolidColor;
@@ -250,7 +260,7 @@ export class OutlineManager extends Script {
     camera.enableFrustumCulling = originalEnableFrustumCulling;
     camera.cullingMask = originalCullingMask;
     camera.viewport = this._cameraViewport;
-    
+
     scene.background.solidColor = originalSolidColor;
     scene.background.mode = originalBackgroundMode;
   }
