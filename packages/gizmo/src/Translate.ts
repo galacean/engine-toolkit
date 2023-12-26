@@ -15,6 +15,8 @@ export class TranslateControl extends GizmoComponent {
   private _translateControlMap: Array<AxisProps>;
 
   private _selectedAxis: axisType;
+
+  private _preMatrix: Matrix = new Matrix();
   private _startGroupMatrix: Matrix = new Matrix();
   private _startInvMatrix: Matrix = new Matrix();
   private _startScale: number = 1;
@@ -61,6 +63,7 @@ export class TranslateControl extends GizmoComponent {
     this._selectedAxis = axisType[axisName];
     // get gizmo start worldPosition
     this._group.getWorldMatrix(this._startGroupMatrix);
+    this._preMatrix.copyFrom(this._startGroupMatrix);
     Matrix.invert(this._startGroupMatrix, this._startInvMatrix);
 
     // get start scale
@@ -100,7 +103,8 @@ export class TranslateControl extends GizmoComponent {
     mat.elements[14] = subVec.z * localAxis.z;
 
     Matrix.multiply(this._startGroupMatrix, mat, mat);
-    this._group.setWorldMatrix(mat);
+    this._group.applyTransform(this._preMatrix, mat);
+    this._preMatrix.copyFrom(mat);
   }
 
   onMoveEnd(): void {

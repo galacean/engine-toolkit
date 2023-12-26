@@ -37,6 +37,7 @@ export class RotateControl extends GizmoComponent {
   private _rotateHelperPlaneMesh = GizmoMesh.createCircle(this.engine);
 
   private _selectedAxis: axisType;
+  private _preMatrix: Matrix = new Matrix();
   private _startMatrix: Matrix = new Matrix();
   private _startInvMatrix: Matrix = new Matrix();
 
@@ -152,6 +153,7 @@ export class RotateControl extends GizmoComponent {
     startHelperRenderer.castShadows = false;
     startHelperRenderer.mesh = this._startLineMesh;
     startHelperRenderer.setMaterial(Utils.yellowMaterial);
+    startHelperRenderer.priority = 90;
 
     // rotate end line
     this._endLineHelperEntity = this._gizmoRotateHelperEntity.createChild("lineHelperE");
@@ -160,6 +162,7 @@ export class RotateControl extends GizmoComponent {
     endHelperRenderer.castShadows = false;
     endHelperRenderer.mesh = this._endLineMesh;
     endHelperRenderer.setMaterial(Utils.yellowMaterial);
+    endHelperRenderer.priority = 90;
 
     // rotate plane
     this._rotateHelperPlaneEntity = this._gizmoRotateHelperEntity.createChild("rotateHelperPlane");
@@ -170,6 +173,7 @@ export class RotateControl extends GizmoComponent {
     // @ts-ignore
     this._rotateHelperPlaneMesh._enableVAO = false;
     planeHelperRenderer.setMaterial(Utils.rotatePlaneMaterial);
+    planeHelperRenderer.priority = 90;
     this._rotateHelperPlaneEntity.isActive = false;
   }
 
@@ -205,6 +209,7 @@ export class RotateControl extends GizmoComponent {
     } = this;
 
     group.getWorldMatrix(startMat);
+    this._preMatrix.copyFrom(startMat);
     Matrix.invert(startMat, this._startInvMatrix);
 
     const s = this._getGizmoScale();
@@ -261,8 +266,8 @@ export class RotateControl extends GizmoComponent {
         GizmoMesh.updateCircle(this._rotateHelperPlaneMesh, startP, localAxis, rad);
 
         Matrix.rotateAxisAngle(startMat, localAxis, rad, mat);
-        group.setWorldMatrix(mat);
-
+        group.applyTransform(this._preMatrix, mat);
+        this._preMatrix.copyFrom(mat);
         const d = (rad / Math.PI) * 180;
         this._endLineHelperEntity.transform.setRotation(d * localAxis.x, d * localAxis.y, d * localAxis.z);
         break;
@@ -281,7 +286,9 @@ export class RotateControl extends GizmoComponent {
         Vector3.transformNormal(tempVec, this._startInvMatrix, tempVec);
         const angle = pointer.deltaPosition.length() * this._speedFactor;
         Matrix.rotateAxisAngle(startMat, tempVec, angle, startMat);
-        group.setWorldMatrix(startMat);
+        group.applyTransform(this._preMatrix, startMat);
+        this._preMatrix.copyFrom(startMat);
+
         Matrix.invert(startMat, this._startInvMatrix);
         break;
     }

@@ -15,6 +15,8 @@ export class ScaleControl extends GizmoComponent {
   private _scaleControlMap: Array<AxisProps> = [];
 
   private _selectedAxis: axisType;
+
+  private _preMatrix: Matrix = new Matrix();
   private _startGroupMatrix: Matrix = new Matrix();
   private _startInvMatrix: Matrix = new Matrix();
   private _startPoint: Vector3 = new Vector3();
@@ -56,6 +58,7 @@ export class ScaleControl extends GizmoComponent {
     this._selectedAxis = axisType[axisName];
     // get gizmo start worldPosition
     this._group.getWorldMatrix(this._startGroupMatrix);
+    this._preMatrix.copyFrom(this._startGroupMatrix);
     Matrix.invert(this._startGroupMatrix, this._startInvMatrix);
     const { _startPoint, _scaleFactor } = this;
 
@@ -107,7 +110,8 @@ export class ScaleControl extends GizmoComponent {
     }
 
     Matrix.scale(this._startGroupMatrix, scaleVec, mat);
-    this._group.setWorldMatrix(mat);
+    this._group.applyTransform(this._preMatrix, mat);
+    this._preMatrix.copyFrom(mat);
   }
 
   onMoveEnd(): void {
