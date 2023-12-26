@@ -159,17 +159,23 @@ export class SkeletonViewer extends Script {
   }
 
   private _showSkeleton(renderer: SkinnedMeshRenderer): void {
-    const bones = renderer.bones;
+    // @ts-ignore
+    if (!renderer._jointEntities) {
+      renderer.update(0);
+    }
+    // @ts-ignore
+    const joints: Entity[] = renderer._jointEntities;
+
     const spheres: Entity[][] = [];
 
     let maxLength = 0;
 
-    for (let i = 0; i < bones.length; i++) {
-      const bone = bones[i];
-      const anchorPoint = bone.transform.worldPosition;
+    for (let i = 0; i < joints.length; i++) {
+      const joint = joints[i];
+      const anchorPoint = joint.transform.worldPosition;
 
       // 球
-      const entity = bone.createChild();
+      const entity = joint.createChild();
       const renderer = entity.addComponent(MeshRenderer);
       renderer.receiveShadows = false;
       renderer.castShadows = false;
@@ -177,13 +183,13 @@ export class SkeletonViewer extends Script {
       renderer.setMaterial(this._material);
       renderer.priority = 1;
 
-      spheres.push([entity, bone]);
+      spheres.push([entity, joint]);
 
       this._debugMesh.push(renderer);
 
       // 连接体
-      for (let j = 0; j < bone.children.length; j++) {
-        const child = bone.children[j];
+      for (let j = 0; j < joint.childCount; j++) {
+        const child = joint.children[j];
         const childPoint = child.transform.worldPosition;
         const absoluteDirection = childPoint.clone().subtract(anchorPoint);
         const direction = child.transform.position;
@@ -193,7 +199,7 @@ export class SkeletonViewer extends Script {
           maxLength = distance;
         }
 
-        const entity = bone;
+        const entity = joint;
         const renderer = entity.addComponent(MeshRenderer);
         renderer.receiveShadows = false;
         renderer.castShadows = false;
