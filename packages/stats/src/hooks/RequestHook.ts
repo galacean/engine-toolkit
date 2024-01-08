@@ -1,7 +1,7 @@
 
 let requestSize = 0;
 
-function hookRequest() {
+export function hookRequest() {
 
   let originalSend = XMLHttpRequest.prototype.send;
   
@@ -69,7 +69,6 @@ export class RequestHook {
 
   constructor() {
     this._hooked = true;
-    hookRequest();
   }
 
   public reset(): void {
