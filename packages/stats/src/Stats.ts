@@ -1,4 +1,5 @@
 import { Script, Camera } from "@galacean/engine";
+import { hookRequest } from "./hooks/RequestHook";
 import Monitor from "./Monitor";
 
 /**
@@ -6,6 +7,10 @@ import Monitor from "./Monitor";
  */
 export class Stats extends Script {
   private monitor: Monitor;
+
+  static hookRequest() {
+    hookRequest();
+  }
 
   override onBeginRender(camera: Camera): void {
     if (!this.monitor) {
