@@ -22,7 +22,13 @@ import {
   SpotLight,
   Transform,
   Vector3,
-  DependentMode
+  DependentMode,
+  ParticleRenderer,
+  BoxShape,
+  CircleShape,
+  ConeShape,
+  HemisphereShape,
+  SphereShape
 } from "@galacean/engine";
 import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { WireframePrimitive } from "./WireframePrimitive";
@@ -111,7 +117,7 @@ export class WireframeManager extends Script {
    */
   addEntityWireframe(entity: Entity, includeChildren = true): void {
     if (includeChildren) {
-      const components = new Array<Camera | SpotLight | DirectLight | PointLight | Collider>();
+      const components = new Array<Camera | SpotLight | DirectLight | PointLight | Collider | ParticleRenderer>();
       entity.getComponentsIncludeChildren(Camera, components);
       for (let i = 0, n = components.length; i < n; i++) {
         this.addCameraWireframe(<Camera>components[i]);
@@ -140,6 +146,12 @@ export class WireframeManager extends Script {
       for (let i = componentsOffset, n = components.length; i < n; i++) {
         this.addCollideWireframe(<Collider>components[i]);
       }
+      componentsOffset = components.length;
+
+      entity.getComponentsIncludeChildren(ParticleRenderer, components);
+      for (let i = componentsOffset, n = components.length; i < n; i++) {
+        this.addParticleRendererEmissionShapeWireframe(<ParticleRenderer>components[i]);
+      }
     } else {
       const camera = entity.getComponent(Camera);
       camera && this.addCameraWireframe(camera);
@@ -151,6 +163,8 @@ export class WireframeManager extends Script {
       pointLight && this.addPointLightWireframe(pointLight);
       const collider = entity.getComponent(Collider);
       collider && this.addCollideWireframe(collider);
+      const particle = entity.getComponent(ParticleRenderer);
+      particle && this.addParticleRendererEmissionShapeWireframe(particle);
     }
   }
 
@@ -424,6 +438,145 @@ export class WireframeManager extends Script {
     this._localTranslate(positionsOffset, tempVector);
 
     this._indicesCount += capsuleIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+  }
+
+  addParticleRendererEmissionShapeWireframe(particleRenderer: ParticleRenderer): void {
+    if (particleRenderer.generator.emission.enabled) {
+      const shape = particleRenderer.generator.emission.shape;
+      const transform = particleRenderer.entity.transform;
+      switch (shape.shapeType) {
+        case 0:
+          this.addBoxParticleShapeWireframe(shape as BoxShape, transform);
+          break;
+        case 1:
+          this.addCircleParticleShapeWireframe(shape as CircleShape, transform);
+          break;
+        case 2:
+          this.addConeParticleShapeWireframe(shape as ConeShape, transform);
+          break;
+        case 3:
+          this.addHemisphereParticleShapeWireframe(shape as HemisphereShape, transform);
+          break;
+        case 4:
+          this.addSphereParticleShapeWireframe(shape as SphereShape, transform);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  addBoxParticleShapeWireframe(shape: BoxShape, transform: Transform): void {
+    const worldScale = transform.lossyWorldScale;
+    const { size } = shape;
+
+    const positionsOffset = this._localPositions.length;
+
+    const cuboidIndicesCount = WireframePrimitive.cuboidIndexCount;
+    this._growthIndexMemory(cuboidIndicesCount);
+    this._growthPosition(WireframePrimitive.cuboidPositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
+    WireframePrimitive.createCuboidWireframe(
+      worldScale.x * size.x,
+      worldScale.y * size.y,
+      worldScale.z * size.z,
+      localPositions,
+      positionsOffset,
+      indices,
+      this._indicesCount
+    );
+
+    this._indicesCount += cuboidIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+  }
+
+  addCircleParticleShapeWireframe(shape: CircleShape, transform: Transform): void {
+    const worldScale = transform.lossyWorldScale;
+    const { radius } = shape;
+
+    const positionsOffset = this._localPositions.length;
+
+    const circleIndicesCount = WireframePrimitive.circleIndexCount;
+    this._growthIndexMemory(circleIndicesCount);
+    this._growthPosition(WireframePrimitive.circlePositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
+    WireframePrimitive.createCircleWireframe(
+      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
+      0,
+      new Vector3(),
+      localPositions,
+      positionsOffset,
+      indices,
+      this._indicesCount
+    );
+    this._indicesCount += circleIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+  }
+
+  addConeParticleShapeWireframe(shape: ConeShape, transform: Transform): void {
+    const worldScale = transform.lossyWorldScale;
+    const { radius, length, angle } = shape;
+
+    const positionsOffset = this._localPositions.length;
+
+    const frustumIndicesCount = WireframePrimitive.frustumIndexCount;
+    this._growthIndexMemory(frustumIndicesCount);
+    this._growthPosition(WireframePrimitive.frustumPositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
+    WireframePrimitive.createFrustumWireframe(
+      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
+      length,
+      angle,
+      localPositions,
+      positionsOffset,
+      indices,
+      this._indicesCount
+    );
+    this._indicesCount += frustumIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+  }
+
+  addHemisphereParticleShapeWireframe(shape: HemisphereShape, transform: Transform): void {
+    const worldScale = transform.lossyWorldScale;
+    const { radius } = shape;
+
+    const positionsOffset = this._localPositions.length;
+
+    const hemisphereIndicesCount = WireframePrimitive.hemisphereIndexCount;
+    this._growthIndexMemory(hemisphereIndicesCount);
+    this._growthPosition(WireframePrimitive.hemispherePositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
+    WireframePrimitive.createHemisphereWireframe(
+      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
+      2,
+      localPositions,
+      positionsOffset,
+      indices,
+      this._indicesCount
+    );
+    this._indicesCount += hemisphereIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+  }
+
+  addSphereParticleShapeWireframe(shape: SphereShape, transform: Transform): void {
+    const worldScale = transform.lossyWorldScale;
+    const { radius } = shape;
+
+    const positionsOffset = this._localPositions.length;
+
+    const sphereIndicesCount = WireframePrimitive.sphereIndexCount;
+    this._growthIndexMemory(sphereIndicesCount);
+    this._growthPosition(WireframePrimitive.spherePositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
+    WireframePrimitive.createSphereWireframe(
+      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
+      localPositions,
+      positionsOffset,
+      indices,
+      this._indicesCount
+    );
+    this._indicesCount += sphereIndicesCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
   }
 

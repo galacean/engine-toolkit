@@ -108,6 +108,34 @@ export class WireframePrimitive {
   }
 
   /**
+   * Get frustum wire frame index count.
+   */
+  static get frustumIndexCount(): number {
+    return WireframePrimitive.circleIndexCount * 2 + 10;
+  }
+
+  /**
+   * Get frustum wire frame position count.
+   */
+  static get frustumPositionCount(): number {
+    return WireframePrimitive.circleVertexCount * 2 + 10;
+  }
+
+  /**
+   * Get hemisphere wire frame index count.
+   */
+  static get hemisphereIndexCount(): number {
+    return WireframePrimitive.circleVertexCount * 2 + WireframePrimitive.circleIndexCount;
+  }
+
+  /**
+   * Get hemisphere wire frame position count.
+   */
+  static get hemispherePositionCount(): number {
+    return WireframePrimitive.circleVertexCount + 2 + WireframePrimitive.circlePositionCount;
+  }
+
+  /**
    * Store cuboid wireframe mesh data.
    * The origin located in center of cuboid.
    * @param width - Cuboid width
@@ -554,5 +582,163 @@ export class WireframePrimitive {
         indices[indicesOffset + 2 * i + 1] = positionOffset;
       }
     }
+  }
+
+  /**
+   * Store frustum wireframe mesh data.
+   * The origin located in the center of cap.
+   * @param radius - The radius of cap
+   * @param height - The height of cone
+   * @param angle - The angle of cone
+   * @param positions - position array
+   * @param positionOffset - The min of index list
+   * @param indices - index array
+   * @param indicesOffset - index array offset
+   */
+  static createFrustumWireframe(
+    radius: number,
+    height: number,
+    angle: number,
+    positions: Vector3[],
+    positionOffset: number,
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
+  ): void {
+    WireframePrimitive._shift.set(0, 0, 0);
+
+    // Z
+    WireframePrimitive.createCircleWireframe(
+      radius,
+      2,
+      WireframePrimitive._shift,
+      positions,
+      positionOffset,
+      indices,
+      indicesOffset
+    );
+
+    WireframePrimitive._shift.set(0, 0, -height);
+    const radian = MathUtil.degreeToRadian(angle);
+    const dirSinA = Math.sin(radian);
+    const bottomRadius = radius + dirSinA * height;
+
+    WireframePrimitive.createCircleWireframe(
+      bottomRadius,
+      2,
+      WireframePrimitive._shift,
+      positions,
+      positionOffset + WireframePrimitive.circleVertexCount,
+      indices,
+      indicesOffset + WireframePrimitive.circleIndexCount
+    );
+
+    const indexBegin = positionOffset + 2 * WireframePrimitive.circleVertexCount;
+    let offset = indexBegin;
+
+    positions[offset++].set(0, 0, 0);
+    positions[offset++].set(0, 0, -height);
+    positions[offset++].set(radius, 0, 0);
+    positions[offset++].set(bottomRadius, 0, -height);
+    positions[offset++].set(-radius, 0, 0);
+    positions[offset++].set(-bottomRadius, 0, -height);
+    positions[offset++].set(0, radius, 0);
+    positions[offset++].set(0, bottomRadius, -height);
+    positions[offset++].set(0, -radius, 0);
+    positions[offset++].set(0, -bottomRadius, -height);
+
+    indicesOffset += 2 * WireframePrimitive.circleIndexCount;
+    indices[indicesOffset++] = indexBegin;
+    indices[indicesOffset++] = indexBegin + 1;
+    indices[indicesOffset++] = indexBegin + 2;
+    indices[indicesOffset++] = indexBegin + 3;
+    indices[indicesOffset++] = indexBegin + 4;
+    indices[indicesOffset++] = indexBegin + 5;
+    indices[indicesOffset++] = indexBegin + 6;
+    indices[indicesOffset++] = indexBegin + 7;
+    indices[indicesOffset++] = indexBegin + 8;
+    indices[indicesOffset++] = indexBegin + 9;
+  }
+
+  /**
+   * Store hemisphere wireframe mesh data.
+   * @param radius - The radius of hemisphere
+   * @param axis - The default direction
+   * @param positions - position array
+   * @param positionOffset - The min of index list
+   * @param indices - index array
+   * @param indicesOffset - index array offset
+   */
+  static createHemisphereWireframe(
+    radius: number,
+    axis: number,
+    positions: Vector3[],
+    positionOffset: number,
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
+  ): void {
+    const vertexCount = WireframePrimitive.circleVertexCount / 2;
+    const twoPi = Math.PI;
+    const countReciprocal = 1.0 / vertexCount;
+
+    let offset = positionOffset;
+    for (let i = 0; i < vertexCount + 1; i++) {
+      const v = i * countReciprocal;
+      const thetaDelta = v * twoPi;
+
+      switch (axis) {
+        case 0:
+          positions[offset++].set(radius * Math.sin(thetaDelta), 0, radius * Math.cos(thetaDelta));
+          break;
+        case 1:
+          positions[offset++].set(0, radius * Math.sin(thetaDelta), radius * Math.cos(thetaDelta));
+          break;
+        case 2:
+          positions[offset++].set(-radius * Math.cos(thetaDelta), 0, -radius * Math.sin(thetaDelta));
+          break;
+      }
+
+      const globalIndex = i + positionOffset;
+
+      if (i < vertexCount) {
+        indices[indicesOffset + 2 * i] = globalIndex;
+        indices[indicesOffset + 2 * i + 1] = globalIndex + 1;
+      }
+    }
+
+    indicesOffset += WireframePrimitive.circleVertexCount;
+    for (let i = 0; i < vertexCount + 1; i++) {
+      const v = i * countReciprocal;
+      const thetaDelta = v * twoPi;
+
+      switch (axis) {
+        case 0:
+          positions[offset++].set(radius * Math.sin(thetaDelta), radius * Math.cos(thetaDelta), 0);
+          break;
+        case 1:
+          positions[offset++].set(radius * Math.cos(thetaDelta), radius * Math.sin(thetaDelta), 0);
+          break;
+        case 2:
+          positions[offset++].set(0, -radius * Math.cos(thetaDelta), -radius * Math.sin(thetaDelta));
+          break;
+      }
+
+      const globalIndex = i + positionOffset + vertexCount + 1;
+
+      if (i < vertexCount) {
+        indices[indicesOffset + 2 * i] = globalIndex;
+        indices[indicesOffset + 2 * i + 1] = globalIndex + 1;
+      }
+    }
+
+    WireframePrimitive._shift.set(0, 0, 0);
+    WireframePrimitive.createCircleWireframe(
+      radius,
+      axis,
+      WireframePrimitive._shift,
+      positions,
+      positionOffset + WireframePrimitive.circleVertexCount + 2,
+      indices,
+      indicesOffset + WireframePrimitive.circleVertexCount
+    );
   }
 }
