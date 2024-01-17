@@ -468,7 +468,6 @@ export class WireframeManager extends Script {
   }
 
   addBoxParticleShapeWireframe(shape: BoxShape, transform: Transform): void {
-    const worldScale = transform.lossyWorldScale;
     const { size } = shape;
 
     const positionsOffset = this._localPositions.length;
@@ -478,9 +477,9 @@ export class WireframeManager extends Script {
     this._growthPosition(WireframePrimitive.cuboidPositionCount);
     const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createCuboidWireframe(
-      worldScale.x * size.x,
-      worldScale.y * size.y,
-      worldScale.z * size.z,
+      size.x,
+      size.y,
+      size.z,
       localPositions,
       positionsOffset,
       indices,
@@ -488,11 +487,10 @@ export class WireframeManager extends Script {
     );
 
     this._indicesCount += cuboidIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset, false));
   }
 
   addCircleParticleShapeWireframe(shape: CircleShape, transform: Transform): void {
-    const worldScale = transform.lossyWorldScale;
     const { radius } = shape;
 
     const positionsOffset = this._localPositions.length;
@@ -502,7 +500,7 @@ export class WireframeManager extends Script {
     this._growthPosition(WireframePrimitive.circlePositionCount);
     const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createCircleWireframe(
-      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
+      radius,
       0,
       new Vector3(),
       localPositions,
@@ -511,11 +509,10 @@ export class WireframeManager extends Script {
       this._indicesCount
     );
     this._indicesCount += circleIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset, false));
   }
 
   addConeParticleShapeWireframe(shape: ConeShape, transform: Transform): void {
-    const worldScale = transform.lossyWorldScale;
     const { radius, length, angle } = shape;
 
     const positionsOffset = this._localPositions.length;
@@ -525,7 +522,7 @@ export class WireframeManager extends Script {
     this._growthPosition(WireframePrimitive.frustumPositionCount);
     const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createFrustumWireframe(
-      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
+      radius,
       length,
       angle,
       localPositions,
@@ -534,11 +531,10 @@ export class WireframeManager extends Script {
       this._indicesCount
     );
     this._indicesCount += frustumIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset, false));
   }
 
   addHemisphereParticleShapeWireframe(shape: HemisphereShape, transform: Transform): void {
-    const worldScale = transform.lossyWorldScale;
     const { radius } = shape;
 
     const positionsOffset = this._localPositions.length;
@@ -548,7 +544,7 @@ export class WireframeManager extends Script {
     this._growthPosition(WireframePrimitive.hemispherePositionCount);
     const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createHemisphereWireframe(
-      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
+      radius,
       2,
       localPositions,
       positionsOffset,
@@ -556,11 +552,10 @@ export class WireframeManager extends Script {
       this._indicesCount
     );
     this._indicesCount += hemisphereIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset, false));
   }
 
   addSphereParticleShapeWireframe(shape: SphereShape, transform: Transform): void {
-    const worldScale = transform.lossyWorldScale;
     const { radius } = shape;
 
     const positionsOffset = this._localPositions.length;
@@ -569,15 +564,9 @@ export class WireframeManager extends Script {
     this._growthIndexMemory(sphereIndicesCount);
     this._growthPosition(WireframePrimitive.spherePositionCount);
     const { _indices: indices, _localPositions: localPositions } = this;
-    WireframePrimitive.createSphereWireframe(
-      Math.max(worldScale.x, worldScale.y, worldScale.z) * radius,
-      localPositions,
-      positionsOffset,
-      indices,
-      this._indicesCount
-    );
+    WireframePrimitive.createSphereWireframe(radius, localPositions, positionsOffset, indices, this._indicesCount);
     this._indicesCount += sphereIndicesCount;
-    this._wireframeElements.push(new WireframeElement(transform, positionsOffset));
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset, false));
   }
 
   override onAwake(): void {
@@ -634,7 +623,11 @@ export class WireframeManager extends Script {
       if (wireframeElement.updateFlag.flag) {
         const transform = wireframeElement.transform;
         const worldMatrix = WireframeManager._tempMatrix;
-        Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
+        if (wireframeElement.isScaleIgnored) {
+          Matrix.rotationTranslation(transform.worldRotationQuaternion, transform.worldPosition, worldMatrix);
+        } else {
+          worldMatrix.copyFrom(transform.worldMatrix);
+        }
 
         for (let j = beginIndex; j < endIndex; j++) {
           const localPosition = localPositions[positionIndex];
@@ -748,7 +741,7 @@ export class WireframeManager extends Script {
 class WireframeElement {
   updateFlag: BoolUpdateFlag;
 
-  constructor(public transform: Transform, public transformRanges: number) {
+  constructor(public transform: Transform, public transformRanges: number, public isScaleIgnored: boolean = true) {
     this.updateFlag = transform.registerWorldChangeFlag();
   }
 }
