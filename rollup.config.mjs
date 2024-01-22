@@ -46,7 +46,7 @@ const plugins = [
   glslify({
     include: [/\.glsl$/]
   }),
-  string({ include: "**/*.shader" }),
+  string({ include: "**/*.(shader|gsl)" }),
   swc(
     defineRollupSwcOption({
       include: /\.[mc]?[jt]sx?$/,
