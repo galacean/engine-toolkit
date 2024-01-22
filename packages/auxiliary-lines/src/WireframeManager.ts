@@ -445,7 +445,7 @@ export class WireframeManager extends Script {
     if (particleRenderer.generator.emission.enabled) {
       const shape = particleRenderer.generator.emission.shape;
       const transform = particleRenderer.entity.transform;
-      switch (shape.shapeType) {
+      switch (shape?.shapeType) {
         case 0:
           this.addBoxParticleShapeWireframe(shape as BoxShape, transform);
           break;
