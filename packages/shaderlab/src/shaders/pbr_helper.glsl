@@ -1,4 +1,4 @@
-#include "normal_get.gsl"
+#include "normal_get.glsl"
 
 
 float computeSpecularOcclusion(float ambientOcclusion, float roughness, float dotNV ) {
@@ -159,6 +159,6 @@ void initMaterial(out Material material, inout Geometry geometry){
 }
 
 // direct + indirect
-#include "brdf.gsl"
-#include "direct_irradiance_frag_define.gsl"
-#include "ibl_frag_define.gsl"
+#include "brdf.glsl"
+#include "direct_irradiance_frag_define.glsl"
+#include "ibl_frag_define.glsl"

@@ -4,7 +4,7 @@
 
 #ifdef SCENE_IS_CALCULATE_SHADOWS
     #if SCENE_SHADOW_CASCADED_COUNT != 1
-        #include "ShadowCoord.gsl"
+        #include "ShadowCoord.glsl"
     #endif
     
     // intensity, resolution, sunIndex
@@ -51,7 +51,7 @@
     #endif
 
     #if SCENE_SHADOW_TYPE == 3
-        #include "shadow_sample_tent.gsl"
+        #include "shadow_sample_tent.glsl"
 
         float sampleShadowMapFiltered9(TEXTURE2D_SHADOW_PARAM(shadowMap), vec3 shadowCoord, vec4 shadowmapSize) {
             float attenuation;

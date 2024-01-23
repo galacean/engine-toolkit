@@ -1,4 +1,4 @@
-declare module "*.gsl" {
+declare module "*.glsl" {
   const value: string;
   export default value;
 }

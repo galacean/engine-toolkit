@@ -44,9 +44,10 @@ const mainFields = ["module", "main"];
 const plugins = [
   resolve({ extensions, preferBuiltins: true, mainFields }),
   glslify({
-    include: [/\.glsl$/]
+    include: [/\.glsl$/],
+    exclude: "**/packages/shaderlab/src/shaders/**"
   }),
-  string({ include: "**/*.(shader|gsl)" }),
+  string({ include: "**/*.(shader|glsl|gs)" }),
   swc(
     defineRollupSwcOption({
       include: /\.[mc]?[jt]sx?$/,

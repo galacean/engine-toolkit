@@ -22,7 +22,7 @@
     #endif
 #endif
 
-#include "transform_declare.gsl"
-#include "camera_declare.gsl"
+#include "transform_declare.glsl"
+#include "camera_declare.glsl"
 
 vec4 material_TilingOffset;

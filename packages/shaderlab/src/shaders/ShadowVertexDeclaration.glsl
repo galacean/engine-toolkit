@@ -4,6 +4,6 @@
 
 #ifdef SCENE_IS_CALCULATE_SHADOWS
     #if SCENE_SHADOW_CASCADED_COUNT==1
-        #include "ShadowCoord.gsl"
+        #include "ShadowCoord.glsl"
     #endif
 #endif

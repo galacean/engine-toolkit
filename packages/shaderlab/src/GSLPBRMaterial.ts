@@ -6,8 +6,8 @@ export class GSLPBRMaterial extends PBRBaseMaterial {
   static registerIncludes() {
     if (this._registered) return;
 
-    for (const [n, c] of Object.entries(pbr_include_fragment_list)) {
-      ShaderFactory.registerInclude(`${n}.gsl`, c);
+    for (const sourceFragment of pbr_include_fragment_list) {
+      ShaderFactory.registerInclude(sourceFragment.includeKey, sourceFragment.source);
     }
     this._registered = true;
   }
