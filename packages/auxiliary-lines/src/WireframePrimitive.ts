@@ -619,8 +619,8 @@ export class WireframePrimitive {
 
     WireframePrimitive._shift.set(0, 0, -height);
     const radian = MathUtil.degreeToRadian(angle);
-    const dirSinA = Math.sin(radian);
-    const bottomRadius = radius + dirSinA * height;
+    const dirTanA = Math.tan(radian);
+    const bottomRadius = radius + dirTanA * height;
 
     WireframePrimitive.createCircleWireframe(
       bottomRadius,
