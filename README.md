@@ -5,6 +5,7 @@
 Some out-of-the-box utility features based on the [Galacean engine](https://github.com/galacean/engine) `Script` and `Material`, welcome to enjoy!
 
 ## Features
+
 - 📊 &nbsp;**[Stats](packages/stats)** - Statistics rendering data
 
 - 🛸 &nbsp;**[Controls](packages/controls)** - Some camera controllers
@@ -23,12 +24,12 @@ Some out-of-the-box utility features based on the [Galacean engine](https://gith
 - 🖱 &nbsp;**[Input Logger](packages/input-logger)** - Outputs `keyboard` and `pointer` information in real time for developers
 - 📦 &nbsp;**[Draco](packages/draco)** - Support draco compressed mesh
 
-
 ### [Custom Materials](packages/custom-material)
 
 - ⚔️ &nbsp;**[Grid Material](packages/custom-material/src/grid)** - Infinity grid material
 - 🗳 &nbsp;**[Planar Shadow Material](packages/custom-material/src/planar-shadow)** - Two-pass shadow on the planar
 - 🍞 &nbsp;**[Bake PBR Material](packages/custom-material/src/bake-pbr)** - Bake texture with ibl lighting
+- 🍞 &nbsp;**[Shader Lab](packages/shaderlab)** - a declarative language for creating shader
 
 ## npm
 
