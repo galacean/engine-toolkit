@@ -47,7 +47,7 @@ const plugins = [
     include: [/\.glsl$/],
     exclude: "**/packages/shaderlab/src/shaders/**"
   }),
-  string({ include: "**/*.(shader|glsl|gs)" }),
+  string({ include: ["**/*.shader", "**/packages/shaderlab/src/**/*.(glsl|gs)"] }),
   swc(
     defineRollupSwcOption({
       include: /\.[mc]?[jt]sx?$/,
