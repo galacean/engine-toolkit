@@ -9,6 +9,7 @@ export * from "@galacean/engine-toolkit-custom-material";
 export * from "@galacean/engine-toolkit-navigation-gizmo";
 export * from "@galacean/engine-toolkit-geometry-sketch";
 export * from "@galacean/engine-toolkit-stats";
+export * from "@galacean/engine-toolkit-shader-lab";
 
 //@ts-ignore
 export const version = `__buildVersion`;

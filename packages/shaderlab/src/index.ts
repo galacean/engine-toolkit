@@ -1,0 +1,1 @@
+export { GSLPBRMaterial } from "./GSLPBRMaterial";
