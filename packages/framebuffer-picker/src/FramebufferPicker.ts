@@ -133,14 +133,17 @@ export class FramebufferPicker extends Script {
     this._updateRenderersPickColor(camera.scene);
     // Prepare render target and shader
     const lastRenderTarget = camera.renderTarget;
+    const lastRatio = camera.aspectRatio;
     camera.renderTarget = this._pickRenderTarget;
     camera.setReplacementShader(pickShader);
+    camera.aspectRatio = lastRatio;
 
     camera.render();
 
     // Revert render target and shader
     camera.resetReplacementShader();
     camera.renderTarget = lastRenderTarget;
+    camera.resetAspectRatio();
   }
 
   private _readPixelFromRenderTarget(x: number, y: number, xEnd?: number, yEnd?: number): Uint8Array {
