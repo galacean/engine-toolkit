@@ -1,5 +1,3 @@
-import attr_blendShape_input from "./attr_blendShape_input.glsl";
-import attr_common_vert from "./attr_common_vert.glsl";
 import attrib from "./attrib.glsl";
 import begin_normal_vert from "./begin_normal_vert.glsl";
 import begin_position_vert from "./begin_position_vert.glsl";
@@ -30,15 +28,12 @@ import ShadowVertexDeclaration from "./ShadowVertexDeclaration.glsl";
 import skinning_vert from "./skinning_vert.glsl";
 import transform_declare from "./transform_declare.glsl";
 import uv_vert from "./uv_vert.glsl";
-import vary_color_share from "./vary_color_share.glsl";
-import vary_FogVertexDeclaration from "./vary_FogVertexDeclaration.glsl";
-import vary_normal_share from "./vary_normal_share.glsl";
-import vary_ShadowVertexDeclaration from "./vary_ShadowVertexDeclaration.glsl";
-import vary_uv_share from "./vary_uv_share.glsl";
-import vary_worldpos_share from "./vary_worldpos_share.glsl";
 import varying from "./varying.glsl";
 import worldpos_vert from "./worldpos_vert.glsl";
 import pbr from "./pbr.gs";
+import globals from "./globals.glsl";
+import pbr_vert1 from "./pbr_vert1.glsl";
+import pbr_vert2 from "./pbr_vert2.glsl";
 
 interface IShaderFragment {
   includeKey: string;
@@ -46,8 +41,6 @@ interface IShaderFragment {
 }
 
 const pbr_include_fragment_list: IShaderFragment[] = [
-  { source: attr_blendShape_input, includeKey: "attr_blendShape_input.glsl" },
-  { source: attr_common_vert, includeKey: "attr_common_vert.glsl" },
   { source: attrib, includeKey: "attrib.glsl" },
   { source: begin_normal_vert, includeKey: "begin_normal_vert.glsl" },
   { source: begin_position_vert, includeKey: "begin_position_vert.glsl" },
@@ -78,13 +71,10 @@ const pbr_include_fragment_list: IShaderFragment[] = [
   { source: skinning_vert, includeKey: "skinning_vert.glsl" },
   { source: transform_declare, includeKey: "transform_declare.glsl" },
   { source: uv_vert, includeKey: "uv_vert.glsl" },
-  { source: vary_color_share, includeKey: "vary_color_share.glsl" },
-  { source: vary_FogVertexDeclaration, includeKey: "vary_FogVertexDeclaration.glsl" },
-  { source: vary_normal_share, includeKey: "vary_normal_share.glsl" },
-  { source: vary_ShadowVertexDeclaration, includeKey: "vary_ShadowVertexDeclaration.glsl" },
-  { source: vary_uv_share, includeKey: "vary_uv_share.glsl" },
-  { source: vary_worldpos_share, includeKey: "vary_worldpos_share.glsl" },
   { source: varying, includeKey: "varying.glsl" },
-  { source: worldpos_vert, includeKey: "worldpos_vert.glsl" }
+  { source: worldpos_vert, includeKey: "worldpos_vert.glsl" },
+  { source: globals, includeKey: "globals.glsl" },
+  { source: pbr_vert1, includeKey: "pbr_vert1.glsl" },
+  { source: pbr_vert2, includeKey: "pbr_vert2.glsl" }
 ];
 export { pbr as pbrSource, pbr_include_fragment_list };
