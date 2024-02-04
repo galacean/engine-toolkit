@@ -186,7 +186,7 @@ export class FramebufferPicker extends Script {
 
     return {
       x: Math.floor(((x - viewport.x) / viewWidth) * (pickRenderTarget.width - 1)),
-      y: Math.floor((1 - (y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1))
+      y: Math.floor(((y - viewport.y) / viewHeight) * (pickRenderTarget.height - 1))
     };
   }
 
