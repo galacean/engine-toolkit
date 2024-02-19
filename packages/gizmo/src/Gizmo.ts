@@ -48,7 +48,7 @@ export class Gizmo extends Script {
   private _tempRay2: Ray = new Ray();
 
   private _type: State = null;
-  private _scalor: number = 1;
+  private _scalar: number = 1;
 
   private _sphereColliderEntity: Entity;
 
@@ -120,12 +120,12 @@ export class Gizmo extends Script {
    * @return current gizmo size - min 0.01, default 1
    */
   get size(): number {
-    return this._scalor;
+    return this._scalar;
   }
 
   set size(value: number) {
-    this._scalor = MathUtil.clamp(value, 0.01, Infinity);
-    Utils.scaleFactor = this._scalor * 0.05773502691896257;
+    this._scalar = MathUtil.clamp(value, 0.01, Infinity);
+    Utils.scaleFactor = this._scalar * 0.05773502691896257;
   }
 
   constructor(entity: Entity) {
@@ -212,6 +212,11 @@ export class Gizmo extends Script {
         this._group._gizmoTransformDirty = false;
       }
       if (pointer) {
+        const { x, y } = pointer.position;
+        const { canvas } = this.engine;
+        if (x <= 0 || y <= 0 || x > canvas.width || y > canvas.height) {
+          return;
+        }
         if ((pointer.pressedButtons & PointerButton.Primary) !== 0) {
           this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
             if (result) {
@@ -220,7 +225,11 @@ export class Gizmo extends Script {
           });
         } else {
           this._sceneCamera.screenPointToRay(pointer.position, this._tempRay);
-          const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
+          const isHit = this.engine.sceneManager.scenes[0].physics.raycast(
+            this._tempRay,
+            Number.MAX_VALUE,
+            this._layer
+          );
 
           if (isHit) {
             const originLayer = this._sceneCamera.cullingMask;
