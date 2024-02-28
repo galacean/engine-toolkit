@@ -212,7 +212,8 @@ export class Gizmo extends Script {
         this._group._gizmoTransformDirty = false;
       }
       if (pointer) {
-        if ((pointer.pressedButtons & PointerButton.Primary) !== 0) {
+        // @ts-ignore
+        if ((pointer.pressedButtons & PointerButton.Primary) !== 0 && pointer.currentTarget === canvas._webCanvas) {
           this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
             if (result) {
               this._selectHandler(result, pointer.position);
