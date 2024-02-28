@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-shader-lab",
-  "version": "1.2.0-alpha.10",
+  "version": "1.2.0-alpha.12",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
