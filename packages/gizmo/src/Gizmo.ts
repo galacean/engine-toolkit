@@ -156,8 +156,8 @@ export class Gizmo extends Script {
     if (!this._initialized) {
       return;
     }
-
-    const { pointers } = this.engine.inputManager;
+    const { inputManager } = this.engine;
+    const { pointers } = inputManager;
     const pointer = pointers.find((pointer: Pointer) => {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
@@ -217,7 +217,7 @@ export class Gizmo extends Script {
         if (x <= 0 || y <= 0 || x > canvas.width || y > canvas.height) {
           return;
         }
-        if ((pointer.pressedButtons & PointerButton.Primary) !== 0) {
+        if (inputManager.isPointerDown(PointerButton.Primary)) {
           this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
             if (result) {
               this._selectHandler(result, pointer.position);
