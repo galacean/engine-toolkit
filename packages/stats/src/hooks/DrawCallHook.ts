@@ -24,10 +24,14 @@ export default class DrawCallHook {
 
     const hasInstancedFunc = gl instanceof WebGL2RenderingContext || (gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced");
     if (hasInstancedFunc) {
+      // @ts-ignore
       this.realDrawElementsInstanced = gl.drawElementsInstanced;
+      // @ts-ignore
       this.realDrawArraysInstanced = gl.drawArraysInstanced;
 
+      // @ts-ignore
       gl.drawElementsInstanced = this.hookedDrawElementsInstanced.bind(this);
+      // @ts-ignore
       gl.drawArraysInstanced = this.hookedDrawArraysInstanced.bind(this);
     } else {
       const extAngleInstancedArrays = gl.getExtension("ANGLE_instanced_arrays");
@@ -126,7 +130,9 @@ export default class DrawCallHook {
 
       const hasInstancedFunc = gl instanceof WebGL2RenderingContext || (gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced");
       if (hasInstancedFunc) {
+        // @ts-ignore
         gl.drawElementsInstanced = this.realDrawElementsInstanced;
+        // @ts-ignore
         gl.drawArraysInstanced = this.realDrawArraysInstanced;
       } else {
         const extAngleInstancedArrays = gl.getExtension("ANGLE_instanced_arrays");
