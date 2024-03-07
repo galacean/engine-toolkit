@@ -334,24 +334,13 @@ export class Group {
       for (let j = renderers.length - 1; j >= 0; j--) {
         const renderer = renderers[j];
         if (renderer.entity.isActiveInHierarchy) {
-          const bounds = renderers[j].bounds;
-          const isBoundsInfinity =
-            bounds.max.x >= Number.MAX_VALUE &&
-            bounds.max.y >= Number.MAX_VALUE &&
-            bounds.max.z >= Number.MAX_VALUE &&
-            bounds.min.x <= -Number.MAX_VALUE &&
-            bounds.min.y <= -Number.MAX_VALUE &&
-            bounds.min.z <= -Number.MAX_VALUE;
-          if (isBoundsInfinity) {
-            isEffective = false;
-            break;
-          }
-
-          BoundingBox.merge(tempBoundBox, bounds, tempBoundBox);
+          BoundingBox.merge(tempBoundBox, renderers[j].bounds, tempBoundBox);
         }
       }
     }
-    if (tempBoundBox.getExtent(out).length() <= 0) {
+
+    const length = tempBoundBox.getExtent(out).length();
+    if (length <= 0 || length >= Number.MAX_VALUE) {
       isEffective = false;
     }
     if (isEffective) {
