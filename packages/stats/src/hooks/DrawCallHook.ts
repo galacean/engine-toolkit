@@ -22,7 +22,8 @@ export default class DrawCallHook {
     gl.drawElements = this.hookedDrawElements.bind(this);
     gl.drawArrays = this.hookedDrawArrays.bind(this);
 
-    if (gl instanceof WebGL2RenderingContext) {
+    const hasInstancedFunc = gl instanceof WebGL2RenderingContext || (gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced");
+    if (hasInstancedFunc) {
       this.realDrawElementsInstanced = gl.drawElementsInstanced;
       this.realDrawArraysInstanced = gl.drawArraysInstanced;
 
@@ -123,7 +124,8 @@ export default class DrawCallHook {
       gl.drawElements = this.realDrawElements;
       gl.drawArrays = this.realDrawArrays;
 
-      if (gl instanceof WebGL2RenderingContext) {
+      const hasInstancedFunc = gl instanceof WebGL2RenderingContext || (gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced");
+      if (hasInstancedFunc) {
         gl.drawElementsInstanced = this.realDrawElementsInstanced;
         gl.drawArraysInstanced = this.realDrawArraysInstanced;
       } else {
