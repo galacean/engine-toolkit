@@ -338,7 +338,9 @@ export class Group {
         }
       }
     }
-    if (tempBoundBox.getExtent(out).length() <= 0) {
+
+    const length = tempBoundBox.getExtent(out).length();
+    if (length <= 0 || length >= Number.MAX_VALUE) {
       isEffective = false;
     }
     if (isEffective) {
