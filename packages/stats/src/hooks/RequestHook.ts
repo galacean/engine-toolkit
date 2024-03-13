@@ -9,7 +9,6 @@ export function hookRequest() {
   function addRequestSize(url: string, size: number) {
     if (cacheMap.get(url) == undefined) {
       cacheMap.set(url, size);
-      console.log(`request(${size}): ${url}`);
       requestSize += size;
     }
   }
