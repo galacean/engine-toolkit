@@ -48,7 +48,7 @@ export class Gizmo extends Script {
   private _tempRay2: Ray = new Ray();
 
   private _type: State = null;
-  private _scalor: number = 1;
+  private _scalar: number = 1;
 
   private _sphereColliderEntity: Entity;
 
@@ -75,7 +75,7 @@ export class Gizmo extends Script {
   }
 
   /**
-   * gizmo layer, default Layer29
+   * gizmo layer, default Layer31
    * @return the layer for gizmo entity and gizmo's inner framebuffer picker
    * @remarks Layer duplicate warning, check whether this layer is taken
    */
@@ -120,18 +120,17 @@ export class Gizmo extends Script {
    * @return current gizmo size - min 0.01, default 1
    */
   get size(): number {
-    return this._scalor;
+    return this._scalar;
   }
 
   set size(value: number) {
-    this._scalor = MathUtil.clamp(value, 0.01, Infinity);
-    Utils.scaleFactor = this._scalor * 0.05773502691896257;
+    this._scalar = MathUtil.clamp(value, 0.01, Infinity);
+    Utils.scaleFactor = this._scalar * 0.05773502691896257;
   }
 
   constructor(entity: Entity) {
     super(entity);
-    // @ts-ignore
-    if (!this.entity.engine.physicsManager._initialized) {
+    if (!this.entity.engine.physicsManager) {
       throw new Error("PhysicsManager is not initialized");
     }
 
@@ -142,7 +141,7 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.rotate, RotateControl);
     this._createGizmoControl(State.scale, ScaleControl);
 
-    this.layer = Layer.Layer29;
+    this.layer = Layer.Layer31;
     // gizmo collider
     this._sphereColliderEntity = entity.createChild("gizmoCollider");
     const sphereCollider = this._sphereColliderEntity.addComponent(StaticCollider);
@@ -157,8 +156,8 @@ export class Gizmo extends Script {
     if (!this._initialized) {
       return;
     }
-
-    const { pointers } = this.engine.inputManager;
+    const { inputManager } = this.engine;
+    const { pointers } = inputManager;
     const pointer = pointers.find((pointer: Pointer) => {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
@@ -213,7 +212,12 @@ export class Gizmo extends Script {
         this._group._gizmoTransformDirty = false;
       }
       if (pointer) {
-        if ((pointer.pressedButtons & PointerButton.Primary) !== 0) {
+        const { x, y } = pointer.position;
+        const { canvas } = this.engine;
+        if (x <= 0 || y <= 0 || x > canvas.width || y > canvas.height) {
+          return;
+        }
+        if (inputManager.isPointerDown(PointerButton.Primary)) {
           this._framebufferPicker.pick(pointer.position.x, pointer.position.y).then((result) => {
             if (result) {
               this._selectHandler(result, pointer.position);
@@ -221,7 +225,11 @@ export class Gizmo extends Script {
           });
         } else {
           this._sceneCamera.screenPointToRay(pointer.position, this._tempRay);
-          const isHit = this.engine.physicsManager.raycast(this._tempRay, Number.MAX_VALUE, this._layer);
+          const isHit = this.engine.sceneManager.scenes[0].physics.raycast(
+            this._tempRay,
+            Number.MAX_VALUE,
+            this._layer
+          );
 
           if (isHit) {
             const originLayer = this._sceneCamera.cullingMask;

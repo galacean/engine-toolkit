@@ -5,13 +5,16 @@
 Some out-of-the-box utility features based on the [Galacean engine](https://github.com/galacean/engine) `Script` and `Material`, welcome to enjoy!
 
 ## Features
+
 - 📊 &nbsp;**[Stats](packages/stats)** - Statistics rendering data
 
 - 🛸 &nbsp;**[Controls](packages/controls)** - Some camera controllers
+- 🎥 &nbsp;**[Tween](packages/tween)** - Library for tween animation
 - 🫧 &nbsp;**[FrameBufferPicker](packages/framebuffer-picker)** - Pixel-based object picking
 - ➡️ &nbsp;**[Gizmo](packages/gizmo)** - Operation tools for transforming (displacement, rotation, scaling)
 - 🧭 &nbsp;**[Navigation Gizmo](packages/navigation-gizmo)** - Three-view & visualized operation for camera control
 - 🛣 &nbsp;**[Waypoint](packages/way-point)** - control entity move along waypoint
+- 🪁 &nbsp;**[Dynamic Bone](packages/dynamic-bone)** - use dynamic spring movement to enhance skeleton animation
 
 - 📐 &nbsp;**[Lines](packages/lines)** - 2D Solid Line & Dash Line
 - 🖇 &nbsp;**[Auxiliary Lines](packages/auxiliary-lines)** - Draw wireframe for entity and component
@@ -19,13 +22,14 @@ Some out-of-the-box utility features based on the [Galacean engine](https://gith
 - ⭕️ &nbsp;**[Outline](packages/outline)** - Show outline of mesh renderers
 - 🖼 &nbsp;**[Geometry Sketch](packages/geometry-sketch)** - Convert geometry into texture && sketch normal and mesh wireframe
 - 🖱 &nbsp;**[Input Logger](packages/input-logger)** - Outputs `keyboard` and `pointer` information in real time for developers
-
+- 📦 &nbsp;**[Draco](packages/draco)** - Support draco compressed mesh
 
 ### [Custom Materials](packages/custom-material)
 
 - ⚔️ &nbsp;**[Grid Material](packages/custom-material/src/grid)** - Infinity grid material
 - 🗳 &nbsp;**[Planar Shadow Material](packages/custom-material/src/planar-shadow)** - Two-pass shadow on the planar
 - 🍞 &nbsp;**[Bake PBR Material](packages/custom-material/src/bake-pbr)** - Bake texture with ibl lighting
+- 🍞 &nbsp;**[Shader Lab](packages/shaderlab)** - a declarative language for creating shader
 
 ## npm
 
