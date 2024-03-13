@@ -1,0 +1,5 @@
+#include "uv_vert.glsl"
+#include "color_vert.glsl"
+#include "normal_vert.glsl"
+#include "worldpos_vert.glsl"
+#include "position_vert.glsl"

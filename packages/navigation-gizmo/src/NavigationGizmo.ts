@@ -20,10 +20,16 @@ import { EndScript } from "./EndScript";
 import { SphereScript } from "./SphereScript";
 import { Utils } from "./Utils";
 
+function traverseEntity(entity: Entity, callback: (entity: Entity) => any) {
+  callback(entity);
+  for (const child of entity.children) {
+    traverseEntity(child, callback);
+  }
+}
+
 export class NavigationGizmo extends Script {
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
-  private _previousSceneCullingMaskLayer: Layer = Layer.Nothing;
 
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
@@ -61,22 +67,12 @@ export class NavigationGizmo extends Script {
   set camera(camera: Camera) {
     let sceneCamera = this._sceneCamera;
     if (sceneCamera !== camera) {
-      // restore the previous camera cullingMask
-      if (sceneCamera) {
-        sceneCamera.cullingMask = this._previousSceneCullingMaskLayer;
-      }
       if (camera) {
         sceneCamera = this._sceneCamera = camera;
         this._sphereScript.camera = camera;
         Object.keys(this._endScript).forEach((key) => {
           this._endScript[key].camera = camera;
         });
-
-        this._previousSceneCullingMaskLayer = sceneCamera.cullingMask;
-        if ((sceneCamera.cullingMask & this._gizmoLayer) != 0) {
-          sceneCamera.cullingMask ^= this._gizmoLayer;
-          console.log("camera cullingmask layer modified");
-        }
       } else {
         throw new Error("navigation gizmo needs scene camera");
       }
@@ -99,27 +95,19 @@ export class NavigationGizmo extends Script {
 
   /**
    * gizmo layer, default Layer30
-   * @return the layer for gizmo and gizmo camera's cullingMask
-   * @remarks Layer duplicate warning, check whether this layer is taken
    */
   get layer(): Layer {
     return this._gizmoLayer;
   }
 
   set layer(layer: Layer) {
-    const sceneCamera = this._sceneCamera;
     if (this._gizmoLayer !== layer) {
-      // restore previous layer
-      if (sceneCamera) {
-        sceneCamera.cullingMask = this._previousSceneCullingMaskLayer;
-      }
       this._gizmoLayer = layer;
       this._gizmoCamera.cullingMask = layer;
-      this._gizmoEntity.layer = layer;
 
-      if (sceneCamera && (sceneCamera.cullingMask & this._gizmoLayer) != 0) {
-        sceneCamera.cullingMask ^= this._gizmoLayer;
-      }
+      traverseEntity(this._gizmoEntity, (entity) => {
+        entity.layer = layer;
+      });
     }
   }
 
@@ -136,8 +124,7 @@ export class NavigationGizmo extends Script {
 
   constructor(entity: Entity) {
     super(entity);
-    // @ts-ignore
-    if (!entity.engine.physicsManager._initialized) {
+    if (!entity.engine.physicsManager) {
       throw new Error("PhysicsManager is not initialized");
     }
 
