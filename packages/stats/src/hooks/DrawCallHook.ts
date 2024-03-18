@@ -22,7 +22,7 @@ export default class DrawCallHook {
     gl.drawElements = this.hookedDrawElements.bind(this);
     gl.drawArrays = this.hookedDrawArrays.bind(this);
 
-    const hasInstancedFunc = gl instanceof WebGL2RenderingContext || (gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced");
+    const hasInstancedFunc = this.hasInstancedFunction(gl);
     if (hasInstancedFunc) {
       // @ts-ignore
       this.realDrawElementsInstanced = gl.drawElementsInstanced;
@@ -52,6 +52,11 @@ export default class DrawCallHook {
     log(`DrawCall is hooked.`);
   }
 
+  // prettier-ignore
+  private hasInstancedFunction(gl: WebGLRenderingContext | WebGL2RenderingContext): boolean {
+    return (gl instanceof WebGL2RenderingContext || ((gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced")));
+  }
+
   private hookedDrawElements(mode: number, count: number, type: number, offset: number): void {
     this.realDrawElements.call(this.gl, mode, count, type, offset);
     this.update(count, mode);
@@ -62,13 +67,8 @@ export default class DrawCallHook {
     this.update(count, mode);
   }
 
-  private hookedDrawElementsInstanced(
-    mode: number,
-    count: number,
-    type: number,
-    offset: number,
-    primcount: number
-  ): void {
+  // prettier-ignore
+  private hookedDrawElementsInstanced(mode: number, count: number, type: number, offset: number, primcount: number): void {
     this.realDrawElementsInstanced.call(this.gl, mode, count, type, offset, primcount);
     this.update(count, mode);
   }
@@ -128,7 +128,7 @@ export default class DrawCallHook {
       gl.drawElements = this.realDrawElements;
       gl.drawArrays = this.realDrawArrays;
 
-      const hasInstancedFunc = gl instanceof WebGL2RenderingContext || (gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced");
+      const hasInstancedFunc = this.hasInstancedFunction(gl);
       if (hasInstancedFunc) {
         // @ts-ignore
         gl.drawElementsInstanced = this.realDrawElementsInstanced;
