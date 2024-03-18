@@ -71,6 +71,13 @@ The `Camera Controls`, as the name implies, is a component that is used with the
 
 ![merge](https://user-images.githubusercontent.com/7768919/212807005-cba34313-1750-47e9-9855-fe7e6f8df148.gif)
 
+### BoxSelectionControls
+
+`BoxSelectionControls` is generally used in editor or RTS games to draw a rectangle on the screen and find objects in it.
+
+https://user-images.githubusercontent.com/7953802/250814033-073aee92-cd8d-489e-8e89-d3cbeb26ee84.mov
+
+
 ## npm
 
 The `Control` is published on npm with full typing support. To install, use:

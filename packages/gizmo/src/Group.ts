@@ -338,6 +338,11 @@ export class Group {
         }
       }
     }
+
+    const length = tempBoundBox.getExtent(out).length();
+    if (length <= 0 || length >= Number.MAX_VALUE) {
+      isEffective = false;
+    }
     if (isEffective) {
       tempBoundBox.getCenter(out);
     } else {
