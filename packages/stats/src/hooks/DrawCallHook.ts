@@ -52,7 +52,6 @@ export default class DrawCallHook {
     log(`DrawCall is hooked.`);
   }
 
-  // prettier-ignore
   private hasInstancedFunction(gl: WebGLRenderingContext | WebGL2RenderingContext): boolean {
     return (gl instanceof WebGL2RenderingContext || ((gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced")));
   }
@@ -67,7 +66,6 @@ export default class DrawCallHook {
     this.update(count, mode);
   }
 
-  // prettier-ignore
   private hookedDrawElementsInstanced(mode: number, count: number, type: number, offset: number, primcount: number): void {
     this.realDrawElementsInstanced.call(this.gl, mode, count, type, offset, primcount);
     this.update(count, mode);
