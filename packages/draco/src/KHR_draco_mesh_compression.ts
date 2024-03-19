@@ -71,6 +71,7 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
       return KHR_draco_mesh_compression._decoder.decode(buffer, taskConfig).then((decodedGeometry) => {
         const mesh = new ModelMesh(engine, glTFMesh.name);
         return this._parseMeshFromGLTFPrimitiveDraco(
+          context,
           mesh,
           glTFMesh,
           glTFPrimitive,
@@ -102,6 +103,7 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
   }
 
   private _parseMeshFromGLTFPrimitiveDraco(
+    context: GLTFParserContext,
     mesh: ModelMesh,
     gltfMesh: IMesh,
     gltfPrimitive: IMeshPrimitive,
@@ -219,7 +221,7 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
       mesh.addSubMesh(0, vertexCount, mode);
     }
     // BlendShapes
-    targets && GLTFMeshParser._createBlendShape(mesh, null, gltfMesh, accessors, targets, getBlendShapeData);
+    targets && GLTFMeshParser._createBlendShape(context, mesh, null, gltfMesh, gltfPrimitive, targets);
 
     mesh.uploadData(!keepMeshData);
     return Promise.resolve(mesh);
