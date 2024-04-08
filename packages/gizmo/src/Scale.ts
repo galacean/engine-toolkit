@@ -112,6 +112,7 @@ export class ScaleControl extends GizmoComponent {
     Matrix.scale(this._startGroupMatrix, scaleVec, mat);
     this._group.applyTransform(this._preMatrix, mat);
     this._preMatrix.copyFrom(mat);
+    this.engine.dispatch("gizmo-move", "scale");
   }
 
   onMoveEnd(): void {

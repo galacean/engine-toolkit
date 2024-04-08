@@ -105,6 +105,7 @@ export class TranslateControl extends GizmoComponent {
     Matrix.multiply(this._startGroupMatrix, mat, mat);
     this._group.applyTransform(this._preMatrix, mat);
     this._preMatrix.copyFrom(mat);
+    this.engine.dispatch("gizmo-move", "translate");
   }
 
   onMoveEnd(): void {

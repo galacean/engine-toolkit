@@ -292,6 +292,7 @@ export class RotateControl extends GizmoComponent {
         Matrix.invert(startMat, this._startInvMatrix);
         break;
     }
+    this.engine.dispatch("gizmo-move", "rotate");
   }
 
   onMoveEnd(): void {
