@@ -1,8 +1,9 @@
-import { PBRBaseMaterial, ShaderFactory, Shader, Engine, Vector3 } from "@galacean/engine";
-import { pbr_include_fragment_list, pbrSource } from "./shaders";
+import { Engine, PBRBaseMaterial, Shader, ShaderFactory, Vector3 } from "@galacean/engine";
+import { pbrSource, pbr_include_fragment_list } from "./shaders";
 
 export class GSLPBRMaterial extends PBRBaseMaterial {
   private static _registered = false;
+
   static registerIncludes() {
     if (this._registered) return;
 
@@ -14,7 +15,8 @@ export class GSLPBRMaterial extends PBRBaseMaterial {
 
   constructor(engine: Engine) {
     GSLPBRMaterial.registerIncludes();
-    super(engine, Shader.create(pbrSource));
+    const shader = Shader.find("pbr.gs") || Shader.create(pbrSource);
+    super(engine, shader);
 
     const shaderData = this.shaderData;
     shaderData.setFloat("material_Metal", 1);
