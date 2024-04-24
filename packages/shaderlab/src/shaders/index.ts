@@ -9,8 +9,7 @@ import color_vert from "./color_vert.glsl";
 import common_vert from "./common_vert.glsl";
 import common from "./common.glsl";
 import direct_irradiance_frag_define from "./direct_irradiance_frag_define.glsl";
-import FogFragment from "./FogFragment.glsl";
-import FogFragmentDeclaration from "./FogFragmentDeclaration.glsl";
+import fog from "./fog.glsl";
 import FogVertex from "./FogVertex.glsl";
 import ibl_frag_define from "./ibl_frag_define.glsl";
 import light_frag_define from "./light_frag_define.glsl";
@@ -31,9 +30,9 @@ import uv_vert from "./uv_vert.glsl";
 import varying from "./varying.glsl";
 import worldpos_vert from "./worldpos_vert.glsl";
 import pbr from "./pbr.gs";
-import globals from "./globals.glsl";
 import pbr_vert1 from "./pbr_vert1.glsl";
 import pbr_vert2 from "./pbr_vert2.glsl";
+import input from "./input.glsl";
 
 interface IShaderFragment {
   includeKey: string;
@@ -52,8 +51,7 @@ const pbr_include_fragment_list: IShaderFragment[] = [
   { source: common_vert, includeKey: "common_vert.glsl" },
   { source: common, includeKey: "common.glsl" },
   { source: direct_irradiance_frag_define, includeKey: "direct_irradiance_frag_define.glsl" },
-  { source: FogFragment, includeKey: "FogFragment.glsl" },
-  { source: FogFragmentDeclaration, includeKey: "FogFragmentDeclaration.glsl" },
+  { source: fog, includeKey: "fog.glsl" },
   { source: FogVertex, includeKey: "FogVertex.glsl" },
   { source: ibl_frag_define, includeKey: "ibl_frag_define.glsl" },
   { source: light_frag_define, includeKey: "light_frag_define.glsl" },
@@ -73,8 +71,8 @@ const pbr_include_fragment_list: IShaderFragment[] = [
   { source: uv_vert, includeKey: "uv_vert.glsl" },
   { source: varying, includeKey: "varying.glsl" },
   { source: worldpos_vert, includeKey: "worldpos_vert.glsl" },
-  { source: globals, includeKey: "globals.glsl" },
   { source: pbr_vert1, includeKey: "pbr_vert1.glsl" },
-  { source: pbr_vert2, includeKey: "pbr_vert2.glsl" }
+  { source: pbr_vert2, includeKey: "pbr_vert2.glsl" },
+  { source: input, includeKey: "input.glsl" }
 ];
 export { pbr as pbrSource, pbr_include_fragment_list };

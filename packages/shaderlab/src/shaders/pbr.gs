@@ -69,7 +69,20 @@ Shader "pbr.gs" {
           #include "varying.glsl"
         }
 
-        #include "globals.glsl"
+        #include "common.glsl"
+        #include "common_vert.glsl"
+        #include "blendShape_input.glsl"
+        #include "ShadowVertexDeclaration.glsl"
+
+        // fragment uniforms
+        #include "fog.glsl"
+        #include "light_frag_define.glsl"
+        #include "pbr_frag_define.glsl"
+        #include "pbr_helper.glsl"
+
+
+        // new
+        #include "input.glsl"
 
         VertexShader = pbrVert;
         FragmentShader = pbrFrag;
@@ -92,7 +105,10 @@ Shader "pbr.gs" {
 
         void pbrFrag(_galacean_v2f v) {
           #include "pbr_frag.glsl"
-          #include "FogFragment.glsl"
+
+          #if SCENE_FOG_MODE != 0
+              gl_FragColor = fog(gl_FragColor, v.v_positionVS);
+          #endif
 
           #ifndef ENGINE_IS_COLORSPACE_GAMMA
               gl_FragColor = linearToGamma(gl_FragColor);
