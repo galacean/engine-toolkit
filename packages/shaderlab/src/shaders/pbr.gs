@@ -81,7 +81,6 @@ Shader "pbr.gs" {
         // fragment uniforms
         #include "fog.glsl"
         #include "light_frag_define.glsl"
-        #include "pbr_frag_define.glsl"
 
         #include "shading_pbr.glsl"
 
@@ -100,7 +99,15 @@ Shader "pbr.gs" {
         }
 
         void pbrFrag(_galacean_v2f v) {
-          #include "pbr_frag.glsl"
+          Geometry geometry;
+          Material material;
+         
+          initSurfaceData(geometry, material);
+
+          vec4 color =  evaluateSurface(geometry, material);
+          
+          gl_FragColor = color;
+
 
           #if SCENE_FOG_MODE != 0
               gl_FragColor = fog(gl_FragColor, v.v_positionVS);
