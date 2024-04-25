@@ -1,5 +1,3 @@
-#include "ShadowFragmentDeclaration.glsl"
-
 void addDirectRadiance(vec3 incidentDirection, vec3 color, Geometry geometry, Material material, inout ReflectedLight reflectedLight) {
     float attenuation = 1.0;
 

@@ -5,3 +5,6 @@ mat4 camera_ProjMat;
 mat4 renderer_MVMat;
 mat4 renderer_MVPMat;
 mat4 renderer_NormalMat;
+
+vec3 camera_Position;
+vec3 camera_Forward; 

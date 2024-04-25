@@ -56,7 +56,9 @@ Shader "pbr.gs" {
     }
     
     SubShader "Default" {
-      Pass "Pass0" {
+      UsePass "pbr/Default/ShadowCaster"
+
+      Pass "Forward Pass" {
         Tags { pipelineStage = "Forward"} 
 
         #define IS_METALLIC_WORKFLOW
@@ -70,6 +72,8 @@ Shader "pbr.gs" {
         }
 
         #include "common.glsl"
+        #include "transform_declare.glsl"
+
         #include "common_vert.glsl"
         #include "blendShape_input.glsl"
         #include "ShadowVertexDeclaration.glsl"
