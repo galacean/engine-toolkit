@@ -70,7 +70,7 @@ void addDirectRadiance(vec3 incidentDirection, vec3 color, Geometry geometry, Ma
 
 #endif
 
-void addTotalDirectRadiance(Geometry geometry, Material material, inout ReflectedLight reflectedLight){
+void evaluateDirectRadiance(Geometry geometry, Material material, inout ReflectedLight reflectedLight){
     float shadowAttenuation = 1.0;
 
     #ifdef SCENE_DIRECT_LIGHT_COUNT

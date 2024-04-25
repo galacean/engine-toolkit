@@ -100,5 +100,6 @@ struct Material {
         float clearCoat;
         float clearCoatRoughness;
     #endif
+    vec3 emissive;
 
 }
