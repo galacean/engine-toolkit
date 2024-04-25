@@ -4,7 +4,6 @@ import begin_position_vert from "./begin_position_vert.glsl";
 import blendShape_input from "./blendShape_input.glsl";
 import blendShape_vert from "./blendShape_vert.glsl";
 import brdf from "./brdf.glsl";
-// import camera_declare from "./camera_declare.glsl";
 import color_vert from "./color_vert.glsl";
 import common_vert from "./common_vert.glsl";
 import common from "./common.glsl";
@@ -20,10 +19,8 @@ import pbr_frag from "./pbr_frag.glsl";
 import pbr_helper from "./pbr_helper.glsl";
 import position_vert from "./position_vert.glsl";
 import shadow_sample_tent from "./shadow_sample_tent.glsl";
-// import ShadowCoord from "./ShadowCoord.glsl";
-// import ShadowFragmentDeclaration from "./ShadowFragmentDeclaration.glsl";
 import ShadowVertex from "./ShadowVertex.glsl";
-import ShadowVertexDeclaration from "./ShadowVertexDeclaration.glsl";
+import shadow from "./shadow.glsl";
 import skinning_vert from "./skinning_vert.glsl";
 import transform_declare from "./transform_declare.glsl";
 import uv_vert from "./uv_vert.glsl";
@@ -46,7 +43,6 @@ const pbr_include_fragment_list: IShaderFragment[] = [
   { source: blendShape_input, includeKey: "blendShape_input.glsl" },
   { source: blendShape_vert, includeKey: "blendShape_vert.glsl" },
   { source: brdf, includeKey: "brdf.glsl" },
-  // { source: camera_declare, includeKey: "camera_declare.glsl" },
   { source: color_vert, includeKey: "color_vert.glsl" },
   { source: common_vert, includeKey: "common_vert.glsl" },
   { source: common, includeKey: "common.glsl" },
@@ -62,10 +58,8 @@ const pbr_include_fragment_list: IShaderFragment[] = [
   { source: pbr_helper, includeKey: "pbr_helper.glsl" },
   { source: position_vert, includeKey: "position_vert.glsl" },
   { source: shadow_sample_tent, includeKey: "shadow_sample_tent.glsl" },
-  // { source: ShadowCoord, includeKey: "ShadowCoord.glsl" },
-  // { source: ShadowFragmentDeclaration, includeKey: "ShadowFragmentDeclaration.glsl" },
   { source: ShadowVertex, includeKey: "ShadowVertex.glsl" },
-  { source: ShadowVertexDeclaration, includeKey: "ShadowVertexDeclaration.glsl" },
+  { source: shadow, includeKey: "shadow.glsl" },
   { source: skinning_vert, includeKey: "skinning_vert.glsl" },
   { source: transform_declare, includeKey: "transform_declare.glsl" },
   { source: uv_vert, includeKey: "uv_vert.glsl" },

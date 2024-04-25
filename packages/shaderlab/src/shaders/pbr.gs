@@ -76,7 +76,7 @@ Shader "pbr.gs" {
 
         #include "common_vert.glsl"
         #include "blendShape_input.glsl"
-        #include "ShadowVertexDeclaration.glsl"
+        #include "shadow.glsl"
 
         // fragment uniforms
         #include "fog.glsl"
