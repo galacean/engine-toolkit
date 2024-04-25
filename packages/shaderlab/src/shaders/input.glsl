@@ -4,35 +4,6 @@
 // 	vec4 tangent;
 // }
 
-struct SurfaceData{
-	vec3  position;
-    vec3  normal;
-    vec3  viewDir;
-    float dotNV;
-    
-    #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        vec3 clearCoatNormal;
-        float clearCoatDotNV;
-    #endif
-
-    #ifdef MATERIAL_ENABLE_ANISOTROPY
-        vec3  anisotropicT;
-        vec3  anisotropicB;
-        vec3  anisotropicN;
-        float anisotropy;
-    #endif
-	
-	vec3  diffuseColor;
-    float roughness;
-    vec3  specularColor;
-    float opacity;
-    float f0;
-    #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        float clearCoat;
-        float clearCoatRoughness;
-    #endif
-}
-
 struct Attributes{
   	vec3 POSITION;
 
@@ -254,9 +225,4 @@ void intVertexData(in Temp_Attributes attributes, out Temp_Varyings varyings){
 	#endif
 
 	
-}
-
-
-void initSurfaceData(in Temp_Varyings varyings, out SurfaceData surfaceData){
-
 }
