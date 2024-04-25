@@ -158,6 +158,8 @@ void initMaterial(out Material material, inout Geometry geometry){
 
 }
 
+
+
 // direct + indirect
 #include "brdf.glsl"
 #include "direct_irradiance_frag_define.glsl"

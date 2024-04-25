@@ -82,8 +82,8 @@ Shader "pbr.gs" {
         #include "fog.glsl"
         #include "light_frag_define.glsl"
         #include "pbr_frag_define.glsl"
-        #include "pbr_helper.glsl"
 
+        #include "shading_pbr.glsl"
 
         // new
         #include "input.glsl"
@@ -94,15 +94,7 @@ Shader "pbr.gs" {
         _galacean_v2f pbrVert(_galacean_a2v attr) {
           _galacean_v2f v;
 
-          #include "pbr_vert1.glsl"
-
-          #include "blendShape_vert.glsl"
-          #include "skinning_vert.glsl"
-
-          #include "pbr_vert2.glsl"
-
-          #include "ShadowVertex.glsl"
-          #include "FogVertex.glsl"
+          #include "vert_pbr.glsl"
 
           return v;
         }
