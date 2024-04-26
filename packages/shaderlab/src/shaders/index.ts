@@ -1,18 +1,17 @@
-import attrib from "./attrib.glsl";
 import blendShape_input from "./blendShape_input.glsl";
-import common_vert from "./common_vert.glsl";
 import common from "./common.glsl";
 import fog from "./fog.glsl";
-import light_frag_define from "./light_frag_define.glsl";
+import light from "./light.glsl";
 import normal_get from "./normal_get.glsl";
 import shadow_sample_tent from "./shadow_sample_tent.glsl";
 import shadow from "./shadow.glsl";
-import transform_declare from "./transform_declare.glsl";
-import varying from "./varying.glsl";
+import transform from "./transform.glsl";
 import pbr from "./pbr.gs";
-import vert_pbr from "./vert_pbr.glsl";
+import vert from "./vert.glsl";
 import input from "./input.glsl";
 import shading_pbr from "./shading_pbr";
+import temp_transformAttributes from "./temp/transformAttributes.glsl";
+import temp_transformVaryings from "./temp/transformVaryings.glsl";
 
 interface IShaderFragment {
   includeKey: string;
@@ -20,19 +19,18 @@ interface IShaderFragment {
 }
 
 const pbr_include_fragment_list: IShaderFragment[] = [
-  { source: attrib, includeKey: "attrib.glsl" },
   { source: blendShape_input, includeKey: "blendShape_input.glsl" },
-  { source: common_vert, includeKey: "common_vert.glsl" },
   { source: common, includeKey: "common.glsl" },
   { source: fog, includeKey: "fog.glsl" },
-  { source: light_frag_define, includeKey: "light_frag_define.glsl" },
+  { source: light, includeKey: "light.glsl" },
   { source: normal_get, includeKey: "normal_get.glsl" },
   { source: shadow_sample_tent, includeKey: "shadow_sample_tent.glsl" },
   { source: shadow, includeKey: "shadow.glsl" },
-  { source: transform_declare, includeKey: "transform_declare.glsl" },
-  { source: varying, includeKey: "varying.glsl" },
-  { source: vert_pbr, includeKey: "vert_pbr.glsl" },
+  { source: transform, includeKey: "transform.glsl" },
+  { source: vert, includeKey: "vert.glsl" },
   { source: input, includeKey: "input.glsl" },
+  { source: temp_transformAttributes, includeKey: "temp_transformAttributes.glsl" },
+  { source: temp_transformVaryings, includeKey: "temp_transformVaryings.glsl" },
 
   ...shading_pbr
 ];

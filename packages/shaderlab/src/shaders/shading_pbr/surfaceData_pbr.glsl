@@ -55,7 +55,7 @@ float getAARoughnessFactor(vec3 normal) {
     }
 #endif
 
-void initGeometry(out Geometry geometry, bool isFrontFacing){
+void initGeometry(out Geometry geometry, bool isFrontFacing, Temp_Varyings v){
     geometry.position = v.v_pos;
     #ifdef CAMERA_ORTHOGRAPHIC
         geometry.viewDir =  -camera_Forward;
@@ -99,7 +99,7 @@ void initGeometry(out Geometry geometry, bool isFrontFacing){
     #endif
 }
 
-void initMaterial(out Material material, inout Geometry geometry){
+void initMaterial(out Material material, inout Geometry geometry, Temp_Varyings v){
         vec4 baseColor = material_BaseColor;
         float metal = material_Metal;
         float roughness = material_Roughness;
@@ -192,7 +192,7 @@ void initMaterial(out Material material, inout Geometry geometry){
 
 }
 
-void initSurfaceData(out Geometry geometry, out Material material){
-    initGeometry(geometry, gl_FrontFacing);
-    initMaterial(material, geometry);
+void initSurfaceData(out Geometry geometry, out Material material, Temp_Varyings v ){
+    initGeometry(geometry, gl_FrontFacing, v);
+    initMaterial(material, geometry, v);
 }

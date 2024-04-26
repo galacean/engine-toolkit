@@ -63,46 +63,45 @@ Shader "pbr.gs" {
 
         #define IS_METALLIC_WORKFLOW
 
-        struct _galacean_a2v {
-          #include "attrib.glsl"
-        }
-
-        struct _galacean_v2f {
-          #include "varying.glsl"
-        }
-
+        #include "input.glsl"
         #include "common.glsl"
-        #include "transform_declare.glsl"
+        #include "transform.glsl"
 
-        #include "common_vert.glsl"
+        #include "vert.glsl"
         #include "blendShape_input.glsl"
         #include "shadow.glsl"
 
-        // fragment uniforms
         #include "fog.glsl"
-        #include "light_frag_define.glsl"
+        #include "light.glsl"
 
         #include "shading_pbr.glsl"
 
-        // new
-        #include "input.glsl"
 
         VertexShader = pbrVert;
         FragmentShader = pbrFrag;
 
-        _galacean_v2f pbrVert(_galacean_a2v attr) {
-          _galacean_v2f v;
+        Varyings pbrVert(Attributes attr) {
+          Varyings v;
 
-          #include "vert_pbr.glsl"
+          // @todo delete
+          Temp_Attributes temp_attributes;
+          Temp_Varyings temp_varyings;
+          #include "temp_transformAttributes.glsl"
+          #include "temp_transformVaryings.glsl"
+
+          initVert();
 
           return v;
         }
 
-        void pbrFrag(_galacean_v2f v) {
+        void pbrFrag(Varyings v) {
           Geometry geometry;
           Material material;
          
-          initSurfaceData(geometry, material);
+          // @todo delete
+          Temp_Varyings temp_varyings;
+
+          initSurfaceData(geometry, material, temp_varyings);
 
           vec4 color =  evaluateSurface(geometry, material);
           
