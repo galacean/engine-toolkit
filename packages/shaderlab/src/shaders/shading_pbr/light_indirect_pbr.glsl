@@ -87,7 +87,7 @@ vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness
 }
 
 
-void evaluateIBL(SurfaceData surfaceData, inout vec3 color){
+void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
     vec3 Fd = vec3(0);
     vec3 Fs = vec3(0);
 

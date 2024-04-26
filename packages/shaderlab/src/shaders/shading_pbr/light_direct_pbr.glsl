@@ -75,13 +75,13 @@ vec3 addDirectRadiance(vec3 incidentDirection, vec3 color, SurfaceData surfaceDa
 
 #endif
 
-void evaluateDirectRadiance(SurfaceData surfaceData, inout vec3 color){
+void evaluateDirectRadiance(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
     float shadowAttenuation = 1.0;
 
     #ifdef SCENE_DIRECT_LIGHT_COUNT
         shadowAttenuation = 1.0;
         #ifdef SCENE_IS_CALCULATE_SHADOWS
-            shadowAttenuation *= sampleShadowMap();
+            shadowAttenuation *= sampleShadowMap(v);
             // int sunIndex = int(scene_ShadowInfo.z);
         #endif
 

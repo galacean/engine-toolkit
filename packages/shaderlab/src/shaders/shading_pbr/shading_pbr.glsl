@@ -7,13 +7,13 @@
 #include "light_indirect_pbr.glsl"
 
 
-vec4 evaluateSurface(SurfaceData surfaceData){
+vec4 evaluateSurface(Temp_Varyings v, SurfaceData surfaceData){
     vec3 color = vec3(0);
 
     // Direct Light
-    evaluateDirectRadiance(surfaceData, color);
+    evaluateDirectRadiance(v, surfaceData, color);
     // IBL
-    evaluateIBL(surfaceData, color);
+    evaluateIBL(v, surfaceData, color);
     // Emissive
     color += surfaceData.emissive;
 

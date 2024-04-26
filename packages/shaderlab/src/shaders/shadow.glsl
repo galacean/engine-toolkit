@@ -25,50 +25,50 @@
             return index;
         }
 
-        vec3 getShadowCoord() {
-        #if SCENE_SHADOW_CASCADED_COUNT == 1
-            mediump int cascadeIndex = 0;
-        #else
-            mediump int cascadeIndex = computeCascadeIndex(v.v_pos);
-        #endif
-    
-        #ifdef GRAPHICS_API_WEBGL2
-            mat4 shadowMatrix = scene_ShadowMatrices[cascadeIndex];
-        #else
-            mat4 shadowMatrix;
-            #if SCENE_SHADOW_CASCADED_COUNT == 4
-                if (cascadeIndex == 0) {
-                    shadowMatrix = scene_ShadowMatrices[0];
-                } else if (cascadeIndex == 1) {
-                    shadowMatrix = scene_ShadowMatrices[1];
-                } else if (cascadeIndex == 2) {
-                    shadowMatrix = scene_ShadowMatrices[2];
-                } else if (cascadeIndex == 3) {
-                    shadowMatrix = scene_ShadowMatrices[3];
-                } else {
-                    shadowMatrix = scene_ShadowMatrices[4];
-                }
-            #endif
-            #if SCENE_SHADOW_CASCADED_COUNT == 2
-                if (cascadeIndex == 0) {
-                    shadowMatrix = scene_ShadowMatrices[0];
-                } else if (cascadeIndex == 1) {
-                    shadowMatrix = scene_ShadowMatrices[1];
-                } else {
-                    shadowMatrix = scene_ShadowMatrices[2];
-                } 
-            #endif
+        vec3 getShadowCoord(vec3 positionWS) {
             #if SCENE_SHADOW_CASCADED_COUNT == 1
-                if (cascadeIndex == 0) {
-                    shadowMatrix = scene_ShadowMatrices[0];
-                } else  {
-                    shadowMatrix = scene_ShadowMatrices[1];
-                } 
+                mediump int cascadeIndex = 0;
+            #else
+                mediump int cascadeIndex = computeCascadeIndex(positionWS);
             #endif
-        #endif
-    
-        vec4 shadowCoord = shadowMatrix * vec4(v.v_pos, 1.0);
-        return shadowCoord.xyz;
+        
+            #ifdef GRAPHICS_API_WEBGL2
+                mat4 shadowMatrix = scene_ShadowMatrices[cascadeIndex];
+            #else
+                mat4 shadowMatrix;
+                #if SCENE_SHADOW_CASCADED_COUNT == 4
+                    if (cascadeIndex == 0) {
+                        shadowMatrix = scene_ShadowMatrices[0];
+                    } else if (cascadeIndex == 1) {
+                        shadowMatrix = scene_ShadowMatrices[1];
+                    } else if (cascadeIndex == 2) {
+                        shadowMatrix = scene_ShadowMatrices[2];
+                    } else if (cascadeIndex == 3) {
+                        shadowMatrix = scene_ShadowMatrices[3];
+                    } else {
+                        shadowMatrix = scene_ShadowMatrices[4];
+                    }
+                #endif
+                #if SCENE_SHADOW_CASCADED_COUNT == 2
+                    if (cascadeIndex == 0) {
+                        shadowMatrix = scene_ShadowMatrices[0];
+                    } else if (cascadeIndex == 1) {
+                        shadowMatrix = scene_ShadowMatrices[1];
+                    } else {
+                        shadowMatrix = scene_ShadowMatrices[2];
+                    } 
+                #endif
+                #if SCENE_SHADOW_CASCADED_COUNT == 1
+                    if (cascadeIndex == 0) {
+                        shadowMatrix = scene_ShadowMatrices[0];
+                    } else  {
+                        shadowMatrix = scene_ShadowMatrices[1];
+                    } 
+                #endif
+            #endif
+        
+            vec4 shadowCoord = shadowMatrix * vec4(positionWS, 1.0);
+            return shadowCoord.xyz;
         }
 
     #endif
@@ -148,11 +148,11 @@
     }
 
 
-    float sampleShadowMap() {
+    float sampleShadowMap(Temp_Varyings v) {
         #if SCENE_SHADOW_CASCADED_COUNT == 1
             vec3 shadowCoord = v.v_shadowCoord;
         #else
-            vec3 shadowCoord = getShadowCoord();
+            vec3 shadowCoord = getShadowCoord(v.v_pos);
         #endif
         
         float attenuation = 1.0;

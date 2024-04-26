@@ -67,8 +67,8 @@ Shader "pbr.gs" {
         #include "common.glsl"
         #include "transform.glsl"
 
-        #include "vert.glsl"
         #include "blendShape_input.glsl"
+        #include "vert.glsl"
         #include "shadow.glsl"
 
         #include "fog.glsl"
@@ -99,10 +99,11 @@ Shader "pbr.gs" {
 
           // @todo delete
           Temp_Varyings temp_varyings;
+          #include "temp_transformVaryings.glsl"
 
           initSurfaceData(temp_varyings, surfaceData, gl_FrontFacing);
 
-          vec4 color = evaluateSurface(surfaceData);
+          vec4 color = evaluateSurface(temp_varyings, surfaceData);
           gl_FragColor = color;
 
           #if SCENE_FOG_MODE != 0

@@ -53,13 +53,13 @@ void initGeometry(Temp_Varyings v, inout SurfaceData surfaceData, bool isFrontFa
         surfaceData.viewDir =  normalize(camera_Position - v.v_pos);
     #endif
     #if defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY)
-        mat3 tbn = getTBN(isFrontFacing);
+        mat3 tbn = getTBN(v, isFrontFacing);
     #endif
 
     #ifdef MATERIAL_HAS_NORMALTEXTURE
         surfaceData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
     #else
-        surfaceData.normal = getNormal(isFrontFacing);
+        surfaceData.normal = getNormal(v, isFrontFacing);
     #endif
 
     surfaceData.dotNV = saturate( dot(surfaceData.normal, surfaceData.viewDir) );
@@ -69,7 +69,7 @@ void initGeometry(Temp_Varyings v, inout SurfaceData surfaceData, bool isFrontFa
         #ifdef MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE
             surfaceData.clearCoatNormal = getNormalByNormalTexture(tbn, material_ClearCoatNormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
         #else
-            surfaceData.clearCoatNormal = getNormal(isFrontFacing);
+            surfaceData.clearCoatNormal = getNormal(v, isFrontFacing);
         #endif
         surfaceData.clearCoatDotNV = saturate( dot(surfaceData.clearCoatNormal, surfaceData.viewDir) );
     #endif

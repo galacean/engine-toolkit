@@ -146,12 +146,6 @@ void initVertex(){
     #endif
 
 
-    // shadow
-    #ifdef SCENE_IS_CALCULATE_SHADOWS
-        #if SCENE_SHADOW_CASCADED_COUNT == 1
-            v.v_shadowCoord = getShadowCoord();
-        #endif
-    #endif
 
 
     // fog
@@ -159,8 +153,6 @@ void initVertex(){
         vec4 positionVS = renderer_MVMat * position;
         v.v_positionVS = positionVS.xyz / positionVS.w;
     #endif
-
-
 
 
     // uv_vert
@@ -205,6 +197,13 @@ void initVertex(){
     #ifdef MATERIAL_NEED_WORLD_POS
         vec4 temp_pos = renderer_ModelMat * position;
         v.v_pos = temp_pos.xyz / temp_pos.w;
+    #endif
+
+    // shadow
+    #ifdef SCENE_IS_CALCULATE_SHADOWS
+        #if SCENE_SHADOW_CASCADED_COUNT == 1
+            v.v_shadowCoord = getShadowCoord(v.v_pos);
+        #endif
     #endif
 
     // position_vert
