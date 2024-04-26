@@ -63,43 +63,19 @@ float material_OcclusionTextureCoord;
     sampler2D material_OcclusionTexture;
 #endif
 
-// Runtime
-struct ReflectedLight {
-    vec3 directDiffuse;
-    vec3 directSpecular;
-    vec3 indirectDiffuse;
-    vec3 indirectSpecular;
+float computeSpecularOcclusion(float ambientOcclusion, float roughness, float dotNV ) {
+    return saturate( pow( dotNV + ambientOcclusion, exp2( - 16.0 * roughness - 1.0 ) ) - 1.0 + ambientOcclusion );
 }
 
-// struct Geometry {
-//     vec3  position;
-//     vec3  normal;
-//     vec3  viewDir;
-//     float dotNV;
-    
-//     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-//         vec3 clearCoatNormal;
-//         float clearCoatDotNV;
-//     #endif
 
-//     #ifdef MATERIAL_ENABLE_ANISOTROPY
-//         vec3  anisotropicT;
-//         vec3  anisotropicB;
-//         vec3  anisotropicN;
-//         float anisotropy;
-//     #endif
-// }
-
-// struct Material {
-//     vec3  diffuseColor;
-//     float roughness;
-//     vec3  specularColor;
-//     float opacity;
-//     float f0;
-//     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-//         float clearCoat;
-//         float clearCoatRoughness;
-//     #endif
-//     vec3 emissive;
-
-// }
+float getAARoughnessFactor(vec3 normal) {
+    // Kaplanyan 2016, "Stable specular highlights"
+    // Tokuyoshi 2017, "Error Reduction and Simplification for Shading Anti-Aliasing"
+    // Tokuyoshi and Kaplanyan 2019, "Improved Geometric Specular Antialiasing"
+    #ifdef HAS_DERIVATIVES
+        vec3 dxy = max( abs(dFdx(normal)), abs(dFdy(normal)) );
+        return MIN_PERCEPTUAL_ROUGHNESS + max( max(dxy.x, dxy.y), dxy.z );
+    #else
+        return MIN_PERCEPTUAL_ROUGHNESS;
+    #endif
+}

@@ -29,18 +29,6 @@ struct SurfaceData{
 }
 
 
-float getAARoughnessFactor(vec3 normal) {
-    // Kaplanyan 2016, "Stable specular highlights"
-    // Tokuyoshi 2017, "Error Reduction and Simplification for Shading Anti-Aliasing"
-    // Tokuyoshi and Kaplanyan 2019, "Improved Geometric Specular Antialiasing"
-    #ifdef HAS_DERIVATIVES
-        vec3 dxy = max( abs(dFdx(normal)), abs(dFdy(normal)) );
-        return MIN_PERCEPTUAL_ROUGHNESS + max( max(dxy.x, dxy.y), dxy.z );
-    #else
-        return MIN_PERCEPTUAL_ROUGHNESS;
-    #endif
-}
-
 #ifdef MATERIAL_ENABLE_ANISOTROPY
     // Aniso Bent Normals
     // Mc Alley https://www.gdcvault.com/play/1022235/Rendering-the-World-of-Far 

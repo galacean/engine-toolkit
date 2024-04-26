@@ -8,27 +8,16 @@
 
 
 vec4 evaluateSurface(SurfaceData surfaceData){
-
-    ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
+    vec3 color = vec3(0);
 
     // Direct Light
-    evaluateDirectRadiance(surfaceData, reflectedLight);
-
-
+    evaluateDirectRadiance(surfaceData, color);
     // IBL
-    evaluateIBL(surfaceData, reflectedLight);
+    evaluateIBL(surfaceData, color);
+    // Emissive
+    color += surfaceData.emissive;
 
-    // Total
-    vec3 totalRadiance =    reflectedLight.directDiffuse + 
-                            reflectedLight.indirectDiffuse + 
-                            reflectedLight.directSpecular + 
-                            reflectedLight.indirectSpecular +
-                            surfaceData.emissive;
-
-
-    return vec4(totalRadiance, surfaceData.opacity);
-
-
+    return vec4(color, surfaceData.opacity);
 }
 
 

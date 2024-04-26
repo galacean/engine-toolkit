@@ -103,9 +103,7 @@ Shader "pbr.gs" {
           initSurfaceData(temp_varyings, surfaceData, gl_FrontFacing);
 
           vec4 color = evaluateSurface(surfaceData);
-          
           gl_FragColor = color;
-
 
           #if SCENE_FOG_MODE != 0
               gl_FragColor = fog(gl_FragColor, v.v_positionVS);
