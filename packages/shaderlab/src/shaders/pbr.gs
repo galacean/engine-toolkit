@@ -89,21 +89,20 @@ Shader "pbr.gs" {
           #include "temp_transformAttributes.glsl"
           #include "temp_transformVaryings.glsl"
 
-          initVert();
+          initVertex();
 
           return v;
         }
 
         void pbrFrag(Varyings v) {
-          Geometry geometry;
-          Material material;
-         
+          SurfaceData surfaceData;
+
           // @todo delete
           Temp_Varyings temp_varyings;
 
-          initSurfaceData(geometry, material, temp_varyings);
+          initSurfaceData(temp_varyings, surfaceData, gl_FrontFacing);
 
-          vec4 color =  evaluateSurface(geometry, material);
+          vec4 color = evaluateSurface(surfaceData);
           
           gl_FragColor = color;
 

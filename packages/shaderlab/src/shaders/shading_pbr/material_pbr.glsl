@@ -71,35 +71,35 @@ struct ReflectedLight {
     vec3 indirectSpecular;
 }
 
-struct Geometry {
-    vec3  position;
-    vec3  normal;
-    vec3  viewDir;
-    float dotNV;
+// struct Geometry {
+//     vec3  position;
+//     vec3  normal;
+//     vec3  viewDir;
+//     float dotNV;
     
-    #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        vec3 clearCoatNormal;
-        float clearCoatDotNV;
-    #endif
+//     #ifdef MATERIAL_ENABLE_CLEAR_COAT
+//         vec3 clearCoatNormal;
+//         float clearCoatDotNV;
+//     #endif
 
-    #ifdef MATERIAL_ENABLE_ANISOTROPY
-        vec3  anisotropicT;
-        vec3  anisotropicB;
-        vec3  anisotropicN;
-        float anisotropy;
-    #endif
-}
+//     #ifdef MATERIAL_ENABLE_ANISOTROPY
+//         vec3  anisotropicT;
+//         vec3  anisotropicB;
+//         vec3  anisotropicN;
+//         float anisotropy;
+//     #endif
+// }
 
-struct Material {
-    vec3  diffuseColor;
-    float roughness;
-    vec3  specularColor;
-    float opacity;
-    float f0;
-    #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        float clearCoat;
-        float clearCoatRoughness;
-    #endif
-    vec3 emissive;
+// struct Material {
+//     vec3  diffuseColor;
+//     float roughness;
+//     vec3  specularColor;
+//     float opacity;
+//     float f0;
+//     #ifdef MATERIAL_ENABLE_CLEAR_COAT
+//         float clearCoat;
+//         float clearCoatRoughness;
+//     #endif
+//     vec3 emissive;
 
-}
+// }

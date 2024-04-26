@@ -7,26 +7,26 @@
 #include "light_indirect_pbr.glsl"
 
 
-vec4 evaluateSurface(in Geometry geometry, in Material material){
+vec4 evaluateSurface(SurfaceData surfaceData){
 
     ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
 
     // Direct Light
-    evaluateDirectRadiance(geometry, material, reflectedLight);
+    evaluateDirectRadiance(surfaceData, reflectedLight);
 
 
     // IBL
-    evaluateIBL(geometry, material, reflectedLight);
+    evaluateIBL(surfaceData, reflectedLight);
 
     // Total
     vec3 totalRadiance =    reflectedLight.directDiffuse + 
                             reflectedLight.indirectDiffuse + 
                             reflectedLight.directSpecular + 
                             reflectedLight.indirectSpecular +
-                            material.emissive;
+                            surfaceData.emissive;
 
 
-    return vec4(totalRadiance, material.opacity);
+    return vec4(totalRadiance, surfaceData.opacity);
 
 
 }

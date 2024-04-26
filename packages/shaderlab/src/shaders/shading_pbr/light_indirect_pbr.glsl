@@ -43,22 +43,22 @@ float getSpecularMIPLevel(float roughness, int maxMIPLevel ) {
     return roughness * float(maxMIPLevel);
 }
 
-vec3 getReflectedVector(Geometry geometry, vec3 n) {
+vec3 getReflectedVector(SurfaceData surfaceData, vec3 n) {
     #ifdef MATERIAL_ENABLE_ANISOTROPY
-        vec3 r = reflect(-geometry.viewDir, geometry.anisotropicN);
+        vec3 r = reflect(-surfaceData.viewDir, surfaceData.anisotropicN);
     #else
-        vec3 r = reflect(-geometry.viewDir, n);
+        vec3 r = reflect(-surfaceData.viewDir, n);
     #endif
 
     return r;
 }
 
-vec3 getLightProbeRadiance(Geometry geometry, vec3 normal, float roughness, int maxMIPLevel, float specularIntensity) {
+vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness, int maxMIPLevel, float specularIntensity) {
 
     #ifndef SCENE_USE_SPECULAR_ENV
         return vec3(0);
     #else
-        vec3 reflectVec = getReflectedVector(geometry, normal);
+        vec3 reflectVec = getReflectedVector(surfaceData, normal);
         reflectVec.x = -reflectVec.x; // TextureCube is left-hand,so x need inverse
         
         float specularMIPLevel = getSpecularMIPLevel(roughness, maxMIPLevel );
@@ -90,10 +90,10 @@ float computeSpecularOcclusion(float ambientOcclusion, float roughness, float do
     return saturate( pow( dotNV + ambientOcclusion, exp2( - 16.0 * roughness - 1.0 ) ) - 1.0 + ambientOcclusion );
 }
 
-void evaluateIBL(Geometry geometry, Material material, inout ReflectedLight reflectedLight ){
+void evaluateIBL(SurfaceData surfaceData, inout ReflectedLight reflectedLight ){
      // IBL diffuse
     #ifdef SCENE_USE_SH
-        vec3 irradiance = getLightProbeIrradiance(scene_EnvSH, geometry.normal);
+        vec3 irradiance = getLightProbeIrradiance(scene_EnvSH, surfaceData.normal);
         #ifdef ENGINE_IS_COLORSPACE_GAMMA
             irradiance = (linearToGamma(vec4(irradiance, 1.0))).rgb;
         #endif
@@ -103,20 +103,20 @@ void evaluateIBL(Geometry geometry, Material material, inout ReflectedLight refl
        irradiance *= PI;
     #endif
 
-    reflectedLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
+    reflectedLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert( surfaceData.diffuseColor );
 
     // IBL specular
-    vec3 radiance = getLightProbeRadiance(geometry, geometry.normal, material.roughness, int(scene_EnvMapLight.mipMapLevel), scene_EnvMapLight.specularIntensity);
+    vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, surfaceData.roughness, int(scene_EnvMapLight.mipMapLevel), scene_EnvMapLight.specularIntensity);
     float radianceAttenuation = 1.0;
 
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        vec3 clearCoatRadiance = getLightProbeRadiance( geometry, geometry.clearCoatNormal, material.clearCoatRoughness, int(scene_EnvMapLight.mipMapLevel), scene_EnvMapLight.specularIntensity );
+        vec3 clearCoatRadiance = getLightProbeRadiance( surfaceData, surfaceData.clearCoatNormal, surfaceData.clearCoatRoughness, int(scene_EnvMapLight.mipMapLevel), scene_EnvMapLight.specularIntensity );
 
-        reflectedLight.indirectSpecular += clearCoatRadiance * material.clearCoat * envBRDFApprox(vec3( 0.04 ), material.clearCoatRoughness, geometry.clearCoatDotNV);
-        radianceAttenuation -= material.clearCoat * F_Schlick(material.f0, geometry.clearCoatDotNV);
+        reflectedLight.indirectSpecular += clearCoatRadiance * surfaceData.clearCoat * envBRDFApprox(vec3( 0.04 ), surfaceData.clearCoatRoughness, surfaceData.clearCoatDotNV);
+        radianceAttenuation -= surfaceData.clearCoat * F_Schlick(surfaceData.f0, surfaceData.clearCoatDotNV);
     #endif
 
-    reflectedLight.indirectSpecular += radianceAttenuation * radiance * envBRDFApprox(material.specularColor, material.roughness, geometry.dotNV );
+    reflectedLight.indirectSpecular += radianceAttenuation * radiance * envBRDFApprox(surfaceData.specularColor, surfaceData.roughness, surfaceData.dotNV );
 
 
     // Occlusion
@@ -130,7 +130,7 @@ void evaluateIBL(Geometry geometry, Material material, inout ReflectedLight refl
         float ambientOcclusion = ((texture2D(material_OcclusionTexture, aoUV)).r - 1.0) * material_OcclusionIntensity + 1.0;
         reflectedLight.indirectDiffuse *= ambientOcclusion;
         #ifdef SCENE_USE_SPECULAR_ENV
-            reflectedLight.indirectSpecular *= computeSpecularOcclusion(ambientOcclusion, material.roughness, geometry.dotNV);
+            reflectedLight.indirectSpecular *= computeSpecularOcclusion(ambientOcclusion, surfaceData.roughness, surfaceData.dotNV);
         #endif
     #endif
 

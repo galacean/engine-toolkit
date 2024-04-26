@@ -214,15 +214,3 @@ struct Temp_Varyings{
 	    vec3 v_pos;
 	#endif
 }
-
-void intVertexData(in Temp_Attributes attributes, out Temp_Varyings varyings){
-	vec4 position = vec4( attributes.POSITION , 1.0 );
-
-
-	#if SCENE_FOG_MODE != 0
-    	vec4 positionVS = renderer_MVMat * position;
-    	varyings.v_positionVS = positionVS.xyz / positionVS.w;
-	#endif
-
-	
-}

@@ -44,44 +44,46 @@ float getAARoughnessFactor(vec3 normal) {
 #ifdef MATERIAL_ENABLE_ANISOTROPY
     // Aniso Bent Normals
     // Mc Alley https://www.gdcvault.com/play/1022235/Rendering-the-World-of-Far 
-    vec3 getAnisotropicBentNormal(Geometry geometry, vec3 n, float roughness) {
-        vec3  anisotropyDirection = (geometry.anisotropy >= 0.0) ? geometry.anisotropicB : geometry.anisotropicT;
-        vec3  anisotropicTangent  = cross(anisotropyDirection, geometry.viewDir);
+    vec3 getAnisotropicBentNormal(SurfaceData surfaceData) {
+        vec3  anisotropyDirection = (surfaceData.anisotropy >= 0.0) ? surfaceData.anisotropicB : surfaceData.anisotropicT;
+        vec3  anisotropicTangent  = cross(anisotropyDirection, surfaceData.viewDir);
         vec3  anisotropicNormal   = cross(anisotropicTangent, anisotropyDirection);
         // reduce stretching for (roughness < 0.2), refer to https://advances.realtimerendering.com/s2018/Siggraph%202018%20HDRP%20talk_with%20notes.pdf 80
-        vec3  bentNormal          = normalize( mix(n, anisotropicNormal, abs(geometry.anisotropy) * saturate( 5.0 * roughness)) );
+        vec3  bentNormal          = normalize( mix(surfaceData.normal, anisotropicNormal, abs(surfaceData.anisotropy) * saturate( 5.0 * surfaceData.roughness)) );
 
         return bentNormal;
     }
 #endif
 
-void initGeometry(out Geometry geometry, bool isFrontFacing, Temp_Varyings v){
-    geometry.position = v.v_pos;
+
+
+void initGeometry(Temp_Varyings v, inout SurfaceData surfaceData, bool isFrontFacing){
+    surfaceData.position = v.v_pos;
     #ifdef CAMERA_ORTHOGRAPHIC
-        geometry.viewDir =  -camera_Forward;
+        surfaceData.viewDir =  -camera_Forward;
     #else
-        geometry.viewDir =  normalize(camera_Position - v.v_pos);
+        surfaceData.viewDir =  normalize(camera_Position - v.v_pos);
     #endif
     #if defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY)
         mat3 tbn = getTBN(isFrontFacing);
     #endif
 
     #ifdef MATERIAL_HAS_NORMALTEXTURE
-        geometry.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+        surfaceData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
     #else
-        geometry.normal = getNormal(isFrontFacing);
+        surfaceData.normal = getNormal(isFrontFacing);
     #endif
 
-    geometry.dotNV = saturate( dot(geometry.normal, geometry.viewDir) );
+    surfaceData.dotNV = saturate( dot(surfaceData.normal, surfaceData.viewDir) );
 
 
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
         #ifdef MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE
-            geometry.clearCoatNormal = getNormalByNormalTexture(tbn, material_ClearCoatNormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+            surfaceData.clearCoatNormal = getNormalByNormalTexture(tbn, material_ClearCoatNormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
         #else
-            geometry.clearCoatNormal = getNormal(isFrontFacing);
+            surfaceData.clearCoatNormal = getNormal(isFrontFacing);
         #endif
-        geometry.clearCoatDotNV = saturate( dot(geometry.clearCoatNormal, geometry.viewDir) );
+        surfaceData.clearCoatDotNV = saturate( dot(surfaceData.clearCoatNormal, surfaceData.viewDir) );
     #endif
 
     #ifdef MATERIAL_ENABLE_ANISOTROPY
@@ -93,13 +95,13 @@ void initGeometry(out Geometry geometry, bool isFrontFacing, Temp_Varyings v){
             anisotropicDirection.xy *= anisotropyTextureInfo.rg * 2.0 - 1.0;
         #endif
 
-        geometry.anisotropy = anisotropy;
-        geometry.anisotropicT = normalize(tbn * anisotropicDirection);
-        geometry.anisotropicB = normalize(cross(geometry.normal, geometry.anisotropicT));
+        surfaceData.anisotropy = anisotropy;
+        surfaceData.anisotropicT = normalize(tbn * anisotropicDirection);
+        surfaceData.anisotropicB = normalize(cross(surfaceData.normal, surfaceData.anisotropicT));
     #endif
 }
 
-void initMaterial(out Material material, inout Geometry geometry, Temp_Varyings v){
+void initMaterial(Temp_Varyings v, inout SurfaceData surfaceData){
         vec4 baseColor = material_BaseColor;
         float metal = material_Metal;
         float roughness = material_Roughness;
@@ -108,7 +110,7 @@ void initMaterial(out Material material, inout Geometry geometry, Temp_Varyings 
         float alphaCutoff = material_AlphaCutoff;
         float f0 = pow2( (material_IOR - 1.0) / (material_IOR + 1.0) );
 
-        material.f0 = f0;
+        surfaceData.f0 = f0;
 
         #ifdef MATERIAL_HAS_BASETEXTURE
             vec4 baseTextureColor = texture2D(material_BaseTexture, v.v_uv);
@@ -146,38 +148,38 @@ void initMaterial(out Material material, inout Geometry geometry, Temp_Varyings 
 
 
         #ifdef IS_METALLIC_WORKFLOW
-            material.diffuseColor = baseColor.rgb * ( 1.0 - metal );
-            material.specularColor = mix( vec3(f0), baseColor.rgb, metal );
-            material.roughness = roughness;
+            surfaceData.diffuseColor = baseColor.rgb * ( 1.0 - metal );
+            surfaceData.specularColor = mix( vec3(f0), baseColor.rgb, metal );
+            surfaceData.roughness = roughness;
         #else
             float specularStrength = max( max( specularColor.r, specularColor.g ), specularColor.b );
-            material.diffuseColor = baseColor.rgb * ( 1.0 - specularStrength );
-            material.specularColor = specularColor;
-            material.roughness = 1.0 - glossiness;
+            surfaceData.diffuseColor = baseColor.rgb * ( 1.0 - specularStrength );
+            surfaceData.specularColor = specularColor;
+            surfaceData.roughness = 1.0 - glossiness;
         #endif
 
-        material.roughness = max(material.roughness, getAARoughnessFactor(geometry.normal));
+        surfaceData.roughness = max(surfaceData.roughness, getAARoughnessFactor(surfaceData.normal));
 
         #ifdef MATERIAL_ENABLE_CLEAR_COAT
-            material.clearCoat = material_ClearCoat;
-            material.clearCoatRoughness = material_ClearCoatRoughness;
+            surfaceData.clearCoat = material_ClearCoat;
+            surfaceData.clearCoatRoughness = material_ClearCoatRoughness;
             #ifdef MATERIAL_HAS_CLEAR_COAT_TEXTURE
-                material.clearCoat *= (texture2D( material_ClearCoatTexture, v.v_uv )).r;
+                surfaceData.clearCoat *= (texture2D( material_ClearCoatTexture, v.v_uv )).r;
             #endif
             #ifdef MATERIAL_HAS_CLEAR_COAT_ROUGHNESS_TEXTURE
-                material.clearCoatRoughness *= (texture2D( material_ClearCoatRoughnessTexture, v.v_uv )).g;
+                surfaceData.clearCoatRoughness *= (texture2D( material_ClearCoatRoughnessTexture, v.v_uv )).g;
             #endif
-            material.clearCoat = saturate( material.clearCoat );
-            material.clearCoatRoughness = max(material.clearCoatRoughness, getAARoughnessFactor(geometry.clearCoatNormal));
+            surfaceData.clearCoat = saturate( surfaceData.clearCoat );
+            surfaceData.clearCoatRoughness = max(surfaceData.clearCoatRoughness, getAARoughnessFactor(surfaceData.clearCoatNormal));
         #endif
 
         #ifdef MATERIAL_IS_TRANSPARENT
-            material.opacity = baseColor.a;
+            surfaceData.opacity = baseColor.a;
         #else
-            material.opacity = 1.0;
+            surfaceData.opacity = 1.0;
         #endif
         #ifdef MATERIAL_ENABLE_ANISOTROPY
-            geometry.anisotropicN = getAnisotropicBentNormal(geometry, geometry.normal, material.roughness);
+            surfaceData.anisotropicN = getAnisotropicBentNormal(surfaceData);
         #endif
 
         vec3 emissiveRadiance = material_EmissiveColor;
@@ -188,11 +190,11 @@ void initMaterial(out Material material, inout Geometry geometry, Temp_Varyings 
             #endif
         emissiveRadiance *= emissiveColor.rgb;
         #endif
-        material.emissive = emissiveRadiance;
+        surfaceData.emissive = emissiveRadiance;
 
 }
 
-void initSurfaceData(out Geometry geometry, out Material material, Temp_Varyings v ){
-    initGeometry(geometry, gl_FrontFacing, v);
-    initMaterial(material, geometry, v);
+void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData, bool isFrontFacing){
+    initGeometry(v, surfaceData, isFrontFacing);
+    initMaterial(v, surfaceData);
 }

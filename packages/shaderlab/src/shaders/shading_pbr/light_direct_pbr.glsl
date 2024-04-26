@@ -1,29 +1,29 @@
-void addDirectRadiance(vec3 incidentDirection, vec3 color, Geometry geometry, Material material, inout ReflectedLight reflectedLight) {
+void addDirectRadiance(vec3 incidentDirection, vec3 color, SurfaceData surfaceData, inout ReflectedLight reflectedLight) {
     float attenuation = 1.0;
 
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        float clearCoatDotNL = saturate( dot( geometry.clearCoatNormal, incidentDirection ) );
+        float clearCoatDotNL = saturate( dot( surfaceData.clearCoatNormal, incidentDirection ) );
         vec3 clearCoatIrradiance = clearCoatDotNL * color;
 
-        reflectedLight.directSpecular += material.clearCoat * clearCoatIrradiance * BRDF_Specular_GGX( incidentDirection, geometry, geometry.clearCoatNormal, vec3( 0.04 ), material.clearCoatRoughness );
-        attenuation -= material.clearCoat * F_Schlick(material.f0, geometry.clearCoatDotNV);
+        reflectedLight.directSpecular += surfaceData.clearCoat * clearCoatIrradiance * BRDF_Specular_GGX( incidentDirection, surfaceData, surfaceData.clearCoatNormal, vec3( 0.04 ), surfaceData.clearCoatRoughness );
+        attenuation -= surfaceData.clearCoat * F_Schlick(surfaceData.f0, surfaceData.clearCoatDotNV);
     #endif
 
-    float dotNL = saturate( dot( geometry.normal, incidentDirection ) );
+    float dotNL = saturate( dot( surfaceData.normal, incidentDirection ) );
     vec3 irradiance = dotNL * color * PI;
 
-    reflectedLight.directSpecular += attenuation * irradiance * BRDF_Specular_GGX( incidentDirection, geometry, geometry.normal, material.specularColor, material.roughness);
-    reflectedLight.directDiffuse += attenuation * irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
+    reflectedLight.directSpecular += attenuation * irradiance * BRDF_Specular_GGX( incidentDirection, surfaceData, surfaceData.normal, surfaceData.specularColor, surfaceData.roughness);
+    reflectedLight.directDiffuse += attenuation * irradiance * BRDF_Diffuse_Lambert( surfaceData.diffuseColor );
 
 }
 
 #ifdef SCENE_DIRECT_LIGHT_COUNT
 
-    void addDirectionalDirectLightRadiance(DirectLight directionalLight, Geometry geometry, Material material, inout ReflectedLight reflectedLight) {
+    void addDirectionalDirectLightRadiance(DirectLight directionalLight, SurfaceData surfaceData, inout ReflectedLight reflectedLight) {
         vec3 color = directionalLight.color;
         vec3 direction = -directionalLight.direction;
 
-		addDirectRadiance( direction, color, geometry, material, reflectedLight );
+		addDirectRadiance( direction, color, surfaceData, reflectedLight );
 
     }
 
@@ -31,9 +31,9 @@ void addDirectRadiance(vec3 incidentDirection, vec3 color, Geometry geometry, Ma
 
 #ifdef SCENE_POINT_LIGHT_COUNT
 
-	void addPointDirectLightRadiance(PointLight pointLight, Geometry geometry, Material material, inout ReflectedLight reflectedLight) {
+	void addPointDirectLightRadiance(PointLight pointLight, SurfaceData surfaceData, inout ReflectedLight reflectedLight) {
 
-		vec3 lVector = pointLight.position - geometry.position;
+		vec3 lVector = pointLight.position - surfaceData.position;
 		vec3 direction = normalize( lVector );
 
 		float lightDistance = length( lVector );
@@ -41,7 +41,7 @@ void addDirectRadiance(vec3 incidentDirection, vec3 color, Geometry geometry, Ma
 		vec3 color = pointLight.color;
 		color *= clamp(1.0 - pow(lightDistance/pointLight.distance, 4.0), 0.0, 1.0);
 
-		addDirectRadiance( direction, color, geometry, material, reflectedLight );
+		addDirectRadiance( direction, color, surfaceData, reflectedLight );
 
 	}
 
@@ -49,9 +49,9 @@ void addDirectRadiance(vec3 incidentDirection, vec3 color, Geometry geometry, Ma
 
 #ifdef SCENE_SPOT_LIGHT_COUNT
 
-	void addSpotDirectLightRadiance(SpotLight spotLight, Geometry geometry, Material material, inout ReflectedLight reflectedLight) {
+	void addSpotDirectLightRadiance(SpotLight spotLight, SurfaceData surfaceData, inout ReflectedLight reflectedLight) {
 
-		vec3 lVector = spotLight.position - geometry.position;
+		vec3 lVector = spotLight.position - surfaceData.position;
 		vec3 direction = normalize( lVector );
 
 		float lightDistance = length( lVector );
@@ -63,14 +63,14 @@ void addDirectRadiance(vec3 incidentDirection, vec3 color, Geometry geometry, Ma
 		vec3 color = spotLight.color;
 		color *= spotEffect * decayEffect;
 
-		addDirectRadiance( direction, color, geometry, material, reflectedLight );
+		addDirectRadiance( direction, color, surfaceData, reflectedLight );
 
 	}
 
 
 #endif
 
-void evaluateDirectRadiance(Geometry geometry, Material material, inout ReflectedLight reflectedLight){
+void evaluateDirectRadiance(SurfaceData surfaceData, inout ReflectedLight reflectedLight){
     float shadowAttenuation = 1.0;
 
     #ifdef SCENE_DIRECT_LIGHT_COUNT
@@ -91,7 +91,7 @@ void evaluateDirectRadiance(Geometry geometry, Material material, inout Reflecte
                     }
                 #endif
                 directionalLight.direction = scene_DirectLightDirection[i];
-                addDirectionalDirectLightRadiance( directionalLight, geometry, material, reflectedLight );
+                addDirectionalDirectLightRadiance( directionalLight, surfaceData, reflectedLight );
             }
         }
 
@@ -107,7 +107,7 @@ void evaluateDirectRadiance(Geometry geometry, Material material, inout Reflecte
                 pointLight.position = scene_PointLightPosition[i];
                 pointLight.distance = scene_PointLightDistance[i];
 
-                addPointDirectLightRadiance( pointLight, geometry, material, reflectedLight );
+                addPointDirectLightRadiance( pointLight, surfaceData, reflectedLight );
             } 
         }
 
@@ -126,7 +126,7 @@ void evaluateDirectRadiance(Geometry geometry, Material material, inout Reflecte
                 spotLight.angleCos = scene_SpotLightAngleCos[i];
                 spotLight.penumbraCos = scene_SpotLightPenumbraCos[i];
 
-                addSpotDirectLightRadiance( spotLight, geometry, material, reflectedLight );
+                addSpotDirectLightRadiance( spotLight, surfaceData, reflectedLight );
             } 
         }
 

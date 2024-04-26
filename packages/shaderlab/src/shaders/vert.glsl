@@ -26,7 +26,7 @@ vec4 material_TilingOffset;
 
 
 
-void initVert(){
+void initVertex(){
     vec4 position = vec4( attr.POSITION , 1.0 );
 
     #ifndef MATERIAL_OMIT_NORMAL
