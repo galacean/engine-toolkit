@@ -86,6 +86,8 @@ void initGeometry(Temp_Varyings v, inout SurfaceData surfaceData, bool isFrontFa
         surfaceData.anisotropy = anisotropy;
         surfaceData.anisotropicT = normalize(tbn * anisotropicDirection);
         surfaceData.anisotropicB = normalize(cross(surfaceData.normal, surfaceData.anisotropicT));
+        surfaceData.anisotropicN = getAnisotropicBentNormal(surfaceData);
+
     #endif
 }
 
@@ -165,9 +167,6 @@ void initMaterial(Temp_Varyings v, inout SurfaceData surfaceData){
             surfaceData.opacity = baseColor.a;
         #else
             surfaceData.opacity = 1.0;
-        #endif
-        #ifdef MATERIAL_ENABLE_ANISOTROPY
-            surfaceData.anisotropicN = getAnisotropicBentNormal(surfaceData);
         #endif
 
         vec3 emissiveRadiance = material_EmissiveColor;
