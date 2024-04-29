@@ -22,7 +22,7 @@ vec3 getLightProbeIrradiance(vec3 sh[9], vec3 normal){
 // ------------------------Specular------------------------
 
 // ref: https://www.unrealengine.com/blog/physically-based-shading-on-mobile - environmentBRDF for GGX on mobile
-vec3 envBRDFApprox(vec3 specularColor,float roughness, float dotNV ) {
+vec3 envBRDFApprox(vec3 specularColor, float roughness, float dotNV ) {
 
     const vec4 c0 = vec4( - 1, - 0.0275, - 0.572, 0.022 );
 
@@ -53,7 +53,7 @@ vec3 getReflectedVector(SurfaceData surfaceData, vec3 n) {
     return r;
 }
 
-vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness, int maxMIPLevel, float specularIntensity) {
+vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness) {
 
     #ifndef SCENE_USE_SPECULAR_ENV
         return vec3(0);
@@ -61,7 +61,7 @@ vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness
         vec3 reflectVec = getReflectedVector(surfaceData, normal);
         reflectVec.x = -reflectVec.x; // TextureCube is left-hand,so x need inverse
         
-        float specularMIPLevel = getSpecularMIPLevel(roughness, maxMIPLevel );
+        float specularMIPLevel = getSpecularMIPLevel(roughness, int(scene_EnvMapLight.mipMapLevel) );
 
         #ifdef HAS_TEX_LOD
             vec4 envMapColor = textureCubeLodEXT( scene_EnvSpecularSampler, reflectVec, specularMIPLevel );
@@ -80,18 +80,14 @@ vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness
             #endif
         #endif
         
-        return envMapColor.rgb * specularIntensity;
+        return envMapColor.rgb * scene_EnvMapLight.specularIntensity;
 
     #endif
 
 }
 
 
-void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
-    vec3 Fd = vec3(0);
-    vec3 Fs = vec3(0);
-
-     // IBL diffuse
+void evaluateDiffuseIBL(SurfaceData surfaceData, float diffuseAO, inout vec3 Fd){
     #ifdef SCENE_USE_SH
         vec3 irradiance = getLightProbeIrradiance(scene_EnvSH, surfaceData.normal);
         #ifdef ENGINE_IS_COLORSPACE_GAMMA
@@ -103,36 +99,40 @@ void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
        irradiance *= PI;
     #endif
 
-    Fd += irradiance * BRDF_Diffuse_Lambert( surfaceData.diffuseColor );
+    Fd += diffuseAO * irradiance * BRDF_Diffuse_Lambert( surfaceData.diffuseColor );
+}
 
-    // IBL specular
-    vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, surfaceData.roughness, int(scene_EnvMapLight.mipMapLevel), scene_EnvMapLight.specularIntensity);
+void evaluateSpecularIBL(SurfaceData surfaceData, float specularAO, inout vec3 Fs){
     float radianceAttenuation = 1.0;
-
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        vec3 clearCoatRadiance = getLightProbeRadiance( surfaceData, surfaceData.clearCoatNormal, surfaceData.clearCoatRoughness, int(scene_EnvMapLight.mipMapLevel), scene_EnvMapLight.specularIntensity );
-
-        Fs += clearCoatRadiance * surfaceData.clearCoat * envBRDFApprox(vec3( 0.04 ), surfaceData.clearCoatRoughness, surfaceData.clearCoatDotNV);
         radianceAttenuation -= surfaceData.clearCoat * F_Schlick(surfaceData.f0, surfaceData.clearCoatDotNV);
     #endif
 
-   Fs += radianceAttenuation * radiance * envBRDFApprox(surfaceData.specularColor, surfaceData.roughness, surfaceData.dotNV );
+    vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, surfaceData.roughness);
+    Fs += specularAO * radianceAttenuation * radiance * envBRDFApprox(surfaceData.specularColor, surfaceData.roughness, surfaceData.dotNV );
+}
 
-
-    // Occlusion
-    #ifdef MATERIAL_HAS_OCCLUSION_TEXTURE
-        vec2 aoUV = v.v_uv;
-        #ifdef RENDERER_HAS_UV1
-            if(material_OcclusionTextureCoord == 1.0){
-                aoUV = v.v_uv1;
-            }
-        #endif
-        float ambientOcclusion = ((texture2D(material_OcclusionTexture, aoUV)).r - 1.0) * material_OcclusionIntensity + 1.0;
-        Fd *= ambientOcclusion;
-        #ifdef SCENE_USE_SPECULAR_ENV
-            Fs *= computeSpecularOcclusion(ambientOcclusion, surfaceData.roughness, surfaceData.dotNV);
-        #endif
+void evaluateClearCoatIBL(SurfaceData surfaceData, float specularAO, inout vec3 Fs){
+   #ifdef MATERIAL_ENABLE_CLEAR_COAT
+        vec3 clearCoatRadiance = getLightProbeRadiance( surfaceData, surfaceData.clearCoatNormal, surfaceData.clearCoatRoughness);
+        Fs += specularAO * clearCoatRadiance * surfaceData.clearCoat * envBRDFApprox(vec3( 0.04 ), surfaceData.clearCoatRoughness, surfaceData.clearCoatDotNV);
     #endif
+}
+
+void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
+    vec3 Fd = vec3(0);
+    vec3 Fs = vec3(0);
+    float diffuseAO = evaluateDiffuseAO(v);
+    float specularAO = evaluateSpecularAO(diffuseAO, surfaceData.roughness, surfaceData.dotNV);
+
+    // IBL diffuse
+    evaluateDiffuseIBL(surfaceData, diffuseAO, Fd);
+
+    // IBL specular
+    evaluateSpecularIBL(surfaceData, specularAO, Fs);
+
+    // IBL ClearCoat
+    evaluateClearCoatIBL(surfaceData, specularAO, Fs);
 
     color += Fd + Fs;
 }

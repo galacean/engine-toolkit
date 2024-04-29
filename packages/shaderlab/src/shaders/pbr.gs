@@ -83,12 +83,13 @@ Shader "pbr.gs" {
         Varyings pbrVert(Attributes attr) {
           Varyings v;
 
-          // @todo delete
+          // @todo: delete
           Temp_Attributes temp_attributes;
           Temp_Varyings temp_varyings;
           #include "temp_transformAttributes.glsl"
           #include "temp_transformVaryings.glsl"
 
+          // @todo: use initVertex(attr, v);
           initVertex();
 
           return v;
@@ -97,7 +98,7 @@ Shader "pbr.gs" {
         void pbrFrag(Varyings v) {
           SurfaceData surfaceData;
 
-          // @todo delete
+          // @todo: delete
           Temp_Varyings temp_varyings;
           #include "temp_transformVaryings.glsl"
 
@@ -115,5 +116,6 @@ Shader "pbr.gs" {
           #endif
         }
       }
+
     }
   }
