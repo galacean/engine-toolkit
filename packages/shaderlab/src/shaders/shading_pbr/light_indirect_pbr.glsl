@@ -1,3 +1,4 @@
+
 // ------------------------Diffuse------------------------
 
 // sh need be pre-scaled in CPU.
@@ -102,22 +103,23 @@ void evaluateDiffuseIBL(SurfaceData surfaceData, float diffuseAO, inout vec3 Fd)
     Fd += diffuseAO * irradiance * BRDF_Diffuse_Lambert( surfaceData.diffuseColor );
 }
 
-void evaluateSpecularIBL(SurfaceData surfaceData, float specularAO, inout vec3 Fs){
+float evaluateClearCoatIBL(SurfaceData surfaceData, float specularAO, inout vec3 Fs){
     float radianceAttenuation = 1.0;
+
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        radianceAttenuation -= surfaceData.clearCoat * F_Schlick(surfaceData.f0, surfaceData.clearCoatDotNV);
+        vec3 clearCoatRadiance = getLightProbeRadiance( surfaceData, surfaceData.clearCoatNormal, surfaceData.clearCoatRoughness);
+        Fs += specularAO * clearCoatRadiance * surfaceData.clearCoat * envBRDFApprox(vec3( 0.04 ), surfaceData.clearCoatRoughness, surfaceData.clearCoatDotNV);
+        radianceAttenuation -= surfaceData.clearCoat * F_Schlick(0.04, surfaceData.clearCoatDotNV);
     #endif
 
+    return radianceAttenuation;
+}
+
+void evaluateSpecularIBL(SurfaceData surfaceData, float specularAO, float radianceAttenuation, inout vec3 Fs){
     vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, surfaceData.roughness);
     Fs += specularAO * radianceAttenuation * radiance * envBRDFApprox(surfaceData.specularColor, surfaceData.roughness, surfaceData.dotNV );
 }
 
-void evaluateClearCoatIBL(SurfaceData surfaceData, float specularAO, inout vec3 Fs){
-   #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        vec3 clearCoatRadiance = getLightProbeRadiance( surfaceData, surfaceData.clearCoatNormal, surfaceData.clearCoatRoughness);
-        Fs += specularAO * clearCoatRadiance * surfaceData.clearCoat * envBRDFApprox(vec3( 0.04 ), surfaceData.clearCoatRoughness, surfaceData.clearCoatDotNV);
-    #endif
-}
 
 void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
     vec3 Fd = vec3(0);
@@ -128,11 +130,11 @@ void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
     // IBL diffuse
     evaluateDiffuseIBL(surfaceData, diffuseAO, Fd);
 
-    // IBL specular
-    evaluateSpecularIBL(surfaceData, specularAO, Fs);
-
     // IBL ClearCoat
-    evaluateClearCoatIBL(surfaceData, specularAO, Fs);
+    float radianceAttenuation = evaluateClearCoatIBL(surfaceData, specularAO, Fs);
+
+    // IBL specular
+    evaluateSpecularIBL(surfaceData, specularAO, radianceAttenuation, Fs);
 
     color += Fd + Fs;
 }

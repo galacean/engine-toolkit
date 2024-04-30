@@ -1,8 +1,4 @@
-#include "material_pbr.glsl"
-#include "normal_get.glsl"
 #include "surfaceData_pbr.glsl"
-// direct + indirect
-#include "brdf.glsl"
 #include "light_direct_pbr.glsl"
 #include "light_indirect_pbr.glsl"
 

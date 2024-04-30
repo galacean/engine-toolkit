@@ -120,6 +120,6 @@ vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, vec3 nor
 
 }
 
-vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor ) {
+vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 	return RECIPROCAL_PI * diffuseColor;
 }
