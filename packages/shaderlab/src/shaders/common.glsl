@@ -1,3 +1,6 @@
+#ifndef COMMON_INCLUDED
+#define COMMON_INCLUDED 1
+
 #define PI 3.14159265359
 #define RECIPROCAL_PI 0.31830988618
 #define EPSILON 1e-6
@@ -91,4 +94,7 @@ float remapDepthBufferLinear01(float z){
 	}
 
 	#define INVERSE_MAT(mat) inverseMat(mat)
+#endif
+
+
 #endif

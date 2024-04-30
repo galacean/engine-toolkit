@@ -1,3 +1,6 @@
+// #ifndef INPUT_INCLUDED
+// #define INPUT_INCLUDED 1
+
 struct Attributes{
   	vec3 POSITION;
 
@@ -208,3 +211,6 @@ struct Temp_Varyings{
 	    vec3 v_pos;
 	#endif
 }
+
+
+// #endif

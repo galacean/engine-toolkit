@@ -65,14 +65,8 @@ Shader "pbr.gs" {
 
         #include "input.glsl"
         #include "common.glsl"
-        #include "transform.glsl"
-
-        #include "blendShape.glsl"
-        #include "vert.glsl"
-        #include "shadow.glsl"
-
+        #include "vertex.glsl"
         #include "fog.glsl"
-        #include "light.glsl"
 
         #include "shadingPBR.glsl"
 

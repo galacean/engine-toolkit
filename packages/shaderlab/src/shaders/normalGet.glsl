@@ -1,3 +1,6 @@
+#ifndef NORMAL_GET_INCLUDED
+#define NORMAL_GET_INCLUDED 1
+
 // gl_FrontFacing has random value on Adreno GPUs
 // the Adreno bug is only when gl_FrontFacing is inside a function
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1154842
@@ -56,3 +59,6 @@ mat3 getTBN(Temp_Varyings v, bool isFrontFacing){
 	
     return tbn;
 }
+
+
+#endif

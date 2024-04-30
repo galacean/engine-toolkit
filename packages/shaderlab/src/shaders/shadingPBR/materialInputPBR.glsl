@@ -1,3 +1,6 @@
+#ifndef MATERIAL_INPUT_PBR_INCLUDED
+#define MATERIAL_INPUT_PBR_INCLUDED 1
+
 #define MIN_PERCEPTUAL_ROUGHNESS 0.045
 #define MIN_ROUGHNESS            0.002025
 
@@ -102,3 +105,6 @@ float getAARoughnessFactor(vec3 normal) {
         return MIN_PERCEPTUAL_ROUGHNESS;
     #endif
 }
+
+
+#endif

@@ -2,6 +2,9 @@
 // #ifndef LIGHT_INDIRECT_PBR_INCLUDED
 // #define LIGHT_INDIRECT_PBR_INCLUDED 1
 
+#include "brdf.glsl"
+#include "light.glsl"
+
 // ------------------------Diffuse------------------------
 
 // sh need be pre-scaled in CPU.

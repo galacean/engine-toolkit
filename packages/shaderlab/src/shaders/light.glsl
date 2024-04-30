@@ -1,3 +1,6 @@
+#ifndef LIGHT_INCLUDED
+#define LIGHT_INCLUDED 1
+
 // Directional light
 #ifdef SCENE_DIRECT_LIGHT_COUNT
 
@@ -92,3 +95,6 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
     return true;
     #endif
 }
+
+
+#endif

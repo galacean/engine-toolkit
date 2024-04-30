@@ -1,3 +1,7 @@
+#ifndef SKIN_INCLUDED
+#define SKIN_INCLUDED 1
+
+
 #ifdef RENDERER_HAS_SKIN
   #ifdef RENDERER_USE_JOINT_TEXTURE
     sampler2D renderer_JointSampler;
@@ -20,4 +24,7 @@
     #else
         mat4 renderer_JointMatrix[ RENDERER_JOINTS_NUM ];
     #endif
+#endif
+
+
 #endif

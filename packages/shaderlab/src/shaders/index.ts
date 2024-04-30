@@ -12,7 +12,7 @@ import skin from "./skin.glsl";
 import temp_transformAttributes from "./temp/transformAttributes.glsl";
 import temp_transformVaryings from "./temp/transformVaryings.glsl";
 import transform from "./transform.glsl";
-import vert from "./vert.glsl";
+import vertex from "./vertex.glsl";
 
 interface IShaderFragment {
   includeKey: string;
@@ -28,7 +28,7 @@ const pbr_include_fragment_list: IShaderFragment[] = [
   { source: shadowSampleTent, includeKey: "shadowSampleTent.glsl" },
   { source: shadow, includeKey: "shadow.glsl" },
   { source: transform, includeKey: "transform.glsl" },
-  { source: vert, includeKey: "vert.glsl" },
+  { source: vertex, includeKey: "vertex.glsl" },
   { source: input, includeKey: "input.glsl" },
   { source: temp_transformAttributes, includeKey: "temp_transformAttributes.glsl" },
   { source: temp_transformVaryings, includeKey: "temp_transformVaryings.glsl" },

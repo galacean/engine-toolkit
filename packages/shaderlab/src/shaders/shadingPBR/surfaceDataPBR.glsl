@@ -1,3 +1,6 @@
+#ifndef SURFACEDATA_PBR_INCLUDED
+#define SURFACEDATA_PBR_INCLUDED 1
+
 #include "materialInputPBR.glsl"
 #include "normalGet.glsl"
 
@@ -188,3 +191,6 @@ void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData, bool isFrontF
     initGeometry(v, surfaceData, isFrontFacing);
     initMaterial(v, surfaceData);
 }
+
+
+#endif

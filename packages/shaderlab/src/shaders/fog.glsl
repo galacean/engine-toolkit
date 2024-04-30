@@ -1,3 +1,6 @@
+#ifndef FOG_INCLUDED
+#define FOG_INCLUDED 1
+
 #if SCENE_FOG_MODE != 0
     vec4 scene_FogColor;
     vec4 scene_FogParams; // (-1/(end-start), end/(end-start), density/ln(2),density/sprt(ln(2)));
@@ -21,4 +24,7 @@
 
         return color;
     }
+#endif
+
+
 #endif

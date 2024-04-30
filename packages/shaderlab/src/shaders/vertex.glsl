@@ -1,8 +1,13 @@
+// #ifndef VERTEX_INCLUDE
+// #define VERTEX_INCLUDE 1
+
 #include "skin.glsl"
+#include "blendShape.glsl"
+#include "shadow.glsl"
+#include "transform.glsl"
+
 
 vec4 material_TilingOffset;
-
-
 
 void initVertex(){
     vec4 position = vec4( attr.POSITION , 1.0 );
@@ -187,3 +192,5 @@ void initVertex(){
     // position_vert
     gl_Position = renderer_MVPMat * position;
 }
+
+// #endif

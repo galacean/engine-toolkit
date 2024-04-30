@@ -1,3 +1,6 @@
+#ifndef BLENDSHAPE_INCLUDED
+#define BLENDSHAPE_INCLUDED 1
+
 #ifdef RENDERER_HAS_BLENDSHAPE
 	#ifdef RENDERER_BLENDSHAPE_USE_TEXTURE
 		mediump sampler2DArray renderer_BlendShapeTexture;
@@ -24,4 +27,7 @@
 			return (texelFetch(renderer_BlendShapeTexture, uv, 0)).xyz;
 		}
 	#endif
+#endif
+
+
 #endif
