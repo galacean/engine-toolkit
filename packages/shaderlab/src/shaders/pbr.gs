@@ -67,14 +67,14 @@ Shader "pbr.gs" {
         #include "common.glsl"
         #include "transform.glsl"
 
-        #include "blendShape_input.glsl"
+        #include "blendShape.glsl"
         #include "vert.glsl"
         #include "shadow.glsl"
 
         #include "fog.glsl"
         #include "light.glsl"
 
-        #include "shading_pbr.glsl"
+        #include "shadingPBR.glsl"
 
 
         VertexShader = pbrVert;

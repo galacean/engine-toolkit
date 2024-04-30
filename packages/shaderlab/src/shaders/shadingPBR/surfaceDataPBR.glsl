@@ -1,5 +1,5 @@
-#include "material_pbr.glsl"
-#include "normal_get.glsl"
+#include "materialInputPBR.glsl"
+#include "normalGet.glsl"
 
 struct SurfaceData{
 	vec3  position;

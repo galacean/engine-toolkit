@@ -1,6 +1,6 @@
-#include "surfaceData_pbr.glsl"
-#include "light_direct_pbr.glsl"
-#include "light_indirect_pbr.glsl"
+#include "surfaceDataPBR.glsl"
+#include "lightDirectPBR.glsl"
+#include "lightIndirectPBR.glsl"
 
 
 vec4 evaluateSurface(Temp_Varyings v, SurfaceData surfaceData){

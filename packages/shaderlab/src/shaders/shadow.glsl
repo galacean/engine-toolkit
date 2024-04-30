@@ -120,7 +120,7 @@
     #endif
 
     #if SCENE_SHADOW_TYPE == 3
-        #include "shadow_sample_tent.glsl"
+        #include "shadowSampleTent.glsl"
 
         float sampleShadowMapFiltered9(TEXTURE2D_SHADOW_PARAM(shadowMap), vec3 shadowCoord, vec4 shadowmapSize) {
             float attenuation;
