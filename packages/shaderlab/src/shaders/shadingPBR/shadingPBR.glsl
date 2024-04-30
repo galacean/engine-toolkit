@@ -1,3 +1,6 @@
+// #ifndef SHADING_PBR_INCLUDED
+// #define SHADING_PBR_INCLUDED 1
+
 #include "surfaceDataPBR.glsl"
 #include "lightDirectPBR.glsl"
 #include "lightIndirectPBR.glsl"
@@ -16,4 +19,6 @@ vec4 evaluateSurface(Temp_Varyings v, SurfaceData surfaceData){
     return vec4(color, surfaceData.opacity);
 }
 
+
+// #endif
 

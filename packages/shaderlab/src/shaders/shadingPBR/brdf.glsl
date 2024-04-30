@@ -1,4 +1,7 @@
 
+#ifndef BRDF_INCLUDED
+#define BRDF_INCLUDED 1
+
 float F_Schlick(float f0, float dotLH) {
 	return f0 + 0.96 * (pow(1.0 - dotLH, 5.0));
 }
@@ -123,3 +126,6 @@ vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, vec3 nor
 vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 	return RECIPROCAL_PI * diffuseColor;
 }
+
+
+#endif

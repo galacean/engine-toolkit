@@ -1,9 +1,3 @@
-// struct VertexData{
-// 	vec4 position;
-// 	vec3 normal;
-// 	vec4 tangent;
-// }
-
 struct Attributes{
   	vec3 POSITION;
 

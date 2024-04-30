@@ -1,4 +1,7 @@
 
+#ifndef LIGHT_DIRECT_PBR_INCLUDED
+// #define LIGHT_DIRECT_PBR_INCLUDED 1
+
 #include "brdf.glsl"
 
 void diffuseLobe(SurfaceData surfaceData, vec3 irradiance, float attenuation, inout vec3 Fd){
@@ -155,3 +158,6 @@ void evaluateDirectRadiance(Temp_Varyings v, SurfaceData surfaceData, inout vec3
 
     #endif
 }
+
+
+#endif
