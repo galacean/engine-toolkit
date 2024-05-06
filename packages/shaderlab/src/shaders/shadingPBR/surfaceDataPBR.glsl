@@ -1,9 +1,6 @@
 #ifndef SURFACEDATA_PBR_INCLUDED
 #define SURFACEDATA_PBR_INCLUDED 1
 
-#include "materialInputPBR.glsl"
-#include "normalGet.glsl"
-
 struct SurfaceData{
 	vec3  position;
     vec3  normal;
@@ -34,21 +31,9 @@ struct SurfaceData{
 	vec3 emissive;
 }
 
-
-#ifdef MATERIAL_ENABLE_ANISOTROPY
-    // Aniso Bent Normals
-    // Mc Alley https://www.gdcvault.com/play/1022235/Rendering-the-World-of-Far 
-    vec3 getAnisotropicBentNormal(SurfaceData surfaceData) {
-        vec3  anisotropyDirection = (surfaceData.anisotropy >= 0.0) ? surfaceData.anisotropicB : surfaceData.anisotropicT;
-        vec3  anisotropicTangent  = cross(anisotropyDirection, surfaceData.viewDir);
-        vec3  anisotropicNormal   = cross(anisotropicTangent, anisotropyDirection);
-        // reduce stretching for (roughness < 0.2), refer to https://advances.realtimerendering.com/s2018/Siggraph%202018%20HDRP%20talk_with%20notes.pdf 80
-        vec3  bentNormal          = normalize( mix(surfaceData.normal, anisotropicNormal, abs(surfaceData.anisotropy) * saturate( 5.0 * surfaceData.roughness)) );
-
-        return bentNormal;
-    }
-#endif
-
+#include "materialInputPBR.glsl"
+#include "normalGet.glsl"
+#include "materialFunctionPBR.glsl"
 
 
 void initGeometry(Temp_Varyings v, inout SurfaceData surfaceData, bool isFrontFacing){

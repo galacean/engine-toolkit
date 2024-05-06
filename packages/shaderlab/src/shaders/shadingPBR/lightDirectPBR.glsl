@@ -30,31 +30,31 @@ float clearCoatLobe(vec3 incidentDirection, vec3 color, SurfaceData surfaceData,
 }
 
 
-vec3 getDirectRadiance(vec3 incidentDirection, vec3 color, SurfaceData surfaceData) {
+void addRadiance(vec3 incidentDirection, vec3 lightColor, SurfaceData surfaceData, inout vec3 color) {
 
     vec3 Fd = vec3(0);
     vec3 Fs = vec3(0);
     float dotNL = saturate( dot( surfaceData.normal, incidentDirection ) );
-    vec3 irradiance = dotNL * color * PI;
+    vec3 irradiance = dotNL * lightColor * PI;
 
     // ClearCoat Lobe
-    float attenuation = clearCoatLobe(incidentDirection, color, surfaceData, Fs);
+    float attenuation = clearCoatLobe(incidentDirection, lightColor, surfaceData, Fs);
     // Diffuse Lobe
     diffuseLobe(surfaceData, irradiance, attenuation, Fd);
     // Specular Lobe
     specularLobe(surfaceData, incidentDirection, irradiance, attenuation, Fs);
 
-    return Fd + Fs;
+    color += Fd + Fs;
 
 }
 
 #ifdef SCENE_DIRECT_LIGHT_COUNT
 
     void addDirectionalDirectLightRadiance(DirectLight directionalLight, SurfaceData surfaceData, inout vec3 color) {
-        vec3 color2 = directionalLight.color;
+        vec3 lightColor = directionalLight.color;
         vec3 direction = -directionalLight.direction;
 
-		color += getDirectRadiance( direction, color2, surfaceData );
+        addRadiance( direction, lightColor, surfaceData, color );
 
     }
 
@@ -68,10 +68,10 @@ vec3 getDirectRadiance(vec3 incidentDirection, vec3 color, SurfaceData surfaceDa
 		vec3 direction = normalize( lVector );
 		float lightDistance = length( lVector );
 
-		vec3 color2 = pointLight.color;
-		color2 *= clamp(1.0 - pow(lightDistance/pointLight.distance, 4.0), 0.0, 1.0);
+		vec3 lightColor = pointLight.color;
+		lightColor *= clamp(1.0 - pow(lightDistance/pointLight.distance, 4.0), 0.0, 1.0);
 
-		color += getDirectRadiance( direction, color2, surfaceData );
+        addRadiance( direction, lightColor, surfaceData, color );
 
 	}
 
@@ -89,10 +89,10 @@ vec3 getDirectRadiance(vec3 incidentDirection, vec3 color, SurfaceData surfaceDa
 		float spotEffect = smoothstep( spotLight.penumbraCos, spotLight.angleCos, angleCos );
 		float decayEffect = clamp(1.0 - pow(lightDistance/spotLight.distance, 4.0), 0.0, 1.0);
 
-		vec3 color2 = spotLight.color;
-		color2 *= spotEffect * decayEffect;
+		vec3 lightColor = spotLight.color;
+		lightColor *= spotEffect * decayEffect;
 
-		color += getDirectRadiance( direction, color2, surfaceData );
+        addRadiance( direction, lightColor, surfaceData, color );
 
 	}
 

@@ -4,6 +4,7 @@
 
 #include "brdf.glsl"
 #include "light.glsl"
+#include "materialFunctionPBR.glsl"
 
 // ------------------------Diffuse------------------------
 
