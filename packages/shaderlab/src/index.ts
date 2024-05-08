@@ -1,6 +1,7 @@
 export { GSLPBRMaterial } from "./GSLPBRMaterial";
+export { ThinMaterial } from "./ThinMaterial";
 import { Shader, ShaderFactory } from "@galacean/engine";
-import { fragmentList, pbrSource } from "./shaders";
+import { fragmentList, pbrSource, thinSource } from "./shaders";
 
 let registered = false;
 
@@ -12,6 +13,7 @@ export function registerIncludes() {
   }
 
   Shader.create(pbrSource);
+  Shader.create(thinSource);
 
   registered = true;
 }
