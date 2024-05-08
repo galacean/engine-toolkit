@@ -11,7 +11,6 @@ import shadowSampleTent from "./shadowSampleTent.glsl";
 import skin from "./skin.glsl";
 import temp_transformAttributes from "./temp/transformAttributes.glsl";
 import temp_transformVaryings from "./temp/transformVaryings.glsl";
-import thinSource from "./thin.gs";
 import transform from "./transform.glsl";
 import vertex from "./vertex.glsl";
 
@@ -37,4 +36,4 @@ const fragmentList: IShaderFragment[] = [
 
   ...shadingPBR
 ];
-export { fragmentList, pbrSource, thinSource };
+export { fragmentList, pbrSource };
