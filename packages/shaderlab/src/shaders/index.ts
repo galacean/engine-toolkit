@@ -4,13 +4,14 @@ import fog from "./fog.glsl";
 import input from "./input.glsl";
 import light from "./light.glsl";
 import normalGet from "./normalGet.glsl";
-import pbr from "./pbr.gs";
+import pbrSource from "./pbr.gs";
 import shadingPBR from "./shadingPBR";
 import shadow from "./shadow.glsl";
 import shadowSampleTent from "./shadowSampleTent.glsl";
 import skin from "./skin.glsl";
 import temp_transformAttributes from "./temp/transformAttributes.glsl";
 import temp_transformVaryings from "./temp/transformVaryings.glsl";
+import thinSource from "./thin.gs";
 import transform from "./transform.glsl";
 import vertex from "./vertex.glsl";
 
@@ -19,7 +20,7 @@ interface IShaderFragment {
   source: string;
 }
 
-const pbr_include_fragment_list: IShaderFragment[] = [
+const fragmentList: IShaderFragment[] = [
   { source: blendShape, includeKey: "blendShape.glsl" },
   { source: common, includeKey: "common.glsl" },
   { source: fog, includeKey: "fog.glsl" },
@@ -36,4 +37,4 @@ const pbr_include_fragment_list: IShaderFragment[] = [
 
   ...shadingPBR
 ];
-export { pbr as pbrSource, pbr_include_fragment_list };
+export { fragmentList, pbrSource, thinSource };
