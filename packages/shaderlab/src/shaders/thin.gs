@@ -1,9 +1,9 @@
 Shader "thin.gs" {
      EditorProperties {
 	      Header("Thin Film") {
-           material_Eta2("iridescentIor", Range(1, 10, 0.1)) = 1.5;
-           material_Iridescence("Iridescence",  Range(0, 1, 0.01)) = 0;
+           material_Iridescence("Iridescence",  Range(0, 1, 0.01)) = 1;
            material_IridescenceThickness("iridescenceThickness",  Range(0.01, 5, 0.01)) = 0.1;
+           material_Eta2("iridescentIor", Range(1, 5, 0.1)) = 1.5;
         }
       
         Header("Base"){
