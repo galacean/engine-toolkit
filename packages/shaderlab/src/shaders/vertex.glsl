@@ -157,7 +157,7 @@ void initVertex(){
 
     // color_vert
     #ifdef RENDERER_ENABLE_VERTEXCOLOR
-    	v.v_color = COLOR_0;
+    	v.v_color = attr.COLOR_0;
     #endif
 
 
