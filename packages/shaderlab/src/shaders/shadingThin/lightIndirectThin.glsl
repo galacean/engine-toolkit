@@ -5,7 +5,6 @@
 #include "brdf.glsl"
 #include "brdfThin.glsl"
 #include "light.glsl"
-#include "materialFunctionPBR.glsl"
 
 // ------------------------Diffuse------------------------
 
@@ -134,6 +133,32 @@ void evaluateSpecularIBL(SurfaceData surfaceData, float specularAO, float radian
     
     vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, surfaceData.roughness);
     Fs += specularAO * radianceAttenuation * radiance * fator;
+}
+
+float evaluateDiffuseAO(Temp_Varyings v){
+    float diffuseAO = 1.0;
+
+    #ifdef MATERIAL_HAS_OCCLUSION_TEXTURE
+        vec2 aoUV = v.v_uv;
+        #ifdef RENDERER_HAS_UV1
+            if(material_OcclusionTextureCoord == 1.0){
+                aoUV = v.v_uv1;
+            }
+        #endif
+        diffuseAO = ((texture2D(material_OcclusionTexture, aoUV)).r - 1.0) * material_OcclusionIntensity + 1.0;
+    #endif
+
+    return diffuseAO;
+}
+
+float evaluateSpecularAO(float diffuseAO, float roughness, float dotNV){
+    float specularAO = 1.0;
+
+    #if defined(MATERIAL_HAS_OCCLUSION_TEXTURE) && defined(SCENE_USE_SPECULAR_ENV) 
+        specularAO = saturate( pow( dotNV + diffuseAO, exp2( - 16.0 * roughness - 1.0 ) ) - 1.0 + diffuseAO );
+    #endif
+
+    return specularAO;
 }
 
 

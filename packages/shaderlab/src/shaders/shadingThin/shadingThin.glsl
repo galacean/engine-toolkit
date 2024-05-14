@@ -6,7 +6,6 @@ float material_IridescenceThickness;
 float material_Eta2;
 
 
-#include "surfaceDataPBR.glsl"
 #include "lightDirectThin.glsl"
 #include "lightIndirectThin.glsl"
 
