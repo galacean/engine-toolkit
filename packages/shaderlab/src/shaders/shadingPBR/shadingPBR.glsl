@@ -1,7 +1,6 @@
 // #ifndef SHADING_PBR_INCLUDED
 // #define SHADING_PBR_INCLUDED 1
 
-#include "surfaceDataPBR.glsl"
 #include "lightDirectPBR.glsl"
 #include "lightIndirectPBR.glsl"
 
