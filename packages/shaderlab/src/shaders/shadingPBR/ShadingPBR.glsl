@@ -1,8 +1,8 @@
 // #ifndef SHADING_PBR_INCLUDED
 // #define SHADING_PBR_INCLUDED 1
 
-#include "lightDirectPBR.glsl"
-#include "lightIndirectPBR.glsl"
+#include "LightDirectPBR.glsl"
+#include "LightIndirectPBR.glsl"
 
 
 vec4 evaluateSurface(Temp_Varyings v, SurfaceData surfaceData){

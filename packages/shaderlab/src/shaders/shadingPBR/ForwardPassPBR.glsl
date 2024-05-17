@@ -1,14 +1,14 @@
-#include "attributesPBR.glsl"
-#include "varyingsPBR.glsl"
-#include "common.glsl"
-#include "vertex.glsl"
-#include "fog.glsl"
+#include "AttributesPBR.glsl"
+#include "VaryingsPBR.glsl"
+#include "Common.glsl"
+#include "Vertex.glsl"
+#include "Fog.glsl"
 
-#include "materialInputPBR.glsl"
-#include "shadingPBR.glsl"
+#include "MaterialInputPBR.glsl"
+#include "ShadingPBR.glsl"
 
 
-Varyings pbrVert(Attributes attr) {
+Varyings PBRVertex(Attributes attr) {
   Varyings v;
 
   // @todo: delete
@@ -23,7 +23,7 @@ Varyings pbrVert(Attributes attr) {
   return v;
 }
 
-void pbrFrag(Varyings v) {
+void PBRFragment(Varyings v) {
   SurfaceData surfaceData;
 
   // @todo: delete

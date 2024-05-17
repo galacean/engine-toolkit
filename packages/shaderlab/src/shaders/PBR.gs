@@ -1,4 +1,4 @@
-Shader "pbr.gs" {
+Shader "PBR.gs" {
     EditorProperties {
       Header("Base"){
         material_IOR("IOR", Range(0, 5, 0.01)) = 1.5;
@@ -71,6 +71,7 @@ Shader "pbr.gs" {
     }
     
     SubShader "Default" {
+
       UsePass "pbr/Default/ShadowCaster"
 
       Pass "Forward Pass" {
@@ -78,10 +79,11 @@ Shader "pbr.gs" {
 
         #define IS_METALLIC_WORKFLOW
 
-        VertexShader = pbrVert;
-        FragmentShader = pbrFrag;
+        VertexShader = PBRVertex;
+        FragmentShader = PBRFragment;
         
-        #include "forwardPassPBR.glsl"
+        #include "ForwardPassPBR.glsl"
+
       }
     }
   }
