@@ -1,10 +1,10 @@
 // #ifndef VERTEX_INCLUDE
 // #define VERTEX_INCLUDE 1
 
-#include "skin.glsl"
-#include "blendShape.glsl"
-#include "shadow.glsl"
-#include "transform.glsl"
+#include "Skin.glsl"
+#include "BlendShape.glsl"
+#include "Shadow.glsl"
+#include "Transform.glsl"
 
 
 vec4 material_TilingOffset;

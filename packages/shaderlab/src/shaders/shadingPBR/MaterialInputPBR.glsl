@@ -1,7 +1,7 @@
 #ifndef MATERIAL_INPUT_PBR_INCLUDED
 #define MATERIAL_INPUT_PBR_INCLUDED 1
 
-#include "normal.glsl"
+#include "Normal.glsl"
 
 struct SurfaceData{
 	vec3  position;

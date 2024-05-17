@@ -2,9 +2,8 @@
 // #ifndef LIGHT_INDIRECT_PBR_INCLUDED
 // #define LIGHT_INDIRECT_PBR_INCLUDED 1
 
-#include "brdf.glsl"
-#include "brdfThin.glsl"
-#include "light.glsl"
+#include "BRDF.glsl"
+#include "Light.glsl"
 
 // ------------------------Diffuse------------------------
 
@@ -123,17 +122,10 @@ float evaluateClearCoatIBL(SurfaceData surfaceData, float specularAO, inout vec3
 }
 
 void evaluateSpecularIBL(SurfaceData surfaceData, float specularAO, float radianceAttenuation, inout vec3 Fs){
-    vec3 reflectdir = reflect(surfaceData.normal, -surfaceData.viewDir);
-    vec3 halfdir = reflectdir + surfaceData.viewDir;
-    float cosTheta1 = dot(halfdir, reflectdir);
-    vec3 fresnelIridescent = ThinFilmIridescence(cosTheta1, material_Eta2 , surfaceData.specularColor ,material_IridescenceThickness);
-    //vec3 F_iridescence = fresnelIridescent * material_Iridescence;//mix(vec3(0.0,0.0,0.0),fresnelIridescent,material_Iridescence);
-    vec3 envBRDF = envBRDFApprox( surfaceData.specularColor , surfaceData.roughness, surfaceData.dotNV );
-    vec3 fator = mix(envBRDF, fresnelIridescent, material_Iridescence);
-    
     vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, surfaceData.roughness);
-    Fs += specularAO * radianceAttenuation * radiance * fator;
+    Fs += specularAO * radianceAttenuation * radiance * envBRDFApprox(surfaceData.specularColor, surfaceData.roughness, surfaceData.dotNV );
 }
+
 
 float evaluateDiffuseAO(Temp_Varyings v){
     float diffuseAO = 1.0;
@@ -161,7 +153,6 @@ float evaluateSpecularAO(float diffuseAO, float roughness, float dotNV){
     return specularAO;
 }
 
-
 void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
     vec3 Fd = vec3(0);
     vec3 Fs = vec3(0);
@@ -174,7 +165,7 @@ void evaluateIBL(Temp_Varyings v, SurfaceData surfaceData, inout vec3 color){
     // IBL ClearCoat
     float radianceAttenuation = evaluateClearCoatIBL(surfaceData, specularAO, Fs);
 
-    // IBL Iridescence Specular
+    // IBL specular
     evaluateSpecularIBL(surfaceData, specularAO, radianceAttenuation, Fs);
 
     color += Fd + Fs;

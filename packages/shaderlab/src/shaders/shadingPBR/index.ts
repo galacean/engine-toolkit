@@ -1,19 +1,17 @@
-import attributesPBR from "./attributesPBR.glsl";
-import brdf from "./brdf.glsl";
-import forwardPassPBR from "./forwardPassPBR.glsl";
-import lightDirectPBR from "./lightDirectPBR.glsl";
-import lightIndirectPBR from "./lightIndirectPBR.glsl";
-import materialInputPBR from "./materialInputPBR.glsl";
-import shadingPBR from "./shadingPBR.glsl";
-import varyingsPBR from "./varyingsPBR.glsl";
+import AttributesPBR from "./AttributesPBR.glsl";
+import BRDF from "./BRDF.glsl";
+import ForwardPassPBR from "./ForwardPassPBR.glsl";
+import LightDirectPBR from "./LightDirectPBR.glsl";
+import LightIndirectPBR from "./LightIndirectPBR.glsl";
+import MaterialInputPBR from "./MaterialInputPBR.glsl";
+import VaryingsPBR from "./VaryingsPBR.glsl";
 
 export default [
-  { source: brdf, includeKey: "brdf.glsl" },
-  { source: lightDirectPBR, includeKey: "lightDirectPBR.glsl" },
-  { source: lightIndirectPBR, includeKey: "lightIndirectPBR.glsl" },
-  { source: shadingPBR, includeKey: "shadingPBR.glsl" },
-  { source: materialInputPBR, includeKey: "materialInputPBR.glsl" },
-  { source: attributesPBR, includeKey: "attributesPBR.glsl" },
-  { source: varyingsPBR, includeKey: "varyingsPBR.glsl" },
-  { source: forwardPassPBR, includeKey: "forwardPassPBR.glsl" }
+  { source: ForwardPassPBR, includeKey: "ForwardPassPBR.glsl" },
+  { source: AttributesPBR, includeKey: "AttributesPBR.glsl" },
+  { source: VaryingsPBR, includeKey: "VaryingsPBR.glsl" },
+  { source: MaterialInputPBR, includeKey: "MaterialInputPBR.glsl" },
+  { source: LightDirectPBR, includeKey: "LightDirectPBR.glsl" },
+  { source: LightIndirectPBR, includeKey: "LightIndirectPBR.glsl" },
+  { source: BRDF, includeKey: "BRDF.glsl" }
 ];

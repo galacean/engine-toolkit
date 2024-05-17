@@ -1,19 +1,19 @@
-import blendShape from "./blendShape.glsl";
-import common from "./common.glsl";
-import fog from "./fog.glsl";
-import light from "./light.glsl";
-import normal from "./normal.glsl";
-import pbrSource from "./pbr.gs";
+import BlendShape from "./BlendShape.glsl";
+import Common from "./Common.glsl";
+import Fog from "./Fog.glsl";
+import Light from "./Light.glsl";
+import Normal from "./Normal.glsl";
+import PBRSource from "./PBR.gs";
+import Shadow from "./Shadow.glsl";
+import ShadowSampleTent from "./ShadowSampleTent.glsl";
+import Skin from "./Skin.glsl";
+import ThinSource from "./Thin.gs";
+import Transform from "./Transform.glsl";
+import Vertex from "./Vertex.glsl";
 import shadingPBR from "./shadingPBR";
 import shadingThin from "./shadingThin";
-import shadow from "./shadow.glsl";
-import shadowSampleTent from "./shadowSampleTent.glsl";
-import skin from "./skin.glsl";
 import temp_transformAttributes from "./temp/transformAttributes.glsl";
 import temp_transformVaryings from "./temp/transformVaryings.glsl";
-import thinSource from "./thin.gs";
-import transform from "./transform.glsl";
-import vertex from "./vertex.glsl";
 
 interface IShaderFragment {
   includeKey: string;
@@ -21,20 +21,20 @@ interface IShaderFragment {
 }
 
 const fragmentList: IShaderFragment[] = [
-  { source: blendShape, includeKey: "blendShape.glsl" },
-  { source: common, includeKey: "common.glsl" },
-  { source: fog, includeKey: "fog.glsl" },
-  { source: light, includeKey: "light.glsl" },
-  { source: normal, includeKey: "normal.glsl" },
-  { source: shadowSampleTent, includeKey: "shadowSampleTent.glsl" },
-  { source: shadow, includeKey: "shadow.glsl" },
-  { source: transform, includeKey: "transform.glsl" },
-  { source: vertex, includeKey: "vertex.glsl" },
+  { source: BlendShape, includeKey: "BlendShape.glsl" },
+  { source: Common, includeKey: "Common.glsl" },
+  { source: Fog, includeKey: "Fog.glsl" },
+  { source: Light, includeKey: "Light.glsl" },
+  { source: Normal, includeKey: "Normal.glsl" },
+  { source: ShadowSampleTent, includeKey: "ShadowSampleTent.glsl" },
+  { source: Shadow, includeKey: "Shadow.glsl" },
+  { source: Transform, includeKey: "Transform.glsl" },
+  { source: Vertex, includeKey: "Vertex.glsl" },
   { source: temp_transformAttributes, includeKey: "temp_transformAttributes.glsl" },
   { source: temp_transformVaryings, includeKey: "temp_transformVaryings.glsl" },
-  { source: skin, includeKey: "skin.glsl" },
+  { source: Skin, includeKey: "Skin.glsl" },
 
   ...shadingPBR,
   ...shadingThin
 ];
-export { fragmentList, pbrSource, thinSource };
+export { PBRSource, ThinSource, fragmentList };

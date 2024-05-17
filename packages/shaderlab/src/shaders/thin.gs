@@ -1,5 +1,5 @@
-Shader "thin.gs" {
-     EditorProperties {
+Shader "Thin.gs" {
+    EditorProperties {
 	      Header("Thin Film") {
            material_Iridescence("Iridescence",  Range(0, 1, 0.01)) = 1;
            material_IridescenceThickness("iridescenceThickness",  Range(0.01, 5, 0.01)) = 0.1;
@@ -53,7 +53,7 @@ Shader "thin.gs" {
         }
       }
 
-      EditorMacros {
+    EditorMacros {
         Header("Conditional Macors") {
           MATERIAL_HAS_BASETEXTURE("HAS_BASETEXTURE");
           MATERIAL_HAS_ROUGHNESS_METALLIC_TEXTURE("HAS_ROUGHNESS_METALLIC_TEXTURE");
@@ -83,8 +83,11 @@ Shader "thin.gs" {
         Tags { pipelineStage = "Forward"} 
 
         #define IS_METALLIC_WORKFLOW
-        #include "forwardPassThin.glsl"
 
+        VertexShader = PBRVertex;
+        FragmentShader = PBRFragment;
+
+        #include "ForwardPassThin.glsl"
       }
 
     }
