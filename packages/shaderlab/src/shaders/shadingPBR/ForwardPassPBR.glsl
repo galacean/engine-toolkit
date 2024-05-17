@@ -5,8 +5,8 @@
 #include "Fog.glsl"
 
 #include "MaterialInputPBR.glsl"
-#include "ShadingPBR.glsl"
-
+#include "LightDirectPBR.glsl"
+#include "LightIndirectPBR.glsl"
 
 Varyings PBRVertex(Attributes attr) {
   Varyings v;
@@ -32,14 +32,22 @@ void PBRFragment(Varyings v) {
 
   initSurfaceData(temp_varyings, surfaceData, gl_FrontFacing);
 
-  vec4 color = evaluateSurface(temp_varyings, surfaceData);
-  gl_FragColor = color;
+  vec4 color = vec4(0, 0, 0, surfaceData.opacity);
+
+  // Direct Light
+  evaluateDirectRadiance(temp_varyings, surfaceData, color.rgb);
+  // IBL
+  evaluateIBL(temp_varyings, surfaceData, color.rgb);
+  // Emissive
+  color.rgb += surfaceData.emissive;
 
   #if SCENE_FOG_MODE != 0
-      gl_FragColor = fog(gl_FragColor, v.v_positionVS);
+      color = fog(color, v.v_positionVS);
   #endif
 
   #ifndef ENGINE_IS_COLORSPACE_GAMMA
-      gl_FragColor = linearToGamma(gl_FragColor);
+      color = linearToGamma(color);
   #endif
+
+  gl_FragColor = color;
 }
