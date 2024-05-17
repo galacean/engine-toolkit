@@ -8,9 +8,6 @@
 #include "shadingPBR.glsl"
 
 
-VertexShader = pbrVert;
-FragmentShader = pbrFrag;
-
 Varyings pbrVert(Attributes attr) {
   Varyings v;
 

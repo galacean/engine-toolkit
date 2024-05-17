@@ -77,9 +77,11 @@ Shader "pbr.gs" {
         Tags { pipelineStage = "Forward"} 
 
         #define IS_METALLIC_WORKFLOW
+
+        VertexShader = pbrVert;
+        FragmentShader = pbrFrag;
+        
         #include "forwardPassPBR.glsl"
-
       }
-
     }
   }
