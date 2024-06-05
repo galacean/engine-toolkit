@@ -10,7 +10,7 @@
     "b:types": "tsc"
   },
   "types": "types/index.d.ts",
-  "main": "dist/main.js",
+  "main": "dist/es/index.js",
   "module": "dist/module.js",
   "files": [
     "dist/**/*",
