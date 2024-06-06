@@ -14,7 +14,7 @@ export class GSLPBRMaterial extends PBRBaseMaterial {
 
   constructor(engine: Engine) {
     GSLPBRMaterial.registerIncludes();
-    super(engine, Shader.create(pbrSource));
+    super(engine, Shader.find("pbr.gs") || Shader.create(pbrSource));
 
     const shaderData = this.shaderData;
     shaderData.setFloat("material_Metal", 1);
