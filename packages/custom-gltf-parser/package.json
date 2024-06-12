@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-custom-gltf-parser",
-  "version": "0.0.0-experimental-shaderlab-thin.2",
+  "version": "0.0.0-experimental-shaderlab-thin.3",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"

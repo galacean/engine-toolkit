@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-outline",
-  "version": "0.0.0-experimental-shaderlab-thin.2",
+  "version": "0.0.0-experimental-shaderlab-thin.3",
   "license": "MIT",
   "module": "dist/es/index.js",
   "main": "dist/commonjs/browser.js",
