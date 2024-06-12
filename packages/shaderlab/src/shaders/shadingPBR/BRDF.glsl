@@ -77,10 +77,10 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 }
 
 #ifdef MATERIAL_ENABLE_ANISOTROPY
-    vec3 anisotropicLobe(vec3 h, vec3 l, SurfaceData surfaceData, vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
-        vec3 t = surfaceData.anisotropicT;
-        vec3 b = surfaceData.anisotropicB;
-        vec3 v = surfaceData.viewDir;
+    vec3 anisotropicLobe(vec3 h, vec3 l, BRDFData brdfData, vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
+        vec3 t = brdfData.anisotropicT;
+        vec3 b = brdfData.anisotropicB;
+        vec3 v = brdfData.viewDir;
 
         float dotTV = dot(t, v);
         float dotBV = dot(b, v);
@@ -91,8 +91,8 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 
         // Aniso parameter remapping
         // https://blog.selfshadow.com/publications/s2017-shading-course/imageworks/s2017_pbs_imageworks_slides_v2.pdf page 24
-        float at = max(alpha * (1.0 + surfaceData.anisotropy), MIN_ROUGHNESS);
-        float ab = max(alpha * (1.0 - surfaceData.anisotropy), MIN_ROUGHNESS);
+        float at = max(alpha * (1.0 + brdfData.anisotropy), MIN_ROUGHNESS);
+        float ab = max(alpha * (1.0 - brdfData.anisotropy), MIN_ROUGHNESS);
 
         // specular anisotropic BRDF
     	vec3 F = F_Schlick( specularColor, dotLH );
@@ -104,19 +104,19 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 #endif
 
 // GGX Distribution, Schlick Fresnel, GGX-Smith Visibility
-vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, vec3 normal, vec3 specularColor, float roughness ) {
+vec3 BRDF_Specular_GGX(vec3 incidentDirection, BRDFData brdfData, vec3 normal, vec3 specularColor, float roughness ) {
 
 	float alpha = pow2( roughness ); // UE4's roughness
 
-	vec3 halfDir = normalize( incidentDirection + surfaceData.viewDir );
+	vec3 halfDir = normalize( incidentDirection + brdfData.viewDir );
 
 	float dotNL = saturate( dot( normal, incidentDirection ) );
-	float dotNV = saturate( dot( normal, surfaceData.viewDir ) );
+	float dotNV = saturate( dot( normal, brdfData.viewDir ) );
 	float dotNH = saturate( dot( normal, halfDir ) );
 	float dotLH = saturate( dot( incidentDirection, halfDir ) );
 
     #ifdef MATERIAL_ENABLE_ANISOTROPY
-        return anisotropicLobe(halfDir, incidentDirection, surfaceData, specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
+        return anisotropicLobe(halfDir, incidentDirection, brdfData, specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
     #else
         return isotropicLobe(specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
     #endif
