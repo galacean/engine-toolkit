@@ -13,7 +13,8 @@ struct Varyings{
 	    #ifdef RENDERER_HAS_NORMAL
 	        vec3 v_normal;
 	        #if defined(RENDERER_HAS_TANGENT) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY) )
-	            mat3 v_TBN;
+				vec3 v_tangent;
+				vec3 v_bitangent;
 	        #endif
 	    #endif
 	#endif
@@ -46,7 +47,8 @@ struct Temp_Varyings{
 	    #ifdef RENDERER_HAS_NORMAL
 	        vec3 v_normal;
 	        #if defined(RENDERER_HAS_TANGENT) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY) )
-	            mat3 v_TBN;
+	          	vec3 v_tangent;
+				vec3 v_bitangent;
 	        #endif
 	    #endif
 	#endif

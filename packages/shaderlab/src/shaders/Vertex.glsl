@@ -170,7 +170,8 @@ void initVertex(){
                 vec3 tangentW = normalize( mat3(renderer_NormalMat) * tangent.xyz );
                 vec3 bitangentW = cross( v.v_normal, tangentW ) * tangent.w;
 
-                v.v_TBN = mat3( tangentW, bitangentW, v.v_normal );
+                v.v_tangent = tangentW;
+                v.v_bitangent = bitangentW;
             #endif
         #endif
     #endif

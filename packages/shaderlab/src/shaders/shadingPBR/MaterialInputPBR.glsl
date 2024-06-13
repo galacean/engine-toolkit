@@ -22,7 +22,8 @@ struct BRDFData{
     // geometry
     vec3  position;
     vec3  normal;
-    mat3  tbn;
+    vec3  tangent;
+    vec3  bitangent;
     vec3  viewDir;
     float dotNV;
 
@@ -233,11 +234,13 @@ void initGeometryData(Temp_Varyings v, inout BRDFData brdfData, bool isFrontFaci
 
     #if defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY)
         mat3 tbn = getTBN(v, isFrontFacing);
-        brdfData.tbn = tbn;
-    #endif
-
-    #ifdef MATERIAL_HAS_NORMALTEXTURE
-        brdfData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+        brdfData.tangent = tbn[0];
+        brdfData.bitangent = tbn[1];
+        #ifdef MATERIAL_HAS_NORMALTEXTURE
+            brdfData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+        #else
+            brdfData.normal = tbn[2];
+        #endif
     #else
         brdfData.normal = getNormal(v, isFrontFacing);
     #endif
@@ -248,7 +251,7 @@ void initGeometryData(Temp_Varyings v, inout BRDFData brdfData, bool isFrontFaci
 void initClearCoatBRDFData(Temp_Varyings v, inout BRDFData brdfData, bool isFrontFacing){
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
         #ifdef MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE
-            brdfData.clearCoatNormal = getNormalByNormalTexture(brdfData.tbn, material_ClearCoatNormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+            brdfData.clearCoatNormal = getNormalByNormalTexture(mat3(brdfData.tangent, brdfData.bitangent, brdfData.normal), material_ClearCoatNormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
         #else
             brdfData.clearCoatNormal = getNormal(v, isFrontFacing);
         #endif
@@ -283,7 +286,7 @@ void initAnisotropyBRDFData(Temp_Varyings v, inout BRDFData brdfData){
         #endif
 
         brdfData.anisotropy = anisotropy;
-        brdfData.anisotropicT = normalize(brdfData.tbn * anisotropicDirection);
+        brdfData.anisotropicT = normalize(mat3(brdfData.tangent, brdfData.bitangent, brdfData.normal) * anisotropicDirection);
         brdfData.anisotropicB = normalize(cross(brdfData.normal, brdfData.anisotropicT));
         brdfData.anisotropicN = getAnisotropicBentNormal(brdfData);
 

@@ -11,7 +11,8 @@
     #ifdef RENDERER_HAS_NORMAL
         temp_varyings.v_normal = v.v_normal;
         #if defined(RENDERER_HAS_TANGENT) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY) )
-            temp_varyings.v_TBN = v.v_TBN;
+            temp_varyings.v_tangent = v.v_tangent;
+            temp_varyings.v_bitangent = v.v_bitangent;
         #endif
     #endif
 #endif
