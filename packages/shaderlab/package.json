@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-shader-lab",
-  "version": "0.0.0-experimental-shaderlab-thin.3",
+  "version": "0.0.0-experimental-shaderlab-thin.4",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
