@@ -4,6 +4,7 @@
 #include "Normal.glsl"
 
 struct SurfaceData{
+    // common
 	vec3  albedoColor;
     vec3  specularColor;
 	vec3  emissiveColor;
@@ -11,6 +12,13 @@ struct SurfaceData{
     float roughness;
     float f0;
     float opacity;
+
+    // geometry
+    vec3  position;
+    vec3  normal;
+    vec3  tangent;
+    vec3  bitangent;
+    vec3  viewDir;
 }
 
 struct BRDFData{
@@ -138,7 +146,8 @@ float getAARoughnessFactor(vec3 normal) {
 #endif
 
 
-void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData){
+void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData, bool isFrontFacing){
+    // common
     vec4 baseColor = material_BaseColor;
     float metallic = material_Metal;
     float roughness = material_Roughness;
@@ -202,6 +211,39 @@ void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData){
     #else
         surfaceData.opacity = 1.0;
     #endif
+
+
+    // geometry
+    surfaceData.position = v.v_pos;
+    
+    #ifdef CAMERA_ORTHOGRAPHIC
+        surfaceData.viewDir = -camera_Forward;
+    #else
+        surfaceData.viewDir = normalize(camera_Position - v.v_pos);
+    #endif
+
+    #if defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY)
+        mat3 tbn = getTBN(v, isFrontFacing);
+        surfaceData.tangent = tbn[0];
+        surfaceData.bitangent = tbn[1];
+        #ifdef MATERIAL_HAS_NORMALTEXTURE
+            surfaceData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+        #else
+            surfaceData.normal = tbn[2];
+        #endif
+    #else
+        surfaceData.normal = getNormal(v, isFrontFacing);
+    #endif
+}
+
+void initGeometryData(SurfaceData surfaceData, inout BRDFData brdfData){
+    brdfData.position = surfaceData.position;
+    brdfData.normal = surfaceData.normal;
+    brdfData.tangent = surfaceData.tangent;
+    brdfData.bitangent = surfaceData.bitangent;
+    brdfData.viewDir = surfaceData.viewDir;
+
+    brdfData.dotNV = saturate( dot(brdfData.normal, brdfData.viewDir) );
 }
 
 void initCommonBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
@@ -221,31 +263,6 @@ void initCommonBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
     #endif
 
     brdfData.roughness = max(roughness, getAARoughnessFactor(brdfData.normal));
-}
-
-void initGeometryData(Temp_Varyings v, inout BRDFData brdfData, bool isFrontFacing){
-    brdfData.position = v.v_pos;
-    
-    #ifdef CAMERA_ORTHOGRAPHIC
-        brdfData.viewDir = -camera_Forward;
-    #else
-        brdfData.viewDir = normalize(camera_Position - v.v_pos);
-    #endif
-
-    #if defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY)
-        mat3 tbn = getTBN(v, isFrontFacing);
-        brdfData.tangent = tbn[0];
-        brdfData.bitangent = tbn[1];
-        #ifdef MATERIAL_HAS_NORMALTEXTURE
-            brdfData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
-        #else
-            brdfData.normal = tbn[2];
-        #endif
-    #else
-        brdfData.normal = getNormal(v, isFrontFacing);
-    #endif
-
-    brdfData.dotNV = saturate( dot(brdfData.normal, brdfData.viewDir) );
 }
 
 void initClearCoatBRDFData(Temp_Varyings v, inout BRDFData brdfData, bool isFrontFacing){
@@ -295,7 +312,7 @@ void initAnisotropyBRDFData(Temp_Varyings v, inout BRDFData brdfData){
 }
 
 void initBRDFData(Temp_Varyings v, SurfaceData surfaceData, out BRDFData brdfData, bool isFrontFacing){
-    initGeometryData(v, brdfData, isFrontFacing);
+    initGeometryData(surfaceData, brdfData);
     initCommonBRDFData(surfaceData, brdfData);
     initClearCoatBRDFData(v, brdfData, isFrontFacing);
     initAnisotropyBRDFData(v, brdfData);

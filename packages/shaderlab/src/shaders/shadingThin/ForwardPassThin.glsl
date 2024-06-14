@@ -38,7 +38,7 @@ void PBRFragment(Varyings v) {
   Temp_Varyings temp_varyings;
   #include "temp_transformVaryings.glsl"
 
-  initSurfaceData(temp_varyings, surfaceData);
+  initSurfaceData(temp_varyings, surfaceData, gl_FrontFacing);
   // Can modify surfaceData here.
   initBRDFData(temp_varyings, surfaceData, brdfData, gl_FrontFacing);
 
