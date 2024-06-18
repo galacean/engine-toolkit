@@ -40,7 +40,7 @@ void initVertex(){
     						normal += getBlendShapeVertexElement(i, vertexElementOffset) * weight;
     					#endif
     
-    					#if defined( RENDERER_HAS_TANGENT ) && defined(RENDERER_BLENDSHAPE_HAS_TANGENT) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) )
+    					#if defined( RENDERER_HAS_TANGENT ) && defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
     						vertexElementOffset += 1;
     						tangent.xyz += getBlendShapeVertexElement(i, vertexElementOffset) * weight;
     					#endif
@@ -58,7 +58,8 @@ void initVertex(){
     					normal += attr.NORMAL_BS0 * renderer_BlendShapeWeights[0];
     					normal += attr.NORMAL_BS1 * renderer_BlendShapeWeights[1];
     				#endif
-    				#if defined( RENDERER_HAS_TANGENT ) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) )
+                    
+    				#ifdef RENDERER_HAS_TANGENT
     					tangent.xyz += attr.TANGENT_BS0 * renderer_BlendShapeWeights[0];
     					tangent.xyz += attr.TANGENT_BS1 * renderer_BlendShapeWeights[1];
     				#endif				
@@ -76,7 +77,7 @@ void initVertex(){
     						normal += attr.NORMAL_BS3 * renderer_BlendShapeWeights[3];
     					#endif
 
-    					#if defined(RENDERER_BLENDSHAPE_HAS_TANGENT) && defined( RENDERER_HAS_TANGENT ) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) )
+    					#if defined(RENDERER_BLENDSHAPE_HAS_TANGENT) && defined( RENDERER_HAS_TANGENT )
     						tangent.xyz += attr.TANGENT_BS0 * renderer_BlendShapeWeights[0];
     						tangent.xyz += attr.TANGENT_BS1 * renderer_BlendShapeWeights[1];
     						tangent.xyz += attr.TANGENT_BS2 * renderer_BlendShapeWeights[2];
@@ -120,7 +121,7 @@ void initVertex(){
             #if defined(RENDERER_HAS_NORMAL) && !defined(MATERIAL_OMIT_NORMAL)
                 mat3 skinNormalMatrix = INVERSE_MAT(mat3(skinMatrix));
                 normal = normal * skinNormalMatrix;
-                #if defined(RENDERER_HAS_TANGENT) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) )
+                #ifdef RENDERER_HAS_TANGENT
                     tangent.xyz = tangent.xyz * skinNormalMatrix;
                 #endif
 
@@ -166,7 +167,7 @@ void initVertex(){
         #ifdef RENDERER_HAS_NORMAL
             v.v_normal = normalize( mat3(renderer_NormalMat) * normal );
 
-            #if defined(RENDERER_HAS_TANGENT) && ( defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY) )
+            #ifdef RENDERER_HAS_TANGENT
                 vec3 tangentW = normalize( mat3(renderer_NormalMat) * tangent.xyz );
                 vec3 bitangentW = cross( v.v_normal, tangentW ) * tangent.w;
 

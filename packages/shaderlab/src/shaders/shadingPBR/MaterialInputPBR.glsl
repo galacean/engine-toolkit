@@ -14,10 +14,14 @@ struct SurfaceData{
     float opacity;
 
     // geometry
-    vec3  position;
-    vec3  normal;
-    vec3  tangent;
-    vec3  bitangent;
+    vec3 position;
+    vec3 normal;
+
+    #ifdef RENDERER_HAS_TANGENT
+        vec3  tangent;
+        vec3  bitangent;
+    #endif
+
     vec3  viewDir;
 }
 
@@ -28,10 +32,14 @@ struct BRDFData{
     float roughness;
 
     // geometry
-    vec3  position;
-    vec3  normal;
-    vec3  tangent;
-    vec3  bitangent;
+    vec3 position;
+    vec3 normal;
+
+    #ifdef RENDERER_HAS_TANGENT
+        vec3  tangent;
+        vec3  bitangent;
+    #endif
+
     vec3  viewDir;
     float dotNV;
 
@@ -222,7 +230,7 @@ void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData, bool isFrontF
         surfaceData.viewDir = normalize(camera_Position - v.v_pos);
     #endif
 
-    #if defined(MATERIAL_HAS_NORMALTEXTURE) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_ENABLE_ANISOTROPY)
+    #ifdef RENDERER_HAS_TANGENT
         mat3 tbn = getTBN(v, isFrontFacing);
         surfaceData.tangent = tbn[0];
         surfaceData.bitangent = tbn[1];
@@ -239,8 +247,10 @@ void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData, bool isFrontF
 void initGeometryData(SurfaceData surfaceData, inout BRDFData brdfData){
     brdfData.position = surfaceData.position;
     brdfData.normal = surfaceData.normal;
-    brdfData.tangent = surfaceData.tangent;
-    brdfData.bitangent = surfaceData.bitangent;
+    #ifdef RENDERER_HAS_TANGENT
+        brdfData.tangent = surfaceData.tangent;
+        brdfData.bitangent = surfaceData.bitangent;
+    #endif
     brdfData.viewDir = surfaceData.viewDir;
 
     brdfData.dotNV = saturate( dot(brdfData.normal, brdfData.viewDir) );
