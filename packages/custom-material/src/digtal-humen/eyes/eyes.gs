@@ -56,7 +56,7 @@
             VertexShader = PBRVertex;
             FragmentShader = PBRFragment;
             
-            #include "/eyes/EyesForwardPass.glsl"
+            #include "EyesForwardPass.glsl"
     
           }
         }

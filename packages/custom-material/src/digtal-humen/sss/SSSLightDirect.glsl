@@ -2,7 +2,7 @@
 // #define LIGHT_DIRECT_THIN_INCLUDED 1
 
 #include "BRDF.glsl"
-#include "/sss/SSSFunction.glsl"
+#include "SSSFunction.glsl"
 #include "Light.glsl"
 #include "Shadow.glsl"
 

@@ -4,23 +4,24 @@
 #include "Vertex.glsl"
 #include "Fog.glsl"
 
-  float material_HairFirstWidth;
-  float material_HairSecondWidth;
-  float material_HairsFirststrength;
-  float material_HairsSecondstrength;
-  float material_HairFirstOffest;
-  float material_HairSecondOffest;
-  vec4 material_HairFirstColor;
-  vec4 material_HairSecondColor;
-
- #ifdef MATERIAL_HAS_HAIRANISOTROPY_TEXTURE
-  sampler2D material_HairAnisotropyTexture;
- #endif
-
 #include "MaterialInputPBR.glsl"
-//#include "LightDirectPBR.glsl"
-#include "/hair/HairLightDirect.glsl"
 #include "LightIndirectPBR.glsl"
+
+
+vec4 material_SkinScatterAmount;
+float material_CurvaturePower;
+
+#ifdef MATERIAL_HAS_CURVATEXTURE
+sampler2D material_CurvatureTexture;
+#endif
+
+struct FsphericalGaussian {
+    vec3 Axis;  //u
+    float Sharpness; //L
+    float Amplitude; //a
+}
+
+#include "/sss/SSSLightDirect.glsl"
 
 Varyings PBRVertex(Attributes attr) {
   Varyings v;
@@ -51,13 +52,13 @@ void PBRFragment(Varyings v) {
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
+
   // Direct Light
   evaluateDirectRadiance(temp_varyings, brdfData, color.rgb);
   // IBL
   evaluateIBL(temp_varyings, brdfData, color.rgb);
   // Emissive
   color.rgb += surfaceData.emissiveColor;
-
 
   #if SCENE_FOG_MODE != 0
       color = fog(color, v.v_positionVS);

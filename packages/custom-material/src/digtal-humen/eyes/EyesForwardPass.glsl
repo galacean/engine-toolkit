@@ -7,7 +7,7 @@
 #include "MaterialInputPBR.glsl"
 #include "LightDirectPBR.glsl"
 #include "LightIndirectPBR.glsl"
-#include "/eyes/EyesFunction.glsl"
+#include "EyesFunction.glsl"
 
       float material_ScleraSize;
       float material_IrisSize;

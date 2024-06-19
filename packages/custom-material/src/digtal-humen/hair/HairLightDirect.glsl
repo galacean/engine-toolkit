@@ -2,7 +2,7 @@
 // #define LIGHT_DIRECT_THIN_INCLUDED 1
 
 #include "BRDF.glsl"
-#include "/hair/HairFunction.glsl"
+#include "HairFunction.glsl"
 #include "Light.glsl"
 #include "Shadow.glsl"
 

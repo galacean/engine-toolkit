@@ -1,22 +1,28 @@
 
-      Shader "sss/ss.gs" {
+      Shader "hair/Effect.gs" {
         EditorProperties {
           Header("Base"){
             material_IOR("IOR", Range(0, 5, 0.01)) = 1.5;
             material_BaseColor("BaseColor", Color) = (1, 1, 1, 1);
             material_BaseTexture("BaseTexture", Texture2D);
           }
-
-          Header("SSS"){
-          material_SkinScatterAmount("SSSColor", Color) = (1,1,1,1);
-          material_CurvatureTexture("CurvatureTexture", Texture2D);
-          material_CurvaturePower("CurvaturePower", Float) = 0;
-          }
-
+    
           Header("Metal Roughness") {
             material_Metal( "Metal", Range(0,1,0.01) ) = 1;
             material_Roughness( "Roughness", Range( 0, 1, 0.01 ) ) = 1;
             material_RoughnessMetallicTexture("RoughnessMetallicTexture", Texture2D);
+          }
+
+          Header("HairAnisotropy") {
+            material_HairFirstWidth("HairFirstWidth", Range(0, 15, 0.01)) = 1;
+            material_HairSecondWidth("HairSecondWidth", Range(0, 15, 0.01)) = 1;
+            material_HairsFirststrength("HairsFirstrength", Range(0, 5, 0.01)) = 1;
+            material_HairsSecondstrength("HairsSecondstrength", Range(0, 5, 0.01)) = 1;
+            material_HairFirstOffest("HairFirstOffest", Range(-1, 5, 0.01)) = 1;
+            material_HairSecondOffest("HairSecondOffest", Range(-1, 5, 0.01)) = 1;
+            material_HairFirstColor("HairFirstColor", Color) = (1,1,1,1);
+            material_HairSecondColor("HairSecondColor", Color) = (1,1,1,1);
+            material_HairAnisotropyTexture("HairAnisotropyTexture", Texture2D);
           }
     
           Header("Normal") {
@@ -44,13 +50,14 @@
         EditorMacros {
           Header("Conditional Macors") {
             MATERIAL_HAS_BASETEXTURE("HAS_BASETEXTURE");
-            MATERIAL_HAS_CURVATEXTURE("HAS_CURVATEXTURE");
             MATERIAL_HAS_ROUGHNESS_METALLIC_TEXTURE("HAS_ROUGHNESS_METALLIC_TEXTURE");
+            MATERIAL_HAS_HAIRANISOTROPY_TEXTURE("HAIRANISOTROPY");
             MATERIAL_HAS_NORMALTEXTURE("HAS_NORMALTEXTURE");
             MATERIAL_HAS_EMISSIVETEXTURE("HAS_EMISSIVETEXTURE");
             MATERIAL_HAS_OCCLUSION_TEXTURE("HAS_OCCLUSION_TEXTURE");
             MATERIAL_IS_TRANSPARENT("IS_TRANSPARENT");
             MATERIAL_IS_ALPHA_CUTOFF("IS_ALPHA_CUTOFF");
+
           }
     
           Header("Enabled Macros") {
@@ -71,7 +78,7 @@
             VertexShader = PBRVertex;
             FragmentShader = PBRFragment;
             
-            #include "/sss/SSSForwardPass.glsl"
+            #include "HairForwardPass.glsl"
     
           }
         }
