@@ -67,7 +67,7 @@ void PBRFragment(Varyings v) {
   // Can modify surfaceData here.
 
   //sclera uv
-	vec2 scleraUV = (v.v_uv * material_ScleraSize) - ((material_ScleraSize-1.0)/2.0);
+  vec2 scleraUV = (v.v_uv * material_ScleraSize)-((material_ScleraSize-1.0)/2.0);
 
   //sclera texture
   #ifdef MATERIAL_HAS_SCLERA_TEXTURE  
