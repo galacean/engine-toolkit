@@ -22,16 +22,16 @@ void specularLobe(BRDFData brdfData, vec3 incidentDirection, vec3 irradiance, fl
     float shift = 1.0;
    #endif
   
-    vec3 ShiftTangent1 = ShiftTangent(worldBitangentDir,brdfData.normal,shift+material_HairFirstOffest);
-    vec3 ShiftTangent2 = ShiftTangent(worldBitangentDir,brdfData.normal,shift+material_HairSecondOffest);
+    vec3 shiftTangent1 = ShiftTangent(worldBitangentDir,brdfData.normal,shift+material_HairFirstOffest);
+    vec3 shiftTangent2 = ShiftTangent(worldBitangentDir,brdfData.normal,shift+material_HairSecondOffest);
  
-    vec3 Firstcol= material_HairFirstColor.rgb ;
-    vec3 FirstSpecular =Firstcol * AnisotropySpecular( brdfData , incidentDirection, material_HairFirstWidth *15.0, material_HairsFirststrength, ShiftTangent1);
+    vec3 firstcol= material_HairFirstColor.rgb ;
+    vec3 firstSpecular =firstcol * AnisotropySpecular( brdfData , incidentDirection, material_HairFirstWidth *15.0, material_HairsFirststrength, shiftTangent1);
  
-    vec3 Secondcol= material_HairSecondColor.rgb ;
-    vec3 SecondSpecular = Secondcol * AnisotropySpecular( brdfData ,  incidentDirection, material_HairSecondWidth *15.0, material_HairsSecondstrength, ShiftTangent2);
+    vec3 secondcol= material_HairSecondColor.rgb ;
+    vec3 secondSpecular = secondcol * AnisotropySpecular( brdfData ,  incidentDirection, material_HairSecondWidth *15.0, material_HairsSecondstrength, shiftTangent2);
  
-    vec3 hairSpecular =clamp( FirstSpecular + SecondSpecular,0.0,1.0);
+    vec3 hairSpecular = clamp( firstSpecular + secondSpecular,0.0,1.0);
 
     Fs += attenuation * irradiance * hairSpecular;
 }

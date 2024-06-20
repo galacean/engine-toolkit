@@ -4,18 +4,18 @@
 #include "Vertex.glsl"
 #include "Fog.glsl"
 
-  float material_HairFirstWidth;
-  float material_HairSecondWidth;
-  float material_HairsFirststrength;
-  float material_HairsSecondstrength;
-  float material_HairFirstOffest;
-  float material_HairSecondOffest;
-  vec4 material_HairFirstColor;
-  vec4 material_HairSecondColor;
+float material_HairFirstWidth;
+float material_HairSecondWidth;
+float material_HairsFirststrength;
+float material_HairsSecondstrength;
+float material_HairFirstOffest;
+float material_HairSecondOffest;
+vec4 material_HairFirstColor;
+vec4 material_HairSecondColor;
 
- #ifdef MATERIAL_HAS_HAIRANISOTROPY_TEXTURE
-  sampler2D material_HairAnisotropyTexture;
- #endif
+#ifdef MATERIAL_HAS_HAIRANISOTROPY_TEXTURE
+ sampler2D material_HairAnisotropyTexture;
+#endif
 
 #include "MaterialInputPBR.glsl"
 #include "HairLightDirect.glsl"

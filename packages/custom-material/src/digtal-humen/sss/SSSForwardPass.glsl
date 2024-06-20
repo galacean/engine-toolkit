@@ -12,7 +12,7 @@ vec4 material_SkinScatterAmount;
 float material_CurvaturePower;
 
 #ifdef MATERIAL_HAS_CURVATEXTURE
-sampler2D material_CurvatureTexture;
+ sampler2D material_CurvatureTexture;
 #endif
 
 struct FsphericalGaussian {
@@ -21,7 +21,7 @@ struct FsphericalGaussian {
     float Amplitude; //a
 }
 
-#include "/sss/SSSLightDirect.glsl"
+#include "SSSLightDirect.glsl"
 
 Varyings PBRVertex(Attributes attr) {
   Varyings v;

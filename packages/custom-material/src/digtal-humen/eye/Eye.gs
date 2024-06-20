@@ -1,7 +1,7 @@
 
       Shader "eyes/eyes.gs" {
         EditorProperties {
-           Header("Scler") {
+           Header("Sclera") {
            material_ScleraColor("Sclera Color", Color) = (1,1,1,1);
            material_ScleraSize("Sclera Size", Range(0, 5, 0.01)) = 1.5;
            material_Metal("Sclera Specular", Range(0,1,0.01) ) = 1;
@@ -56,7 +56,7 @@
             VertexShader = PBRVertex;
             FragmentShader = PBRFragment;
             
-            #include "EyesForwardPass.glsl"
+            #include "EyeForwardPass.glsl"
     
           }
         }
