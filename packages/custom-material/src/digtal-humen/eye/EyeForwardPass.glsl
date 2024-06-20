@@ -115,7 +115,7 @@ void PBRFragment(Varyings v) {
   #endif
   vec3 viewDirInTBN = tbn * vDir;
 
-	vec2 offset = ParallaxOffset(h, material_Parallax, viewDirInTBN) ;
+  vec2 offset = ParallaxOffset(h, material_Parallax, viewDirInTBN);
 
   //iris uv and pupil uv
   vec2 irisUV = (v.v_uv * irisSize) - ((irisSize-1.0)/2.0);
