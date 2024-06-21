@@ -13,7 +13,7 @@ void diffuseLobe(BRDFData brdfData, vec3 irradiance, float attenuation, inout ve
 
 void specularLobe(BRDFData brdfData, vec3 incidentDirection, vec3 irradiance, float attenuation, inout vec3 Fs){
 
-    vec3 worldtangentDir   = brdfData.tangent;
+    vec3 worldtangentDir = brdfData.tangent;
     vec3 worldBitangentDir = brdfData.bitangent;
 
    #ifdef MATERIAL_HAS_HAIRANISOTROPY_TEXTURE
@@ -22,16 +22,16 @@ void specularLobe(BRDFData brdfData, vec3 incidentDirection, vec3 irradiance, fl
     float shift = 1.0;
    #endif
   
-    vec3 shiftTangent1 = ShiftTangent(worldBitangentDir,brdfData.normal,shift+material_HairFirstOffest);
-    vec3 shiftTangent2 = ShiftTangent(worldBitangentDir,brdfData.normal,shift+material_HairSecondOffest);
+    vec3 shiftTangent1 = ShiftTangent(worldBitangentDir, brdfData.normal, shift+material_HairFirstOffest);
+    vec3 shiftTangent2 = ShiftTangent(worldBitangentDir, brdfData.normal, shift+material_HairSecondOffest);
  
-    vec3 firstcol= material_HairFirstColor.rgb ;
-    vec3 firstSpecular =firstcol * AnisotropySpecular( brdfData , incidentDirection, material_HairFirstWidth *15.0, material_HairsFirststrength, shiftTangent1);
+    vec3 firstcol = material_HairFirstColor.rgb;
+    vec3 firstSpecular = firstcol * AnisotropySpecular(brdfData, incidentDirection, material_HairFirstWidth*15.0, material_HairsFirststrength, shiftTangent1);
  
-    vec3 secondcol= material_HairSecondColor.rgb ;
-    vec3 secondSpecular = secondcol * AnisotropySpecular( brdfData ,  incidentDirection, material_HairSecondWidth *15.0, material_HairsSecondstrength, shiftTangent2);
+    vec3 secondcol = material_HairSecondColor.rgb;
+    vec3 secondSpecular = secondcol * AnisotropySpecular(brdfData, incidentDirection, material_HairSecondWidth*15.0, material_HairsSecondstrength, shiftTangent2);
  
-    vec3 hairSpecular = clamp( firstSpecular + secondSpecular,0.0,1.0);
+    vec3 hairSpecular = clamp(firstSpecular + secondSpecular, 0.0, 1.0);
 
     Fs += attenuation * irradiance * hairSpecular;
 }
