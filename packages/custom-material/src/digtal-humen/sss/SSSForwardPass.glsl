@@ -17,8 +17,8 @@ float material_CurvaturePower;
 
 struct FsphericalGaussian {
     vec3 Axis;  //u
-    float Sharpness; //L
-    float Amplitude; //a
+    vec3 Sharpness; //L
+    vec3 Amplitude; //a
 }
 
 #include "SSSLightDirect.glsl"

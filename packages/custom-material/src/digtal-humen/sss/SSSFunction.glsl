@@ -1,35 +1,35 @@
-float DotCosineLobe(FsphericalGaussian G , vec3 Normal)
+vec3 DotCosineLobe(FsphericalGaussian G , vec3 N)
 {
- float muDotN = dot(G.Axis,Normal);
- float c0 = 0.36;
- float c1 = 0.25 / c0;
- float eml = exp(-G.Sharpness);
- float em2l = eml * eml;
- float rl = 1.0 / G.Sharpness;
+ float muDotN = dot(G.Axis,N);
+ vec3 c0 = vec3 (0.36);
+ vec3 c1 = vec3(0.25 / c0);
+ vec3 eml = exp(-G.Sharpness);
+ vec3 em2l = eml * eml;
+ vec3 rl = 1.0 / G.Sharpness;
 
- float scale = 1.0 + 2.0 * em2l - rl;
- float bias =(eml - em2l) * rl - em2l;
+ vec3 scale = 1.0 + 2.0 * em2l - rl;
+ vec3 bias =(eml - em2l) * rl - em2l;
 
- float x = sqrt(1.0 - scale);
- float x0 = c0 * muDotN;
- float x1 = c1 * x;
+ vec3 x = sqrt(vec3(1.0)- scale);
+ vec3 x0 = c0 * muDotN;
+ vec3 x1 = c1 * x;
 
- float n = x0 + x1;
+ vec3 n = x0 + x1;
 
- float y;
- if (abs(x0) <= x1)
+ vec3 y;
+if (all(lessThanEqual(abs(x0), x1)))
  {
    y = (n * n) / x;
  } 
  else
  {
-   y = clamp(muDotN,0.0,1.0);
+   y = clamp(vec3(muDotN),vec3(0.0),vec3(1.0));
  }
  return scale * y + bias;
 }
 
 //Normalized SG
-FsphericalGaussian MakeNormalizedSG(vec3 lightdir , float sharpness)
+FsphericalGaussian MakeNormalizedSG(vec3 lightdir , vec3 sharpness)
 {
 FsphericalGaussian SG;
 SG.Axis = lightdir;
@@ -40,13 +40,11 @@ return SG;
   
 vec3 SGDiffuseLighting(vec3 Light ,vec3 Normal ,vec3 ScatterAmt)
 {
-FsphericalGaussian RedKernel = MakeNormalizedSG(Light, 1.0 / max(ScatterAmt.x,0.0001));
-FsphericalGaussian GreenKernel = MakeNormalizedSG(Light, 1.0/ max(ScatterAmt.y,0.0001));
-FsphericalGaussian BlueKernel = MakeNormalizedSG(Light, 1.0/ max(ScatterAmt.z,0.0001));
-vec3 diffuse = vec3(DotCosineLobe(RedKernel,Normal), DotCosineLobe(GreenKernel,Normal),  DotCosineLobe(BlueKernel,Normal));
+FsphericalGaussian Kernel = MakeNormalizedSG(L, 1.0 / max(ScatterAmt.xyz,0.0001));
+vec3 diffuse = DotCosineLobe(Kernel,N); 
 //Tone Mapping
-vec3 x = max(vec3(0.0,0.0,0.0),(diffuse-0.004));
-diffuse =  (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+vec3 diffuselobe = max(vec3(0.0),(diffuse-0.004));
+diffuse = (diffuselobe * (6.2 * diffuselobe + 0.5)) / (diffuselobe * (6.2 * diffuselobe + 1.7) + 0.06);
 return diffuse;
 }
 

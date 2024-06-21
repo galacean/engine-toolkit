@@ -36,12 +36,12 @@ void addRadiance(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, ino
     vec3 Fs = vec3(0);
 
   #ifdef MATERIAL_HAS_CURVATEXTURE
-    vec4 SkinCurvatureTexture = texture2D(material_CurvatureTexture, v.v_uv) ;
+    vec4 skinCurvatureTexture = texture2D(material_CurvatureTexture, v.v_uv) ;
     #else
-    vec4 SkinCurvatureTexture =vec4(1,1,1,1) ;
+    vec4 skinCurvatureTexture =vec4(1,1,1,1) ;
    #endif
 
-    float skintexture = SkinCurvatureTexture.r * material_CurvaturePower ;
+    float skintexture = skinCurvatureTexture.r * material_CurvaturePower ;
     vec3 scatterAmt = material_SkinScatterAmount.rgb * skintexture;
     vec3 SG = SGDiffuseLighting( brdfData.normal, incidentDirection, scatterAmt);
     vec3 irradiance = SG * lightColor * PI;

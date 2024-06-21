@@ -1,5 +1,5 @@
 
-Shader "sss/ss.gs" {
+Shader "sss/sss.gs" {
   EditorProperties {
     Header("Base"){
       material_IOR("IOR", Range(0, 5, 0.01)) = 1.5;

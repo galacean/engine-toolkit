@@ -1,4 +1,3 @@
-
 Shader "eyes/eyes.gs" {
   EditorProperties {
     Header("Sclera") {

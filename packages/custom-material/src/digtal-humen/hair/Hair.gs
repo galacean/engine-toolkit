@@ -1,5 +1,4 @@
-
-Shader "hair/Effect.gs" {
+Shader "hair/hair.gs" {
   EditorProperties {
     Header("Base"){
       material_IOR("IOR", Range(0, 5, 0.01)) = 1.5;
