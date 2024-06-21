@@ -24,7 +24,7 @@ Shader "eyes/eyes.gs" {
     }
 
     Header("Common") {
-      material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
+    material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
     }
   }
 
