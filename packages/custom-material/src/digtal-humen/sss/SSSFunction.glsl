@@ -38,10 +38,10 @@ SG.Amplitude = SG.Sharpness /((2.0 * PI) * (1.0 - exp(-2.0 * SG.Sharpness)));
 return SG;
 }
   
-vec3 SGDiffuseLighting(vec3 Light ,vec3 Normal ,vec3 ScatterAmt)
+vec3 SGDiffuseLighting(vec3 light ,vec3 normal ,vec3 scatterAmt)
 {
-FsphericalGaussian Kernel = MakeNormalizedSG(L, 1.0 / max(ScatterAmt.xyz,0.0001));
-vec3 diffuse = DotCosineLobe(Kernel,Normal); 
+FsphericalGaussian Kernel = MakeNormalizedSG(light, 1.0 / max(scatterAmt.xyz,0.0001));
+vec3 diffuse = DotCosineLobe(Kernel,normal); 
 //Tone Mapping
 vec3 diffuselobe = max(vec3(0.0),(diffuse-0.004));
 diffuse = (diffuselobe * (6.2 * diffuselobe + 0.5)) / (diffuselobe * (6.2 * diffuselobe + 1.7) + 0.06);
