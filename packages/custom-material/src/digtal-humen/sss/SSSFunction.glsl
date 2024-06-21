@@ -41,7 +41,7 @@ return SG;
 vec3 SGDiffuseLighting(vec3 Light ,vec3 Normal ,vec3 ScatterAmt)
 {
 FsphericalGaussian Kernel = MakeNormalizedSG(L, 1.0 / max(ScatterAmt.xyz,0.0001));
-vec3 diffuse = DotCosineLobe(Kernel,N); 
+vec3 diffuse = DotCosineLobe(Kernel,Normal); 
 //Tone Mapping
 vec3 diffuselobe = max(vec3(0.0),(diffuse-0.004));
 diffuse = (diffuselobe * (6.2 * diffuselobe + 0.5)) / (diffuselobe * (6.2 * diffuselobe + 1.7) + 0.06);
