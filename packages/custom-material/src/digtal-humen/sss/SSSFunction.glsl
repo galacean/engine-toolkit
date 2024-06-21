@@ -1,7 +1,7 @@
 vec3 DotCosineLobe(FsphericalGaussian G , vec3 N)
 {
  float muDotN = dot(G.Axis,N);
- vec3 c0 = vec3 (0.36);
+ vec3 c0 = vec3(0.36);
  vec3 c1 = vec3(0.25 / c0);
  vec3 eml = exp(-G.Sharpness);
  vec3 em2l = eml * eml;
