@@ -1,6 +1,6 @@
-float DotCosineLobe(FsphericalGaussian G , vec3 N)
+float DotCosineLobe(FsphericalGaussian G , vec3 Normal)
 {
- float muDotN = dot(G.Axis,N);
+ float muDotN = dot(G.Axis,Normal);
  float c0 = 0.36;
  float c1 = 0.25 / c0;
  float eml = exp(-G.Sharpness);
@@ -28,7 +28,7 @@ float DotCosineLobe(FsphericalGaussian G , vec3 N)
  return scale * y + bias;
 }
 
-//normalized SG
+//Normalized SG
 FsphericalGaussian MakeNormalizedSG(vec3 lightdir , float sharpness)
 {
 FsphericalGaussian SG;
@@ -38,13 +38,13 @@ SG.Amplitude = SG.Sharpness /((2.0 * PI) * (1.0 - exp(-2.0 * SG.Sharpness)));
 return SG;
 }
   
-vec3 SGDiffuseLighting(vec3 L ,vec3 N ,vec3 ScatterAmt)
+vec3 SGDiffuseLighting(vec3 Light ,vec3 Normal ,vec3 ScatterAmt)
 {
-FsphericalGaussian RedKernel = MakeNormalizedSG(L, 1.0 / max(ScatterAmt.x,0.0001));
-FsphericalGaussian GreenKernel = MakeNormalizedSG(L, 1.0/ max(ScatterAmt.y,0.0001));
-FsphericalGaussian BlueKernel = MakeNormalizedSG(L, 1.0/ max(ScatterAmt.z,0.0001));
-vec3 diffuse = vec3(DotCosineLobe(RedKernel,N), DotCosineLobe(GreenKernel,N),  DotCosineLobe(BlueKernel,N));
-//tone mapping
+FsphericalGaussian RedKernel = MakeNormalizedSG(Light, 1.0 / max(ScatterAmt.x,0.0001));
+FsphericalGaussian GreenKernel = MakeNormalizedSG(Light, 1.0/ max(ScatterAmt.y,0.0001));
+FsphericalGaussian BlueKernel = MakeNormalizedSG(Light, 1.0/ max(ScatterAmt.z,0.0001));
+vec3 diffuse = vec3(DotCosineLobe(RedKernel,Normal), DotCosineLobe(GreenKernel,Normal),  DotCosineLobe(BlueKernel,Normal));
+//Tone Mapping
 vec3 x = max(vec3(0.0,0.0,0.0),(diffuse-0.004));
 diffuse =  (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
 return diffuse;

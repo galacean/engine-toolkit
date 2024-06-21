@@ -64,12 +64,10 @@ void PBRFragment(Varyings v) {
 
   initSurfaceData(temp_varyings, surfaceData, gl_FrontFacing);
 
-  // Can modify surfaceData here.
-
-  //sclera uv
+  //Sclera UV
   vec2 scleraUV = (v.v_uv * material_ScleraSize)-((material_ScleraSize-1.0)/2.0);
 
-  //sclera texture
+  //Sclera Texture
   #ifdef MATERIAL_HAS_SCLERA_TEXTURE  
    vec4 scleraColor = texture2D(material_ScleraTexture, scleraUV);
    scleraColor *= material_ScleraColor;
@@ -80,19 +78,19 @@ void PBRFragment(Varyings v) {
    vec4 scleraColor = vec4(1.0,1.0,1.0,1.0);
   #endif
 
-  //iris size for mask
+  //Iris Size For Mask
   vec2 irisSizeUV = (v.v_uv * material_IrisSize) - ((material_IrisSize-1.0)/2.0);
   float irisSize  = material_IrisSize * 0.6;
 
-  //pupil size
+  //Pupil Size
   float pupilSizeX = mix(mix(0.5,0.2,irisSize/5.0),mix(1.2,0.75,irisSize/5.0),material_PupilSize.x);
   float pupilSizeY = mix(mix(0.5,0.2,irisSize/5.0),mix(1.2,0.75,irisSize/5.0),material_PupilSize.y);
   vec2 pupilSize = vec2(pupilSizeX,pupilSizeY);
 
-  //parallax uv
+  //Parallax UV
   vec2 parallaxUV = mix((v.v_uv * 0.75)-((0.75-1.0)/2.0) ,( v.v_uv * pupilSize)-((pupilSize-1.0)/2.0),v.v_uv);
 
-  //get mask
+  //Get Mask
   float h = 0.0;
   #ifdef MATERIAL_HAS_SCLERA_MASK
    float irismasktex = (texture2D(material_Scleramask, irisSizeUV)).r;
@@ -106,7 +104,7 @@ void PBRFragment(Varyings v) {
    h = 1.0;
   #endif
 
-  //transform viewdirWS to viewdirTS
+  //Transform ViewdirWS To ViewdirTS
   vec3 vDir = -normalize(camera_Position - v.v_pos); 
   #ifdef RENDERER_HAS_TANGENT
    mat3 tbn = mat3(surfaceData.tangent, surfaceData.bitangent, surfaceData.normal);
@@ -117,11 +115,11 @@ void PBRFragment(Varyings v) {
 
   vec2 offset = ParallaxOffset(h, material_Parallax, viewDirInTBN);
 
-  //iris uv and pupil uv
+  //Iris UV And Pupil UV
   vec2 irisUV = (v.v_uv * irisSize) - ((irisSize-1.0)/2.0);
   vec2 pupilUV = irisUV * ((-1.0 + (uvmask * pupilSize)))-( 0.5 *(uvmask * pupilSize)); 
      
-  //parallax color
+  //Parallax Color
   vec4 parallax = vec4(0,0,0,0);
   #ifdef MATERIAL_HAS_IRIS_TEXTURE
    parallax = texture2D(material_IrisTexture, pupilUV - offset);
@@ -133,12 +131,12 @@ void PBRFragment(Varyings v) {
 
   vec4 baseColor = mix(ScleraColor,parallax,irismasktex);
 
-  //limbus
+  //Limbus
   vec4 limbalstrength = (0.0 - (material_Limbal * 10.0 )) * baseColor;
   float limbalRadius =saturate( irisoffsettex  * (1.0-irismasktex));
   baseColor = mix(baseColor,limbalstrength,limbalRadius);
 
-  //normal
+  //Normal
   #ifdef MATERIAL_HAS_SCLERA_NORMAL
    vec3 scleraNormal = getNormalByNormalTexture(tbn, material_ScleraNormal, material_ScleraNormalStrength, scleraUV, gl_FrontFacing);
   #else

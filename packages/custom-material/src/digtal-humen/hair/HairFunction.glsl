@@ -1,7 +1,7 @@
-vec3 ShiftTangent(vec3 T,vec3 N, float shift )
+vec3 ShiftTangent(vec3 Tangent,vec3 Normal, float shift )
 {
  
-return (normalize(T+N*shift));
+return (normalize(Tangent + Normal * shift));
 }
 
 //Kajiya-Kay Model
