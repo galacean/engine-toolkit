@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-custom-material",
-  "version": "0.0.0-experimental-shaderlab-thin.8",
+  "version": "0.0.0-experimental-shaderlab-pbr.0",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
