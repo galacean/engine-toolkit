@@ -29,7 +29,6 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
     struct DirectLight {
         vec3 color;
         vec3 direction;
-        bool isCulled;
     }
 
     ivec2 scene_DirectLightCullingMask[SCENE_DIRECT_LIGHT_COUNT];
@@ -39,7 +38,6 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
     void getLightInfo(int index, out DirectLight light){
         light.color = scene_DirectLightColor[index];
         light.direction = scene_DirectLightDirection[index];
-        light.isCulled = isRendererCulledByLight(renderer_Layer.xy, scene_DirectLightCullingMask[index]);
     }
 
 #endif
@@ -52,7 +50,6 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
         vec3 color;
         vec3 position;
         float distance;
-        bool isCulled;
     }
 
     ivec2 scene_PointLightCullingMask[ SCENE_POINT_LIGHT_COUNT ];
@@ -64,7 +61,6 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
         light.color = scene_PointLightColor[index];
         light.position = scene_PointLightPosition[index];
         light.distance = scene_PointLightDistance[index];
-        light.isCulled = isRendererCulledByLight(renderer_Layer.xy, scene_PointLightCullingMask[index]);
     }
 
 #endif
@@ -80,7 +76,6 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
         float distance;
         float angleCos;
         float penumbraCos;
-        bool isCulled;
     }
 
     ivec2 scene_SpotLightCullingMask[ SCENE_SPOT_LIGHT_COUNT ];
@@ -98,7 +93,6 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
         light.distance = scene_SpotLightDistance[index];
         light.angleCos = scene_SpotLightAngleCos[index];
         light.penumbraCos = scene_SpotLightPenumbraCos[index];
-        light.isCulled = isRendererCulledByLight(renderer_Layer.xy, scene_SpotLightCullingMask[index]);
     }
 
 
