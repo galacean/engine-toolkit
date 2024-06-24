@@ -9,8 +9,7 @@ ivec4 renderer_Layer;
     }
 #endif
 
-bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
-{
+bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask){
     #ifdef GRAPHICS_API_WEBGL2
     return !((rendererLayer.x & lightCullingMask.x) != 0 || (rendererLayer.y & lightCullingMask.y) != 0);
     #else
@@ -35,9 +34,12 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
     vec3 scene_DirectLightColor[SCENE_DIRECT_LIGHT_COUNT];
     vec3 scene_DirectLightDirection[SCENE_DIRECT_LIGHT_COUNT];
 
-    void getLightInfo(int index, out DirectLight light){
+    DirectLight getDirectLight(int index){
+        DirectLight light;
         light.color = scene_DirectLightColor[index];
         light.direction = scene_DirectLightDirection[index];
+
+        return light;
     }
 
 #endif
@@ -57,10 +59,13 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
     vec3 scene_PointLightPosition[ SCENE_POINT_LIGHT_COUNT ];
     float scene_PointLightDistance[ SCENE_POINT_LIGHT_COUNT ];
 
-    void getLightInfo(int index, out PointLight light){
+    PointLight getPointLight(int index){
+        PointLight light;
         light.color = scene_PointLightColor[index];
         light.position = scene_PointLightPosition[index];
         light.distance = scene_PointLightDistance[index];
+
+        return light;
     }
 
 #endif
@@ -86,13 +91,16 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask)
     float scene_SpotLightAngleCos[ SCENE_SPOT_LIGHT_COUNT ];
     float scene_SpotLightPenumbraCos[ SCENE_SPOT_LIGHT_COUNT ];
 
-    void getLightInfo(int index, out SpotLight light){
+    SpotLight getSpotLight(int index){
+        SpotLight light;
         light.color = scene_SpotLightColor[index];
         light.position = scene_SpotLightPosition[index];
         light.direction = scene_SpotLightDirection[index];
         light.distance = scene_SpotLightDistance[index];
         light.angleCos = scene_SpotLightAngleCos[index];
         light.penumbraCos = scene_SpotLightPenumbraCos[index];
+
+        return light;
     }
 
 

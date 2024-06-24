@@ -110,11 +110,10 @@ void evaluateDirectRadiance(Temp_Varyings v, BRDFData brdfData, inout vec3 color
             shadowAttenuation *= sampleShadowMap(v);
         #endif
 
-        DirectLight directionalLight;
         for ( int i = 0; i < SCENE_DIRECT_LIGHT_COUNT; i ++ ) {
-            getLightInfo(i, directionalLight);
             // warning: use `continue` syntax may trigger flickering bug in safri 16.1.
             if(!isRendererCulledByLight(renderer_Layer.xy, scene_DirectLightCullingMask[i])){
+                DirectLight directionalLight = getDirectLight(i);
                 #ifdef SCENE_IS_CALCULATE_SHADOWS
                     if (i == 0) { // Sun light index is always 0
                         directionalLight.color *= shadowAttenuation;
@@ -128,10 +127,9 @@ void evaluateDirectRadiance(Temp_Varyings v, BRDFData brdfData, inout vec3 color
 
     #ifdef SCENE_POINT_LIGHT_COUNT
 
-        PointLight pointLight;
         for ( int i = 0; i < SCENE_POINT_LIGHT_COUNT; i ++ ) {
-            getLightInfo(i, pointLight);
             if(!isRendererCulledByLight(renderer_Layer.xy, scene_PointLightCullingMask[i])){
+                PointLight pointLight = getPointLight(i);
                 addPointDirectLightRadiance( pointLight, brdfData, color );
             } 
         }
@@ -139,11 +137,10 @@ void evaluateDirectRadiance(Temp_Varyings v, BRDFData brdfData, inout vec3 color
     #endif
 
     #ifdef SCENE_SPOT_LIGHT_COUNT
-
-        SpotLight spotLight;
+      
         for ( int i = 0; i < SCENE_SPOT_LIGHT_COUNT; i ++ ) {
-            getLightInfo(i, spotLight);
             if(!isRendererCulledByLight(renderer_Layer.xy, scene_SpotLightCullingMask[i])){
+                SpotLight spotLight = getSpotLight(i);
                 addSpotDirectLightRadiance( spotLight, brdfData, color );
             } 
         }
