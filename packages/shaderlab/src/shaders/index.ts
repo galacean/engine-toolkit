@@ -7,11 +7,9 @@ import PBRSource from "./PBR.gs";
 import Shadow from "./Shadow.glsl";
 import ShadowSampleTent from "./ShadowSampleTent.glsl";
 import Skin from "./Skin.glsl";
-import ThinSource from "./Thin.gs";
 import Transform from "./Transform.glsl";
 import Vertex from "./Vertex.glsl";
 import shadingPBR from "./shadingPBR";
-import shadingThin from "./shadingThin";
 import temp_transformAttributes from "./temp/transformAttributes.glsl";
 import temp_transformVaryings from "./temp/transformVaryings.glsl";
 
@@ -34,7 +32,6 @@ const fragmentList: IShaderFragment[] = [
   { source: temp_transformVaryings, includeKey: "temp_transformVaryings.glsl" },
   { source: Skin, includeKey: "Skin.glsl" },
 
-  ...shadingPBR,
-  ...shadingThin
+  ...shadingPBR
 ];
-export { PBRSource, ThinSource, fragmentList };
+export { PBRSource, fragmentList };
