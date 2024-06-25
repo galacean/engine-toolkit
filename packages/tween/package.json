@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-tween",
-  "version": "0.0.0-experimental-shaderlab-pbr.3",
+  "version": "0.0.0-experimental-shaderlab-pbr.4",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
