@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-controls",
-  "version": "0.0.0-experimental-shaderlab-pbr.4",
+  "version": "0.0.0-experimental-shaderlab-pbr.5",
   "license": "MIT",
   "publishConfig": {
     "access": "public",
