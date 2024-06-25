@@ -2,6 +2,19 @@
 #ifndef LIGHT_DIRECT_PBR_INCLUDED
 #define LIGHT_DIRECT_PBR_INCLUDED
 
+#ifndef FUNCTION_SURFACE_SHADING
+    #define FUNCTION_SURFACE_SHADING surfaceShading
+#endif
+#ifndef FUNCTION_DIFFUSE_LOBE
+    #define FUNCTION_DIFFUSE_LOBE diffuseLobe
+#endif
+#ifndef FUNCTION_SPECULAR_LOBE
+    #define FUNCTION_SPECULAR_LOBE specularLobe
+#endif
+#ifndef FUNCTION_CLEAR_COAT_LOBE
+    #define FUNCTION_CLEAR_COAT_LOBE clearCoatLobe
+#endif
+
 #include "BRDF.glsl"
 #include "Light.glsl"
 #include "Shadow.glsl"
