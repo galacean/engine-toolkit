@@ -1,6 +1,6 @@
 
 // #ifndef LIGHT_INDIRECT_PBR_INCLUDED
-// #define LIGHT_INDIRECT_PBR_INCLUDED 1
+// #define LIGHT_INDIRECT_PBR_INCLUDED
 
 #include "BRDF.glsl"
 #include "Light.glsl"

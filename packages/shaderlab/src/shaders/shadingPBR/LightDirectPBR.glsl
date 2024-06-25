@@ -1,6 +1,6 @@
 
-// #ifndef LIGHT_DIRECT_PBR_INCLUDED
-// #define LIGHT_DIRECT_PBR_INCLUDED 1
+#ifndef LIGHT_DIRECT_PBR_INCLUDED
+#define LIGHT_DIRECT_PBR_INCLUDED
 
 #define FUNCTION_SURFACE_SHADING surfaceShading
 #define FUNCTION_DIFFUSE_LOBE diffuseLobe
@@ -35,7 +35,7 @@ float clearCoatLobe(vec3 incidentDirection, vec3 color, BRDFData brdfData, inout
 }
 
 
-void addRadiance(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, inout vec3 color) {
+void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, inout vec3 color) {
 
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
@@ -61,7 +61,7 @@ void addRadiance(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, ino
         vec3 lightColor = directionalLight.color;
         vec3 direction = -directionalLight.direction;
 
-        addRadiance( direction, lightColor, brdfData, color );
+        FUNCTION_SURFACE_SHADING( direction, lightColor, brdfData, color );
 
     }
 
@@ -78,7 +78,7 @@ void addRadiance(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, ino
 		vec3 lightColor = pointLight.color;
 		lightColor *= clamp(1.0 - pow(lightDistance/pointLight.distance, 4.0), 0.0, 1.0);
 
-        addRadiance( direction, lightColor, brdfData, color );
+        FUNCTION_SURFACE_SHADING( direction, lightColor, brdfData, color );
 
 	}
 
@@ -99,14 +99,14 @@ void addRadiance(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, ino
 		vec3 lightColor = spotLight.color;
 		lightColor *= spotEffect * decayEffect;
 
-        addRadiance( direction, lightColor, brdfData, color );
+        FUNCTION_SURFACE_SHADING( direction, lightColor, brdfData, color );
 
 	}
 
 
 #endif
 
-void surfaceShading(Temp_Varyings v, BRDFData brdfData, inout vec3 color){
+void evaluateDirectRadiance(Temp_Varyings v, BRDFData brdfData, inout vec3 color){
     float shadowAttenuation = 1.0;
 
     #ifdef SCENE_DIRECT_LIGHT_COUNT
@@ -154,4 +154,4 @@ void surfaceShading(Temp_Varyings v, BRDFData brdfData, inout vec3 color){
 }
 
 
-// #endif
+#endif

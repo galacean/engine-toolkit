@@ -38,7 +38,7 @@ void PBRFragment(Varyings v) {
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
   // Direct Light
-  FUNCTION_SURFACE_SHADING(temp_varyings, brdfData, color.rgb);
+  evaluateDirectRadiance(temp_varyings, brdfData, color.rgb);
   // IBL
   evaluateIBL(temp_varyings, brdfData, color.rgb);
   // Emissive
