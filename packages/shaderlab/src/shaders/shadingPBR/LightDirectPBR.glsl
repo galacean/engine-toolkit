@@ -2,6 +2,11 @@
 // #ifndef LIGHT_DIRECT_PBR_INCLUDED
 // #define LIGHT_DIRECT_PBR_INCLUDED 1
 
+#define FUNCTION_SURFACE_SHADING surfaceShading
+#define FUNCTION_DIFFUSE_LOBE diffuseLobe
+#define FUNCTION_SPECULAR_LOBE specularLobe
+#define FUNCTION_CLEAR_COAT_LOBE clearCoatLobe
+
 #include "BRDF.glsl"
 #include "Light.glsl"
 #include "Shadow.glsl"
@@ -38,13 +43,13 @@ void addRadiance(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, ino
     vec3 irradiance = dotNL * lightColor * PI;
 
     // ClearCoat Lobe
-    float attenuation = clearCoatLobe(incidentDirection, lightColor, brdfData, specularColor);
+    float attenuation = FUNCTION_CLEAR_COAT_LOBE(incidentDirection, lightColor, brdfData, specularColor);
 
     vec3 attenuationIrradiance = irradiance * irradiance;
     // Diffuse Lobe
-    diffuseLobe(brdfData, attenuationIrradiance, diffuseColor);
+    FUNCTION_DIFFUSE_LOBE(brdfData, attenuationIrradiance, diffuseColor);
     // Specular Lobe
-    specularLobe(brdfData, incidentDirection, attenuationIrradiance, specularColor);
+    FUNCTION_SPECULAR_LOBE(brdfData, incidentDirection, attenuationIrradiance, specularColor);
 
     color += diffuseColor + specularColor;
 
@@ -101,7 +106,7 @@ void addRadiance(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, ino
 
 #endif
 
-void evaluateDirectRadiance(Temp_Varyings v, BRDFData brdfData, inout vec3 color){
+void surfaceShading(Temp_Varyings v, BRDFData brdfData, inout vec3 color){
     float shadowAttenuation = 1.0;
 
     #ifdef SCENE_DIRECT_LIGHT_COUNT
