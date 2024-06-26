@@ -1,10 +1,10 @@
 import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "@galacean/engine";
+import { Spherical } from "./Spherical";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
-import { IControlInput } from "./inputDevice/IControlInput";
 import { ControlKeyboard } from "./inputDevice/ControlKeyboard";
 import { ControlPointer } from "./inputDevice/ControlPointer";
 import { ControlWheel } from "./inputDevice/ControlWheel";
-import { Spherical } from "./Spherical";
+import { IControlInput } from "./inputDevice/IControlInput";
 
 /**
  * The camera's track controller, can rotate, zoom, pan, support mouse and touch events.
@@ -12,7 +12,7 @@ import { Spherical } from "./Spherical";
 export class OrbitControl extends Script {
   canvas: Canvas;
   input: InputManager;
-  inputDevices: IControlInput[] = [ControlKeyboard, ControlPointer, ControlWheel];
+  inputDevices: IControlInput[] = [new ControlKeyboard(), new ControlPointer(), new ControlWheel()];
   camera: Camera;
   cameraTransform: Transform;
 
@@ -74,10 +74,10 @@ export class OrbitControl extends Script {
       this._enableKeys = value;
       const { inputDevices } = this;
       if (value) {
-        inputDevices.push(ControlKeyboard);
+        inputDevices.push(new ControlKeyboard());
       } else {
         for (let i = inputDevices.length - 1; i >= 0; i--) {
-          if (inputDevices[i] === ControlKeyboard) {
+          if (inputDevices[i] instanceof ControlKeyboard) {
             inputDevices.splice(i, 1);
             break;
           }

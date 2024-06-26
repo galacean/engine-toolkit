@@ -1,12 +1,10 @@
 import { InputManager, Vector3 } from "@galacean/engine";
-import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { OrbitControl } from "../OrbitControl";
+import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { IControlInput } from "./IControlInput";
-import { StaticInterfaceImplement } from "./StaticInterfaceImplement";
 
-@StaticInterfaceImplement<IControlInput>()
-export class ControlWheel {
-  static onUpdateHandler(input: InputManager): ControlHandlerType {
+export class ControlWheel implements IControlInput {
+  onUpdateHandler(input: InputManager): ControlHandlerType {
     const { wheelDelta } = input;
     if (wheelDelta.x === 0 && wheelDelta.y === 0 && wheelDelta.z === 0) {
       return ControlHandlerType.None;
@@ -15,7 +13,7 @@ export class ControlWheel {
     }
   }
 
-  static onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
+  onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
     outDelta.copyFrom(control.input.wheelDelta);
   }
 }

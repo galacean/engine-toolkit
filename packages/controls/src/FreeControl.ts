@@ -10,7 +10,7 @@ import { Spherical } from "./Spherical";
  */
 export class FreeControl extends Script {
   input: InputManager;
-  inputDevices: IControlInput[] = [ControlFreeKeyboard, ControlFreePointer];
+  inputDevices: IControlInput[] = [new ControlFreeKeyboard(), new ControlFreePointer()];
 
   /** Movement distance per second, the unit is the unit before MVP conversion. */
   movementSpeed: number = 1.0;

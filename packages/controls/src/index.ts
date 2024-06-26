@@ -11,4 +11,3 @@ export { ControlHandlerType } from "./enums/ControlHandlerType";
 
 export type { IControlInput } from "./inputDevice/IControlInput";
 
-export { StaticInterfaceImplement } from "./inputDevice/StaticInterfaceImplement";
