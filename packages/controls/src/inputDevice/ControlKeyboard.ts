@@ -1,12 +1,10 @@
 import { InputManager, Keys, Vector3 } from "@galacean/engine";
-import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { OrbitControl } from "../OrbitControl";
+import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { IControlInput } from "./IControlInput";
-import { StaticInterfaceImplement } from "./StaticInterfaceImplement";
 
-@StaticInterfaceImplement<IControlInput>()
-export class ControlKeyboard {
-  static onUpdateHandler(input: InputManager): ControlHandlerType {
+export class ControlKeyboard implements IControlInput {
+  onUpdateHandler(input: InputManager): ControlHandlerType {
     if (
       input.isKeyHeldDown(Keys.ArrowLeft) ||
       input.isKeyHeldDown(Keys.ArrowRight) ||
@@ -19,7 +17,7 @@ export class ControlKeyboard {
     }
   }
 
-  static onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
+  onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
     const { keyPanSpeed, input } = control;
     outDelta.x = outDelta.y = 0;
     if (input.isKeyHeldDown(Keys.ArrowLeft)) {

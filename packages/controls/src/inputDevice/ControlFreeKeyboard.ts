@@ -1,12 +1,8 @@
 import { InputManager, Keys, Vector3 } from "@galacean/engine";
-import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { FreeControl } from "../FreeControl";
-import { IControlInput } from "./IControlInput";
-import { StaticInterfaceImplement } from "./StaticInterfaceImplement";
-
-@StaticInterfaceImplement<IControlInput>()
+import { ControlHandlerType } from "../enums/ControlHandlerType";
 export class ControlFreeKeyboard {
-  static onUpdateHandler(input: InputManager): ControlHandlerType {
+  onUpdateHandler(input: InputManager): ControlHandlerType {
     if (
       input.isKeyHeldDown(Keys.ArrowLeft) ||
       input.isKeyHeldDown(Keys.KeyA) ||
@@ -23,7 +19,7 @@ export class ControlFreeKeyboard {
     }
   }
 
-  static onUpdateDelta(control: FreeControl, outDelta: Vector3): void {
+  onUpdateDelta(control: FreeControl, outDelta: Vector3): void {
     const { movementSpeed, input } = control;
     outDelta.x = outDelta.y = outDelta.z = 0;
     if (input.isKeyHeldDown(Keys.ArrowLeft) || input.isKeyHeldDown(Keys.KeyA)) {

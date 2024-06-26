@@ -1,9 +1,9 @@
 import { Camera, Canvas, Entity, InputManager, Script, Transform, Vector3 } from "@galacean/engine";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
-import { IControlInput } from "./inputDevice/IControlInput";
 import { ControlKeyboard } from "./inputDevice/ControlKeyboard";
 import { ControlPointer } from "./inputDevice/ControlPointer";
 import { ControlWheel } from "./inputDevice/ControlWheel";
+import { IControlInput } from "./inputDevice/IControlInput";
 
 /**
  * The camera's track controller, can rotate, zoom, pan, support mouse and touch events.
@@ -11,7 +11,7 @@ import { ControlWheel } from "./inputDevice/ControlWheel";
 export class OrthoControl extends Script {
   canvas: Canvas;
   input: InputManager;
-  inputDevices: IControlInput[] = [ControlKeyboard, ControlPointer, ControlWheel];
+  inputDevices: IControlInput[] = [new ControlKeyboard(), new ControlPointer(), new ControlWheel()];
   camera: Camera;
   cameraTransform: Transform;
 

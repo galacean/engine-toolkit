@@ -1,21 +1,19 @@
 import { InputManager, PointerButton, Vector3 } from "@galacean/engine";
-import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { OrbitControl } from "../OrbitControl";
+import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { IControlInput } from "./IControlInput";
-import { StaticInterfaceImplement } from "./StaticInterfaceImplement";
 
 enum DeltaType {
   Moving,
   Distance,
   None
 }
-@StaticInterfaceImplement<IControlInput>()
-export class ControlFreePointer {
-  private static _deltaType: DeltaType = DeltaType.Moving;
-  private static _handlerType: ControlHandlerType = ControlHandlerType.None;
-  private static _frameIndex: number = 0;
-  private static _lastUsefulFrameIndex: number = -1;
-  static onUpdateHandler(input: InputManager): ControlHandlerType {
+export class ControlFreePointer implements IControlInput {
+  private _deltaType: DeltaType = DeltaType.Moving;
+  private _handlerType: ControlHandlerType = ControlHandlerType.None;
+  private _frameIndex: number = 0;
+  private _lastUsefulFrameIndex: number = -1;
+  onUpdateHandler(input: InputManager): ControlHandlerType {
     ++this._frameIndex;
     if (input.pointers.length === 1) {
       if (input.isPointerHeldDown(PointerButton.Primary)) {
@@ -34,7 +32,7 @@ export class ControlFreePointer {
     return this._handlerType;
   }
 
-  static onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
+  onUpdateDelta(control: OrbitControl, outDelta: Vector3): void {
     const { _frameIndex: frameIndex } = this;
     switch (this._deltaType) {
       case DeltaType.Moving:
@@ -53,7 +51,7 @@ export class ControlFreePointer {
     this._lastUsefulFrameIndex = frameIndex;
   }
 
-  private static _updateType(handlerType: ControlHandlerType, deltaType: DeltaType) {
+  private _updateType(handlerType: ControlHandlerType, deltaType: DeltaType) {
     if (this._handlerType !== handlerType || this._deltaType !== deltaType) {
       this._handlerType = handlerType;
       this._deltaType = deltaType;
