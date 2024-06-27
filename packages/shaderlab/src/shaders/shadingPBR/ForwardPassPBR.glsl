@@ -11,14 +11,7 @@
 Varyings PBRVertex(Attributes attr) {
   Varyings v;
 
-  // @todo: delete
-  Temp_Attributes temp_attributes;
-  Temp_Varyings temp_varyings;
-  #include "temp_transformAttributes.glsl"
-  #include "temp_transformVaryings.glsl"
-
-  // @todo: use initVertex(attr, v);
-  initVertex();
+  initVertex(attr, v);
 
   return v;
 }
@@ -27,20 +20,16 @@ void PBRFragment(Varyings v) {
   SurfaceData surfaceData;
   BRDFData brdfData;
 
-  // @todo: delete
-  Temp_Varyings temp_varyings;
-  #include "temp_transformVaryings.glsl"
-
-  initSurfaceData(temp_varyings, surfaceData, gl_FrontFacing);
-  // Can modify surfaceData here.
-  initBRDFData(temp_varyings, surfaceData, brdfData, gl_FrontFacing);
+  initSurfaceData(v, surfaceData, gl_FrontFacing);
+  // // Can modify surfaceData here.
+  initBRDFData(v, surfaceData, brdfData, gl_FrontFacing);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
   // Direct Light
-  evaluateDirectRadiance(temp_varyings, brdfData, color.rgb);
+  evaluateDirectRadiance(v, brdfData, color.rgb);
   // IBL
-  evaluateIBL(temp_varyings, brdfData, color.rgb);
+  evaluateIBL(v, brdfData, color.rgb);
   // Emissive
   color.rgb += surfaceData.emissiveColor;
 

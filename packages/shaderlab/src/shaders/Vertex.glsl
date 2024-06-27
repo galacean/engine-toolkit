@@ -9,7 +9,7 @@
 
 vec4 material_TilingOffset;
 
-void initVertex(){
+void initVertex(Attributes attr, out Varyings v){
     vec4 position = vec4( attr.POSITION , 1.0 );
 
     #ifndef MATERIAL_OMIT_NORMAL

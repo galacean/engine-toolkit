@@ -127,7 +127,7 @@ void evaluateSpecularIBL(BRDFData brdfData, float specularAO, float radianceAtte
 }
 
 
-float evaluateDiffuseAO(Temp_Varyings v){
+float evaluateDiffuseAO(Varyings v){
     float diffuseAO = 1.0;
 
     #ifdef MATERIAL_HAS_OCCLUSION_TEXTURE
@@ -153,7 +153,7 @@ float evaluateSpecularAO(float diffuseAO, float roughness, float dotNV){
     return specularAO;
 }
 
-void evaluateIBL(Temp_Varyings v, BRDFData brdfData, inout vec3 color){
+void evaluateIBL(Varyings v, BRDFData brdfData, inout vec3 color){
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
     float diffuseAO = evaluateDiffuseAO(v);

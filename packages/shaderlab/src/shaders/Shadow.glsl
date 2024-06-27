@@ -151,7 +151,7 @@
     }
 
 
-    float sampleShadowMap(Temp_Varyings v) {
+    float sampleShadowMap(Varyings v) {
         #if SCENE_SHADOW_CASCADED_COUNT == 1
             vec3 shadowCoord = v.v_shadowCoord;
         #else

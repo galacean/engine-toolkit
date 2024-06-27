@@ -114,7 +114,7 @@ void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, 
 
 #endif
 
-void evaluateDirectRadiance(Temp_Varyings v, BRDFData brdfData, inout vec3 color){
+void evaluateDirectRadiance(Varyings v, BRDFData brdfData, inout vec3 color){
     float shadowAttenuation = 1.0;
 
     #ifdef SCENE_DIRECT_LIGHT_COUNT

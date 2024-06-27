@@ -10,8 +10,6 @@ import Skin from "./Skin.glsl";
 import Transform from "./Transform.glsl";
 import Vertex from "./Vertex.glsl";
 import shadingPBR from "./shadingPBR";
-import temp_transformAttributes from "./temp/transformAttributes.glsl";
-import temp_transformVaryings from "./temp/transformVaryings.glsl";
 
 interface IShaderFragment {
   includeKey: string;
@@ -28,8 +26,6 @@ const fragmentList: IShaderFragment[] = [
   { source: Shadow, includeKey: "Shadow.glsl" },
   { source: Transform, includeKey: "Transform.glsl" },
   { source: Vertex, includeKey: "Vertex.glsl" },
-  { source: temp_transformAttributes, includeKey: "temp_transformAttributes.glsl" },
-  { source: temp_transformVaryings, includeKey: "temp_transformVaryings.glsl" },
   { source: Skin, includeKey: "Skin.glsl" },
 
   ...shadingPBR

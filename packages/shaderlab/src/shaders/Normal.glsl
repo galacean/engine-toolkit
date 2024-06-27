@@ -4,7 +4,7 @@
 // gl_FrontFacing has random value on Adreno GPUs
 // the Adreno bug is only when gl_FrontFacing is inside a function
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1154842
-vec3 getNormal(Temp_Varyings v, bool isFrontFacing){
+vec3 getNormal(Varyings v, bool isFrontFacing){
     #ifdef RENDERER_HAS_NORMAL
         vec3 normal = normalize(v.v_normal);
     #elif defined(HAS_DERIVATIVES)
@@ -27,7 +27,7 @@ vec3 getNormalByNormalTexture(mat3 tbn, sampler2D normalTexture, float normalInt
     return normal;
 }
 
-mat3 getTBN(Temp_Varyings v, bool isFrontFacing){
+mat3 getTBN(Varyings v, bool isFrontFacing){
     #if defined(RENDERER_HAS_NORMAL) && defined(RENDERER_HAS_TANGENT)
         mat3 tbn = mat3(v.v_tangent, v.v_bitangent, v.v_normal);
     #else

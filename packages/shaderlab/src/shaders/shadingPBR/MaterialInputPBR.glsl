@@ -154,7 +154,7 @@ float getAARoughnessFactor(vec3 normal) {
 #endif
 
 
-void initSurfaceData(Temp_Varyings v, out SurfaceData surfaceData, bool isFrontFacing){
+void initSurfaceData(Varyings v, out SurfaceData surfaceData, bool isFrontFacing){
     // common
     vec4 baseColor = material_BaseColor;
     float metallic = material_Metal;
@@ -275,7 +275,7 @@ void initCommonBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
     brdfData.roughness = max(roughness, getAARoughnessFactor(brdfData.normal));
 }
 
-void initClearCoatBRDFData(Temp_Varyings v, inout BRDFData brdfData, bool isFrontFacing){
+void initClearCoatBRDFData(Varyings v, inout BRDFData brdfData, bool isFrontFacing){
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
         #ifdef MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE
             brdfData.clearCoatNormal = getNormalByNormalTexture(mat3(brdfData.tangent, brdfData.bitangent, brdfData.normal), material_ClearCoatNormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
@@ -302,7 +302,7 @@ void initClearCoatBRDFData(Temp_Varyings v, inout BRDFData brdfData, bool isFron
 
 }
 
-void initAnisotropyBRDFData(Temp_Varyings v, inout BRDFData brdfData){
+void initAnisotropyBRDFData(Varyings v, inout BRDFData brdfData){
     #ifdef MATERIAL_ENABLE_ANISOTROPY
         float anisotropy = material_AnisotropyInfo.z;
         vec3 anisotropicDirection = vec3(material_AnisotropyInfo.xy, 0.0);
@@ -321,7 +321,7 @@ void initAnisotropyBRDFData(Temp_Varyings v, inout BRDFData brdfData){
 
 }
 
-void initBRDFData(Temp_Varyings v, SurfaceData surfaceData, out BRDFData brdfData, bool isFrontFacing){
+void initBRDFData(Varyings v, SurfaceData surfaceData, out BRDFData brdfData, bool isFrontFacing){
     initGeometryData(surfaceData, brdfData);
     initCommonBRDFData(surfaceData, brdfData);
     initClearCoatBRDFData(v, brdfData, isFrontFacing);
