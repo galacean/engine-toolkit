@@ -1,3 +1,7 @@
+#ifndef SKIN_INCLUDED
+#define SKIN_INCLUDED
+
+
 #ifdef RENDERER_HAS_SKIN
   #ifdef RENDERER_USE_JOINT_TEXTURE
     sampler2D renderer_JointSampler;
@@ -22,7 +26,5 @@
     #endif
 #endif
 
-#include "transform_declare.glsl"
-#include "camera_declare.glsl"
 
-vec4 material_TilingOffset;
+#endif
