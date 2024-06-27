@@ -21,7 +21,7 @@ void PBRFragment(Varyings v) {
   BRDFData brdfData;
 
   initSurfaceData(v, surfaceData, gl_FrontFacing);
-  // // Can modify surfaceData here.
+  // Can modify surfaceData here.
   initBRDFData(v, surfaceData, brdfData, gl_FrontFacing);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
