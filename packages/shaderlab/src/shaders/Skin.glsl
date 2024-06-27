@@ -1,5 +1,5 @@
 #ifndef SKIN_INCLUDED
-#define SKIN_INCLUDED 1
+#define SKIN_INCLUDED
 
 
 #ifdef RENDERER_HAS_SKIN

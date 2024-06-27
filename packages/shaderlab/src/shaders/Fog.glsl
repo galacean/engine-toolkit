@@ -1,5 +1,5 @@
 #ifndef FOG_INCLUDED
-#define FOG_INCLUDED 1
+#define FOG_INCLUDED
 
 #if SCENE_FOG_MODE != 0
     vec4 scene_FogColor;

@@ -1,5 +1,5 @@
 #ifndef TRANSFORM_INCLUDED
-#define TRANSFORM_INCLUDED 1
+#define TRANSFORM_INCLUDED
 
 mat4 renderer_LocalMat;
 mat4 renderer_ModelMat;

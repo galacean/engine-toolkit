@@ -1,5 +1,5 @@
 #ifndef LIGHT_INCLUDED
-#define LIGHT_INCLUDED 1
+#define LIGHT_INCLUDED
 
 
 ivec4 renderer_Layer;

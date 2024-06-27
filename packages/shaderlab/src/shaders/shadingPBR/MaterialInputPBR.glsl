@@ -1,5 +1,5 @@
 #ifndef MATERIAL_INPUT_PBR_INCLUDED
-#define MATERIAL_INPUT_PBR_INCLUDED 1
+#define MATERIAL_INPUT_PBR_INCLUDED
 
 #include "Normal.glsl"
 

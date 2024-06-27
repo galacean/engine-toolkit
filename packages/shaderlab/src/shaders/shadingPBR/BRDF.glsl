@@ -1,6 +1,6 @@
 
 #ifndef BRDF_INCLUDED
-#define BRDF_INCLUDED 1
+#define BRDF_INCLUDED
 
 // float F_Schlick(float f0, float dotLH) {
 // 	return f0 + 0.96 * (pow(1.0 - dotLH, 5.0));

@@ -1,6 +1,6 @@
 
-// #ifndef LIGHT_INDIRECT_PBR_INCLUDED
-// #define LIGHT_INDIRECT_PBR_INCLUDED
+#ifndef LIGHT_INDIRECT_PBR_INCLUDED
+#define LIGHT_INDIRECT_PBR_INCLUDED
 
 #include "BRDF.glsl"
 #include "Light.glsl"
@@ -172,4 +172,4 @@ void evaluateIBL(Varyings v, BRDFData brdfData, inout vec3 color){
 }
 
 
-// #endif
+#endif

@@ -1,5 +1,5 @@
-#ifndef NORMAL_GET_INCLUDED
-#define NORMAL_GET_INCLUDED 1
+#ifndef NORMAL_INCLUDED
+#define NORMAL_INCLUDED
 
 // gl_FrontFacing has random value on Adreno GPUs
 // the Adreno bug is only when gl_FrontFacing is inside a function

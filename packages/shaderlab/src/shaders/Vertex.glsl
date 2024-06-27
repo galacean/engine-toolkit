@@ -1,5 +1,5 @@
-// #ifndef VERTEX_INCLUDE
-// #define VERTEX_INCLUDE 1
+#ifndef VERTEX_INCLUDE
+#define VERTEX_INCLUDE
 
 #include "Skin.glsl"
 #include "BlendShape.glsl"
@@ -195,4 +195,4 @@ void initVertex(Attributes attr, out Varyings v){
     gl_Position = renderer_MVPMat * position;
 }
 
-// #endif
+#endif

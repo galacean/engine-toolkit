@@ -1,5 +1,5 @@
 #ifndef SHADOW_SAMPLE_TENT_INCLUDED
-#define SHADOW_SAMPLE_TENT_INCLUDED 1
+#define SHADOW_SAMPLE_TENT_INCLUDED
 
 // ------------------------------------------------------------------
 //  PCF Filtering Tent Functions
