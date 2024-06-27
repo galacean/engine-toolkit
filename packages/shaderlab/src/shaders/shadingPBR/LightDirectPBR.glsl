@@ -53,7 +53,7 @@ void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, 
     // ClearCoat Lobe
     float attenuation = FUNCTION_CLEAR_COAT_LOBE(incidentDirection, lightColor, brdfData, specularColor);
 
-    vec3 attenuationIrradiance = irradiance * irradiance;
+    vec3 attenuationIrradiance = attenuation * irradiance;
     // Diffuse Lobe
     FUNCTION_DIFFUSE_LOBE(brdfData, attenuationIrradiance, diffuseColor);
     // Specular Lobe
@@ -87,7 +87,6 @@ void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, 
 		lightColor *= clamp(1.0 - pow(lightDistance/pointLight.distance, 4.0), 0.0, 1.0);
 
         FUNCTION_SURFACE_SHADING( direction, lightColor, brdfData, color );
-
 	}
 
 #endif
