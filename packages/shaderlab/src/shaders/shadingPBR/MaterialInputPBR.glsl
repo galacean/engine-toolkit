@@ -23,7 +23,7 @@ struct SurfaceData{
     #endif
 
     vec3  viewDir;
-}
+};
 
 struct BRDFData{
     // common
@@ -58,7 +58,7 @@ struct BRDFData{
         vec3 clearCoatNormal;
         float clearCoatDotNV;
     #endif
-}
+};
 
 #define MIN_PERCEPTUAL_ROUGHNESS 0.045
 #define MIN_ROUGHNESS            0.002025

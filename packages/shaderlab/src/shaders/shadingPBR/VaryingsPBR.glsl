@@ -31,7 +31,7 @@ struct Varyings{
 	#ifdef MATERIAL_NEED_WORLD_POS
 	    vec3 v_pos;
 	#endif
-}
+};
 
 
 struct Temp_Varyings{
@@ -67,4 +67,4 @@ struct Temp_Varyings{
 	#ifdef MATERIAL_NEED_WORLD_POS
 	    vec3 v_pos;
 	#endif
-}
+};

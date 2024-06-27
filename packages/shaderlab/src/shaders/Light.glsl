@@ -28,7 +28,7 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask){
     struct DirectLight {
         vec3 color;
         vec3 direction;
-    }
+    };
 
     ivec2 scene_DirectLightCullingMask[SCENE_DIRECT_LIGHT_COUNT];
     vec3 scene_DirectLightColor[SCENE_DIRECT_LIGHT_COUNT];
@@ -52,7 +52,7 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask){
         vec3 color;
         vec3 position;
         float distance;
-    }
+    };
 
     ivec2 scene_PointLightCullingMask[ SCENE_POINT_LIGHT_COUNT ];
     vec3 scene_PointLightColor[ SCENE_POINT_LIGHT_COUNT ];
@@ -81,7 +81,7 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask){
         float distance;
         float angleCos;
         float penumbraCos;
-    }
+    };
 
     ivec2 scene_SpotLightCullingMask[ SCENE_SPOT_LIGHT_COUNT ];
     vec3 scene_SpotLightColor[ SCENE_SPOT_LIGHT_COUNT ];
@@ -112,7 +112,7 @@ struct EnvMapLight {
     float mipMapLevel;
     float diffuseIntensity;
     float specularIntensity;
-}
+};
 
 
 EnvMapLight scene_EnvMapLight;

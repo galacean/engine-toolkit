@@ -68,7 +68,7 @@ struct Attributes{
           vec4 TANGENT;
       #endif
   #endif
-}
+};
 
 
 struct Temp_Attributes{
@@ -140,4 +140,4 @@ struct Temp_Attributes{
           vec4 TANGENT;
       #endif
   #endif
-}
+};
