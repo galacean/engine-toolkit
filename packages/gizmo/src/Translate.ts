@@ -126,6 +126,26 @@ export class TranslateControl extends GizmoComponent {
     this._resizeControl();
   }
 
+  onAlphaChange(axisName: string, value: number) {
+    switch (axisName) {
+      case "x":
+        this._changeAxisAlpha("x", value);
+        this._changeAxisAlpha("xy", value);
+        this._changeAxisAlpha("xz", value);
+        break;
+      case "y":
+        this._changeAxisAlpha("y", value);
+        this._changeAxisAlpha("xy", value);
+        this._changeAxisAlpha("xz", value);
+        break;
+      case "z":
+        this._changeAxisAlpha("z", value);
+        this._changeAxisAlpha("xz", value);
+        this._changeAxisAlpha("yz", value);
+        break;
+    }
+  }
+
   private _initAxis(): void {
     this._translateControlMap = [
       {
@@ -256,5 +276,13 @@ export class TranslateControl extends GizmoComponent {
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
       _tempVec0.set(this._tempScale, this._tempScale, this._tempScale)
     );
+  }
+
+  private _changeAxisAlpha(axisName: string, value: number) {
+    const entity = this.gizmoEntity.findByName(axisName);
+    if (entity) {
+      const component = entity.getComponent(Axis);
+      component.alpha(value);
+    }
   }
 }

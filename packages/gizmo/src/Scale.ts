@@ -132,6 +132,14 @@ export class ScaleControl extends GizmoComponent {
     this._resizeControl(isModified);
   }
 
+  onAlphaChange(axisName: string, value: number): void {
+    const entity = this.gizmoEntity.findByName(axisName);
+    if (entity) {
+      const component = entity.getComponent(Axis);
+      component.alpha(value);
+    }
+  }
+
   private _initAxis(): void {
     this._scaleControlMap = [
       {
