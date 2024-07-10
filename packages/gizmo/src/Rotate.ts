@@ -328,6 +328,8 @@ export class RotateControl extends GizmoComponent {
     this._resizeControl(isModified);
   }
 
+  onAlphaChange(axisName: string, value: number): void {}
+
   private _setAxisSelected(axis: axisType, isSelected: boolean): void {
     const axisMesh = this._rotateControlMap[axis].axisMesh[0];
     GizmoMesh.updateCircleTube(axisMesh, 2 * Math.PI);

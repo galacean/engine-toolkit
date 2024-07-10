@@ -27,6 +27,8 @@ import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
  * Gizmo controls, including translate, rotate, scale
  */
 export class Gizmo extends Script {
+  epsilon = 0.01;
+
   private _initialized = false;
   private _isStarted = false;
   private _isHovered = false;
@@ -250,6 +252,10 @@ export class Gizmo extends Script {
     }
   }
 
+  override onLateUpdate(deltaTime: number): void {
+    this._adjustAxisAlpha();
+  }
+
   private _createGizmoControl(type: State, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
     const control = this.entity.createChild(type.toString()).addComponent(gizmoComponent);
     this._controlMap.push(control);
@@ -352,6 +358,25 @@ export class Gizmo extends Script {
           callbackForOther(control);
         }
       }
+    });
+  }
+
+  private _adjustAxisAlpha() {
+    const direction = this._sceneCamera.entity.transform.worldForward.clone();
+    direction.normalize();
+
+    const cosThetaX = Math.abs(Vector3.dot(direction, Utils.xAxisPositive));
+    const cosThetaY = Math.abs(Vector3.dot(direction, Utils.yAxisPositive));
+    const cosThetaZ = Math.abs(Vector3.dot(direction, Utils.zAxisPositive));
+
+    const factorX = MathUtil.clamp((1 - cosThetaX) / this.epsilon, 0, 1);
+    const factorY = MathUtil.clamp((1 - cosThetaY) / this.epsilon, 0, 1);
+    const factorZ = MathUtil.clamp((1 - cosThetaZ) / this.epsilon, 0, 1);
+
+    this._traverseControl(this._type, (control) => {
+      control.onAlphaChange("x", factorX);
+      control.onAlphaChange("y", factorY);
+      control.onAlphaChange("z", factorZ);
     });
   }
 }
