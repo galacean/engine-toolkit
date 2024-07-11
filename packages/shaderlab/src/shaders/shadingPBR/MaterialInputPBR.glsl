@@ -133,9 +133,9 @@ float getAARoughnessFactor(vec3 normal) {
     // Tokuyoshi and Kaplanyan 2019, "Improved Geometric Specular Antialiasing"
     #ifdef HAS_DERIVATIVES
         vec3 dxy = max( abs(dFdx(normal)), abs(dFdy(normal)) );
-        return min(MIN_PERCEPTUAL_ROUGHNESS + max( max(dxy.x, dxy.y), dxy.z ), 1.0);
+        return max( max(dxy.x, dxy.y), dxy.z );
     #else
-        return MIN_PERCEPTUAL_ROUGHNESS;
+        return 0.0;
     #endif
 }
 
@@ -272,7 +272,7 @@ void initCommonBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
         brdfData.specularColor = specularColor;
     #endif
 
-    brdfData.roughness = max(roughness, getAARoughnessFactor(brdfData.normal));
+    brdfData.roughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(roughness + getAARoughnessFactor(brdfData.normal), 1.0));
 }
 
 void initClearCoatBRDFData(Varyings v, inout BRDFData brdfData, bool isFrontFacing){
@@ -296,7 +296,8 @@ void initClearCoatBRDFData(Varyings v, inout BRDFData brdfData, bool isFrontFaci
         #endif
 
         brdfData.clearCoat = saturate( brdfData.clearCoat );
-        brdfData.clearCoatRoughness = max(brdfData.clearCoatRoughness, getAARoughnessFactor(brdfData.clearCoatNormal));
+       
+        brdfData.clearCoatRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(brdfData.clearCoatRoughness + getAARoughnessFactor(brdfData.clearCoatNormal), 1.0));
 
     #endif
 
