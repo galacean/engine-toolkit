@@ -11,7 +11,8 @@ import {
   PointerPhase,
   Vector2,
   Component,
-  MeshRenderer
+  MeshRenderer,
+  Matrix
 } from "@galacean/engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -25,7 +26,7 @@ import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
  * Gizmo controls, including translate, rotate, scale
  */
 export class Gizmo extends Script {
-  epsilon = 0.01;
+  epsilon = 0.05;
 
   private _initialized = false;
   private _isStarted = false;
@@ -42,7 +43,10 @@ export class Gizmo extends Script {
 
   private _group: Group = new Group();
 
-  private _tempVec: Vector3 = new Vector3();
+  private _tempVec30: Vector3 = new Vector3();
+  private _tempVec31: Vector3 = new Vector3();
+  private _worldMat: Matrix = new Matrix();
+
   private _tempRay: Ray = new Ray();
   private _tempRay2: Ray = new Ray();
 
@@ -158,7 +162,7 @@ export class Gizmo extends Script {
         this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
       });
     }
-    this._group.getWorldPosition(this._tempVec);
+    this._group.getWorldPosition(this._tempVec30);
     if (this._isStarted) {
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
@@ -174,10 +178,10 @@ export class Gizmo extends Script {
         this._group._gizmoTransformDirty = false;
       }
     } else {
-      this._group.getWorldPosition(this._tempVec);
+      this._group.getWorldPosition(this._tempVec30);
 
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
-      const currDistance = Vector3.distance(cameraPosition, this._tempVec);
+      const currDistance = Vector3.distance(cameraPosition, this._tempVec30);
       let distanceDirty = false;
       if (Math.abs(this._lastDistance - currDistance) > MathUtil.zeroTolerance) {
         distanceDirty = true;
@@ -332,21 +336,36 @@ export class Gizmo extends Script {
   }
 
   private _adjustAxisAlpha() {
-    const direction = this._sceneCamera.entity.transform.worldForward.clone();
-    direction.normalize();
-
-    const cosThetaX = Math.abs(Vector3.dot(direction, Utils.xAxisPositive));
-    const cosThetaY = Math.abs(Vector3.dot(direction, Utils.yAxisPositive));
-    const cosThetaZ = Math.abs(Vector3.dot(direction, Utils.zAxisPositive));
-
-    const factorX = MathUtil.clamp((1 - cosThetaX) / this.epsilon, 0, 1);
-    const factorY = MathUtil.clamp((1 - cosThetaY) / this.epsilon, 0, 1);
-    const factorZ = MathUtil.clamp((1 - cosThetaZ) / this.epsilon, 0, 1);
+    const { xAxisPositive, yAxisPositive, zAxisPositive } = Utils;
 
     this._traverseControl(this._type, (control) => {
-      control.onAlphaChange("x", factorX);
-      control.onAlphaChange("y", factorY);
-      control.onAlphaChange("z", factorZ);
+      control.onAlphaChange("x", this._getAlphaFactor(xAxisPositive));
+      control.onAlphaChange("y", this._getAlphaFactor(yAxisPositive));
+      control.onAlphaChange("z", this._getAlphaFactor(zAxisPositive));
     });
+  }
+
+  private _getAlphaFactor(axis: Vector3): number {
+    const { _worldMat: worldMat, _tempVec30: cameraDir, _tempVec31: tempVec, epsilon } = this;
+    cameraDir.copyFrom(this._sceneCamera.entity.transform.worldForward).normalize();
+    this._group.getWorldMatrix(worldMat);
+
+    // angel between camera direction and gizmo axis direction
+    Vector3.transformNormal(axis, worldMat, tempVec);
+    const cosThetaDir = Math.abs(Vector3.dot(tempVec, cameraDir));
+
+    if (this._sceneCamera.isOrthographic) {
+      return 1 - cosThetaDir < epsilon ? MathUtil.clamp((1 - cosThetaDir) / epsilon, 0, 1) : 1;
+    } else {
+      // perspective camera needs to consider position
+      // angle between camera direction and camera-entity position
+      this._group.getWorldPosition(tempVec);
+      Vector3.subtract(this._sceneCamera.entity.transform.worldPosition, tempVec, tempVec);
+      const cosThetaPos = Math.abs(Vector3.dot(tempVec.normalize(), cameraDir));
+
+      const minFactor = Math.min(cosThetaDir, cosThetaPos);
+      const maxFactor = Math.max(cosThetaDir, cosThetaPos);
+      return 1 - maxFactor < epsilon ? MathUtil.clamp((1 - minFactor) / epsilon, 0, 1) : 1;
+    }
   }
 }
