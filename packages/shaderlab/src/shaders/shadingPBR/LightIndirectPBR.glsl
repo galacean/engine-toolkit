@@ -2,6 +2,23 @@
 #ifndef LIGHT_INDIRECT_PBR_INCLUDED
 #define LIGHT_INDIRECT_PBR_INCLUDED
 
+#ifndef FUNCTION_DIFFUSE_AO
+    #define FUNCTION_DIFFUSE_AO evaluateDiffuseAO
+#endif
+#ifndef FUNCTION_SPECULAR_AO
+    #define FUNCTION_SPECULAR_AO evaluateSpecularAO
+#endif
+#ifndef FUNCTION_DIFFUSE_IBL
+    #define FUNCTION_DIFFUSE_IBL evaluateDiffuseIBL
+#endif
+#ifndef FUNCTION_SPECULAR_IBL
+    #define FUNCTION_SPECULAR_IBL evaluateSpecularIBL
+#endif
+#ifndef FUNCTION_CLEAR_COAT_IBL
+    #define FUNCTION_CLEAR_COAT_IBL evaluateClearCoatIBL
+#endif
+
+
 #include "BRDF.glsl"
 #include "Light.glsl"
 
@@ -157,17 +174,17 @@ float evaluateSpecularAO(float diffuseAO, float roughness, float dotNV){
 void evaluateIBL(Varyings v, BRDFData brdfData, inout vec3 color){
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
-    float diffuseAO = evaluateDiffuseAO(v);
-    float specularAO = evaluateSpecularAO(diffuseAO, brdfData.roughness, brdfData.dotNV);
+    float diffuseAO = FUNCTION_DIFFUSE_AO(v);
+    float specularAO = FUNCTION_SPECULAR_AO(diffuseAO, brdfData.roughness, brdfData.dotNV);
 
     // IBL diffuse
-    evaluateDiffuseIBL(brdfData, diffuseAO, diffuseColor);
+    FUNCTION_DIFFUSE_IBL(brdfData, diffuseAO, diffuseColor);
 
     // IBL ClearCoat
-    float radianceAttenuation = evaluateClearCoatIBL(brdfData, specularAO, specularColor);
+    float radianceAttenuation = FUNCTION_CLEAR_COAT_IBL(brdfData, specularAO, specularColor);
 
     // IBL specular
-    evaluateSpecularIBL(brdfData, specularAO, radianceAttenuation, specularColor);
+    FUNCTION_SPECULAR_IBL(brdfData, specularAO, radianceAttenuation, specularColor);
 
     color += diffuseColor + specularColor;
 }

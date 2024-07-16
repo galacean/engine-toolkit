@@ -44,7 +44,7 @@
         material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
         material_TilingOffset("TilingOffset", Vector4) = (1, 1, 0, 0);
       }
-    }
+  }
 
     EditorMacros {
       Header("Conditional Macors") {
