@@ -14,7 +14,10 @@
 Varyings PBRVertex(Attributes attr) {
   Varyings v;
 
-  initVertex(attr, v);
+  initUV(attr, v);
+  initVertexColor(attr, v);
+  initTransform(attr, v);
+  initShadowCorrd(attr, v);
 
   return v;
 }

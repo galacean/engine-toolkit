@@ -3,6 +3,9 @@
 
 struct Varyings{
 	vec2 v_uv;
+	#ifdef RENDERER_HAS_UV1
+	    vec2 v_uv1;
+	#endif
 
 	#ifdef RENDERER_ENABLE_VERTEXCOLOR
   		vec4 v_color;
@@ -22,17 +25,14 @@ struct Varyings{
 	    #endif
 	#endif
 
-	#ifdef SCENE_IS_CALCULATE_SHADOWS
+	#ifdef MATERIAL_NEED_WORLD_POS
+	    vec3 v_pos;
+	#endif
+
+		#ifdef SCENE_IS_CALCULATE_SHADOWS
 	    #if SCENE_SHADOW_CASCADED_COUNT==1
 	        vec3 v_shadowCoord;
 	    #endif
-	#endif
-
-	#ifdef RENDERER_HAS_UV1
-	    vec2 v_uv1;
-	#endif
-	#ifdef MATERIAL_NEED_WORLD_POS
-	    vec3 v_pos;
 	#endif
 };
 

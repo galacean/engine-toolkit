@@ -9,7 +9,32 @@
 
 vec4 material_TilingOffset;
 
-void initVertex(Attributes attr, out Varyings v){
+
+void initUV(Attributes attr, inout Varyings v){
+    #ifdef RENDERER_HAS_UV
+        v.v_uv = attr.TEXCOORD_0;
+    #else
+        // may need this calculate normal
+        v.v_uv = vec2( 0.0, 0.0 );
+    #endif
+
+    #ifdef RENDERER_HAS_UV1
+        v.v_uv1 = attr.TEXCOORD_1;
+    #endif
+
+    #ifdef MATERIAL_NEED_TILING_OFFSET
+        v.v_uv = v.v_uv * material_TilingOffset.xy + material_TilingOffset.zw;
+    #endif
+}
+
+void initVertexColor(Attributes attr, inout Varyings v){
+    #ifdef RENDERER_ENABLE_VERTEXCOLOR
+    	v.v_color = attr.COLOR_0;
+    #endif
+}
+
+
+void initTransform(Attributes attr, out Varyings v){
     vec4 position = vec4( attr.POSITION , 1.0 );
 
     #ifndef MATERIAL_OMIT_NORMAL
@@ -62,30 +87,7 @@ void initVertex(Attributes attr, out Varyings v){
     #endif
 
 
-    // uv_vert
-    #ifdef RENDERER_HAS_UV
-        v.v_uv = attr.TEXCOORD_0;
-    #else
-        // may need this calculate normal
-        v.v_uv = vec2( 0.0, 0.0 );
-    #endif
-
-    #ifdef RENDERER_HAS_UV1
-        v.v_uv1 = attr.TEXCOORD_1;
-    #endif
-
-    #ifdef MATERIAL_NEED_TILING_OFFSET
-        v.v_uv = v.v_uv * material_TilingOffset.xy + material_TilingOffset.zw;
-    #endif
-
-
-    // color_vert
-    #ifdef RENDERER_ENABLE_VERTEXCOLOR
-    	v.v_color = attr.COLOR_0;
-    #endif
-
-
-    // normal_vert
+    // normal and tangent
     #ifndef MATERIAL_OMIT_NORMAL
         #ifdef RENDERER_HAS_NORMAL
             v.v_normal = normalize( mat3(renderer_NormalMat) * normal );
@@ -107,15 +109,19 @@ void initVertex(Attributes attr, out Varyings v){
         v.v_pos = temp_pos.xyz / temp_pos.w;
     #endif
 
-    // shadow
+
+    // position_vert
+    gl_Position = renderer_MVPMat * position;
+}
+
+
+void initShadowCorrd(Attributes attr, out Varyings v){
     #ifdef SCENE_IS_CALCULATE_SHADOWS
         #if SCENE_SHADOW_CASCADED_COUNT == 1
             v.v_shadowCoord = getShadowCoord(v.v_pos);
         #endif
     #endif
-
-    // position_vert
-    gl_Position = renderer_MVPMat * position;
 }
+
 
 #endif
