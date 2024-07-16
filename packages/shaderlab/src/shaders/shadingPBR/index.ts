@@ -5,6 +5,7 @@ import LightDirectPBR from "./LightDirectPBR.glsl";
 import LightIndirectPBR from "./LightIndirectPBR.glsl";
 import MaterialInputPBR from "./MaterialInputPBR.glsl";
 import VaryingsPBR from "./VaryingsPBR.glsl";
+import EditorProps from "./EditorProps.glsl";
 
 export default [
   { source: ForwardPassPBR, includeKey: "ForwardPassPBR.glsl" },
@@ -13,5 +14,6 @@ export default [
   { source: MaterialInputPBR, includeKey: "MaterialInputPBR.glsl" },
   { source: LightDirectPBR, includeKey: "LightDirectPBR.glsl" },
   { source: LightIndirectPBR, includeKey: "LightIndirectPBR.glsl" },
-  { source: BRDF, includeKey: "BRDF.glsl" }
+  { source: BRDF, includeKey: "BRDF.glsl" },
+  { source: EditorProps, includeKey: "EditorProps.glsl" }
 ];

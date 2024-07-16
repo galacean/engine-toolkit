@@ -1,3 +1,6 @@
+#ifndef FORWARD_PASS_PBR_INCLUDED
+#define FORWARD_PASS_PBR_INCLUDED
+
 #include "AttributesPBR.glsl"
 #include "VaryingsPBR.glsl"
 #include "Common.glsl"
@@ -44,3 +47,6 @@ void PBRFragment(Varyings v) {
 
   gl_FragColor = color;
 }
+
+
+#endif

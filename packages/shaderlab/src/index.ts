@@ -1,18 +1,23 @@
 import { Shader, ShaderFactory } from "@galacean/engine";
 import { PBRSource, fragmentList } from "./shaders";
 
-let registered = false;
+let includeRegistered = false;
+let shaderRegistered = false;
 
 export function registerIncludes() {
-  if (registered) return;
+  if (includeRegistered) return;
 
   for (const sourceFragment of fragmentList) {
     ShaderFactory.registerInclude(sourceFragment.includeKey, sourceFragment.source);
   }
 
-  registered = true;
+  includeRegistered = true;
 }
 
 export function registerShader() {
+  if (shaderRegistered) return;
+
   Shader.create(PBRSource);
+
+  shaderRegistered = true;
 }

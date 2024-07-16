@@ -1,3 +1,6 @@
+#ifndef VARYINGS_PBR_INCLUDED
+#define VARYINGS_PBR_INCLUDED
+
 struct Varyings{
 	vec2 v_uv;
 
@@ -32,3 +35,6 @@ struct Varyings{
 	    vec3 v_pos;
 	#endif
 };
+
+
+#endif

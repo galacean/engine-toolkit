@@ -1,3 +1,6 @@
+#ifndef ATTRIBUTES_PBR_INCLUDED
+#define ATTRIBUTES_PBR_INCLUDED
+
 struct Attributes{
   	vec3 POSITION;
 
@@ -69,3 +72,6 @@ struct Attributes{
       #endif
   #endif
 };
+
+
+#endif
