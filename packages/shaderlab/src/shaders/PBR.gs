@@ -11,8 +11,8 @@ Shader "PBR.gs" {
 
         VertexShader = PBRVertex;
         FragmentShader = PBRFragment;
-        
+
         #include "ForwardPassPBR.glsl"
       }
     }
-  }
+}

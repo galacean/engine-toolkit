@@ -3,6 +3,10 @@
 
 #include "Normal.glsl"
 
+#if defined(RENDERER_HAS_TANGENT) || defined(MATERIAL_ENABLE_ANISOTROPY) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE)
+    #define NEED_TANGENT
+#endif
+
 struct SurfaceData{
     // common
 	vec3  albedoColor;
@@ -17,7 +21,7 @@ struct SurfaceData{
     vec3 position;
     vec3 normal;
 
-    #ifdef RENDERER_HAS_TANGENT
+    #ifdef NEED_TANGENT
         vec3  tangent;
         vec3  bitangent;
     #endif
@@ -35,7 +39,7 @@ struct BRDFData{
     vec3 position;
     vec3 normal;
 
-    #ifdef RENDERER_HAS_TANGENT
+    #ifdef NEED_TANGENT
         vec3  tangent;
         vec3  bitangent;
     #endif
@@ -55,7 +59,7 @@ struct BRDFData{
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
         float clearCoat;
         float clearCoatRoughness;
-        vec3 clearCoatNormal;
+        vec3  clearCoatNormal;
         float clearCoatDotNV;
     #endif
 };
@@ -230,7 +234,7 @@ void initSurfaceData(Varyings v, out SurfaceData surfaceData, bool isFrontFacing
         surfaceData.viewDir = normalize(camera_Position - v.v_pos);
     #endif
 
-    #ifdef RENDERER_HAS_TANGENT
+    #ifdef NEED_TANGENT
         mat3 tbn = getTBN(v, isFrontFacing);
         surfaceData.tangent = tbn[0];
         surfaceData.bitangent = tbn[1];
@@ -247,7 +251,7 @@ void initSurfaceData(Varyings v, out SurfaceData surfaceData, bool isFrontFacing
 void initGeometryData(SurfaceData surfaceData, inout BRDFData brdfData){
     brdfData.position = surfaceData.position;
     brdfData.normal = surfaceData.normal;
-    #ifdef RENDERER_HAS_TANGENT
+    #ifdef NEED_TANGENT
         brdfData.tangent = surfaceData.tangent;
         brdfData.bitangent = surfaceData.bitangent;
     #endif
