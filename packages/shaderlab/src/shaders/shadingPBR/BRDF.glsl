@@ -2,9 +2,9 @@
 #ifndef BRDF_INCLUDED
 #define BRDF_INCLUDED
 
-// float F_Schlick(float f0, float dotLH) {
-// 	return f0 + 0.96 * (pow(1.0 - dotLH, 5.0));
-// }
+float F_Schlick(float f0, float dotLH) {
+	return f0 + 0.96 * (pow(1.0 - dotLH, 5.0));
+}
 
 vec3 F_Schlick(vec3 specularColor, float dotLH ) {
 

@@ -1,4 +1,3 @@
-export { GSLPBRMaterial } from "./GSLPBRMaterial";
 import { Shader, ShaderFactory } from "@galacean/engine";
 import { PBRSource, fragmentList } from "./shaders";
 
@@ -11,9 +10,9 @@ export function registerIncludes() {
     ShaderFactory.registerInclude(sourceFragment.includeKey, sourceFragment.source);
   }
 
-  Shader.create(PBRSource);
-
   registered = true;
 }
 
-export { PBRSource };
+export function registerShader() {
+  Shader.create(PBRSource);
+}
