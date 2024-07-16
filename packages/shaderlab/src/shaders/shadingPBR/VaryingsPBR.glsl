@@ -25,12 +25,10 @@ struct Varyings{
 	    #endif
 	#endif
 
-	#ifdef MATERIAL_NEED_WORLD_POS
-	    vec3 v_pos;
-	#endif
+	vec3 v_pos;
 
-		#ifdef SCENE_IS_CALCULATE_SHADOWS
-	    #if SCENE_SHADOW_CASCADED_COUNT==1
+	#ifdef SCENE_IS_CALCULATE_SHADOWS
+		#if SCENE_SHADOW_CASCADED_COUNT==1
 	        vec3 v_shadowCoord;
 	    #endif
 	#endif

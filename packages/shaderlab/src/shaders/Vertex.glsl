@@ -8,8 +8,6 @@
 
 
 vec4 material_TilingOffset;
-
-
 void initUV(Attributes attr, inout Varyings v){
     #ifdef RENDERER_HAS_UV
         v.v_uv = attr.TEXCOORD_0;
@@ -22,9 +20,7 @@ void initUV(Attributes attr, inout Varyings v){
         v.v_uv1 = attr.TEXCOORD_1;
     #endif
 
-    #ifdef MATERIAL_NEED_TILING_OFFSET
-        v.v_uv = v.v_uv * material_TilingOffset.xy + material_TilingOffset.zw;
-    #endif
+    v.v_uv = v.v_uv * material_TilingOffset.xy + material_TilingOffset.zw;
 }
 
 void initVertexColor(Attributes attr, inout Varyings v){
@@ -104,10 +100,8 @@ void initTransform(Attributes attr, out Varyings v){
 
 
     // worldpos_vert
-    #ifdef MATERIAL_NEED_WORLD_POS
-        vec4 temp_pos = renderer_ModelMat * position;
-        v.v_pos = temp_pos.xyz / temp_pos.w;
-    #endif
+    vec4 temp_pos = renderer_ModelMat * position;
+    v.v_pos = temp_pos.xyz / temp_pos.w;
 
 
     // position_vert
