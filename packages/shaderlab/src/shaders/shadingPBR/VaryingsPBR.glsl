@@ -15,13 +15,11 @@ struct Varyings{
 	    vec3 v_positionVS;
 	#endif
 
-	#ifndef MATERIAL_OMIT_NORMAL
-	    #ifdef RENDERER_HAS_NORMAL
-	        vec3 v_normal;
-	        #ifdef RENDERER_HAS_TANGENT
-				vec3 v_tangent;
-				vec3 v_bitangent;
-	        #endif
+	#ifdef RENDERER_HAS_NORMAL
+	    vec3 v_normal;
+	    #ifdef RENDERER_HAS_TANGENT
+			vec3 v_tangent;
+			vec3 v_bitangent;
 	    #endif
 	#endif
 

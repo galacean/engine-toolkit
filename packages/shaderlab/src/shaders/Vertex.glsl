@@ -33,45 +33,38 @@ void initVertexColor(Attributes attr, inout Varyings v){
 void initTransform(Attributes attr, out Varyings v){
     vec4 position = vec4( attr.POSITION , 1.0 );
 
-    #ifndef MATERIAL_OMIT_NORMAL
-        #ifdef RENDERER_HAS_NORMAL
-            vec3 normal = vec3( attr.NORMAL );
-        #endif
+    #ifdef RENDERER_HAS_NORMAL
+        vec3 normal = vec3( attr.NORMAL );
+    #endif
 
-        #ifdef RENDERER_HAS_TANGENT
-            vec4 tangent = vec4( attr.TANGENT );
-        #endif
+    #ifdef RENDERER_HAS_TANGENT
+        vec4 tangent = vec4( attr.TANGENT );
     #endif
 
 
     // blendShape
     #ifdef RENDERER_HAS_BLENDSHAPE
         calculateBlendShape(attr, position
-        #ifndef MATERIAL_OMIT_NORMAL
-            #ifdef RENDERER_HAS_NORMAL
-                ,normal
-            #endif
-            #ifdef RENDERER_HAS_TANGENT
-                ,tangent
-            #endif
+        #ifdef RENDERER_HAS_NORMAL
+            ,normal
+        #endif
+        #ifdef RENDERER_HAS_TANGENT
+            ,tangent
         #endif
         );
     #endif
-
-
 
     // skin
     #ifdef RENDERER_HAS_SKIN
         mat4 skinMatrix = getSkinMatrix(attr);
         position = skinMatrix * position;
 
-        #if defined(RENDERER_HAS_NORMAL) && !defined(MATERIAL_OMIT_NORMAL)
+        #if defined(RENDERER_HAS_NORMAL)
             mat3 skinNormalMatrix = INVERSE_MAT(mat3(skinMatrix));
             normal = normal * skinNormalMatrix;
             #ifdef RENDERER_HAS_TANGENT
                 tangent.xyz = tangent.xyz * skinNormalMatrix;
             #endif
-
         #endif
     #endif
 
@@ -84,17 +77,15 @@ void initTransform(Attributes attr, out Varyings v){
 
 
     // normal and tangent
-    #ifndef MATERIAL_OMIT_NORMAL
-        #ifdef RENDERER_HAS_NORMAL
-            v.v_normal = normalize( mat3(renderer_NormalMat) * normal );
+    #ifdef RENDERER_HAS_NORMAL
+        v.v_normal = normalize( mat3(renderer_NormalMat) * normal );
 
-            #ifdef RENDERER_HAS_TANGENT
-                vec3 tangentW = normalize( mat3(renderer_NormalMat) * tangent.xyz );
-                vec3 bitangentW = cross( v.v_normal, tangentW ) * tangent.w;
+        #ifdef RENDERER_HAS_TANGENT
+            vec3 tangentW = normalize( mat3(renderer_NormalMat) * tangent.xyz );
+            vec3 bitangentW = cross( v.v_normal, tangentW ) * tangent.w;
 
-                v.v_tangent = tangentW;
-                v.v_bitangent = bitangentW;
-            #endif
+            v.v_tangent = tangentW;
+            v.v_bitangent = bitangentW;
         #endif
     #endif
 

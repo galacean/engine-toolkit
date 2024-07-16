@@ -62,15 +62,13 @@ struct Attributes{
       vec4 COLOR_0;
   #endif
 
-  #ifndef MATERIAL_OMIT_NORMAL
-      #ifdef RENDERER_HAS_NORMAL
-          vec3 NORMAL;
-      #endif
+	#ifdef RENDERER_HAS_NORMAL
+	    vec3 NORMAL;
+	#endif
 
-      #ifdef RENDERER_HAS_TANGENT
-          vec4 TANGENT;
-      #endif
-  #endif
+    #ifdef RENDERER_HAS_TANGENT
+        vec4 TANGENT;
+    #endif
 };
 
 
