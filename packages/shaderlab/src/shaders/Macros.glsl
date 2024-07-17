@@ -2,7 +2,7 @@
 #define MACROS_INCLUDED
 
 #if defined(SCENE_SHADOW_TYPE) && defined(RENDERER_IS_RECEIVE_SHADOWS)
-    #define SCENE_IS_CALCULATE_SHADOWS
+    #define NEED_CALCULATE_SHADOWS
 #endif
 
 

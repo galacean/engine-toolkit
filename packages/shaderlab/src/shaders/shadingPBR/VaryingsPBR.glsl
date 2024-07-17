@@ -26,7 +26,7 @@ struct Varyings{
 	#endif
 
 
-	#if defined(SCENE_IS_CALCULATE_SHADOWS) && (SCENE_SHADOW_CASCADED_COUNT == 1)
+	#if defined(NEED_CALCULATE_SHADOWS) && (SCENE_SHADOW_CASCADED_COUNT == 1)
 	    vec3 v_shadowCoord;
 	#endif
 };

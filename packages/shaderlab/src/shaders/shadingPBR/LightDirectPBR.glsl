@@ -118,7 +118,7 @@ void evaluateDirectRadiance(Varyings v, BRDFData brdfData, inout vec3 color){
 
     #ifdef SCENE_DIRECT_LIGHT_COUNT
         shadowAttenuation = 1.0;
-        #ifdef SCENE_IS_CALCULATE_SHADOWS
+        #ifdef NEED_CALCULATE_SHADOWS
             shadowAttenuation *= sampleShadowMap(v);
         #endif
 
@@ -133,7 +133,7 @@ void evaluateDirectRadiance(Varyings v, BRDFData brdfData, inout vec3 color){
                     directionalLight.direction = scene_DirectLightDirection[i];
                 #endif
                 
-                #ifdef SCENE_IS_CALCULATE_SHADOWS
+                #ifdef NEED_CALCULATE_SHADOWS
                     if (i == 0) { // Sun light index is always 0
                         directionalLight.color *= shadowAttenuation;
                     }

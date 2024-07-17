@@ -4,7 +4,7 @@
 #include "Transform.glsl"
 #include "Common.glsl"
 
-#ifdef SCENE_IS_CALCULATE_SHADOWS
+#ifdef NEED_CALCULATE_SHADOWS
     #if SCENE_SHADOW_CASCADED_COUNT==1
 
         mat4 scene_ShadowMatrices[SCENE_SHADOW_CASCADED_COUNT + 1];
@@ -77,7 +77,7 @@
 #endif
 
 
-#ifdef SCENE_IS_CALCULATE_SHADOWS
+#ifdef NEED_CALCULATE_SHADOWS
     // intensity, null, fadeScale, fadeBias
     vec4 scene_ShadowInfo;
     vec4 scene_ShadowMapSize;

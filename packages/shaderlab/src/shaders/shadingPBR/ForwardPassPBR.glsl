@@ -46,7 +46,7 @@ Varyings PBRVertex(Attributes attributes) {
   #endif
 
   // ShadowCoord
-  #if defined(SCENE_IS_CALCULATE_SHADOWS) && (SCENE_SHADOW_CASCADED_COUNT == 1)
+  #if defined(NEED_CALCULATE_SHADOWS) && (SCENE_SHADOW_CASCADED_COUNT == 1)
       varyings.v_shadowCoord = getShadowCoord(vertexInputs.positionWS);
   #endif
 
