@@ -1,14 +1,90 @@
+#ifndef SHADOW_INCLUDED
+#define SHADOW_INCLUDED
+
+#include "Transform.glsl"
+#include "Common.glsl"
+
 #if defined(SCENE_SHADOW_TYPE) && defined(RENDERER_IS_RECEIVE_SHADOWS)
-    #define SCENE_IS_CALCULATE_SHADOWS
+    #define NEED_CALCULATE_SHADOWS
 #endif
 
-#ifdef SCENE_IS_CALCULATE_SHADOWS
-    #if SCENE_SHADOW_CASCADED_COUNT != 1
-        #include "ShadowCoord.glsl"
+
+#ifdef NEED_CALCULATE_SHADOWS
+    #if SCENE_SHADOW_CASCADED_COUNT == 1
+
+        mat4 scene_ShadowMatrices[SCENE_SHADOW_CASCADED_COUNT + 1];
+        vec4 scene_ShadowSplitSpheres[4];
+
+        mediump int computeCascadeIndex(vec3 positionWS) {
+            vec3 fromCenter0 = positionWS - scene_ShadowSplitSpheres[0].xyz;
+            vec3 fromCenter1 = positionWS - scene_ShadowSplitSpheres[1].xyz;
+            vec3 fromCenter2 = positionWS - scene_ShadowSplitSpheres[2].xyz;
+            vec3 fromCenter3 = positionWS - scene_ShadowSplitSpheres[3].xyz;
+
+            mediump vec4 comparison = vec4(
+                (dot(fromCenter0, fromCenter0) < scene_ShadowSplitSpheres[0].w),
+                (dot(fromCenter1, fromCenter1) < scene_ShadowSplitSpheres[1].w),
+                (dot(fromCenter2, fromCenter2) < scene_ShadowSplitSpheres[2].w),
+                (dot(fromCenter3, fromCenter3) < scene_ShadowSplitSpheres[3].w));
+            comparison.yzw = clamp(comparison.yzw - comparison.xyz,0.0,1.0);//keep the nearest
+            mediump vec4 indexCoefficient = vec4(4.0,3.0,2.0,1.0);
+            mediump int index = 4 - int(dot(comparison, indexCoefficient));
+            return index;
+        }
+
+        vec3 getShadowCoord(vec3 positionWS) {
+            #if SCENE_SHADOW_CASCADED_COUNT == 1
+                mediump int cascadeIndex = 0;
+            #else
+                mediump int cascadeIndex = computeCascadeIndex(positionWS);
+            #endif
+        
+            #ifdef GRAPHICS_API_WEBGL2
+                mat4 shadowMatrix = scene_ShadowMatrices[cascadeIndex];
+            #else
+                mat4 shadowMatrix;
+                #if SCENE_SHADOW_CASCADED_COUNT == 4
+                    if (cascadeIndex == 0) {
+                        shadowMatrix = scene_ShadowMatrices[0];
+                    } else if (cascadeIndex == 1) {
+                        shadowMatrix = scene_ShadowMatrices[1];
+                    } else if (cascadeIndex == 2) {
+                        shadowMatrix = scene_ShadowMatrices[2];
+                    } else if (cascadeIndex == 3) {
+                        shadowMatrix = scene_ShadowMatrices[3];
+                    } else {
+                        shadowMatrix = scene_ShadowMatrices[4];
+                    }
+                #endif
+                #if SCENE_SHADOW_CASCADED_COUNT == 2
+                    if (cascadeIndex == 0) {
+                        shadowMatrix = scene_ShadowMatrices[0];
+                    } else if (cascadeIndex == 1) {
+                        shadowMatrix = scene_ShadowMatrices[1];
+                    } else {
+                        shadowMatrix = scene_ShadowMatrices[2];
+                    } 
+                #endif
+                #if SCENE_SHADOW_CASCADED_COUNT == 1
+                    if (cascadeIndex == 0) {
+                        shadowMatrix = scene_ShadowMatrices[0];
+                    } else  {
+                        shadowMatrix = scene_ShadowMatrices[1];
+                    } 
+                #endif
+            #endif
+        
+            vec4 shadowCoord = shadowMatrix * vec4(positionWS, 1.0);
+            return shadowCoord.xyz;
+        }
+
     #endif
-    
-    // intensity, resolution, sunIndex
-    vec3 scene_ShadowInfo;
+#endif
+
+
+#ifdef NEED_CALCULATE_SHADOWS
+    // intensity, null, fadeScale, fadeBias
+    vec4 scene_ShadowInfo;
     vec4 scene_ShadowMapSize;
 
     #ifdef GRAPHICS_API_WEBGL2
@@ -51,7 +127,7 @@
     #endif
 
     #if SCENE_SHADOW_TYPE == 3
-        #include "shadow_sample_tent.glsl"
+        #include "ShadowSampleTent.glsl"
 
         float sampleShadowMapFiltered9(TEXTURE2D_SHADOW_PARAM(shadowMap), vec3 shadowCoord, vec4 shadowmapSize) {
             float attenuation;
@@ -71,13 +147,15 @@
         }
     #endif
 
-    float sampleShadowMap() {
-        #if SCENE_SHADOW_CASCADED_COUNT == 1
-            vec3 shadowCoord = v.v_shadowCoord;
-        #else
-            vec3 shadowCoord = getShadowCoord();
-        #endif
-        
+
+    float getShadowFade(vec3 positionWS){
+        vec3 camToPixel = positionWS - camera_Position;
+        float distanceCamToPixel2 = dot(camToPixel, camToPixel);
+        return saturate( distanceCamToPixel2 * scene_ShadowInfo.z + scene_ShadowInfo.w );
+    }
+
+
+    float sampleShadowMap(vec3 positionWS, vec3 shadowCoord) {
         float attenuation = 1.0;
         if(shadowCoord.z > 0.0 && shadowCoord.z < 1.0) {
         #if SCENE_SHADOW_TYPE == 1
@@ -93,6 +171,13 @@
         #endif
             attenuation = mix(1.0, attenuation, scene_ShadowInfo.x);
         }
+
+        float shadowFade = getShadowFade(positionWS);
+        attenuation = mix(1.0, mix(attenuation, 1.0, shadowFade), scene_ShadowInfo.x);
+
         return attenuation;
     }
+#endif
+
+
 #endif

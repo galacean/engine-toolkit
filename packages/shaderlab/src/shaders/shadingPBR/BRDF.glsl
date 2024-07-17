@@ -1,4 +1,82 @@
 
+#ifndef BRDF_INCLUDED
+#define BRDF_INCLUDED
+
+#define MIN_PERCEPTUAL_ROUGHNESS 0.045
+#define MIN_ROUGHNESS            0.002025
+
+#if defined(RENDERER_HAS_TANGENT) || defined(MATERIAL_ENABLE_ANISOTROPY) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE) || defined(MATERIAL_HAS_NORMALTEXTURE)
+    #define NEED_TANGENT
+#endif
+
+
+struct SurfaceData{
+    // common
+	vec3  albedoColor;
+    vec3  specularColor;
+	vec3  emissiveColor;
+    float metallic;
+    float roughness;
+    float diffuseAO;
+    float specularAO;
+    float f0;
+    float opacity;
+
+    // geometry
+    vec3 position;
+    vec3 normal;
+
+    #ifdef NEED_TANGENT
+        vec3  tangent;
+        vec3  bitangent;
+    #endif
+
+    vec3  viewDir;
+    float dotNV;
+
+    // Anisotropy
+    #ifdef MATERIAL_ENABLE_ANISOTROPY
+        float anisotropy;
+        vec3  anisotropicT;
+        vec3  anisotropicB;
+        vec3  anisotropicN;
+    #endif
+
+    // Clear coat
+    #ifdef MATERIAL_ENABLE_CLEAR_COAT
+        float clearCoat;
+        float clearCoatRoughness;
+        vec3  clearCoatNormal;
+        float clearCoatDotNV;
+    #endif
+};
+
+
+struct BRDFData{
+    vec3  diffuseColor;
+    vec3  specularColor;
+    float roughness;
+
+    #ifdef MATERIAL_ENABLE_CLEAR_COAT
+        vec3  clearCoatSpecularColor;
+        float clearCoatRoughness;
+    #endif
+};
+
+
+float getAARoughnessFactor(vec3 normal) {
+    // Kaplanyan 2016, "Stable specular highlights"
+    // Tokuyoshi 2017, "Error Reduction and Simplification for Shading Anti-Aliasing"
+    // Tokuyoshi and Kaplanyan 2019, "Improved Geometric Specular Antialiasing"
+    #ifdef HAS_DERIVATIVES
+        vec3 dxy = max( abs(dFdx(normal)), abs(dFdy(normal)) );
+        return max( max(dxy.x, dxy.y), dxy.z );
+    #else
+        return 0.0;
+    #endif
+}
+
+
 float F_Schlick(float f0, float dotLH) {
 	return f0 + 0.96 * (pow(1.0 - dotLH, 5.0));
 }
@@ -74,10 +152,10 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 }
 
 #ifdef MATERIAL_ENABLE_ANISOTROPY
-    vec3 anisotropicLobe(vec3 h, vec3 l, Geometry geometry, vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
-        vec3 t = geometry.anisotropicT;
-        vec3 b = geometry.anisotropicB;
-        vec3 v = geometry.viewDir;
+    vec3 anisotropicLobe(vec3 h, vec3 l, SurfaceData surfaceData, vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
+        vec3 t = surfaceData.anisotropicT;
+        vec3 b = surfaceData.anisotropicB;
+        vec3 v = surfaceData.viewDir;
 
         float dotTV = dot(t, v);
         float dotBV = dot(b, v);
@@ -88,8 +166,8 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 
         // Aniso parameter remapping
         // https://blog.selfshadow.com/publications/s2017-shading-course/imageworks/s2017_pbs_imageworks_slides_v2.pdf page 24
-        float at = max(alpha * (1.0 + geometry.anisotropy), MIN_ROUGHNESS);
-        float ab = max(alpha * (1.0 - geometry.anisotropy), MIN_ROUGHNESS);
+        float at = max(alpha * (1.0 + surfaceData.anisotropy), MIN_ROUGHNESS);
+        float ab = max(alpha * (1.0 - surfaceData.anisotropy), MIN_ROUGHNESS);
 
         // specular anisotropic BRDF
     	vec3 F = F_Schlick( specularColor, dotLH );
@@ -101,25 +179,52 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 #endif
 
 // GGX Distribution, Schlick Fresnel, GGX-Smith Visibility
-vec3 BRDF_Specular_GGX(vec3 incidentDirection, Geometry geometry, vec3 normal, vec3 specularColor, float roughness ) {
+vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, vec3 normal, vec3 specularColor, float roughness ) {
 
 	float alpha = pow2( roughness ); // UE4's roughness
 
-	vec3 halfDir = normalize( incidentDirection + geometry.viewDir );
+	vec3 halfDir = normalize( incidentDirection + surfaceData.viewDir );
 
 	float dotNL = saturate( dot( normal, incidentDirection ) );
-	float dotNV = saturate( dot( normal, geometry.viewDir ) );
+    float dotNV = saturate( dot( normal, surfaceData.viewDir ) );
 	float dotNH = saturate( dot( normal, halfDir ) );
 	float dotLH = saturate( dot( incidentDirection, halfDir ) );
 
     #ifdef MATERIAL_ENABLE_ANISOTROPY
-        return anisotropicLobe(halfDir, incidentDirection, geometry, specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
+        return anisotropicLobe(halfDir, incidentDirection, surfaceData, specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
     #else
         return isotropicLobe(specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
     #endif
 
 }
 
-vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor ) {
+vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 	return RECIPROCAL_PI * diffuseColor;
 }
+
+
+void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
+    vec3 albedoColor = surfaceData.albedoColor;
+    vec3 specularColor = surfaceData.specularColor;
+    float metallic = surfaceData.metallic;
+    float roughness = surfaceData.roughness;
+    float f0 = surfaceData.f0;
+
+    #ifdef IS_METALLIC_WORKFLOW
+        brdfData.diffuseColor = albedoColor * ( 1.0 - metallic );
+        brdfData.specularColor = mix( vec3(f0), albedoColor, metallic );
+    #else
+        float specularStrength = max( max( specularColor.r, specularColor.g ), specularColor.b );
+        brdfData.diffuseColor = albedoColor * ( 1.0 - specularStrength );
+        brdfData.specularColor = specularColor;
+    #endif
+
+    brdfData.roughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(roughness + getAARoughnessFactor(surfaceData.normal), 1.0));
+
+    #ifdef MATERIAL_ENABLE_CLEAR_COAT
+        brdfData.clearCoatRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.clearCoatRoughness + getAARoughnessFactor(surfaceData.clearCoatNormal), 1.0));
+        brdfData.clearCoatSpecularColor = vec3(0.04);
+    #endif
+}
+
+#endif
