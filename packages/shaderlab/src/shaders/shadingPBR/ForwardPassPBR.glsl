@@ -56,11 +56,9 @@ Varyings PBRVertex(Attributes attributes) {
   return varyings;
 }
 
+
 void PBRFragment(Varyings varyings) {
-  SurfaceData surfaceData = getSurfaceData(varyings, gl_FrontFacing);
-
   BRDFData brdfData;
-
 
   // Get aoUV
   vec2 aoUV = varyings.uv;
@@ -70,8 +68,10 @@ void PBRFragment(Varyings varyings) {
     }
   #endif
 
+  SurfaceData surfaceData = getSurfaceData(varyings, aoUV, gl_FrontFacing);
+
   // Can modify surfaceData here.
-  initBRDFData(varyings.uv, aoUV, surfaceData, brdfData, gl_FrontFacing);
+  initBRDFData(surfaceData, brdfData);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
