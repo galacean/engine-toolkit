@@ -70,7 +70,7 @@ void PBRFragment(Varyings varyings) {
 
   SurfaceData surfaceData = getSurfaceData(varyings, aoUV, gl_FrontFacing);
 
-  // Can modify surfaceData here.
+  // Can modify surfaceData here
   initBRDFData(surfaceData, brdfData);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
@@ -87,10 +87,10 @@ void PBRFragment(Varyings varyings) {
   #endif
 
   // Evaluate direct lighting
-  evaluateDirectRadiance(shadowAttenuation, brdfData, color.rgb);
+  evaluateDirectRadiance(shadowAttenuation, surfaceData, brdfData, color.rgb);
 
   // IBL
-  evaluateIBL(brdfData, color.rgb);
+  evaluateIBL(surfaceData, brdfData, color.rgb);
 
   // Emissive
   color.rgb += surfaceData.emissiveColor;

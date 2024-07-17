@@ -62,22 +62,22 @@ float getSpecularMIPLevel(float roughness, int maxMIPLevel ) {
     return roughness * float(maxMIPLevel);
 }
 
-vec3 getReflectedVector(BRDFData brdfData, vec3 n) {
+vec3 getReflectedVector(SurfaceData surfaceData, vec3 n) {
     #ifdef MATERIAL_ENABLE_ANISOTROPY
-        vec3 r = reflect(-brdfData.viewDir, brdfData.anisotropicN);
+        vec3 r = reflect(-surfaceData.viewDir, surfaceData.anisotropicN);
     #else
-        vec3 r = reflect(-brdfData.viewDir, n);
+        vec3 r = reflect(-surfaceData.viewDir, n);
     #endif
 
     return r;
 }
 
-vec3 getLightProbeRadiance(BRDFData brdfData, vec3 normal, float roughness) {
+vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness) {
 
     #ifndef SCENE_USE_SPECULAR_ENV
         return vec3(0);
     #else
-        vec3 reflectVec = getReflectedVector(brdfData, normal);
+        vec3 reflectVec = getReflectedVector(surfaceData, normal);
         reflectVec.x = -reflectVec.x; // TextureCube is left-hand,so x need inverse
         
         float specularMIPLevel = getSpecularMIPLevel(roughness, int(scene_EnvMapLight.mipMapLevel) );
@@ -106,9 +106,9 @@ vec3 getLightProbeRadiance(BRDFData brdfData, vec3 normal, float roughness) {
 }
 
 
-void evaluateDiffuseIBL(BRDFData brdfData, inout vec3 diffuseColor){
+void evaluateDiffuseIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec3 diffuseColor){
     #ifdef SCENE_USE_SH
-        vec3 irradiance = getLightProbeIrradiance(scene_EnvSH, brdfData.normal);
+        vec3 irradiance = getLightProbeIrradiance(scene_EnvSH, surfaceData.normal);
         #ifdef ENGINE_IS_COLORSPACE_GAMMA
             irradiance = (linearToGamma(vec4(irradiance, 1.0))).rgb;
         #endif
@@ -118,39 +118,39 @@ void evaluateDiffuseIBL(BRDFData brdfData, inout vec3 diffuseColor){
        irradiance *= PI;
     #endif
 
-    diffuseColor += brdfData.diffuseAO * irradiance * BRDF_Diffuse_Lambert( brdfData.diffuseColor );
+    diffuseColor += surfaceData.diffuseAO * irradiance * BRDF_Diffuse_Lambert( brdfData.diffuseColor );
 }
 
-float evaluateClearCoatIBL(BRDFData brdfData, inout vec3 specularColor){
+float evaluateClearCoatIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec3 specularColor){
     float radianceAttenuation = 1.0;
 
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        vec3 clearCoatRadiance = getLightProbeRadiance( brdfData, brdfData.clearCoatNormal, brdfData.clearCoatRoughness);
-        specularColor += brdfData.specularAO * clearCoatRadiance * brdfData.clearCoat * envBRDFApprox(vec3( 0.04 ), brdfData.clearCoatRoughness, brdfData.clearCoatDotNV);
-        radianceAttenuation -= brdfData.clearCoat * F_Schlick(0.04, brdfData.clearCoatDotNV);
+        vec3 clearCoatRadiance = getLightProbeRadiance(surfaceData, surfaceData.clearCoatNormal, brdfData.clearCoatRoughness);
+        specularColor += surfaceData.specularAO * clearCoatRadiance * surfaceData.clearCoat * envBRDFApprox(brdfData.clearCoatSpecularColor, brdfData.clearCoatRoughness, surfaceData.clearCoatDotNV);
+        radianceAttenuation -= surfaceData.clearCoat * F_Schlick(0.04, surfaceData.clearCoatDotNV);
     #endif
 
     return radianceAttenuation;
 }
 
-void evaluateSpecularIBL(BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
-    vec3 radiance = getLightProbeRadiance(brdfData, brdfData.normal, brdfData.roughness);
-    specularColor += brdfData.specularAO * radianceAttenuation * radiance * envBRDFApprox(brdfData.specularColor, brdfData.roughness, brdfData.dotNV );
+void evaluateSpecularIBL(SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
+    vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, brdfData.roughness);
+    specularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDFApprox(brdfData.specularColor, brdfData.roughness, surfaceData.dotNV );
 }
 
 
-void evaluateIBL(BRDFData brdfData, inout vec3 color){
+void evaluateIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec3 color){
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
 
     // IBL diffuse
-    FUNCTION_DIFFUSE_IBL(brdfData, diffuseColor);
+    FUNCTION_DIFFUSE_IBL(surfaceData, brdfData, diffuseColor);
 
     // IBL ClearCoat
-    float radianceAttenuation = FUNCTION_CLEAR_COAT_IBL(brdfData, specularColor);
+    float radianceAttenuation = FUNCTION_CLEAR_COAT_IBL(surfaceData, brdfData, specularColor);
 
     // IBL specular
-    FUNCTION_SPECULAR_IBL(brdfData, radianceAttenuation, specularColor);
+    FUNCTION_SPECULAR_IBL(surfaceData, brdfData, radianceAttenuation, specularColor);
 
     color += diffuseColor + specularColor;
 }

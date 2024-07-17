@@ -53,42 +53,15 @@ struct SurfaceData{
 
 
 struct BRDFData{
-    // common
     vec3  diffuseColor;
     vec3  specularColor;
     float roughness;
-    float diffuseAO;
-    float specularAO;
 
-    // geometry
-    vec3 position;
-    vec3 normal;
-
-    #ifdef NEED_TANGENT
-        vec3  tangent;
-        vec3  bitangent;
-    #endif
-
-    vec3  viewDir;
-    float dotNV;
-
-    // Anisotropy
-    #ifdef MATERIAL_ENABLE_ANISOTROPY
-        float anisotropy;
-        vec3  anisotropicT;
-        vec3  anisotropicB;
-        vec3  anisotropicN;
-    #endif
-
-    // Clear coat
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        float clearCoat;
+        vec3  clearCoatSpecularColor;
         float clearCoatRoughness;
-        vec3  clearCoatNormal;
-        float clearCoatDotNV;
     #endif
 };
-
 
 
 float getAARoughnessFactor(vec3 normal) {
@@ -179,10 +152,10 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 }
 
 #ifdef MATERIAL_ENABLE_ANISOTROPY
-    vec3 anisotropicLobe(vec3 h, vec3 l, BRDFData brdfData, vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
-        vec3 t = brdfData.anisotropicT;
-        vec3 b = brdfData.anisotropicB;
-        vec3 v = brdfData.viewDir;
+    vec3 anisotropicLobe(vec3 h, vec3 l, SurfaceData surfaceData, vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
+        vec3 t = surfaceData.anisotropicT;
+        vec3 b = surfaceData.anisotropicB;
+        vec3 v = surfaceData.viewDir;
 
         float dotTV = dot(t, v);
         float dotBV = dot(b, v);
@@ -193,8 +166,8 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 
         // Aniso parameter remapping
         // https://blog.selfshadow.com/publications/s2017-shading-course/imageworks/s2017_pbs_imageworks_slides_v2.pdf page 24
-        float at = max(alpha * (1.0 + brdfData.anisotropy), MIN_ROUGHNESS);
-        float ab = max(alpha * (1.0 - brdfData.anisotropy), MIN_ROUGHNESS);
+        float at = max(alpha * (1.0 + surfaceData.anisotropy), MIN_ROUGHNESS);
+        float ab = max(alpha * (1.0 - surfaceData.anisotropy), MIN_ROUGHNESS);
 
         // specular anisotropic BRDF
     	vec3 F = F_Schlick( specularColor, dotLH );
@@ -206,19 +179,19 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
 #endif
 
 // GGX Distribution, Schlick Fresnel, GGX-Smith Visibility
-vec3 BRDF_Specular_GGX(vec3 incidentDirection, BRDFData brdfData, vec3 normal, vec3 specularColor, float roughness ) {
+vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, vec3 normal, vec3 specularColor, float roughness ) {
 
 	float alpha = pow2( roughness ); // UE4's roughness
 
-	vec3 halfDir = normalize( incidentDirection + brdfData.viewDir );
+	vec3 halfDir = normalize( incidentDirection + surfaceData.viewDir );
 
 	float dotNL = saturate( dot( normal, incidentDirection ) );
-	float dotNV = brdfData.dotNV;
+    float dotNV = saturate( dot( normal, surfaceData.viewDir ) );
 	float dotNH = saturate( dot( normal, halfDir ) );
 	float dotLH = saturate( dot( incidentDirection, halfDir ) );
 
     #ifdef MATERIAL_ENABLE_ANISOTROPY
-        return anisotropicLobe(halfDir, incidentDirection, brdfData, specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
+        return anisotropicLobe(halfDir, incidentDirection, surfaceData, specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
     #else
         return isotropicLobe(specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
     #endif
@@ -230,19 +203,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 }
 
 
-void initGeometryData(SurfaceData surfaceData, inout BRDFData brdfData){
-    brdfData.position = surfaceData.position;
-    brdfData.normal = surfaceData.normal;
-    #ifdef NEED_TANGENT
-        brdfData.tangent = surfaceData.tangent;
-        brdfData.bitangent = surfaceData.bitangent;
-    #endif
-    brdfData.viewDir = surfaceData.viewDir;
-
-    brdfData.dotNV = surfaceData.dotNV;
-}
-
-void initCommonBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
+void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     vec3 albedoColor = surfaceData.albedoColor;
     vec3 specularColor = surfaceData.specularColor;
     float metallic = surfaceData.metallic;
@@ -258,44 +219,12 @@ void initCommonBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
         brdfData.specularColor = specularColor;
     #endif
 
-    brdfData.roughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(roughness + getAARoughnessFactor(brdfData.normal), 1.0));
-}
-
-void initClearCoatBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
-    brdfData.clearCoatNormal = surfaceData.clearCoatNormal;
-    brdfData.clearCoatDotNV = surfaceData.clearCoatDotNV;
-    brdfData.clearCoat = surfaceData.clearCoat;
-    brdfData.clearCoatRoughness = surfaceData.clearCoatRoughness;
-}
-
-void initAnisotropyBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
-    brdfData.anisotropy = surfaceData.anisotropy;
-    brdfData.anisotropicT = surfaceData.anisotropicT;
-    brdfData.anisotropicB = surfaceData.anisotropicB;
-    brdfData.anisotropicN = surfaceData.anisotropicN;
-}
-
-void initAO(SurfaceData surfaceData, inout BRDFData brdfData){
-    brdfData.diffuseAO = surfaceData.diffuseAO;
-    brdfData.specularAO = surfaceData.specularAO;
-}
-
-void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
-    initGeometryData(surfaceData, brdfData);
-    initCommonBRDFData(surfaceData, brdfData);
+    brdfData.roughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(roughness + getAARoughnessFactor(surfaceData.normal), 1.0));
 
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        initClearCoatBRDFData(surfaceData, brdfData);
+        brdfData.clearCoatRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.clearCoatRoughness + getAARoughnessFactor(surfaceData.clearCoatNormal), 1.0));
+        brdfData.clearCoatSpecularColor = vec3(0.04);
     #endif
-
-    #ifdef MATERIAL_ENABLE_ANISOTROPY
-        initAnisotropyBRDFData(surfaceData, brdfData);
-    #endif
-
-    initAO(surfaceData, brdfData);
 }
-
-
-
 
 #endif

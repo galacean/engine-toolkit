@@ -198,7 +198,7 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
         #ifdef MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE
             surfaceData.clearCoatNormal = getNormalByNormalTexture(mat3(surfaceData.tangent, surfaceData.bitangent, surfaceData.normal), material_ClearCoatNormalTexture, material_NormalIntensity, uv, isFrontFacing);
         #else
-            surfaceData.clearCoatNormal = surfaceData.normal;
+            surfaceData.clearCoatNormal = normal;
         #endif
         surfaceData.clearCoatDotNV = saturate( dot(surfaceData.clearCoatNormal, surfaceData.viewDir) );
 

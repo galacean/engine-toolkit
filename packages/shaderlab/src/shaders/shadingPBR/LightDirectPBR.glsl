@@ -24,40 +24,40 @@ void diffuseLobe(BRDFData brdfData, vec3 attenuationIrradiance, inout vec3 diffu
     diffuseColor += attenuationIrradiance * BRDF_Diffuse_Lambert( brdfData.diffuseColor );
 }
 
-void specularLobe(BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 specularColor){
-    specularColor += attenuationIrradiance * BRDF_Specular_GGX( incidentDirection, brdfData, brdfData.normal, brdfData.specularColor, brdfData.roughness);
+void specularLobe(SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 specularColor){
+    specularColor += attenuationIrradiance * BRDF_Specular_GGX( incidentDirection, surfaceData, surfaceData.normal, brdfData.specularColor, brdfData.roughness);
 }
 
-float clearCoatLobe(vec3 incidentDirection, vec3 color, BRDFData brdfData, inout vec3 specularColor){
+float clearCoatLobe(vec3 incidentDirection, vec3 color, SurfaceData surfaceData, BRDFData brdfData, inout vec3 specularColor){
     float attenuation = 1.0;
 
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        float clearCoatDotNL = saturate( dot( brdfData.clearCoatNormal, incidentDirection ) );
+        float clearCoatDotNL = saturate( dot( surfaceData.clearCoatNormal, incidentDirection ) );
         vec3 clearCoatIrradiance = clearCoatDotNL * color;
 
-        specularColor += brdfData.clearCoat * clearCoatIrradiance * BRDF_Specular_GGX( incidentDirection, brdfData, brdfData.clearCoatNormal, vec3( 0.04 ), brdfData.clearCoatRoughness );
-        attenuation -= brdfData.clearCoat * F_Schlick(0.04, brdfData.clearCoatDotNV);
+        specularColor += surfaceData.clearCoat * clearCoatIrradiance * BRDF_Specular_GGX( incidentDirection, surfaceData, surfaceData.clearCoatNormal, brdfData.clearCoatSpecularColor, brdfData.clearCoatRoughness );
+        attenuation -= surfaceData.clearCoat * F_Schlick(0.04, surfaceData.clearCoatDotNV);
     #endif
 
     return attenuation;
 }
 
 
-void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, inout vec3 color) {
+void surfaceShading(vec3 incidentDirection, vec3 lightColor, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color) {
 
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
-    float dotNL = saturate( dot( brdfData.normal, incidentDirection ) );
+    float dotNL = saturate( dot( surfaceData.normal, incidentDirection ) );
     vec3 irradiance = dotNL * lightColor * PI;
 
     // ClearCoat Lobe
-    float attenuation = FUNCTION_CLEAR_COAT_LOBE(incidentDirection, lightColor, brdfData, specularColor);
+    float attenuation = FUNCTION_CLEAR_COAT_LOBE(incidentDirection, lightColor, surfaceData, brdfData, specularColor);
 
     vec3 attenuationIrradiance = attenuation * irradiance;
     // Diffuse Lobe
     FUNCTION_DIFFUSE_LOBE(brdfData, attenuationIrradiance, diffuseColor);
     // Specular Lobe
-    FUNCTION_SPECULAR_LOBE(brdfData, incidentDirection, attenuationIrradiance, specularColor);
+    FUNCTION_SPECULAR_LOBE(surfaceData, brdfData, incidentDirection, attenuationIrradiance, specularColor);
 
     color += diffuseColor + specularColor;
 
@@ -65,11 +65,11 @@ void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, 
 
 #ifdef SCENE_DIRECT_LIGHT_COUNT
 
-    void addDirectionalDirectLightRadiance(DirectLight directionalLight, BRDFData brdfData, inout vec3 color) {
+    void addDirectionalDirectLightRadiance(DirectLight directionalLight, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color) {
         vec3 lightColor = directionalLight.color;
         vec3 direction = -directionalLight.direction;
 
-        FUNCTION_SURFACE_SHADING( direction, lightColor, brdfData, color );
+        FUNCTION_SURFACE_SHADING( direction, lightColor, surfaceData, brdfData, color );
 
     }
 
@@ -77,25 +77,24 @@ void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, 
 
 #ifdef SCENE_POINT_LIGHT_COUNT
 
-	void addPointDirectLightRadiance(PointLight pointLight, BRDFData brdfData, inout vec3 color) {
-
-		vec3 lVector = pointLight.position - brdfData.position;
+	void addPointDirectLightRadiance(PointLight pointLight, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color) {
+		vec3 lVector = pointLight.position - surfaceData.position;
 		vec3 direction = normalize( lVector );
 		float lightDistance = length( lVector );
 
 		vec3 lightColor = pointLight.color;
 		lightColor *= clamp(1.0 - pow(lightDistance/pointLight.distance, 4.0), 0.0, 1.0);
 
-        FUNCTION_SURFACE_SHADING( direction, lightColor, brdfData, color );
+        FUNCTION_SURFACE_SHADING( direction, lightColor, surfaceData, brdfData, color );
 	}
 
 #endif
 
 #ifdef SCENE_SPOT_LIGHT_COUNT
 
-	void addSpotDirectLightRadiance(SpotLight spotLight, BRDFData brdfData, inout vec3 color) {
+	void addSpotDirectLightRadiance(SpotLight spotLight, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color) {
 
-		vec3 lVector = spotLight.position - brdfData.position;
+		vec3 lVector = spotLight.position - surfaceData.position;
 		vec3 direction = normalize( lVector );
 		float lightDistance = length( lVector );
 		float angleCos = dot( direction, -spotLight.direction );
@@ -106,14 +105,14 @@ void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, 
 		vec3 lightColor = spotLight.color;
 		lightColor *= spotEffect * decayEffect;
 
-        FUNCTION_SURFACE_SHADING( direction, lightColor, brdfData, color );
+        FUNCTION_SURFACE_SHADING( direction, lightColor, surfaceData, brdfData, color );
 
 	}
 
 
 #endif
 
-void evaluateDirectRadiance(float shadowAttenuation, BRDFData brdfData, inout vec3 color){
+void evaluateDirectRadiance(float shadowAttenuation, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color){
     #ifdef SCENE_DIRECT_LIGHT_COUNT
 
         for ( int i = 0; i < SCENE_DIRECT_LIGHT_COUNT; i ++ ) {
@@ -132,7 +131,7 @@ void evaluateDirectRadiance(float shadowAttenuation, BRDFData brdfData, inout ve
                         directionalLight.color *= shadowAttenuation;
                     }
                 #endif
-                addDirectionalDirectLightRadiance( directionalLight, brdfData, color );
+                addDirectionalDirectLightRadiance( directionalLight, surfaceData, brdfData, color );
             }
         }
 
@@ -150,7 +149,7 @@ void evaluateDirectRadiance(float shadowAttenuation, BRDFData brdfData, inout ve
                     pointLight.position = scene_PointLightPosition[i];
                     pointLight.distance = scene_PointLightDistance[i];
                 #endif
-                addPointDirectLightRadiance( pointLight, brdfData, color );
+                addPointDirectLightRadiance( pointLight, surfaceData, brdfData, color );
             } 
         }
 
@@ -171,7 +170,7 @@ void evaluateDirectRadiance(float shadowAttenuation, BRDFData brdfData, inout ve
                     spotLight.angleCos = scene_SpotLightAngleCos[i];
                     spotLight.penumbraCos = scene_SpotLightPenumbraCos[i];
                 #endif
-                addSpotDirectLightRadiance( spotLight, brdfData, color );
+                addSpotDirectLightRadiance( spotLight, surfaceData, brdfData, color );
             } 
         }
 
