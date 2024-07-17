@@ -3,10 +3,6 @@
 
 #include "Normal.glsl"
 
-#if defined(RENDERER_HAS_TANGENT) || defined(MATERIAL_ENABLE_ANISOTROPY) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE)
-    #define NEED_TANGENT
-#endif
-
 struct SurfaceData{
     // common
 	vec3  albedoColor;

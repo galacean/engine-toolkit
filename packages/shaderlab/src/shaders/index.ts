@@ -2,6 +2,7 @@ import BlendShape from "./BlendShape.glsl";
 import Common from "./Common.glsl";
 import Fog from "./Fog.glsl";
 import Light from "./Light.glsl";
+import Macros from "./Macros.glsl";
 import Normal from "./Normal.glsl";
 import PBRSource from "./PBR.gs";
 import Shadow from "./Shadow.glsl";
@@ -27,6 +28,7 @@ const fragmentList: IShaderFragment[] = [
   { source: Transform, includeKey: "Transform.glsl" },
   { source: Vertex, includeKey: "Vertex.glsl" },
   { source: Skin, includeKey: "Skin.glsl" },
+  { source: Macros, includeKey: "Macros.glsl" },
 
   ...shadingPBR
 ];
