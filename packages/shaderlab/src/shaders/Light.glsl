@@ -34,13 +34,15 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask){
     vec3 scene_DirectLightColor[SCENE_DIRECT_LIGHT_COUNT];
     vec3 scene_DirectLightDirection[SCENE_DIRECT_LIGHT_COUNT];
 
-    DirectLight getDirectLight(int index){
-        DirectLight light;
-        light.color = scene_DirectLightColor[index];
-        light.direction = scene_DirectLightDirection[index];
-
-        return light;
-    }
+    #ifdef GRAPHICS_API_WEBGL2
+        DirectLight getDirectLight(int index){
+            DirectLight light;
+            light.color = scene_DirectLightColor[index];
+            light.direction = scene_DirectLightDirection[index];
+    
+            return light;
+        }
+    #endif
 
 #endif
 
@@ -59,14 +61,16 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask){
     vec3 scene_PointLightPosition[ SCENE_POINT_LIGHT_COUNT ];
     float scene_PointLightDistance[ SCENE_POINT_LIGHT_COUNT ];
 
-    PointLight getPointLight(int index){
-        PointLight light;
-        light.color = scene_PointLightColor[index];
-        light.position = scene_PointLightPosition[index];
-        light.distance = scene_PointLightDistance[index];
+    #ifdef GRAPHICS_API_WEBGL2
+        PointLight getPointLight(int index){
+            PointLight light;
+            light.color = scene_PointLightColor[index];
+            light.position = scene_PointLightPosition[index];
+            light.distance = scene_PointLightDistance[index];
 
-        return light;
-    }
+            return light;
+        }
+    #endif
 
 #endif
 
@@ -91,17 +95,19 @@ bool isRendererCulledByLight(ivec2 rendererLayer, ivec2 lightCullingMask){
     float scene_SpotLightAngleCos[ SCENE_SPOT_LIGHT_COUNT ];
     float scene_SpotLightPenumbraCos[ SCENE_SPOT_LIGHT_COUNT ];
 
-    SpotLight getSpotLight(int index){
-        SpotLight light;
-        light.color = scene_SpotLightColor[index];
-        light.position = scene_SpotLightPosition[index];
-        light.direction = scene_SpotLightDirection[index];
-        light.distance = scene_SpotLightDistance[index];
-        light.angleCos = scene_SpotLightAngleCos[index];
-        light.penumbraCos = scene_SpotLightPenumbraCos[index];
+    #ifdef GRAPHICS_API_WEBGL2
+        SpotLight getSpotLight(int index){
+            SpotLight light;
+            light.color = scene_SpotLightColor[index];
+            light.position = scene_SpotLightPosition[index];
+            light.direction = scene_SpotLightDirection[index];
+            light.distance = scene_SpotLightDistance[index];
+            light.angleCos = scene_SpotLightAngleCos[index];
+            light.penumbraCos = scene_SpotLightPenumbraCos[index];
 
-        return light;
-    }
+            return light;
+        }
+    #endif
 
 
 #endif

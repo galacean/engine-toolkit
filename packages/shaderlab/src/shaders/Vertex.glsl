@@ -47,7 +47,7 @@ VertexInputs getVertexInputs(Attributes attributes){
     #endif
 
    
-     // BlendShape
+    // BlendShape
     #ifdef RENDERER_HAS_BLENDSHAPE
         calculateBlendShape(attributes, position
         #ifdef RENDERER_HAS_NORMAL
