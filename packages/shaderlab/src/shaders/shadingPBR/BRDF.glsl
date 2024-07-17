@@ -2,6 +2,75 @@
 #ifndef BRDF_INCLUDED
 #define BRDF_INCLUDED
 
+#define MIN_PERCEPTUAL_ROUGHNESS 0.045
+#define MIN_ROUGHNESS            0.002025
+
+#if defined(RENDERER_HAS_TANGENT) || defined(MATERIAL_ENABLE_ANISOTROPY) || defined(MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE)
+    #define NEED_TANGENT
+#endif
+
+struct SurfaceData{
+    // common
+	vec3  albedoColor;
+    vec3  specularColor;
+	vec3  emissiveColor;
+    float metallic;
+    float roughness;
+    float f0;
+    float opacity;
+
+    // geometry
+    vec3 position;
+    vec3 normal;
+
+    #ifdef NEED_TANGENT
+        vec3  tangent;
+        vec3  bitangent;
+    #endif
+
+    vec3  viewDir;
+};
+
+
+struct BRDFData{
+    // common
+    vec3  diffuseColor;
+    vec3  specularColor;
+    float roughness;
+    float diffuseAO;
+    float specularAO;
+
+    // geometry
+    vec3 position;
+    vec3 normal;
+
+    #ifdef NEED_TANGENT
+        vec3  tangent;
+        vec3  bitangent;
+    #endif
+
+    vec3  viewDir;
+    float dotNV;
+
+    // Anisotropy
+    #ifdef MATERIAL_ENABLE_ANISOTROPY
+        float anisotropy;
+        vec3  anisotropicT;
+        vec3  anisotropicB;
+        vec3  anisotropicN;
+    #endif
+
+    // Clear coat
+    #ifdef MATERIAL_ENABLE_CLEAR_COAT
+        float clearCoat;
+        float clearCoatRoughness;
+        vec3  clearCoatNormal;
+        float clearCoatDotNV;
+    #endif
+};
+
+
+
 float F_Schlick(float f0, float dotLH) {
 	return f0 + 0.96 * (pow(1.0 - dotLH, 5.0));
 }

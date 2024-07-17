@@ -1,16 +1,17 @@
 #ifndef FORWARD_PASS_PBR_INCLUDED
 #define FORWARD_PASS_PBR_INCLUDED
 
-#include "Macros.glsl"
-#include "AttributesPBR.glsl"
-#include "VaryingsPBR.glsl"
 #include "Common.glsl"
-#include "Vertex.glsl"
 #include "Fog.glsl"
 
-#include "MaterialInputPBR.glsl"
 #include "LightDirectPBR.glsl"
 #include "LightIndirectPBR.glsl"
+
+#include "AttributesPBR.glsl"
+#include "VaryingsPBR.glsl"
+#include "VertexPBR.glsl"
+#include "FragmentPBR.glsl"
+
 
 
 Varyings PBRVertex(Attributes attributes) {
@@ -56,19 +57,31 @@ Varyings PBRVertex(Attributes attributes) {
 }
 
 void PBRFragment(Varyings varyings) {
-  SurfaceData surfaceData;
-  BRDFData brdfData;
+  SurfaceData surfaceData = getSurfaceData(varyings, gl_FrontFacing);
 
-  initSurfaceData(varyings, surfaceData, gl_FrontFacing);
+  BRDFData brdfData;
   // Can modify surfaceData here.
   initBRDFData(varyings, surfaceData, brdfData, gl_FrontFacing);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
-  // Direct Light
-  evaluateDirectRadiance(varyings, brdfData, color.rgb);
+  // Get shadow attenuation
+  float shadowAttenuation = 1.0;
+  #if defined(SCENE_DIRECT_LIGHT_COUNT) && defined(NEED_CALCULATE_SHADOWS)
+    #if SCENE_SHADOW_CASCADED_COUNT == 1
+      vec3 shadowCoord = varyings.v_shadowCoord;
+    #else
+      vec3 shadowCoord = getShadowCoord(varyings.v_pos);
+    #endif
+    shadowAttenuation *= sampleShadowMap(varyings.v_pos, shadowCoord);
+  #endif
+
+  // Evaluate direct lighting
+  evaluateDirectRadiance(shadowAttenuation, brdfData, color.rgb);
+
   // IBL
-  evaluateIBL(varyings, brdfData, color.rgb);
+  evaluateIBL(brdfData, color.rgb);
+
   // Emissive
   color.rgb += surfaceData.emissiveColor;
 

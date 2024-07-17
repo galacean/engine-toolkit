@@ -113,14 +113,8 @@ void surfaceShading(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, 
 
 #endif
 
-void evaluateDirectRadiance(Varyings v, BRDFData brdfData, inout vec3 color){
-    float shadowAttenuation = 1.0;
-
+void evaluateDirectRadiance(float shadowAttenuation, BRDFData brdfData, inout vec3 color){
     #ifdef SCENE_DIRECT_LIGHT_COUNT
-        shadowAttenuation = 1.0;
-        #ifdef NEED_CALCULATE_SHADOWS
-            shadowAttenuation *= sampleShadowMap(v);
-        #endif
 
         for ( int i = 0; i < SCENE_DIRECT_LIGHT_COUNT; i ++ ) {
             // warning: use `continue` syntax may trigger flickering bug in safri 16.1.

@@ -4,8 +4,13 @@
 #include "Transform.glsl"
 #include "Common.glsl"
 
+#if defined(SCENE_SHADOW_TYPE) && defined(RENDERER_IS_RECEIVE_SHADOWS)
+    #define NEED_CALCULATE_SHADOWS
+#endif
+
+
 #ifdef NEED_CALCULATE_SHADOWS
-    #if SCENE_SHADOW_CASCADED_COUNT==1
+    #if SCENE_SHADOW_CASCADED_COUNT == 1
 
         mat4 scene_ShadowMatrices[SCENE_SHADOW_CASCADED_COUNT + 1];
         vec4 scene_ShadowSplitSpheres[4];
@@ -150,13 +155,7 @@
     }
 
 
-    float sampleShadowMap(Varyings v) {
-        #if SCENE_SHADOW_CASCADED_COUNT == 1
-            vec3 shadowCoord = v.v_shadowCoord;
-        #else
-            vec3 shadowCoord = getShadowCoord(v.v_pos);
-        #endif
-        
+    float sampleShadowMap(vec3 positionWS, vec3 shadowCoord) {
         float attenuation = 1.0;
         if(shadowCoord.z > 0.0 && shadowCoord.z < 1.0) {
         #if SCENE_SHADOW_TYPE == 1
@@ -173,7 +172,7 @@
             attenuation = mix(1.0, attenuation, scene_ShadowInfo.x);
         }
 
-        float shadowFade = getShadowFade(v.v_pos);
+        float shadowFade = getShadowFade(positionWS);
         attenuation = mix(1.0, mix(attenuation, 1.0, shadowFade), scene_ShadowInfo.x);
 
         return attenuation;

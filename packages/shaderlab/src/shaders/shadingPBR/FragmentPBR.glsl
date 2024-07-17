@@ -3,66 +3,6 @@
 
 #include "Normal.glsl"
 
-struct SurfaceData{
-    // common
-	vec3  albedoColor;
-    vec3  specularColor;
-	vec3  emissiveColor;
-    float metallic;
-    float roughness;
-    float f0;
-    float opacity;
-
-    // geometry
-    vec3 position;
-    vec3 normal;
-
-    #ifdef NEED_TANGENT
-        vec3  tangent;
-        vec3  bitangent;
-    #endif
-
-    vec3  viewDir;
-};
-
-struct BRDFData{
-    // common
-    vec3  diffuseColor;
-    vec3  specularColor;
-    float roughness;
-
-    // geometry
-    vec3 position;
-    vec3 normal;
-
-    #ifdef NEED_TANGENT
-        vec3  tangent;
-        vec3  bitangent;
-    #endif
-
-    vec3  viewDir;
-    float dotNV;
-
-    // Anisotropy
-    #ifdef MATERIAL_ENABLE_ANISOTROPY
-        float anisotropy;
-        vec3  anisotropicT;
-        vec3  anisotropicB;
-        vec3  anisotropicN;
-    #endif
-
-    // Clear coat
-    #ifdef MATERIAL_ENABLE_CLEAR_COAT
-        float clearCoat;
-        float clearCoatRoughness;
-        vec3  clearCoatNormal;
-        float clearCoatDotNV;
-    #endif
-};
-
-#define MIN_PERCEPTUAL_ROUGHNESS 0.045
-#define MIN_ROUGHNESS            0.002025
-
 float material_AlphaCutoff;
 vec4 material_BaseColor;
 float material_Metal;
@@ -126,35 +66,8 @@ float material_OcclusionTextureCoord;
 #endif
 
 
-
-float getAARoughnessFactor(vec3 normal) {
-    // Kaplanyan 2016, "Stable specular highlights"
-    // Tokuyoshi 2017, "Error Reduction and Simplification for Shading Anti-Aliasing"
-    // Tokuyoshi and Kaplanyan 2019, "Improved Geometric Specular Antialiasing"
-    #ifdef HAS_DERIVATIVES
-        vec3 dxy = max( abs(dFdx(normal)), abs(dFdy(normal)) );
-        return max( max(dxy.x, dxy.y), dxy.z );
-    #else
-        return 0.0;
-    #endif
-}
-
-#ifdef MATERIAL_ENABLE_ANISOTROPY
-    // Aniso Bent Normals
-    // Mc Alley https://www.gdcvault.com/play/1022235/Rendering-the-World-of-Far 
-    vec3 getAnisotropicBentNormal(BRDFData brdfData) {
-        vec3  anisotropyDirection = (brdfData.anisotropy >= 0.0) ? brdfData.anisotropicB : brdfData.anisotropicT;
-        vec3  anisotropicTangent  = cross(anisotropyDirection, brdfData.viewDir);
-        vec3  anisotropicNormal   = cross(anisotropicTangent, anisotropyDirection);
-        // reduce stretching for (roughness < 0.2), refer to https://advances.realtimerendering.com/s2018/Siggraph%202018%20HDRP%20talk_with%20notes.pdf 80
-        vec3  bentNormal          = normalize( mix(brdfData.normal, anisotropicNormal, abs(brdfData.anisotropy) * saturate( 5.0 * brdfData.roughness)) );
-
-        return bentNormal;
-    }
-#endif
-
-
-void initSurfaceData(Varyings v, out SurfaceData surfaceData, bool isFrontFacing){
+SurfaceData getSurfaceData(Varyings v, bool isFrontFacing){
+    SurfaceData surfaceData;
     // common
     vec4 baseColor = material_BaseColor;
     float metallic = material_Metal;
@@ -242,7 +155,37 @@ void initSurfaceData(Varyings v, out SurfaceData surfaceData, bool isFrontFacing
     #else
         surfaceData.normal = getNormal(v, isFrontFacing);
     #endif
+
+    return surfaceData;
 }
+
+float getAARoughnessFactor(vec3 normal) {
+    // Kaplanyan 2016, "Stable specular highlights"
+    // Tokuyoshi 2017, "Error Reduction and Simplification for Shading Anti-Aliasing"
+    // Tokuyoshi and Kaplanyan 2019, "Improved Geometric Specular Antialiasing"
+    #ifdef HAS_DERIVATIVES
+        vec3 dxy = max( abs(dFdx(normal)), abs(dFdy(normal)) );
+        return max( max(dxy.x, dxy.y), dxy.z );
+    #else
+        return 0.0;
+    #endif
+}
+
+#ifdef MATERIAL_ENABLE_ANISOTROPY
+    // Aniso Bent Normals
+    // Mc Alley https://www.gdcvault.com/play/1022235/Rendering-the-World-of-Far 
+    vec3 getAnisotropicBentNormal(BRDFData brdfData) {
+        vec3  anisotropyDirection = (brdfData.anisotropy >= 0.0) ? brdfData.anisotropicB : brdfData.anisotropicT;
+        vec3  anisotropicTangent  = cross(anisotropyDirection, brdfData.viewDir);
+        vec3  anisotropicNormal   = cross(anisotropicTangent, anisotropyDirection);
+        // reduce stretching for (roughness < 0.2), refer to https://advances.realtimerendering.com/s2018/Siggraph%202018%20HDRP%20talk_with%20notes.pdf 80
+        vec3  bentNormal          = normalize( mix(brdfData.normal, anisotropicNormal, abs(brdfData.anisotropy) * saturate( 5.0 * brdfData.roughness)) );
+
+        return bentNormal;
+    }
+#endif
+
+
 
 void initGeometryData(SurfaceData surfaceData, inout BRDFData brdfData){
     brdfData.position = surfaceData.position;
@@ -322,11 +265,34 @@ void initAnisotropyBRDFData(Varyings v, inout BRDFData brdfData){
 
 }
 
+void initAO(Varyings v, inout BRDFData brdfData){
+    float diffuseAO = 1.0;
+    float specularAO = 1.0;
+
+    #ifdef MATERIAL_HAS_OCCLUSION_TEXTURE
+        vec2 aoUV = v.v_uv;
+        #ifdef RENDERER_HAS_UV1
+            if(material_OcclusionTextureCoord == 1.0){
+                aoUV = v.v_uv1;
+            }
+        #endif
+        diffuseAO = ((texture2D(material_OcclusionTexture, aoUV)).r - 1.0) * material_OcclusionIntensity + 1.0;
+    #endif
+
+    #if defined(MATERIAL_HAS_OCCLUSION_TEXTURE) && defined(SCENE_USE_SPECULAR_ENV) 
+        specularAO = saturate( pow( brdfData.dotNV + diffuseAO, exp2( - 16.0 * brdfData.roughness - 1.0 ) ) - 1.0 + diffuseAO );
+    #endif
+
+    brdfData.diffuseAO = diffuseAO;
+    brdfData.specularAO = specularAO;
+}
+
 void initBRDFData(Varyings v, SurfaceData surfaceData, out BRDFData brdfData, bool isFrontFacing){
     initGeometryData(surfaceData, brdfData);
     initCommonBRDFData(surfaceData, brdfData);
     initClearCoatBRDFData(v, brdfData, isFrontFacing);
     initAnisotropyBRDFData(v, brdfData);
+    initAO(v, brdfData);
 }
 
 
