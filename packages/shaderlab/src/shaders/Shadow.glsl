@@ -2,10 +2,7 @@
 #define SHADOW_INCLUDED
 
 #include "Transform.glsl"
-
-#if defined(SCENE_SHADOW_TYPE) && defined(RENDERER_IS_RECEIVE_SHADOWS)
-    #define SCENE_IS_CALCULATE_SHADOWS
-#endif
+#include "Common.glsl"
 
 #ifdef SCENE_IS_CALCULATE_SHADOWS
     #if SCENE_SHADOW_CASCADED_COUNT==1
