@@ -4,12 +4,12 @@
 // gl_FrontFacing has random value on Adreno GPUs
 // the Adreno bug is only when gl_FrontFacing is inside a function
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1154842
-vec3 getNormal(Varyings v, bool isFrontFacing){
+vec3 getNormal(Varyings varyings, bool isFrontFacing){
     #ifdef RENDERER_HAS_NORMAL
-        vec3 normal = normalize(v.v_normal);
+        vec3 normal = normalize(varyings.v_normal);
     #elif defined(HAS_DERIVATIVES)
-        vec3 pos_dx = dFdx(v.v_pos);
-        vec3 pos_dy = dFdy(v.v_pos);
+        vec3 pos_dx = dFdx(varyings.v_pos);
+        vec3 pos_dy = dFdy(varyings.v_pos);
         vec3 normal = normalize( cross(pos_dx, pos_dy) );
     #else
         vec3 normal = vec3(0, 0, 1);
@@ -27,13 +27,13 @@ vec3 getNormalByNormalTexture(mat3 tbn, sampler2D normalTexture, float normalInt
     return normal;
 }
 
-mat3 getTBN(Varyings v, bool isFrontFacing){
+mat3 getTBN(Varyings varyings, bool isFrontFacing){
     #if defined(RENDERER_HAS_NORMAL) && defined(RENDERER_HAS_TANGENT)
-        mat3 tbn = mat3(v.v_tangent, v.v_bitangent, v.v_normal);
+        mat3 tbn = mat3(varyings.v_tangent, varyings.v_bitangent, varyings.v_normal);
     #else
-        vec3 normal = getNormal(v, isFrontFacing);
-        vec3 position = v.v_pos;
-        vec2 uv = isFrontFacing? v.v_uv: -v.v_uv;
+        vec3 normal = getNormal(varyings, isFrontFacing);
+        vec3 position = varyings.v_pos;
+        vec2 uv = isFrontFacing? varyings.v_uv: -varyings.v_uv;
 
         #ifdef HAS_DERIVATIVES
             // ref: http://www.thetenthplanet.de/archives/1180

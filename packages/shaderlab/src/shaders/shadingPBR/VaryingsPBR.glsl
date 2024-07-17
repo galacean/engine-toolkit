@@ -25,10 +25,8 @@ struct Varyings{
 
 	vec3 v_pos;
 
-	#ifdef SCENE_IS_CALCULATE_SHADOWS
-		#if SCENE_SHADOW_CASCADED_COUNT==1
-	        vec3 v_shadowCoord;
-	    #endif
+	#if defined(SCENE_SHADOW_CASCADED_COUNT) && (SCENE_SHADOW_CASCADED_COUNT == 1)
+	    vec3 v_shadowCoord;
 	#endif
 };
 

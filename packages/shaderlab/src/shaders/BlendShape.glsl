@@ -25,7 +25,7 @@
 		#endif
 	#endif
 
-	void calculateBlendShape(Attributes attr, inout vec4 position
+	void calculateBlendShape(Attributes attributes, inout vec4 position
         #ifdef RENDERER_HAS_NORMAL
             ,inout vec3 normal
         #endif
@@ -55,44 +55,44 @@
     
     		}
     	#else
-    		position.xyz += attr.POSITION_BS0 * renderer_BlendShapeWeights[0];
-    		position.xyz += attr.POSITION_BS1 * renderer_BlendShapeWeights[1];
+    		position.xyz += attributes.POSITION_BS0 * renderer_BlendShapeWeights[0];
+    		position.xyz += attributes.POSITION_BS1 * renderer_BlendShapeWeights[1];
 
     		#if defined( RENDERER_BLENDSHAPE_HAS_NORMAL ) && defined( RENDERER_BLENDSHAPE_HAS_TANGENT )
     			#ifdef RENDERER_HAS_NORMAL
-    				normal += attr.NORMAL_BS0 * renderer_BlendShapeWeights[0];
-    				normal += attr.NORMAL_BS1 * renderer_BlendShapeWeights[1];
+    				normal += attributes.NORMAL_BS0 * renderer_BlendShapeWeights[0];
+    				normal += attributes.NORMAL_BS1 * renderer_BlendShapeWeights[1];
     			#endif
                     
     			#ifdef RENDERER_HAS_TANGENT
-    				tangent.xyz += attr.TANGENT_BS0 * renderer_BlendShapeWeights[0];
-    				tangent.xyz += attr.TANGENT_BS1 * renderer_BlendShapeWeights[1];
+    				tangent.xyz += attributes.TANGENT_BS0 * renderer_BlendShapeWeights[0];
+    				tangent.xyz += attributes.TANGENT_BS1 * renderer_BlendShapeWeights[1];
     			#endif				
     		#else
     			#if defined( RENDERER_BLENDSHAPE_HAS_NORMAL ) || defined( RENDERER_BLENDSHAPE_HAS_TANGENT )
-    				position.xyz += attr.POSITION_BS2 * renderer_BlendShapeWeights[2];
-    				position.xyz += attr.POSITION_BS3 * renderer_BlendShapeWeights[3];
+    				position.xyz += attributes.POSITION_BS2 * renderer_BlendShapeWeights[2];
+    				position.xyz += attributes.POSITION_BS3 * renderer_BlendShapeWeights[3];
 
     				#if defined( RENDERER_BLENDSHAPE_HAS_NORMAL ) && defined( RENDERER_HAS_NORMAL )
-    					normal += attr.NORMAL_BS0 * renderer_BlendShapeWeights[0];
-    					normal += attr.NORMAL_BS1 * renderer_BlendShapeWeights[1];
-    					normal += attr.NORMAL_BS2 * renderer_BlendShapeWeights[2];
-    					normal += attr.NORMAL_BS3 * renderer_BlendShapeWeights[3];
+    					normal += attributes.NORMAL_BS0 * renderer_BlendShapeWeights[0];
+    					normal += attributes.NORMAL_BS1 * renderer_BlendShapeWeights[1];
+    					normal += attributes.NORMAL_BS2 * renderer_BlendShapeWeights[2];
+    					normal += attributes.NORMAL_BS3 * renderer_BlendShapeWeights[3];
     				#endif
 
     				#if defined(RENDERER_BLENDSHAPE_HAS_TANGENT) && defined( RENDERER_HAS_TANGENT )
-    					tangent.xyz += attr.TANGENT_BS0 * renderer_BlendShapeWeights[0];
-    					tangent.xyz += attr.TANGENT_BS1 * renderer_BlendShapeWeights[1];
-    					tangent.xyz += attr.TANGENT_BS2 * renderer_BlendShapeWeights[2];
-    					tangent.xyz += attr.TANGENT_BS3 * renderer_BlendShapeWeights[3];
+    					tangent.xyz += attributes.TANGENT_BS0 * renderer_BlendShapeWeights[0];
+    					tangent.xyz += attributes.TANGENT_BS1 * renderer_BlendShapeWeights[1];
+    					tangent.xyz += attributes.TANGENT_BS2 * renderer_BlendShapeWeights[2];
+    					tangent.xyz += attributes.TANGENT_BS3 * renderer_BlendShapeWeights[3];
     				#endif
     			#else
-    				position.xyz += attr.POSITION_BS2 * renderer_BlendShapeWeights[2];
-    				position.xyz += attr.POSITION_BS3 * renderer_BlendShapeWeights[3];
-    				position.xyz += attr.POSITION_BS4 * renderer_BlendShapeWeights[4];
-    				position.xyz += attr.POSITION_BS5 * renderer_BlendShapeWeights[5];
-    				position.xyz += attr.POSITION_BS6 * renderer_BlendShapeWeights[6];
-    				position.xyz += attr.POSITION_BS7 * renderer_BlendShapeWeights[7];
+    				position.xyz += attributes.POSITION_BS2 * renderer_BlendShapeWeights[2];
+    				position.xyz += attributes.POSITION_BS3 * renderer_BlendShapeWeights[3];
+    				position.xyz += attributes.POSITION_BS4 * renderer_BlendShapeWeights[4];
+    				position.xyz += attributes.POSITION_BS5 * renderer_BlendShapeWeights[5];
+    				position.xyz += attributes.POSITION_BS6 * renderer_BlendShapeWeights[6];
+    				position.xyz += attributes.POSITION_BS7 * renderer_BlendShapeWeights[7];
     			#endif
     		#endif
     	#endif

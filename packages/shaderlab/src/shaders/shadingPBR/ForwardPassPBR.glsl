@@ -11,37 +11,47 @@
 #include "LightDirectPBR.glsl"
 #include "LightIndirectPBR.glsl"
 
-Varyings PBRVertex(Attributes attr) {
-  Varyings v;
+Varyings PBRVertex(Attributes attributes) {
+  Varyings varyings;
 
-  initUV(attr, v);
-  initVertexColor(attr, v);
-  initTransform(attr, v);
-  initShadowCorrd(attr, v);
+  varyings.v_uv = getUV0(attributes);
+  #ifdef RENDERER_HAS_UV1
+      varyings.v_uv1 = attributes.TEXCOORD_1;
+  #endif
 
-  return v;
+  #ifdef RENDERER_ENABLE_VERTEXCOLOR
+    varyings.v_color = attributes.COLOR_0;
+  #endif
+
+  initTransform(attributes, varyings);
+
+  #if defined(SCENE_SHADOW_CASCADED_COUNT) && (SCENE_SHADOW_CASCADED_COUNT == 1)
+      // varyings.v_shadowCoord = getShadowCoord(varyings.v_pos);
+  #endif
+
+  return varyings;
 }
 
-void PBRFragment(Varyings v) {
+void PBRFragment(Varyings varyings) {
   SurfaceData surfaceData;
   BRDFData brdfData;
 
-  initSurfaceData(v, surfaceData, gl_FrontFacing);
+  initSurfaceData(varyings, surfaceData, gl_FrontFacing);
   // Can modify surfaceData here.
-  initBRDFData(v, surfaceData, brdfData, gl_FrontFacing);
+  initBRDFData(varyings, surfaceData, brdfData, gl_FrontFacing);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
   // Direct Light
-  evaluateDirectRadiance(v, brdfData, color.rgb);
+  evaluateDirectRadiance(varyings, brdfData, color.rgb);
   // IBL
-  evaluateIBL(v, brdfData, color.rgb);
+  evaluateIBL(varyings, brdfData, color.rgb);
   // Emissive
   color.rgb += surfaceData.emissiveColor;
 
 
   #if SCENE_FOG_MODE != 0
-      color = fog(color, v.v_positionVS);
+      color = fog(color, varyings.v_positionVS);
   #endif
 
   #ifndef ENGINE_IS_COLORSPACE_GAMMA
