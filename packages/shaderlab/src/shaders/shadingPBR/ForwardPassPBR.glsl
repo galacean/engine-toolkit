@@ -17,38 +17,38 @@
 Varyings PBRVertex(Attributes attributes) {
   Varyings varyings;
 
-  varyings.v_uv = getUV0(attributes);
+  varyings.uv = getUV0(attributes);
   #ifdef RENDERER_HAS_UV1
-      varyings.v_uv1 = attributes.TEXCOORD_1;
+      varyings.uv1 = attributes.TEXCOORD_1;
   #endif
 
   #ifdef RENDERER_ENABLE_VERTEXCOLOR
-    varyings.v_color = attributes.COLOR_0;
+    varyings.vertexColor = attributes.COLOR_0;
   #endif
 
 
   VertexInputs vertexInputs = getVertexInputs(attributes);
 
   // positionWS
-  varyings.v_pos = vertexInputs.positionWS;
+  varyings.positionWS = vertexInputs.positionWS;
 
   // positionVS
   #if SCENE_FOG_MODE != 0
-	  varyings.v_positionVS = vertexInputs.positionVS;
+	  varyings.positionVS = vertexInputs.positionVS;
 	#endif
 
   // normalWS、tangentWS、bitangentWS
   #ifdef RENDERER_HAS_NORMAL
-    varyings.v_normal = vertexInputs.normalWS;
+    varyings.normalWS = vertexInputs.normalWS;
     #ifdef RENDERER_HAS_TANGENT
-      varyings.v_tangent = vertexInputs.tangentWS;
-      varyings.v_bitangent = vertexInputs.bitangentWS;
+      varyings.tangentWS = vertexInputs.tangentWS;
+      varyings.bitangentWS = vertexInputs.bitangentWS;
     #endif
   #endif
 
   // ShadowCoord
   #if defined(NEED_CALCULATE_SHADOWS) && (SCENE_SHADOW_CASCADED_COUNT == 1)
-      varyings.v_shadowCoord = getShadowCoord(vertexInputs.positionWS);
+      varyings.shadowCoord = getShadowCoord(vertexInputs.positionWS);
   #endif
 
   gl_Position = renderer_MVPMat * vertexInputs.positionOS;
@@ -69,11 +69,11 @@ void PBRFragment(Varyings varyings) {
   float shadowAttenuation = 1.0;
   #if defined(SCENE_DIRECT_LIGHT_COUNT) && defined(NEED_CALCULATE_SHADOWS)
     #if SCENE_SHADOW_CASCADED_COUNT == 1
-      vec3 shadowCoord = varyings.v_shadowCoord;
+      vec3 shadowCoord = varyings.shadowCoord;
     #else
-      vec3 shadowCoord = getShadowCoord(varyings.v_pos);
+      vec3 shadowCoord = getShadowCoord(varyings.positionWS);
     #endif
-    shadowAttenuation *= sampleShadowMap(varyings.v_pos, shadowCoord);
+    shadowAttenuation *= sampleShadowMap(varyings.positionWS, shadowCoord);
   #endif
 
   // Evaluate direct lighting
@@ -87,7 +87,7 @@ void PBRFragment(Varyings varyings) {
 
 
   #if SCENE_FOG_MODE != 0
-      color = fog(color, varyings.v_positionVS);
+      color = fog(color, varyings.positionVS);
   #endif
 
   #ifndef ENGINE_IS_COLORSPACE_GAMMA

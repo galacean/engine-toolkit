@@ -78,7 +78,7 @@ SurfaceData getSurfaceData(Varyings v, bool isFrontFacing){
     vec3 emissiveRadiance = material_EmissiveColor;
 
     #ifdef MATERIAL_HAS_BASETEXTURE
-        vec4 baseTextureColor = texture2D(material_BaseTexture, v.v_uv);
+        vec4 baseTextureColor = texture2D(material_BaseTexture, v.uv);
         #ifndef ENGINE_IS_COLORSPACE_GAMMA
             baseTextureColor = gammaToLinear(baseTextureColor);
         #endif
@@ -86,7 +86,7 @@ SurfaceData getSurfaceData(Varyings v, bool isFrontFacing){
     #endif
 
     #ifdef RENDERER_ENABLE_VERTEXCOLOR
-        baseColor *= v.v_color;
+        baseColor *= v.vertexColor;
     #endif
 
 
@@ -97,13 +97,13 @@ SurfaceData getSurfaceData(Varyings v, bool isFrontFacing){
     #endif
 
     #ifdef MATERIAL_HAS_ROUGHNESS_METALLIC_TEXTURE
-        vec4 metalRoughMapColor = texture2D( material_RoughnessMetallicTexture, v.v_uv );
+        vec4 metalRoughMapColor = texture2D( material_RoughnessMetallicTexture, v.uv );
         roughness *= metalRoughMapColor.g;
         metallic *= metalRoughMapColor.b;
     #endif
 
     #ifdef MATERIAL_HAS_SPECULAR_GLOSSINESS_TEXTURE
-        vec4 specularGlossinessColor = texture2D(material_SpecularGlossinessTexture, v.v_uv );
+        vec4 specularGlossinessColor = texture2D(material_SpecularGlossinessTexture, v.uv );
         #ifndef ENGINE_IS_COLORSPACE_GAMMA
             specularGlossinessColor = gammaToLinear(specularGlossinessColor);
         #endif
@@ -113,7 +113,7 @@ SurfaceData getSurfaceData(Varyings v, bool isFrontFacing){
     #endif
 
     #ifdef MATERIAL_HAS_EMISSIVETEXTURE
-        vec4 emissiveColor = texture2D(material_EmissiveTexture, v.v_uv);
+        vec4 emissiveColor = texture2D(material_EmissiveTexture, v.uv);
         #ifndef ENGINE_IS_COLORSPACE_GAMMA
             emissiveColor = gammaToLinear(emissiveColor);
         #endif
@@ -135,12 +135,12 @@ SurfaceData getSurfaceData(Varyings v, bool isFrontFacing){
 
 
     // geometry
-    surfaceData.position = v.v_pos;
+    surfaceData.position = v.positionWS;
     
     #ifdef CAMERA_ORTHOGRAPHIC
         surfaceData.viewDir = -camera_Forward;
     #else
-        surfaceData.viewDir = normalize(camera_Position - v.v_pos);
+        surfaceData.viewDir = normalize(camera_Position - v.positionWS);
     #endif
 
     #ifdef NEED_TANGENT
@@ -148,7 +148,7 @@ SurfaceData getSurfaceData(Varyings v, bool isFrontFacing){
         surfaceData.tangent = tbn[0];
         surfaceData.bitangent = tbn[1];
         #ifdef MATERIAL_HAS_NORMALTEXTURE
-            surfaceData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+            surfaceData.normal = getNormalByNormalTexture(tbn, material_NormalTexture, material_NormalIntensity, v.uv, isFrontFacing);
         #else
             surfaceData.normal = tbn[2];
         #endif
@@ -221,7 +221,7 @@ void initCommonBRDFData(SurfaceData surfaceData, inout BRDFData brdfData){
 void initClearCoatBRDFData(Varyings v, inout BRDFData brdfData, bool isFrontFacing){
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
         #ifdef MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE
-            brdfData.clearCoatNormal = getNormalByNormalTexture(mat3(brdfData.tangent, brdfData.bitangent, brdfData.normal), material_ClearCoatNormalTexture, material_NormalIntensity, v.v_uv, isFrontFacing);
+            brdfData.clearCoatNormal = getNormalByNormalTexture(mat3(brdfData.tangent, brdfData.bitangent, brdfData.normal), material_ClearCoatNormalTexture, material_NormalIntensity, v.uv, isFrontFacing);
         #else
             brdfData.clearCoatNormal = getNormal(v, isFrontFacing);
         #endif
@@ -231,11 +231,11 @@ void initClearCoatBRDFData(Varyings v, inout BRDFData brdfData, bool isFrontFaci
         brdfData.clearCoatRoughness = material_ClearCoatRoughness;
 
         #ifdef MATERIAL_HAS_CLEAR_COAT_TEXTURE
-            brdfData.clearCoat *= (texture2D( material_ClearCoatTexture, v.v_uv )).r;
+            brdfData.clearCoat *= (texture2D( material_ClearCoatTexture, v.uv )).r;
         #endif
 
         #ifdef MATERIAL_HAS_CLEAR_COAT_ROUGHNESS_TEXTURE
-            brdfData.clearCoatRoughness *= (texture2D( material_ClearCoatRoughnessTexture, v.v_uv )).g;
+            brdfData.clearCoatRoughness *= (texture2D( material_ClearCoatRoughnessTexture, v.uv )).g;
         #endif
 
         brdfData.clearCoat = saturate( brdfData.clearCoat );
@@ -251,7 +251,7 @@ void initAnisotropyBRDFData(Varyings v, inout BRDFData brdfData){
         float anisotropy = material_AnisotropyInfo.z;
         vec3 anisotropicDirection = vec3(material_AnisotropyInfo.xy, 0.0);
         #ifdef MATERIAL_HAS_ANISOTROPY_TEXTURE
-            vec3 anisotropyTextureInfo = (texture2D( material_AnisotropyTexture, v.v_uv )).rgb;
+            vec3 anisotropyTextureInfo = (texture2D( material_AnisotropyTexture, v.uv )).rgb;
             anisotropy *= anisotropyTextureInfo.b;
             anisotropicDirection.xy *= anisotropyTextureInfo.rg * 2.0 - 1.0;
         #endif
@@ -270,10 +270,10 @@ void initAO(Varyings v, inout BRDFData brdfData){
     float specularAO = 1.0;
 
     #ifdef MATERIAL_HAS_OCCLUSION_TEXTURE
-        vec2 aoUV = v.v_uv;
+        vec2 aoUV = v.uv;
         #ifdef RENDERER_HAS_UV1
             if(material_OcclusionTextureCoord == 1.0){
-                aoUV = v.v_uv1;
+                aoUV = v.uv1;
             }
         #endif
         diffuseAO = ((texture2D(material_OcclusionTexture, aoUV)).r - 1.0) * material_OcclusionIntensity + 1.0;
