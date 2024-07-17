@@ -11,6 +11,8 @@ struct Varyings{
   		vec4 v_color;
 	#endif
 
+	vec3 v_pos;
+
 	#if SCENE_FOG_MODE != 0
 	    vec3 v_positionVS;
 	#endif
@@ -23,9 +25,8 @@ struct Varyings{
 	    #endif
 	#endif
 
-	vec3 v_pos;
 
-	#if defined(SCENE_SHADOW_CASCADED_COUNT) && (SCENE_SHADOW_CASCADED_COUNT == 1)
+	#if defined(SCENE_IS_CALCULATE_SHADOWS) && (SCENE_SHADOW_CASCADED_COUNT == 1)
 	    vec3 v_shadowCoord;
 	#endif
 };

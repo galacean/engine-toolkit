@@ -28,10 +28,11 @@
 	void calculateBlendShape(Attributes attributes, inout vec4 position
         #ifdef RENDERER_HAS_NORMAL
             ,inout vec3 normal
+			 #ifdef RENDERER_HAS_TANGENT
+            	,inout vec4 tangent
+        	#endif
         #endif
-        #ifdef RENDERER_HAS_TANGENT
-            ,inout vec4 tangent
-        #endif
+       
 	){
 		#ifdef RENDERER_BLENDSHAPE_USE_TEXTURE	
     		int vertexOffset = gl_VertexID * renderer_BlendShapeTextureInfo.x;

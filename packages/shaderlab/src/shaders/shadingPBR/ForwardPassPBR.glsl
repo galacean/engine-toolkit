@@ -11,6 +11,7 @@
 #include "LightDirectPBR.glsl"
 #include "LightIndirectPBR.glsl"
 
+
 Varyings PBRVertex(Attributes attributes) {
   Varyings varyings;
 
@@ -23,11 +24,32 @@ Varyings PBRVertex(Attributes attributes) {
     varyings.v_color = attributes.COLOR_0;
   #endif
 
-  initTransform(attributes, varyings);
 
-  #if defined(SCENE_SHADOW_CASCADED_COUNT) && (SCENE_SHADOW_CASCADED_COUNT == 1)
-      // varyings.v_shadowCoord = getShadowCoord(varyings.v_pos);
+  VertexInputs vertexInputs = getVertexInputs(attributes);
+
+  // positionWS
+  varyings.v_pos = vertexInputs.positionWS;
+
+  // positionVS
+  #if SCENE_FOG_MODE != 0
+	  varyings.v_positionVS = vertexInputs.positionVS;
+	#endif
+
+  // normalWS、tangentWS、bitangentWS
+  #ifdef RENDERER_HAS_NORMAL
+    varyings.v_normal = vertexInputs.normalWS;
+    #ifdef RENDERER_HAS_TANGENT
+      varyings.v_tangent = vertexInputs.tangentWS;
+      varyings.v_bitangent = vertexInputs.bitangentWS;
+    #endif
   #endif
+
+  // ShadowCoord
+  #if defined(SCENE_IS_CALCULATE_SHADOWS) && (SCENE_SHADOW_CASCADED_COUNT == 1)
+      varyings.v_shadowCoord = getShadowCoord(vertexInputs.positionWS);
+  #endif
+
+  gl_Position = renderer_MVPMat * vertexInputs.positionOS;
 
   return varyings;
 }
