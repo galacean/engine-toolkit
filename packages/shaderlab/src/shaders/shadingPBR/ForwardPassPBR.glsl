@@ -60,8 +60,18 @@ void PBRFragment(Varyings varyings) {
   SurfaceData surfaceData = getSurfaceData(varyings, gl_FrontFacing);
 
   BRDFData brdfData;
+
+
+  // Get aoUV
+  vec2 aoUV = varyings.uv;
+  #if defined(MATERIAL_HAS_OCCLUSION_TEXTURE) && defined(RENDERER_HAS_UV1)
+    if(material_OcclusionTextureCoord == 1.0){
+        aoUV = varyings.uv1;
+    }
+  #endif
+
   // Can modify surfaceData here.
-  initBRDFData(varyings, surfaceData, brdfData, gl_FrontFacing);
+  initBRDFData(varyings.uv, aoUV, surfaceData, brdfData, gl_FrontFacing);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
