@@ -4,14 +4,13 @@
 #include "Common.glsl"
 #include "Fog.glsl"
 
+#include "AttributesPBR.glsl"
+#include "VaryingsPBR.glsl"
 #include "LightDirectPBR.glsl"
 #include "LightIndirectPBR.glsl"
 
-#include "AttributesPBR.glsl"
-#include "VaryingsPBR.glsl"
 #include "VertexPBR.glsl"
 #include "FragmentPBR.glsl"
-
 
 
 Varyings PBRVertex(Attributes attributes) {
@@ -87,10 +86,10 @@ void PBRFragment(Varyings varyings) {
   #endif
 
   // Evaluate direct lighting
-  evaluateDirectRadiance(shadowAttenuation, surfaceData, brdfData, color.rgb);
+  evaluateDirectRadiance(varyings, surfaceData, brdfData, shadowAttenuation, color.rgb);
 
   // IBL
-  evaluateIBL(surfaceData, brdfData, color.rgb);
+  evaluateIBL(varyings, surfaceData, brdfData, color.rgb);
 
   // Emissive
   color.rgb += surfaceData.emissiveColor;

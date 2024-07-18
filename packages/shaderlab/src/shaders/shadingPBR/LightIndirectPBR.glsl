@@ -105,7 +105,7 @@ vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness
 }
 
 
-void evaluateDiffuseIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec3 diffuseColor){
+void evaluateDiffuseIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, inout vec3 diffuseColor){
     #ifdef SCENE_USE_SH
         vec3 irradiance = getLightProbeIrradiance(scene_EnvSH, surfaceData.normal);
         #ifdef ENGINE_IS_COLORSPACE_GAMMA
@@ -120,7 +120,7 @@ void evaluateDiffuseIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec3 d
     diffuseColor += surfaceData.diffuseAO * irradiance * BRDF_Diffuse_Lambert( brdfData.diffuseColor );
 }
 
-float evaluateClearCoatIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec3 specularColor){
+float evaluateClearCoatIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, inout vec3 specularColor){
     float radianceAttenuation = 1.0;
 
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
@@ -132,24 +132,24 @@ float evaluateClearCoatIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec
     return radianceAttenuation;
 }
 
-void evaluateSpecularIBL(SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
+void evaluateSpecularIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
     vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, brdfData.roughness);
     specularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDFApprox(brdfData.specularColor, brdfData.roughness, surfaceData.dotNV );
 }
 
 
-void evaluateIBL(SurfaceData surfaceData, BRDFData brdfData, inout vec3 color){
+void evaluateIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color){
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
 
     // IBL diffuse
-    FUNCTION_DIFFUSE_IBL(surfaceData, brdfData, diffuseColor);
+    FUNCTION_DIFFUSE_IBL(varyings, surfaceData, brdfData, diffuseColor);
 
     // IBL ClearCoat
-    float radianceAttenuation = FUNCTION_CLEAR_COAT_IBL(surfaceData, brdfData, specularColor);
+    float radianceAttenuation = FUNCTION_CLEAR_COAT_IBL(varyings, surfaceData, brdfData, specularColor);
 
     // IBL specular
-    FUNCTION_SPECULAR_IBL(surfaceData, brdfData, radianceAttenuation, specularColor);
+    FUNCTION_SPECULAR_IBL(varyings, surfaceData, brdfData, radianceAttenuation, specularColor);
 
     color += diffuseColor + specularColor;
 }
