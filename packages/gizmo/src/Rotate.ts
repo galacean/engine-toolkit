@@ -183,18 +183,22 @@ export class RotateControl extends GizmoComponent {
   }
 
   onHoverStart(axisName: string): void {
+    if (this._selectedAxis === axisType[axisName]) return;
+    this.onHoverEnd();
+
     this._selectedAxis = axisType[axisName];
-    // high light when mouse enter
     const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent.highLight && currComponent.highLight();
   }
 
   onHoverEnd(): void {
-    // unlight when mouse leave
-    const currEntity = this.gizmoEntity.findByName(axisType[this._selectedAxis]);
-    const currComponent = currEntity.getComponent(Axis);
-    currComponent.unLight && currComponent.unLight();
+    const axesEntity = this.gizmoEntity.children;
+    for (let entity of axesEntity) {
+      const component = entity.getComponent(Axis);
+      component.unLight && component.unLight();
+    }
+
     this._selectedAxis = null;
   }
 
@@ -327,6 +331,8 @@ export class RotateControl extends GizmoComponent {
   onSwitch(isModified: boolean = false) {
     this._resizeControl(isModified);
   }
+
+  onAlphaChange(axisName: string, value: number): void {}
 
   private _setAxisSelected(axis: axisType, isSelected: boolean): void {
     const axisMesh = this._rotateControlMap[axis].axisMesh[0];

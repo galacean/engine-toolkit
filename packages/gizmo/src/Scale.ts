@@ -42,6 +42,9 @@ export class ScaleControl extends GizmoComponent {
   }
 
   onHoverStart(axisName: string): void {
+    if (this._selectedAxis === axisType[axisName]) return;
+    this.onHoverEnd();
+
     this._selectedAxis = axisType[axisName];
     const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
@@ -49,9 +52,13 @@ export class ScaleControl extends GizmoComponent {
   }
 
   onHoverEnd(): void {
-    const currEntity = this.gizmoEntity.findByName(axisType[this._selectedAxis]);
-    const currComponent = currEntity.getComponent(Axis);
-    currComponent.unLight && currComponent.unLight();
+    const axesEntity = this.gizmoEntity.children;
+    for (let entity of axesEntity) {
+      const component = entity.getComponent(Axis);
+      component.unLight && component.unLight();
+    }
+
+    this._selectedAxis = null;
   }
 
   onMoveStart(ray: Ray, axisName: string): void {
@@ -130,6 +137,14 @@ export class ScaleControl extends GizmoComponent {
 
   onSwitch(isModified: boolean = false) {
     this._resizeControl(isModified);
+  }
+
+  onAlphaChange(axisName: string, value: number): void {
+    const entity = this.gizmoEntity.findByName(axisName);
+    if (entity) {
+      const component = entity.getComponent(Axis);
+      component.alpha(value);
+    }
   }
 
   private _initAxis(): void {

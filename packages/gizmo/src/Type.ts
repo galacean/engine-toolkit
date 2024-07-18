@@ -30,6 +30,8 @@ export abstract class GizmoComponent extends Component {
   abstract onUpdate(isModified: boolean): void;
   /** Called when camera switch between ortho and perps.*/
   abstract onSwitch(isModified: boolean): void;
+  /** Called when axis alpha needs to be modified.*/
+  abstract onAlphaChange(axisName: string, value: number): void;
 }
 
 export enum axisType {

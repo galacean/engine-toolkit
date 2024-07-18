@@ -43,18 +43,21 @@ export class TranslateControl extends GizmoComponent {
   }
 
   onHoverStart(axisName: string): void {
+    if (this._selectedAxis === axisType[axisName]) return;
+    this.onHoverEnd();
+
     this._selectedAxis = axisType[axisName];
-    // change color
     const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent.highLight && currComponent.highLight();
   }
 
   onHoverEnd(): void {
-    // recover axis color
-    const currEntity = this.gizmoEntity.findByName(axisType[this._selectedAxis]);
-    const currComponent = currEntity.getComponent(Axis);
-    currComponent.unLight && currComponent.unLight();
+    const axesEntity = this.gizmoEntity.children;
+    for (let entity of axesEntity) {
+      const component = entity.getComponent(Axis);
+      component.unLight && component.unLight();
+    }
 
     this._selectedAxis = null;
   }
@@ -124,6 +127,26 @@ export class TranslateControl extends GizmoComponent {
 
   onSwitch() {
     this._resizeControl();
+  }
+
+  onAlphaChange(axisName: string, value: number) {
+    switch (axisName) {
+      case "x":
+        this._changeAxisAlpha("x", value);
+        this._changeAxisAlpha("xy", value);
+        this._changeAxisAlpha("xz", value);
+        break;
+      case "y":
+        this._changeAxisAlpha("y", value);
+        this._changeAxisAlpha("xy", value);
+        this._changeAxisAlpha("xz", value);
+        break;
+      case "z":
+        this._changeAxisAlpha("z", value);
+        this._changeAxisAlpha("xz", value);
+        this._changeAxisAlpha("yz", value);
+        break;
+    }
   }
 
   private _initAxis(): void {
@@ -256,5 +279,13 @@ export class TranslateControl extends GizmoComponent {
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
       _tempVec0.set(this._tempScale, this._tempScale, this._tempScale)
     );
+  }
+
+  private _changeAxisAlpha(axisName: string, value: number) {
+    const entity = this.gizmoEntity.findByName(axisName);
+    if (entity) {
+      const component = entity.getComponent(Axis);
+      component.alpha(value);
+    }
   }
 }

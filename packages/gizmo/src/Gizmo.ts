@@ -4,8 +4,6 @@ import {
   Ray,
   Layer,
   PointerButton,
-  SphereColliderShape,
-  StaticCollider,
   Vector3,
   MathUtil,
   Script,
@@ -13,7 +11,8 @@ import {
   PointerPhase,
   Vector2,
   Component,
-  MeshRenderer
+  MeshRenderer,
+  Matrix
 } from "@galacean/engine";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
@@ -27,9 +26,10 @@ import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
  * Gizmo controls, including translate, rotate, scale
  */
 export class Gizmo extends Script {
+  epsilon = 0.05;
+
   private _initialized = false;
   private _isStarted = false;
-  private _isHovered = false;
   private _lastDistance: number = -1;
   private _lastOrthoSize: number = -1;
   private _lastIsOrtho: boolean = false;
@@ -43,14 +43,15 @@ export class Gizmo extends Script {
 
   private _group: Group = new Group();
 
-  private _tempVec: Vector3 = new Vector3();
+  private _tempVec30: Vector3 = new Vector3();
+  private _tempVec31: Vector3 = new Vector3();
+  private _worldMat: Matrix = new Matrix();
+
   private _tempRay: Ray = new Ray();
   private _tempRay2: Ray = new Ray();
 
   private _type: State = null;
   private _scalar: number = 1;
-
-  private _sphereColliderEntity: Entity;
 
   /**
    * initial scene camera & select group in gizmo
@@ -142,13 +143,6 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.scale, ScaleControl);
 
     this.layer = Layer.Layer31;
-    // gizmo collider
-    this._sphereColliderEntity = entity.createChild("gizmoCollider");
-    const sphereCollider = this._sphereColliderEntity.addComponent(StaticCollider);
-    const colliderShape = new SphereColliderShape();
-    colliderShape.radius = Utils.rotateCircleRadius + 0.8;
-    sphereCollider.addShape(colliderShape);
-
     this.state = this._type;
   }
 
@@ -168,8 +162,7 @@ export class Gizmo extends Script {
         this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
       });
     }
-    this._group.getWorldPosition(this._tempVec);
-    this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
+    this._group.getWorldPosition(this._tempVec30);
     if (this._isStarted) {
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
@@ -185,11 +178,10 @@ export class Gizmo extends Script {
         this._group._gizmoTransformDirty = false;
       }
     } else {
-      this._group.getWorldPosition(this._tempVec);
-      this._sphereColliderEntity.transform.setPosition(this._tempVec.x, this._tempVec.y, this._tempVec.z);
+      this._group.getWorldPosition(this._tempVec30);
 
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
-      const currDistance = Vector3.distance(cameraPosition, this._tempVec);
+      const currDistance = Vector3.distance(cameraPosition, this._tempVec30);
       let distanceDirty = false;
       if (Math.abs(this._lastDistance - currDistance) > MathUtil.zeroTolerance) {
         distanceDirty = true;
@@ -224,30 +216,21 @@ export class Gizmo extends Script {
             }
           });
         } else {
-          this._sceneCamera.screenPointToRay(pointer.position, this._tempRay);
-          const isHit = this.engine.sceneManager.scenes[0].physics.raycast(
-            this._tempRay,
-            Number.MAX_VALUE,
-            this._layer
-          );
+          const originLayer = this._sceneCamera.cullingMask;
+          this._sceneCamera.cullingMask = this._layer;
 
-          if (isHit) {
-            const originLayer = this._sceneCamera.cullingMask;
-            this._sceneCamera.cullingMask = this._layer;
-
-            const result = this._framebufferPicker.pick(pointer.position.x, pointer.position.y);
-            this._sceneCamera.cullingMask = originLayer;
-
-            result.then((result) => {
-              this._onGizmoHoverEnd();
-              if (result) {
-                this._overHandler(result);
-              }
-            });
-          }
+          const result = this._framebufferPicker.pick(pointer.position.x, pointer.position.y);
+          this._sceneCamera.cullingMask = originLayer;
+          result.then((result) => {
+            this._overHandler(result);
+          });
         }
       }
     }
+  }
+
+  override onLateUpdate(deltaTime: number): void {
+    this._adjustAxisAlpha();
   }
 
   private _createGizmoControl(type: State, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
@@ -256,21 +239,14 @@ export class Gizmo extends Script {
   }
 
   private _onGizmoHoverStart(currentType: State, axisName: string): void {
-    if (!this._isHovered) {
-      this._isHovered = true;
-      this._traverseControl(currentType, (control) => {
-        this._currentControl = control;
-      });
-
-      this._currentControl.onHoverStart(axisName);
-    }
+    this._traverseControl(currentType, (control) => {
+      this._currentControl = control;
+    });
+    this._currentControl.onHoverStart(axisName);
   }
 
   private _onGizmoHoverEnd(): void {
-    if (this._isHovered) {
-      this._currentControl && this._currentControl.onHoverEnd();
-      this._isHovered = false;
-    }
+    this._currentControl && this._currentControl.onHoverEnd();
   }
 
   private _triggerGizmoStart(currentType: State, axisName: string): void {
@@ -326,10 +302,14 @@ export class Gizmo extends Script {
   }
 
   private _overHandler(result: Component): void {
-    const material = (<MeshRenderer>result).getMaterial();
-    const currentControl = parseInt(material.name);
-    const hoverEntity = result.entity;
-    this._onGizmoHoverStart(currentControl, hoverEntity.name);
+    if (result) {
+      const material = (<MeshRenderer>result).getMaterial();
+      const currentControl = parseInt(material.name);
+      const hoverEntity = result.entity;
+      this._onGizmoHoverStart(currentControl, hoverEntity.name);
+    } else {
+      this._onGizmoHoverEnd();
+    }
   }
 
   private _traverseEntity(entity: Entity, callback: (entity: Entity) => any) {
@@ -353,5 +333,39 @@ export class Gizmo extends Script {
         }
       }
     });
+  }
+
+  private _adjustAxisAlpha() {
+    const { xAxisPositive, yAxisPositive, zAxisPositive } = Utils;
+
+    this._traverseControl(this._type, (control) => {
+      control.onAlphaChange("x", this._getAlphaFactor(xAxisPositive));
+      control.onAlphaChange("y", this._getAlphaFactor(yAxisPositive));
+      control.onAlphaChange("z", this._getAlphaFactor(zAxisPositive));
+    });
+  }
+
+  private _getAlphaFactor(axis: Vector3): number {
+    const { _worldMat: worldMat, _tempVec30: cameraDir, _tempVec31: tempVec, epsilon } = this;
+    cameraDir.copyFrom(this._sceneCamera.entity.transform.worldForward).normalize();
+    this._group.getWorldMatrix(worldMat);
+
+    // angel between camera direction and gizmo axis direction
+    Vector3.transformNormal(axis, worldMat, tempVec);
+    const cosThetaDir = Math.abs(Vector3.dot(tempVec, cameraDir));
+
+    if (this._sceneCamera.isOrthographic) {
+      return 1 - cosThetaDir < epsilon ? MathUtil.clamp((1 - cosThetaDir) / epsilon, 0, 1) : 1;
+    } else {
+      // perspective camera needs to consider position
+      // angle between camera direction and camera-entity position
+      this._group.getWorldPosition(tempVec);
+      Vector3.subtract(this._sceneCamera.entity.transform.worldPosition, tempVec, tempVec);
+      const cosThetaPos = Math.abs(Vector3.dot(tempVec.normalize(), cameraDir));
+
+      const minFactor = Math.min(cosThetaDir, cosThetaPos);
+      const maxFactor = Math.max(cosThetaDir, cosThetaPos);
+      return 1 - maxFactor < epsilon ? MathUtil.clamp((1 - minFactor) / epsilon, 0, 1) : 1;
+    }
   }
 }

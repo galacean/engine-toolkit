@@ -1,4 +1,4 @@
-import { Engine, PrimitiveMesh, ModelMesh, CullMode } from "@galacean/engine";
+import { Engine, PrimitiveMesh, ModelMesh, CullMode, Vector3 } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { GizmoMesh } from "./GizmoMesh";
 import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
@@ -44,6 +44,10 @@ export class Utils {
   static axisCubeMesh: ModelMesh;
   static axisSphereMesh: ModelMesh;
   static axisEndCubeMesh: ModelMesh;
+
+  static xAxisPositive: Vector3;
+  static yAxisPositive: Vector3;
+  static zAxisPositive: Vector3;
 
   static init(engine: Engine) {
     // translate material
@@ -93,6 +97,10 @@ export class Utils {
     Utils.axisHelperLineMesh = PrimitiveMesh.createCylinder(engine, 0.15, 0.15, 1.75);
     Utils.axisHelperPlaneMesh = PrimitiveMesh.createPlane(engine, 0.75, 0.75);
     Utils.axisHelpertorusMesh = GizmoMesh.createCircleTube(engine, Math.PI, 1.6, 0.24);
+
+    Utils.xAxisPositive = new Vector3(-1, 0, 0);
+    Utils.yAxisPositive = new Vector3(0, -1, 0);
+    Utils.zAxisPositive = new Vector3(0, 0, -1);
   }
 
   private static _createPlainColorMaterial(
