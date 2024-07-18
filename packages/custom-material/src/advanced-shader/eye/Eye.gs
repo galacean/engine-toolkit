@@ -38,9 +38,6 @@ Shader "eyes/eyes.gs" {
       MATERIAL_HAS_SCLERA_TEXTURE("HAS_SCLERA_TEXTURE");
     }
 
-    Header("Enabled Macros") {
-      [On] MATERIAL_NEED_WORLD_POS("WORLD POS");
-    }
   }
   
   SubShader "Default" {
@@ -55,7 +52,7 @@ Shader "eyes/eyes.gs" {
       VertexShader = PBRVertex;
       FragmentShader = PBRFragment;
       
-      #include "EyeForwardPass.glsl"
+      #include "./EyeForwardPass.glsl"
 
     }
   }

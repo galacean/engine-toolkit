@@ -56,12 +56,6 @@ Shader "hair/hair.gs" {
       MATERIAL_HAS_OCCLUSION_TEXTURE("HAS_OCCLUSION_TEXTURE");
       MATERIAL_IS_TRANSPARENT("IS_TRANSPARENT");
       MATERIAL_IS_ALPHA_CUTOFF("IS_ALPHA_CUTOFF");
-
-    }
-
-    Header("Enabled Macros") {
-      [On] MATERIAL_NEED_WORLD_POS("WORLD POS");
-      [On] MATERIAL_NEED_TILING_OFFSET("TILING_OFFSET");
     }
   }
   
@@ -77,7 +71,7 @@ Shader "hair/hair.gs" {
       VertexShader = PBRVertex;
       FragmentShader = PBRFragment;
       
-      #include "HairForwardPass.glsl"
+      #include "./HairForwardPass.glsl"
 
     }
   }

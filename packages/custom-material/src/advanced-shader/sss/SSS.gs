@@ -52,11 +52,6 @@ Shader "sss/sss.gs" {
       MATERIAL_IS_TRANSPARENT("IS_TRANSPARENT");
       MATERIAL_IS_ALPHA_CUTOFF("IS_ALPHA_CUTOFF");
     }
-
-    Header("Enabled Macros") {
-      [On] MATERIAL_NEED_WORLD_POS("WORLD POS");
-      [On] MATERIAL_NEED_TILING_OFFSET("TILING_OFFSET");
-    }
   }
   
   SubShader "Default" {
@@ -71,7 +66,7 @@ Shader "sss/sss.gs" {
       VertexShader = PBRVertex;
       FragmentShader = PBRFragment;
       
-      #include "SSSForwardPass.glsl"
+      #include "./SSSForwardPass.glsl"
 
     }
   }

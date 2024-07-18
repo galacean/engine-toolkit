@@ -1,3 +1,16 @@
+vec4 material_SkinScatterAmount;
+float material_CurvaturePower;
+
+#ifdef MATERIAL_HAS_CURVATEXTURE
+ sampler2D material_CurvatureTexture;
+#endif
+
+struct FsphericalGaussian {
+    vec3 Axis;  //u
+    vec3 Sharpness; //L
+    vec3 Amplitude; //a
+}
+
 vec3 DotCosineLobe(FsphericalGaussian G , vec3 N)
 {
  float muDotN = dot(G.Axis,N);

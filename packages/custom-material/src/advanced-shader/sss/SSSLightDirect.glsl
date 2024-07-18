@@ -1,7 +1,7 @@
 #define FUNCTION_SURFACE_SHADING surfaceShading_sss
 
 #include "LightDirectPBR.glsl"
-#include "SSSFunction.glsl"
+#include "./SSSFunction.glsl"
 
 void surfaceShading_sss(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, inout vec3 color) {
 

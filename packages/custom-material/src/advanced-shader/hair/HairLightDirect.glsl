@@ -1,6 +1,6 @@
 #define FUNCTION_SPECULAR_LOBE specularLobe_hair
 
-#include "HairFunction.glsl"
+#include "./HairFunction.glsl"
 #include "LightDirectPBR.glsl"
 
 void specularLobe_hair(BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 specularColor){
