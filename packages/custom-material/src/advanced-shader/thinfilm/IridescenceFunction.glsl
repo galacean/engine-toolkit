@@ -44,7 +44,7 @@ vec3 thinFilmIridescence(float cosTheta1, float eta2, vec3 baseF0,float iridesce
  float cosTheta2 = sqrt(cosTheta2Sq);
       
  // First interface
- float R0 = (iorToFresnel(vec3(eta2), eta1)).x;
+ float R0 = iorToFresnel(vec3(eta2), eta1).x;
  float R12 = F_Schlick(R0, cosTheta1);
  float R21  = R12;
  float T121 =1.0 - R12;
@@ -93,8 +93,8 @@ vec3 directBDRFIridescence(SurfaceData surfaceData, vec3 light, BRDFData brdfDat
  float NdotH = saturate(dot(surfaceData.normal, halfDir ) );
  float cosTheta1 = dot(halfDir, light);
 
- vec3 I = thinFilmIridescence(cosTheta1,material_Eta2,brdfData.specularColor,material_IridescenceThickness);    
- return I;
+ vec3 iridescence = thinFilmIridescence(cosTheta1,material_Eta2,brdfData.specularColor,material_IridescenceThickness);    
+ return iridescence;
 }
 
 #endif
