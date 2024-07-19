@@ -1,9 +1,9 @@
 float material_HairFirstWidth;
 float material_HairSecondWidth;
-float material_HairsFirststrength;
-float material_HairsSecondstrength;
-float material_HairFirstOffest;
-float material_HairSecondOffest;
+float material_HairFirstStrength;
+float material_HairSecondStrength;
+float material_HairFirstOffset;
+float material_HairSecondOffset;
 vec4 material_HairFirstColor;
 vec4 material_HairSecondColor;
 

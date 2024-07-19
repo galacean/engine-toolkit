@@ -8,7 +8,7 @@ Shader "/eyes/Eye.gs" {
     material_ScleraNormalStrength("Sclera NormalStrength", Range(0, 5, 0.01)) = 1;
     material_ScleraTexture("Sclera Texture", Texture2D);
     material_ScleraNormal("Sclera NormalTexture", Texture2D);
-    material_Scleramask("Sclera Mask", Texture2D);
+    material_ScleraMask("Sclera Mask", Texture2D);
 
 
     }

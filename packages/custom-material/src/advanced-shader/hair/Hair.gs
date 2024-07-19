@@ -15,10 +15,10 @@ Shader "hair/hair.gs" {
     Header("HairAnisotropy") {
       material_HairFirstWidth("HairFirstWidth", Range(0, 15, 0.01)) = 1;
       material_HairSecondWidth("HairSecondWidth", Range(0, 15, 0.01)) = 1;
-      material_HairsFirststrength("HairsFirstrength", Range(0, 5, 0.01)) = 1;
-      material_HairsSecondstrength("HairsSecondstrength", Range(0, 5, 0.01)) = 1;
-      material_HairFirstOffest("HairFirstOffest", Range(-1, 5, 0.01)) = 1;
-      material_HairSecondOffest("HairSecondOffest", Range(-1, 5, 0.01)) = 1;
+      material_HairFirstStrength("HairsFirstrength", Range(0, 5, 0.01)) = 1;
+      material_HairSecondStrength("HairsSecondstrength", Range(0, 5, 0.01)) = 1;
+      material_HairFirstOffset("HairFirstOffest", Range(-1, 5, 0.01)) = 1;
+      material_HairSecondOffset("HairSecondOffest", Range(-1, 5, 0.01)) = 1;
       material_HairFirstColor("HairFirstColor", Color) = (1,1,1,1);
       material_HairSecondColor("HairSecondColor", Color) = (1,1,1,1);
       material_HairAnisotropyTexture("HairAnisotropyTexture", Texture2D);

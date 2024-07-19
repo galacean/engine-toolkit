@@ -17,7 +17,7 @@ vec4 material_IrisColor;
 #endif
 
 #ifdef MATERIAL_HAS_SCLERA_MASK
- sampler2D material_Scleramask;
+ sampler2D material_ScleraMask;
 #endif
 
 #ifdef MATERIAL_HAS_IRIS_TEXTURE
@@ -66,9 +66,9 @@ vec3 calculateEyeColor(Varyings varyings, mat3 tbn)
   // Get Mask
   float heighttexture = 0.0;
   #ifdef MATERIAL_HAS_SCLERA_MASK
-   vec3 irismasktex = (texture2D(material_Scleramask, irisSizeUV)).rgb;
-   float uvmask = 1.0 - (texture2D(material_Scleramask, varyings.uv )).b;
-   heighttexture = 1.0 - (texture2D(material_Scleramask, parallaxUV)).b;
+   vec3 irismasktex = (texture2D(material_ScleraMask, irisSizeUV)).rgb;
+   float uvmask = 1.0 - (texture2D(material_ScleraMask, varyings.uv )).b;
+   heighttexture = 1.0 - (texture2D(material_ScleraMask, parallaxUV)).b;
   #else
    vec3 irismasktex = vec3(1.0);
    float uvmask = 1.0;
@@ -112,7 +112,7 @@ vec3 calculateEyeNormal(Varyings varyings, mat3 tbn, bool isFrontFacing)
   vec2 irisSizeUV = (varyings.uv  * material_IrisSize) - ((material_IrisSize-1.0)/2.0);
 
   #ifdef MATERIAL_HAS_SCLERA_MASK
-   vec3 irismasktex = (texture2D(material_Scleramask, irisSizeUV)).rgb;
+   vec3 irismasktex = (texture2D(material_ScleraMask, irisSizeUV)).rgb;
   #else
    vec3 irismasktex = vec3(1.0);
   #endif
