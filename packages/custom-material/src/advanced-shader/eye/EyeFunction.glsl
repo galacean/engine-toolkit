@@ -66,11 +66,11 @@ vec3 calculateEyeColor(Varyings varyings, mat3 tbn)
   // Get Mask
   float heighttexture = 0.0;
   #ifdef MATERIAL_HAS_SCLERA_MASK
-   vec3 irismasktex = (texture2D(material_ScleraMask, irisSizeUV)).rgb;
+   vec3 irisMaskTex = (texture2D(material_ScleraMask, irisSizeUV)).rgb;
    float uvmask = 1.0 - (texture2D(material_ScleraMask, varyings.uv )).b;
    heighttexture = 1.0 - (texture2D(material_ScleraMask, parallaxUV)).b;
   #else
-   vec3 irismasktex = vec3(1.0);
+   vec3 irisMaskTex = vec3(1.0);
    float uvmask = 1.0;
    heighttexture = 1.0;
   #endif
@@ -95,11 +95,11 @@ vec3 calculateEyeColor(Varyings varyings, mat3 tbn)
    parallax.rgb *= material_IrisColor.rgb;
   #endif
 
-  vec4 baseColor = mix(scleraColor,parallax,irismasktex.r);
+  vec4 baseColor = mix(scleraColor,parallax,irisMaskTex.r);
 
    // Limbus
   vec4 limbalstrength = (0.0 - (material_Limbal * 10.0 )) * baseColor;
-  float limbalRadius = saturate(irismasktex.g * (1.0 - irismasktex.r));
+  float limbalRadius = saturate(irisMaskTex.g * (1.0 - irisMaskTex.r));
   baseColor = mix(baseColor,limbalstrength,limbalRadius);
   return baseColor.rgb;
 }
@@ -112,9 +112,9 @@ vec3 calculateEyeNormal(Varyings varyings, mat3 tbn, bool isFrontFacing)
   vec2 irisSizeUV = (varyings.uv  * material_IrisSize) - ((material_IrisSize-1.0)/2.0);
 
   #ifdef MATERIAL_HAS_SCLERA_MASK
-   vec3 irismasktex = (texture2D(material_ScleraMask, irisSizeUV)).rgb;
+   vec3 irisMaskTex = (texture2D(material_ScleraMask, irisSizeUV)).rgb;
   #else
-   vec3 irismasktex = vec3(1.0);
+   vec3 irisMaskTex = vec3(1.0);
   #endif
 
   // Normal
@@ -129,5 +129,5 @@ vec3 calculateEyeNormal(Varyings varyings, mat3 tbn, bool isFrontFacing)
   #else
    vec3 irisNormal =  tbn[2];
   #endif
-  return mix(scleraNormal,irisNormal,irismasktex.r);
+  return mix(scleraNormal,irisNormal,irisMaskTex.r);
 }

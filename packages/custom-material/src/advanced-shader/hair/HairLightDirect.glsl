@@ -1,10 +1,10 @@
-#define FUNCTION_SPECULAR_LOBE specularLobe_hair
+#define FUNCTION_SPECULAR_LOBE specularLobehair
 
 #include "BRDF.glsl"
 
 #include "./HairFunction.glsl"
 
-void specularLobe_hair(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 specularColor){
+void specularLobehair(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 specularColor){
     
     vec3 worldtangentDir = surfaceData.tangent;
     vec3 worldbitangentDir = surfaceData.bitangent;

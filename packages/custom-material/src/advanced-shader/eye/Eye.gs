@@ -1,23 +1,21 @@
 Shader "/eyes/Eye.gs" {
   EditorProperties {
-    Header("Sclera") {
+  Header("Sclera") {
     material_ScleraColor("Sclera Color", Color) = (1,1,1,1);
-    material_ScleraSize("Sclera Size", Range(0, 5, 0.01)) = 1.5;
-    material_Metal("Sclera Specular", Range(0,1,0.01) ) = 1;
-    material_Roughness("Sclera Roughness", Range( 0, 1, 0.01 ) ) = 1
+    material_ScleraSize("Sclera Size", Range(0, 5, 0.01)) = 1.0;
+    material_Metal("Sclera Specular", Range(0,1,0.01) ) = 0.2;
+    material_Roughness("Sclera Roughness", Range( 0, 1, 0.01 ) ) = 0.2;
     material_ScleraNormalStrength("Sclera NormalStrength", Range(0, 5, 0.01)) = 1;
     material_ScleraTexture("Sclera Texture", Texture2D);
     material_ScleraNormal("Sclera NormalTexture", Texture2D);
     material_ScleraMask("Sclera Mask", Texture2D);
-
-
     }
   Header("Iris") {
     material_IrisColor("Iris Color", Color) = (1,1,1,1);
-    material_PupilSize("Pupil Dilation", Vector2) =(1, 0);
+    material_PupilSize("Pupil Dilation", Vector2) =(0.3, 0.3);
     material_Limbal("Limbal Ring Amount", Range(0, 1, 0.01)) = 0.5;
-    material_IrisSize("Iris Size", Range(0, 5, 0.01)) = 1.5;
-    material_Parallax("Parallax Layer", Range(0, 0.5, 0.01)) = 0.1;
+    material_IrisSize("Iris Size", Range(0, 5, 0.01)) = 2;
+    material_Parallax("Parallax Layer", Range(0, 0.5, 0.01)) = 0.08;
     material_IrisNormalStrength("Iris NormalStrength", Range(0, 5, 0.01)) = 1;
 
     material_IrisTexture("Iris Texture", Texture2D);

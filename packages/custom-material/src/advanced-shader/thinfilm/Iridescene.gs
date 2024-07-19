@@ -6,9 +6,9 @@ Shader "/thin/Iridescene.gs" {
     }
 
   Header("Thin Film"){
-      material_Eta2( "IridescentIOR", Range( 1, 10, 0.1 ) ) = 1;
-      material_Iridescence("Iridescence",  Range(0.0 , 1 , 0.01)) = 0.0;
-      material_IridescenceThickness("IridescentThickness",  Range(0.01 , 5 , 0.01)) = 0.07;
+      material_Eta2( "IridescentIOR", Range( 1, 10, 0.1 ) ) =2;
+      material_Iridescence("Iridescence",  Range(0.0 , 1 , 0.01)) = 0.7;
+      material_IridescenceThickness("IridescentThickness",  Range(0.01 , 5 , 0.01)) = 0.1;
     }
 
   Header("Metal Roughness") {

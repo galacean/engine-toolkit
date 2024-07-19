@@ -9,7 +9,7 @@ Shader "sss/sss.gs" {
   Header("SSS"){
       material_SkinScatterAmount("SSSColor", Color) = (1,1,1,1);
       material_CurvatureTexture("CurvatureTexture", Texture2D);
-      material_CurvaturePower("CurvaturePower", Float) = 0;
+      material_CurvaturePower("CurvaturePower", Float) = 0.6;
     }
 
   Header("Metal Roughness") {

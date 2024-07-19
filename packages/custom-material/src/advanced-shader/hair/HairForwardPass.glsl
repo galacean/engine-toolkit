@@ -56,7 +56,6 @@ Varyings PBRVertex(Attributes attributes) {
 }
 
 void PBRFragment(Varyings varyings) {
-  // @todo delete it when bug fixed
   BRDFData brdfData;
 
   // Get aoUV
@@ -68,7 +67,6 @@ void PBRFragment(Varyings varyings) {
   #endif
 
   SurfaceData surfaceData = getSurfaceData(varyings, aoUV, gl_FrontFacing);
-
 
   // Can modify surfaceData here
   initBRDFData(surfaceData, brdfData);
@@ -94,7 +92,6 @@ void PBRFragment(Varyings varyings) {
 
   // Emissive
   color.rgb += surfaceData.emissiveColor;
-
 
   #if SCENE_FOG_MODE != 0
       color = fog(color, varyings.positionVS);
