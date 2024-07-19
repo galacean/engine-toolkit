@@ -4,14 +4,13 @@
 #include "Common.glsl"
 #include "Fog.glsl"
 
+#include "AttributesPBR.glsl"
+#include "VaryingsPBR.glsl"
 #include "./SSSLightDirect.glsl"
 #include "LightIndirectPBR.glsl"
 
-#include "AttributesPBR.glsl"
-#include "VaryingsPBR.glsl"
 #include "VertexPBR.glsl"
 #include "FragmentPBR.glsl"
-
 
 Varyings PBRVertex(Attributes attributes) {
   Varyings varyings;
@@ -55,25 +54,48 @@ Varyings PBRVertex(Attributes attributes) {
   return varyings;
 }
 
-void PBRFragment(Varyings Varyings) {
-  SurfaceData surfaceData;
+
+void PBRFragment(Varyings varyings) {
   BRDFData brdfData;
 
-  initSurfaceData(Varyings, surfaceData, gl_FrontFacing);
-  // Can modify surfaceData here.
-  initBRDFData(Varyings, surfaceData, brdfData, gl_FrontFacing);
+  // Get aoUV
+  vec2 aoUV = varyings.uv;
+  #if defined(MATERIAL_HAS_OCCLUSION_TEXTURE) && defined(RENDERER_HAS_UV1)
+    if(material_OcclusionTextureCoord == 1.0){
+        aoUV = varyings.uv1;
+    }
+  #endif
+
+  SurfaceData surfaceData = getSurfaceData(varyings, aoUV, gl_FrontFacing);
+
+  // Can modify surfaceData here
+  initBRDFData(surfaceData, brdfData);
 
   vec4 color = vec4(0, 0, 0, surfaceData.opacity);
 
-  // Direct Light
-  evaluateDirectRadiance(Varyings, brdfData, color.rgb);
+  // Get shadow attenuation
+  float shadowAttenuation = 1.0;
+  #if defined(SCENE_DIRECT_LIGHT_COUNT) && defined(NEED_CALCULATE_SHADOWS)
+    #if SCENE_SHADOW_CASCADED_COUNT == 1
+      vec3 shadowCoord = varyings.shadowCoord;
+    #else
+      vec3 shadowCoord = getShadowCoord(varyings.positionWS);
+    #endif
+    shadowAttenuation *= sampleShadowMap(varyings.positionWS, shadowCoord);
+  #endif
+
+  // Evaluate direct lighting
+  evaluateDirectRadiance(varyings, surfaceData, brdfData, shadowAttenuation, color.rgb);
+
   // IBL
-  evaluateIBL(Varyings, brdfData, color.rgb);
+  evaluateIBL(varyings, surfaceData, brdfData, color.rgb);
+
   // Emissive
   color.rgb += surfaceData.emissiveColor;
 
+
   #if SCENE_FOG_MODE != 0
-      color = fog(color, varyings.v_positionVS);
+      color = fog(color, varyings.positionVS);
   #endif
 
   #ifndef ENGINE_IS_COLORSPACE_GAMMA
@@ -82,4 +104,5 @@ void PBRFragment(Varyings Varyings) {
 
   gl_FragColor = color;
 }
+
 #endif

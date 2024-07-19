@@ -4,19 +4,22 @@
 #include "Common.glsl"
 #include "Fog.glsl"
 
+#include "AttributesPBR.glsl"
+#include "VaryingsPBR.glsl"
 #include "LightDirectPBR.glsl"
 #include "LightIndirectPBR.glsl"
 
-#include "AttributesPBR.glsl"
-#include "VaryingsPBR.glsl"
 #include "VertexPBR.glsl"
 #include "FragmentPBR.glsl"
+
 #include "./EyeFunction.glsl"
 
 Varyings PBRVertex(Attributes attributes) {
   Varyings varyings;
 
-  varyings.uv = getUV0(attributes);
+  // Don't need tilling offest
+  varyings.uv = attributes.TEXCOORD_0;
+  
   #ifdef RENDERER_HAS_UV1
       varyings.uv1 = attributes.TEXCOORD_1;
   #endif
@@ -55,9 +58,11 @@ Varyings PBRVertex(Attributes attributes) {
   return varyings;
 }
 
+
 void PBRFragment(Varyings varyings) {
   BRDFData brdfData;
 
+  
   // Get aoUV
   vec2 aoUV = varyings.uv;
   #if defined(MATERIAL_HAS_OCCLUSION_TEXTURE) && defined(RENDERER_HAS_UV1)
@@ -70,13 +75,13 @@ void PBRFragment(Varyings varyings) {
 
   #ifdef RENDERER_HAS_TANGENT
    mat3 tbn = mat3(surfaceData.tangent, surfaceData.bitangent, surfaceData.normal);
-  #else
-   mat3 tbn = getTBN(varyings, gl_FrontFacing);
   #endif
 
-  surfaceData.albedoColor =calculateEyeColor(varyings.uv, tbn, surfaceData);
+  // Modify surfaceData by eye algorithm
+  surfaceData.albedoColor = calculateEyeColor(varyings.uv, tbn);
   surfaceData.normal =calculateEyeNormal(varyings.uv, tbn, gl_FrontFacing);
-    
+  surfaceData.f0 = 0.04; 
+
   // Can modify surfaceData here
   initBRDFData(surfaceData, brdfData);
 
@@ -94,10 +99,10 @@ void PBRFragment(Varyings varyings) {
   #endif
 
   // Evaluate direct lighting
-  evaluateDirectRadiance(shadowAttenuation, surfaceData, brdfData, color.rgb);
+  evaluateDirectRadiance(varyings, surfaceData, brdfData, shadowAttenuation, color.rgb);
 
   // IBL
-  evaluateIBL(surfaceData, brdfData, color.rgb);
+  evaluateIBL(varyings, surfaceData, brdfData, color.rgb);
 
   // Emissive
   color.rgb += surfaceData.emissiveColor;

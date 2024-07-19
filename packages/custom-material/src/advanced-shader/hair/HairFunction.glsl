@@ -16,10 +16,10 @@ vec3 shiftTangent(vec3 tangent,vec3 normal, float shift )
 return (normalize(tangent + normal * shift));
 }
 
-//Kajiya-Kay Model
-float anisotropySpecular(BRDFData brdfData, vec3 light, float width, float strength, vec3 shiftedTangent)
+// Kajiya-Kay Model
+float anisotropySpecular(SurfaceData surfaceData, vec3 light, float width, float strength, vec3 shiftedTangent)
 {
-  vec3 v =  brdfData.viewDir;
+  vec3 v = surfaceData.viewDir;
   vec3 H =  normalize( light + v );
   float dotTH = dot(shiftedTangent, H);
   float sinTH =  sqrt(1.0-dotTH * dotTH);

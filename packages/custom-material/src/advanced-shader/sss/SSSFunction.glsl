@@ -9,13 +9,13 @@ struct FsphericalGaussian {
     vec3 Axis;  //u
     vec3 Sharpness; //L
     vec3 Amplitude; //a
-}
+};
 
 vec3 DotCosineLobe(FsphericalGaussian G , vec3 N)
 {
  float muDotN = dot(G.Axis,N);
- vec3 c0 = vec3(0.36);
- vec3 c1 = vec3(0.25 / c0);
+ const vec3 c0 = vec3(0.36);
+ const vec3 c1 = vec3(0.25 / c0);
  vec3 eml = exp(-G.Sharpness);
  vec3 em2l = eml * eml;
  vec3 rl = 1.0 / G.Sharpness;
@@ -41,7 +41,7 @@ if (all(lessThanEqual(abs(x0), x1)))
  return scale * y + bias;
 }
 
-//Normalized SG
+// Normalized SG
 FsphericalGaussian MakeNormalizedSG(vec3 lightdir , vec3 sharpness)
 {
 FsphericalGaussian SG;
@@ -55,12 +55,8 @@ vec3 SGDiffuseLighting(vec3 light ,vec3 normal ,vec3 scatterAmt)
 {
 FsphericalGaussian Kernel = MakeNormalizedSG(light, 1.0 / max(scatterAmt.xyz,0.0001));
 vec3 diffuse = DotCosineLobe(Kernel,normal); 
-//Tone Mapping
+// Tone Mapping
 vec3 diffuselobe = max(vec3(0.0),(diffuse-0.004));
 diffuse = (diffuselobe * (6.2 * diffuselobe + 0.5)) / (diffuselobe * (6.2 * diffuselobe + 1.7) + 0.06);
 return diffuse;
 }
-
-
-  
-  

@@ -1,4 +1,4 @@
-Shader "eyes/eyes.gs" {
+Shader "/eyes/Eye.gs" {
   EditorProperties {
     Header("Sclera") {
     material_ScleraColor("Sclera Color", Color) = (1,1,1,1);
@@ -9,8 +9,10 @@ Shader "eyes/eyes.gs" {
     material_ScleraTexture("Sclera Texture", Texture2D);
     material_ScleraNormal("Sclera NormalTexture", Texture2D);
     material_Scleramask("Sclera Mask", Texture2D);
+
+
     }
-    Header("Iris") {
+  Header("Iris") {
     material_IrisColor("Iris Color", Color) = (1,1,1,1);
     material_PupilSize("Pupil Dilation", Vector2) =(1, 0);
     material_Limbal("Limbal Ring Amount", Range(0, 1, 0.01)) = 0.5;
@@ -22,7 +24,7 @@ Shader "eyes/eyes.gs" {
     material_IrisNormal("Iris NormalTexture", Texture2D);
     }
 
-    Header("Common") {
+  Header("Common") {
     material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
     }
   }
@@ -39,9 +41,8 @@ Shader "eyes/eyes.gs" {
     }
 
   }
-  
+    
   SubShader "Default" {
-
     UsePass "pbr/Default/ShadowCaster"
 
     Pass "Forward Pass" {
@@ -51,9 +52,9 @@ Shader "eyes/eyes.gs" {
 
       VertexShader = PBRVertex;
       FragmentShader = PBRFragment;
-      
-      #include "./EyeForwardPass.glsl"
 
+      #include "./EyeForwardPass.glsl"
+      }
     }
-  }
 }
+      

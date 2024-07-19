@@ -1,32 +1,35 @@
 #define FUNCTION_SURFACE_SHADING surfaceShading_sss
 
-#include "LightDirectPBR.glsl"
+#include "BRDF.glsl"
+#include "ReflectionLobe.glsl"
 #include "./SSSFunction.glsl"
 
-void surfaceShading_sss(vec3 incidentDirection, vec3 lightColor, BRDFData brdfData, inout vec3 color) {
+void surfaceShading_sss(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 lightColor, inout vec3 color) {
 
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
 
     #ifdef MATERIAL_HAS_CURVATEXTURE
-    vec4 skinCurvatureTexture = texture2D(material_CurvatureTexture, v.v_uv) ;
+    vec4 skinCurvatureTexture = texture2D(material_CurvatureTexture, varyings.uv);
     #else
-    vec4 skinCurvatureTexture =vec4(1,1,1,1) ;
+    vec4 skinCurvatureTexture =vec4(1,1,1,1);
    #endif
 
     float skintexture = skinCurvatureTexture.r * material_CurvaturePower ;
     vec3 scatterAmt = material_SkinScatterAmount.rgb * skintexture;
-    vec3 SG = SGDiffuseLighting( brdfData.normal, incidentDirection, scatterAmt);
+    vec3 SG = SGDiffuseLighting(incidentDirection, surfaceData.normal, scatterAmt);
     vec3 irradiance = SG * lightColor * PI;
 
     // ClearCoat Lobe
-    float attenuation = FUNCTION_CLEAR_COAT_LOBE(incidentDirection, lightColor, brdfData, specularColor);
+    float attenuation = clearCoatLobe(varyings, surfaceData, brdfData, incidentDirection, lightColor, specularColor);
 
-    vec3 attenuationIrradiance = irradiance * irradiance;
+    vec3 attenuationIrradiance = attenuation * irradiance;
     // Diffuse Lobe
-    FUNCTION_DIFFUSE_LOBE(brdfData, attenuationIrradiance, diffuseColor);
+    diffuseLobe(varyings, surfaceData, brdfData, attenuationIrradiance, diffuseColor);
     // Specular Lobe
-    FUNCTION_SPECULAR_LOBE(brdfData, incidentDirection, attenuationIrradiance, specularColor);
+    specularLobe(varyings, surfaceData, brdfData, incidentDirection, attenuationIrradiance, specularColor);
 
     color += diffuseColor + specularColor;
 }
+
+#include "LightDirectPBR.glsl"

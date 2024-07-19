@@ -1,18 +1,24 @@
-float sqr(float x)  { return x * x; }
+#ifndef IRIDESCENCE_FUNCTION
+#define IRIDESCENCE_FUNCTION
 
-float IorToFresnel0(float transmittedIor, float incidentIor) 
-{
-  return pow((transmittedIor - incidentIor) / (transmittedIor + incidentIor), 2.0);
- }
+float material_Eta2;
+float material_IridescenceThickness;
+float material_Iridescence;
 
-vec3 Fresnel0ToIor(vec3 F0)
-{
+float sqr(float x)  { 
+  return x * x; 
+}
+
+vec3 IorToFresnel0(vec3 transmittedIor, float incidentIor){
+  return pow((transmittedIor - incidentIor) / (transmittedIor + incidentIor),vec3(2.0,2.0,2.0));
+} 
+
+vec3 Fresnel0ToIor(vec3 F0){
   vec3 sqrtF0 = sqrt(F0);
   return (vec3(1.0) + sqrtF0) / (vec3(1.0) - sqrtF0);
 }
 
- vec3 EvalSensitivity(float opd, vec3 shift)
-{
+ vec3 EvalSensitivity(float opd, vec3 shift){
 	// Use Gaussian fits, given by 3 parameters: val, pos and var
 	float phase = 2.0 * PI * opd * 1.0e-6;
 	const vec3 val = vec3(5.4856e-13, 4.4201e-13, 5.2481e-13);
@@ -29,16 +35,16 @@ vec3 Fresnel0ToIor(vec3 F0)
    return rgb;
 }
 
-vec3 ThinFilmIridescence(float cosTheta1, float eta2, vec3 baseF0,float iridescenceThickness)
-{ 
- float eta1 = 1.0;
+vec3 ThinFilmIridescence(float cosTheta1, float eta2, vec3 baseF0,float iridescenceThickness){ 
+
+ const float eta1 = 1.0;
  float dinc = 2.0 *  iridescenceThickness;
  float sinTheta2  = pow(eta1 / eta2, 2.0) * (1.0 - pow(cosTheta1 , 2.0));
  float cosTheta2Sq = (1.0 - sinTheta2);
  float cosTheta2 = sqrt(cosTheta2Sq);
       
  // First interface
- float R0 = IorToFresnel0(eta2, eta1);
+ float R0 = (IorToFresnel0(vec3(eta2), eta1)).x;
  float R12 = F_Schlick(R0, cosTheta1);
  float R21  = R12;
  float T121 =1.0 - R12;
@@ -47,13 +53,14 @@ vec3 ThinFilmIridescence(float cosTheta1, float eta2, vec3 baseF0,float iridesce
  float phi21 = PI - phi12;
 
  vec3 baseIor = Fresnel0ToIor(baseF0 + 0.0001); 
- vec3 R1  = IorToFresnel0(baseIor, eta2);
+ vec3 R1  =IorToFresnel0(baseIor, eta2);
  vec3 R23 = F_Schlick(R1, cosTheta2);
 
  vec3 phi23 =vec3(0.0);
  if (baseIor[0] < eta2) {phi23[0] = PI;}
  if (baseIor[1] < eta2) {phi23[1] = PI;}
  if (baseIor[2] < eta2) {phi23[2] = PI;}
+ 
  // Phase shift
  float OPD = dinc * cosTheta1 * eta2;
  vec3 phi = vec3(phi21,phi21,phi21) + phi23;
@@ -63,30 +70,31 @@ vec3 ThinFilmIridescence(float cosTheta1, float eta2, vec3 baseF0,float iridesce
  vec3 Rs   = sqr(T121) * R23 / (vec3(1.0)-R123);
 
  vec3 C0 = R12 + Rs;
- vec3 I = vec3(0);			
- I = C0;
+ vec3 iridescence = vec3(0);			
+ iridescence = C0;
 
  vec3 Cm = Rs - T121;
   for (int m = 1; m <= 2; ++m)
     {
      Cm *= r123;
 	 vec3 Sm = 2.0 * EvalSensitivity(float(m) * OPD, float(m) * phi);
-	 I += Cm * Sm;
+	 iridescence += Cm * Sm;
     }
- I = max(I, vec3(0)); 
+ iridescence = max(iridescence, vec3(0)); 
     
- return I;
+ return iridescence;
 }
 
-vec3 DirectBDRFIridescence(BRDFData brdfData, vec3 light, vec3 normal,vec3 specularColor, float roughness )
-{
+vec3 DirectBDRFIridescence(SurfaceData surfaceData, vec3 light, BRDFData brdfData ){
 // Compute dot products
- float NdotL = saturate(dot(normal, light ) );
- float NdotV = saturate(dot(normal, brdfData.viewDir ) );
- vec3 halfDir = normalize(light + brdfData.viewDir );
- float NdotH = saturate(dot(normal, halfDir ) );
+ float NdotL = saturate(dot(surfaceData.normal, light ) );
+ float NdotV = saturate(dot(surfaceData.normal, surfaceData.viewDir ) );
+ vec3 halfDir = normalize(light + surfaceData.viewDir );
+ float NdotH = saturate(dot(surfaceData.normal, halfDir ) );
  float cosTheta1 = dot(halfDir, light);
 
- vec3 I = ThinFilmIridescence(cosTheta1,material_Eta2,specularColor,material_IridescenceThickness);    
+ vec3 I = ThinFilmIridescence(cosTheta1,material_Eta2,brdfData.specularColor,material_IridescenceThickness);    
  return I;
 }
+
+#endif

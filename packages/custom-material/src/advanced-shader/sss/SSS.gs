@@ -1,4 +1,3 @@
-
 Shader "sss/sss.gs" {
   EditorProperties {
     Header("Base"){
@@ -7,42 +6,42 @@ Shader "sss/sss.gs" {
       material_BaseTexture("BaseTexture", Texture2D);
     }
 
-    Header("SSS"){
+  Header("SSS"){
       material_SkinScatterAmount("SSSColor", Color) = (1,1,1,1);
       material_CurvatureTexture("CurvatureTexture", Texture2D);
       material_CurvaturePower("CurvaturePower", Float) = 0;
     }
 
-    Header("Metal Roughness") {
+  Header("Metal Roughness") {
       material_Metal( "Metal", Range(0,1,0.01) ) = 1;
       material_Roughness( "Roughness", Range( 0, 1, 0.01 ) ) = 1;
       material_RoughnessMetallicTexture("RoughnessMetallicTexture", Texture2D);
     }
 
-    Header("Normal") {
+  Header("Normal") {
       material_NormalTexture("NormalTexture", Texture2D);
       material_NormalIntensity("NormalIntensity", Range(0, 5, 0.01)) = 1;
     }
 
-    Header("Emissive") {
+  Header("Emissive") {
       material_EmissiveColor("EmissiveColor", Color ) = (0, 0, 0, 1);
       material_EmissiveTexture("EmissiveTexture", Texture2D);
     }
 
-    Header("Occlusion") {
+  Header("Occlusion") {
       material_OcclusionTexture("OcclusionTexture", Texture2D);
       material_OcclusionIntensity("OcclusionIntensity", Range(0, 5, 0.01)) = 1;
       material_OcclusionTextureCoord("OcclusionTextureCoord", Float) = 0;
     }
 
-    Header("Common") {
+  Header("Common") {
       material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
       material_TilingOffset("TilingOffset", Vector4) = (1, 1, 0, 0);
     }
   }
 
   EditorMacros {
-    Header("Conditional Macors") {
+  Header("Conditional Macors") {
       MATERIAL_HAS_BASETEXTURE("HAS_BASETEXTURE");
       MATERIAL_HAS_CURVATEXTURE("HAS_CURVATEXTURE");
       MATERIAL_HAS_ROUGHNESS_METALLIC_TEXTURE("HAS_ROUGHNESS_METALLIC_TEXTURE");
@@ -53,9 +52,8 @@ Shader "sss/sss.gs" {
       MATERIAL_IS_ALPHA_CUTOFF("IS_ALPHA_CUTOFF");
     }
   }
-  
+    
   SubShader "Default" {
-
     UsePass "pbr/Default/ShadowCaster"
 
     Pass "Forward Pass" {
@@ -65,9 +63,8 @@ Shader "sss/sss.gs" {
 
       VertexShader = PBRVertex;
       FragmentShader = PBRFragment;
-      
-      #include "./SSSForwardPass.glsl"
 
+      #include "./SSSForwardPass.glsl"
+      }
     }
-  }
 }
