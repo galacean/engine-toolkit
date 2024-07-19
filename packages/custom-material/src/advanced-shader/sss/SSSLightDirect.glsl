@@ -17,8 +17,8 @@ void surfaceShadingSSS(Varyings varyings, SurfaceData surfaceData, BRDFData brdf
 
     float skintexture = skinCurvatureTexture.r * material_CurvaturePower ;
     vec3 scatterAmt = material_SkinScatterAmount.rgb * skintexture;
-    vec3 SG = sgdiffuseLighting(incidentDirection, surfaceData.normal, scatterAmt);
-    vec3 irradiance = SG * lightColor * PI;
+    vec3 sg = sgdiffuseLighting(incidentDirection, surfaceData.normal, scatterAmt);
+    vec3 irradiance = sg * lightColor * PI;
 
     // ClearCoat Lobe
     float attenuation = clearCoatLobe(varyings, surfaceData, brdfData, incidentDirection, lightColor, specularColor);

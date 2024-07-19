@@ -41,14 +41,14 @@ if (all(lessThanEqual(abs(x0), x1)))
  return scale * y + bias;
 }
 
-// Normalized SG
+// Normalized sg
 FsphericalGaussian makeNormalizedSG(vec3 lightdir , vec3 sharpness)
 {
-FsphericalGaussian SG;
-SG.Axis = lightdir;
-SG.Sharpness = sharpness;
-SG.Amplitude = SG.Sharpness /((2.0 * PI) * (1.0 - exp(-2.0 * SG.Sharpness)));
-return SG;
+FsphericalGaussian sg;
+sg.Axis = lightdir;
+sg.Sharpness = sharpness;
+sg.Amplitude = sg.Sharpness /((2.0 * PI) * (1.0 - exp(-2.0 * sg.Sharpness)));
+return sg;
 }
   
 vec3 sgdiffuseLighting(vec3 light ,vec3 normal ,vec3 scatterAmt)
