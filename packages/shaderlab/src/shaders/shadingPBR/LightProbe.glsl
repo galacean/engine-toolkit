@@ -1,7 +1,25 @@
 #ifndef LIGHT_PROBE
 #define LIGHT_PROBE
 
-// ------------------------Diffuse------------------------
+// ------------------------Specular------------------------
+
+// ref: https://www.unrealengine.com/blog/physically-based-shading-on-mobile - environmentBRDF for GGX on mobile
+vec3 envBRDFApprox(vec3 specularColor, float roughness, float dotNV ) {
+
+    const vec4 c0 = vec4( - 1, - 0.0275, - 0.572, 0.022 );
+
+    const vec4 c1 = vec4( 1, 0.0425, 1.04, - 0.04 );
+
+    vec4 r = roughness * c0 + c1;
+
+    float a004 = min( r.x * r.x, exp2( - 9.28 * dotNV ) ) * r.x + r.y;
+
+    vec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;
+
+    return specularColor * AB.x + AB.y;
+
+}
+
 
 vec3 getReflectedVector(SurfaceData surfaceData, vec3 n) {
     #ifdef MATERIAL_ENABLE_ANISOTROPY
@@ -48,27 +66,6 @@ vec3 getLightProbeRadiance(SurfaceData surfaceData, vec3 normal, float roughness
         return envMapColor.rgb * scene_EnvMapLight.specularIntensity;
 
     #endif
-
-
-}
-
-// ------------------------Specular------------------------
-
-// ref: https://www.unrealengine.com/blog/physically-based-shading-on-mobile - environmentBRDF for GGX on mobile
-vec3 envBRDFApprox(vec3 specularColor, float roughness, float dotNV ) {
-
-    const vec4 c0 = vec4( - 1, - 0.0275, - 0.572, 0.022 );
-
-    const vec4 c1 = vec4( 1, 0.0425, 1.04, - 0.04 );
-
-    vec4 r = roughness * c0 + c1;
-
-    float a004 = min( r.x * r.x, exp2( - 9.28 * dotNV ) ) * r.x + r.y;
-
-    vec2 AB = vec2( -1.04, 1.04 ) * a004 + r.zw;
-
-    return specularColor * AB.x + AB.y;
-
 }
 
 #endif
