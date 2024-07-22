@@ -1,13 +1,6 @@
 #ifndef NORMAL_INCLUDED
 #define NORMAL_INCLUDED
 
-// gl_FrontFacing has random value on Adreno GPUs
-// the Adreno bug is only when gl_FrontFacing is inside a function
-// https://bugs.chromium.org/p/chromium/issues/detail?id=1154842
-vec3 getNormal(vec3 normal, bool isFrontFacing){
-    normal *= float( isFrontFacing ) * 2.0 - 1.0;
-    return normal;
-}
 
 vec3 getNormalByNormalTexture(mat3 tbn, sampler2D normalTexture, float normalIntensity, vec2 uv, bool isFrontFacing){
     vec3 normal = (texture2D(normalTexture, uv)).rgb;
@@ -32,7 +25,8 @@ mat3 getTBNByDerivatives(vec2 uv, vec3 normal, vec3 position, bool isFrontFacing
 	    vec3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;
 	    vec3 bitangent = dp2perp * duv1.y + dp1perp * duv2.y;
 	    // construct a scale-invariant frame 
-	    float invmax = inversesqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)));
+        float denom = max( dot(tangent, tangent), dot(bitangent, bitangent) );
+        float invmax = (denom == 0.0) ? 0.0 : camera_ProjectionParams.x / sqrt( denom );
 	    return mat3(tangent * invmax, bitangent * invmax, normal);
     #else
         return mat3(vec3(0.0), vec3(0.0), normal);
