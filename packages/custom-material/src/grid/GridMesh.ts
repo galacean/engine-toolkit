@@ -19,6 +19,7 @@ export class GridMesh {
   }
 
   static _updateGridData(mesh: ModelMesh) {
+    // No-FlipY: POSITION_FLIP.xy, FlipY: POSITION_FLIP.zw
     // prettier-ignore
     const vertices = new Float32Array([
       -1, -1, 1, -1, // left-bottom
