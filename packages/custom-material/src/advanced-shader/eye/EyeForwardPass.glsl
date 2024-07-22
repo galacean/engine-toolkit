@@ -82,6 +82,7 @@ void PBRFragment(Varyings varyings) {
   surfaceData.normal =calculateEyeNormal(varyings.uv, tbn, gl_FrontFacing);
   surfaceData.f0 = 0.04; 
 
+
   // Can modify surfaceData here
   initBRDFData(surfaceData, brdfData);
 

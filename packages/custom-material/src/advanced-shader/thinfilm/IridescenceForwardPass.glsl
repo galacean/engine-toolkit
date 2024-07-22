@@ -68,6 +68,7 @@ void PBRFragment(Varyings varyings) {
   #endif
 
   SurfaceData surfaceData = getSurfaceData(varyings, aoUV, gl_FrontFacing);
+  surfaceData.f0 = 0.04; 
 
   // Can modify surfaceData here
   initBRDFData(surfaceData, brdfData);
