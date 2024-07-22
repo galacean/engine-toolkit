@@ -1,4 +1,4 @@
-Shader "/thin/Iridescene.gs" {
+Shader "Advanced/Thin.gs" {
   EditorProperties {
       Header("Base"){
       material_BaseColor("BaseColor", Color) = (1, 1, 1, 1);

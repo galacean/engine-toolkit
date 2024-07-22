@@ -1,4 +1,4 @@
-Shader "/eyes/Eye.gs" {
+Shader "DigitalHuman/Eye.gs" {
   EditorProperties {
   Header("Sclera") {
     material_ScleraColor("Sclera Color", Color) = (1,1,1,1);

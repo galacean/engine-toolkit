@@ -1,4 +1,4 @@
-Shader "hair/hair.gs" {
+Shader "DigitalHuman/Hair.gs" {
   EditorProperties {
     Header("Base"){
       material_IOR("IOR", Range(0, 5, 0.01)) = 1.5;
