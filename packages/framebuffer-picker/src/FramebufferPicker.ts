@@ -130,6 +130,7 @@ export class FramebufferPicker extends Script {
     this._checkFrameBufferSize();
 
     const camera = this._camera;
+    const originPostProcessEnabled = camera.enablePostProcess;
     this._updateRenderersPickColor(camera.scene);
     // Prepare render target and shader
     const lastRenderTarget = camera.renderTarget;
@@ -138,12 +139,14 @@ export class FramebufferPicker extends Script {
     camera.setReplacementShader(pickShader);
     camera.aspectRatio = lastRatio;
 
+    camera.enablePostProcess = false;
     camera.render();
 
-    // Revert render target and shader
+    // Revert render target and shader, post-processing state
     camera.resetReplacementShader();
     camera.renderTarget = lastRenderTarget;
     camera.resetAspectRatio();
+    camera.enablePostProcess = originPostProcessEnabled;
   }
 
   private _readPixelFromRenderTarget(x: number, y: number, xEnd?: number, yEnd?: number): Uint8Array {
