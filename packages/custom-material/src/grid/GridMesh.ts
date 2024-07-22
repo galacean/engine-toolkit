@@ -1,4 +1,14 @@
-import { ContentRestorer, Engine, ModelMesh, Vector3 } from "@galacean/engine";
+import {
+  Buffer,
+  BufferBindFlag,
+  BufferUsage,
+  ContentRestorer,
+  Engine,
+  MeshTopology,
+  ModelMesh,
+  VertexElement,
+  VertexElementFormat
+} from "@galacean/engine";
 
 export class GridMesh {
   static createGridPlane(engine: Engine): ModelMesh {
@@ -9,26 +19,17 @@ export class GridMesh {
   }
 
   static _updateGridData(mesh: ModelMesh) {
-    const positions = new Array<Vector3>(6);
-    positions[0] = new Vector3(1, 1, 0);
-    positions[1] = new Vector3(-1, -1, 0);
-    positions[2] = new Vector3(-1, 1, 0);
-    positions[3] = new Vector3(-1, -1, 0);
-    positions[4] = new Vector3(1, 1, 0);
-    positions[5] = new Vector3(1, -1, 0);
+    // prettier-ignore
+    const vertices = new Float32Array([
+      -1, -1, 1, -1, // left-bottom
+      1, -1, -1, -1,  // right-bottom
+      -1, 1, 1, 1,  // left-top
+      1, 1, -1, 1]); // right-top
 
-    const indices = new Uint8Array(6);
-    indices[0] = 2;
-    indices[1] = 1;
-    indices[2] = 0;
-    indices[3] = 5;
-    indices[4] = 4;
-    indices[5] = 3;
+    mesh.setVertexElements([new VertexElement("POSITION_FLIP", 0, VertexElementFormat.Vector4, 0)]);
+    mesh.setVertexBufferBinding(new Buffer(mesh.engine, BufferBindFlag.VertexBuffer, vertices, BufferUsage.Static), 16);
+    mesh.addSubMesh(0, 4, MeshTopology.TriangleStrip);
 
-    mesh.setPositions(positions);
-    mesh.setIndices(indices);
-    mesh.uploadData(true);
-    mesh.addSubMesh(0, 6);
     const { bounds } = mesh;
     bounds.min.set(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
     bounds.max.set(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
