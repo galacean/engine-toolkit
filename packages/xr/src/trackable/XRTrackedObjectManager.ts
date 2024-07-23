@@ -18,7 +18,7 @@ export abstract class XRTrackedObjectManager<T extends XRTracked> extends Script
   private _trackIdToIndex: number[] = [];
   private _trackedComponents: Array<TrackedComponent<T>> = [];
 
-  constructor(entity: Entity, feature: any) {
+  constructor(entity: Entity, feature: TFeatureConstructor<XRTrackableFeature>) {
     super(entity);
     this._feature = feature;
     this._onTrackedChanged = this._onTrackedChanged.bind(this);
@@ -130,8 +130,7 @@ export abstract class XRTrackedObjectManager<T extends XRTracked> extends Script
       origin.addChild(entity);
     }
 
-    const trackedComponent = entity.addComponent(TrackedComponent<T>);
-    return trackedComponent;
+    return entity.addComponent(TrackedComponent<T>);
   }
 }
 
