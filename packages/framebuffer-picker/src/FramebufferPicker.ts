@@ -2,6 +2,7 @@ import {
   Camera,
   dependentComponents,
   DependentMode,
+  DepthTextureMode,
   Logger,
   Renderer,
   RenderTarget,
@@ -130,6 +131,11 @@ export class FramebufferPicker extends Script {
     this._checkFrameBufferSize();
 
     const camera = this._camera;
+    const originalPostProcessEnabled = camera.enablePostProcess;
+    const originalHDR = camera.enableHDR;
+    const originalDepthMode = camera.depthTextureMode;
+    const originalOpaqueTextureEnabled = camera.opaqueTextureEnabled;
+
     this._updateRenderersPickColor(camera.scene);
     // Prepare render target and shader
     const lastRenderTarget = camera.renderTarget;
@@ -138,12 +144,24 @@ export class FramebufferPicker extends Script {
     camera.setReplacementShader(pickShader);
     camera.aspectRatio = lastRatio;
 
+    // Reset internal RT and useless pass
+    camera.enablePostProcess = false;
+    camera.enableHDR = false;
+    camera.depthTextureMode = DepthTextureMode.None;
+    camera.opaqueTextureEnabled = false;
+
     camera.render();
 
     // Revert render target and shader
     camera.resetReplacementShader();
     camera.renderTarget = lastRenderTarget;
     camera.resetAspectRatio();
+
+    // Revert internal RT and original pass
+    camera.enablePostProcess = originalPostProcessEnabled;
+    camera.enableHDR = originalHDR;
+    camera.depthTextureMode = originalDepthMode;
+    camera.opaqueTextureEnabled = originalOpaqueTextureEnabled;
   }
 
   private _readPixelFromRenderTarget(x: number, y: number, xEnd?: number, yEnd?: number): Uint8Array {
