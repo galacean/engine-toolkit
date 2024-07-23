@@ -75,10 +75,12 @@ void PBRFragment(Varyings varyings) {
 
   #ifdef RENDERER_HAS_TANGENT
    mat3 tbn = mat3(surfaceData.tangent, surfaceData.bitangent, surfaceData.normal);
+  #else
+   mat3 tbn = getTBNByDerivatives(aoUV, normal, varyings.positionWS, gl_FrontFacing);
   #endif
 
   // Modify surfaceData by eye algorithm
-  surfaceData.albedoColor = calculateEyeColor(varyings.uv, tbn);
+  surfaceData.albedoColor = calculateEyeColor(varyings.uv, tbn, surfaceData);
   surfaceData.normal =calculateEyeNormal(varyings.uv, tbn, gl_FrontFacing);
   surfaceData.f0 = 0.04; 
 
@@ -107,7 +109,6 @@ void PBRFragment(Varyings varyings) {
 
   // Emissive
   color.rgb += surfaceData.emissiveColor;
-
 
   #if SCENE_FOG_MODE != 0
       color = fog(color, varyings.positionVS);

@@ -32,12 +32,11 @@ vec2 parallaxOffset( float heighttex, float height, vec3 viewDir )
    {
      float heightTex = heighttex * height- height/2.0;
      vec3 s = viewDir;
-     s.z -= 0.42;
-     s.y -= s.y;
+     s.z += 0.42;
      return  heightTex * (s.xy / s.z);
    }
 
-vec3 calculateEyeColor(Varyings varyings, mat3 tbn)
+vec3 calculateEyeColor(Varyings varyings, mat3 tbn, SurfaceData surfaceData)
 {
   // Sclera UV
   vec2 scleraUV = (varyings.uv * material_ScleraSize)-((material_ScleraSize-1.0)/2.0);
@@ -68,7 +67,7 @@ vec3 calculateEyeColor(Varyings varyings, mat3 tbn)
   #ifdef MATERIAL_HAS_SCLERA_MASK
    vec3 irisMaskTex = (texture2D(material_ScleraMask, irisSizeUV)).rgb;
    float uvmask = 1.0 - (texture2D(material_ScleraMask, varyings.uv )).b;
-   heighttexture = 1.0 - (texture2D(material_ScleraMask, parallaxUV)).b;
+   heighttexture = (texture2D(material_ScleraMask, parallaxUV)).b;
   #else
    vec3 irisMaskTex = vec3(1.0);
    float uvmask = 1.0;
@@ -76,7 +75,7 @@ vec3 calculateEyeColor(Varyings varyings, mat3 tbn)
   #endif
 
   // Transform ViewdirWS To ViewdirTS
-  vec3 vDir = normalize(camera_Position - varyings.positionWS); 
+  vec3 vDir = surfaceData.viewDir; 
   vec3 viewDirInTBN = tbn * vDir;
 
   vec2 offset = parallaxOffset(heighttexture, material_Parallax, viewDirInTBN);

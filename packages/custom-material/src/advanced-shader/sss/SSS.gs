@@ -1,4 +1,4 @@
-Shader "sss/sss.gs" {
+Shader "DigitalHuman/SSS.gs" {
   EditorProperties {
     Header("Base"){
       material_IOR("IOR", Range(0, 5, 0.01)) = 1.5;
