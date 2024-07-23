@@ -71,7 +71,8 @@ function makeRollupConfig(pkg) {
     Object.assign({}, pkg.pkgJson.dependencies, pkg.pkgJson.peerDependencies, pkg.pkgJson.devDependencies)
   );
   let globals = {
-    "@galacean/engine": "Galacean"
+    "@galacean/engine": "Galacean",
+    "@galacean/engine-xr": "GalaceanXR"
   };
   externals.forEach((external) => {
     globals[external] = toGlobalName(external);
