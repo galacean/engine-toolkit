@@ -1,4 +1,4 @@
-import { Entity, Logger, Quaternion, Vector3 } from "@galacean/engine";
+import { Entity, Quaternion, Vector3 } from "@galacean/engine";
 import { XRAnchor, XRAnchorTracking } from "@galacean/engine-xr";
 import { XRTrackedObjectManager } from "./XRTrackedObjectManager";
 
@@ -23,7 +23,7 @@ export class XRAnchorManager extends XRTrackedObjectManager<XRAnchor> {
         feature.addAnchor(anchor.position, anchor.rotation);
       }
     } catch (error) {
-      Logger.error("Anchor Tracking is not supported.", error);
+      console.error("Anchor Tracking is not supported.", error);
     }
   }
 }

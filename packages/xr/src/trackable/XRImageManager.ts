@@ -1,4 +1,4 @@
-import { Entity, Logger } from "@galacean/engine";
+import { Entity } from "@galacean/engine";
 import { XRImageTracking, XRReferenceImage, XRTrackedImage } from "@galacean/engine-xr";
 import { XRTrackedObjectManager } from "./XRTrackedObjectManager";
 
@@ -17,7 +17,7 @@ export class XRImageManager extends XRTrackedObjectManager<XRTrackedImage> {
     try {
       this.engine.xrManager.addFeature(XRImageTracking, this.trackingImages);
     } catch (error) {
-      Logger.error("Image Tracking is not supported.", error);
+      console.error("Image Tracking is not supported.", error);
     }
   }
 }

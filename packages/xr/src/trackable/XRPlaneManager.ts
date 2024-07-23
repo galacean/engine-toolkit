@@ -1,4 +1,4 @@
-import { Entity, Logger } from "@galacean/engine";
+import { Entity } from "@galacean/engine";
 import { XRPlaneMode, XRPlaneTracking, XRTrackedPlane } from "@galacean/engine-xr";
 import { XRTrackedObjectManager } from "./XRTrackedObjectManager";
 
@@ -17,7 +17,7 @@ export class XRPlaneManager extends XRTrackedObjectManager<XRTrackedPlane> {
     try {
       this.engine.xrManager.addFeature(XRPlaneTracking, this.detectionMode);
     } catch (error) {
-      Logger.error("Plane Tracking is not supported.", error);
+      console.error("Plane Tracking is not supported.", error);
     }
   }
 }

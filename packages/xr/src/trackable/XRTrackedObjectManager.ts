@@ -1,8 +1,8 @@
-import { Entity, GLTFResource, Logger, PrefabResource, Script, XRManager } from "@galacean/engine";
+import { Entity, GLTFResource, PrefabResource, Script, XRManager } from "@galacean/engine";
 import { XRFeature, XRSessionState, XRTrackableFeature, XRTracked } from "@galacean/engine-xr";
 import { TrackedComponent } from "../component/TrackedComponent";
 
-export class XRTrackedObjectManager<T extends XRTracked> extends Script {
+export abstract class XRTrackedObjectManager<T extends XRTracked> extends Script {
   /**
    * The prefab that is automatically mounted when the object is tracked.
    *
@@ -46,9 +46,7 @@ export class XRTrackedObjectManager<T extends XRTracked> extends Script {
     xrManager.sessionManager.removeStateChangedListener(this._onSessionChanged);
   }
 
-  protected _initXRFeature(): void {
-    throw new Error("You need to override this method.");
-  }
+  protected abstract _initXRFeature(): void;
 
   private _onSessionChanged(state: XRSessionState): void {
     switch (state) {
@@ -60,7 +58,7 @@ export class XRTrackedObjectManager<T extends XRTracked> extends Script {
         if (feature) {
           feature.addChangedListener(this._onTrackedChanged);
         } else {
-          Logger.error("XRTrackedObjectManager: Feature ", this._feature.name, " not found");
+          console.error("XRTrackedObjectManager: Feature ", this._feature.name, " not found");
         }
         break;
       default:
