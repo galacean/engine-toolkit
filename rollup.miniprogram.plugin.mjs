@@ -34,7 +34,7 @@ const adapterArray = [
   "WebGL2RenderingContext",
   "ImageData",
   "location",
-  "OffscreenCanvas",
+  "OffscreenCanvas"
 ];
 const adapterVars = {};
 
@@ -42,7 +42,7 @@ adapterArray.forEach((name) => {
   adapterVars[name] = register(name);
 });
 
-const regStr = [`"@galacean/engine"`, `'@galacean/engine'`].join("|");
+const regStr = [`"@galacean/engine"`, `'@galacean/engine-xr'`].join("|");
 
 export default [
   inject(adapterVars),
@@ -50,6 +50,6 @@ export default [
     find: new RegExp(regStr, "g"),
     replace: (match, moduleName) => {
       return `${match.substr(0, match.length - 1)}/dist/miniprogram"`;
-    },
-  }),
+    }
+  })
 ];

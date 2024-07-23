@@ -121,16 +121,22 @@ Shader.create(
   "grid",
   `
 #include <common>
-#include <common_vert>
+
+attribute vec4 POSITION_FLIP;
+
 uniform mat4 camera_ViewInvMat;
+uniform mat4 camera_ProjMat;
+uniform vec4 camera_ProjectionParams;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
+
 
 vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat, mat4 projInvMat) {
     vec4 unprojectedPoint =  viewInvMat * projInvMat * vec4(x, y, z, 1.0);
     return unprojectedPoint.xyz / unprojectedPoint.w;
 }
+
 
 void main() {
     float tol = 0.0001;
@@ -140,9 +146,13 @@ void main() {
     }
     mat4 projInvMat = INVERSE_MAT(camera_ProjMat);
 
-    nearPoint = UnprojectPoint(POSITION.x, POSITION.y, -1.0, viewInvMat, projInvMat);// unprojecting on the near plane
-    farPoint = UnprojectPoint(POSITION.x, POSITION.y, 1.0, viewInvMat, projInvMat);// unprojecting on the far plane
-    gl_Position = vec4(POSITION, 1.0);// using directly the clipped coordinates
+    bool flipY = camera_ProjectionParams.x < 0.0;
+    float x = flipY? POSITION_FLIP.z : POSITION_FLIP.x;
+    float y = flipY? POSITION_FLIP.w : POSITION_FLIP.y;
+
+    nearPoint = UnprojectPoint(x, y, -1.0, viewInvMat, projInvMat);// unprojecting on the near plane
+    farPoint = UnprojectPoint(x, y, 1.0, viewInvMat, projInvMat);// unprojecting on the far plane
+    gl_Position = vec4(x, y, 0.0, 1.0);// using directly the clipped coordinates
 }`,
 
   `

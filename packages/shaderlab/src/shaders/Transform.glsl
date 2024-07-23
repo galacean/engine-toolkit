@@ -11,5 +11,6 @@ mat4 renderer_NormalMat;
 
 vec3 camera_Position;
 vec3 camera_Forward; 
+vec4 camera_ProjectionParams;
 
 #endif
