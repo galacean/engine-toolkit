@@ -24,7 +24,7 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "@galacean/engine": "^1.2.0-alpha.5"
+    "@galacean/engine": "^1.3.0-beta.6"
   },
   "dependencies": {
     "@galacean/engine-toolkit-custom-material": "workspace:*"
