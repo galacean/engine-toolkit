@@ -27,8 +27,10 @@ void surfaceShadingSSS(Varyings varyings, SurfaceData surfaceData, BRDFData brdf
     // Diffuse Lobe
     diffuseLobe(varyings, surfaceData, brdfData, attenuationIrradiance, diffuseColor);
     // Specular Lobe
-    specularLobe(varyings, surfaceData, brdfData, incidentDirection, attenuationIrradiance, specularColor);
-
+    // if not limited,  may lead to light leakage
+    if(surfaceData.dotNV > EPSILON){
+        specularLobe(varyings, surfaceData, brdfData, incidentDirection, attenuationIrradiance, specularColor);
+    }
     color += diffuseColor + specularColor;
 }
 
