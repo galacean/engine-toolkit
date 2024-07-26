@@ -10,6 +10,7 @@ import {
   Script,
   Shader,
   ShaderProperty,
+  SubShader,
   Texture2D,
   TextureFormat,
   Vector2,
@@ -19,6 +20,11 @@ import fs from "./color.fs.glsl";
 import vs from "./color.vs.glsl";
 
 const pickShader = Shader.create("framebuffer-picker-color", vs, fs);
+pickShader.subShaders.forEach((subShader: SubShader) => {
+  subShader.passes.forEach((pass) => {
+    pass.setTag("spriteDisableBatching", true);
+  });
+});
 
 /**
  * GPU Frame buffer picker.
