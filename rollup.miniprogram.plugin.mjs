@@ -42,7 +42,7 @@ adapterArray.forEach((name) => {
   adapterVars[name] = register(name);
 });
 
-const regStr = [`"@galacean/engine"`].join("|");
+const regStr = [`"@galacean/engine"`, `'@galacean/engine-xr'`].join("|");
 
 export default [
   inject(adapterVars),

@@ -14,7 +14,7 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@galacean/engine": "1.2.0-alpha.2",
+    "@galacean/engine": "^1.3.0-beta.6",
     "@galacean/engine-toolkit-auxiliary-lines": "workspace:*",
     "@galacean/engine-toolkit-controls": "workspace:*",
     "@galacean/engine-toolkit-framebuffer-picker": "workspace:*"
