@@ -5,6 +5,7 @@ import {
   CameraClearFlags,
   Color,
   DependentMode,
+  DepthTextureMode,
   Entity,
   Layer,
   MeshRenderer,
@@ -206,6 +207,12 @@ export class OutlineManager extends Script {
     const originalSolidColor = scene.background.solidColor;
     const originalBackgroundMode = scene.background.mode;
 
+    const originalRenderTarget = camera.renderTarget;
+    const originalPostProcessEnabled = camera.enablePostProcess;
+    const originalHDR = camera.enableHDR;
+    const originalDepthMode = camera.depthTextureMode;
+    const originalOpaqueTextureEnabled = camera.opaqueTextureEnabled;
+
     const renderers = this._renderers;
     const layerMap = this._layerMap;
     layerMap.length = 0;
@@ -229,18 +236,24 @@ export class OutlineManager extends Script {
 
     // 1. render outline mesh with replace material
     this._screenEntity.isActive = false;
-
     camera.renderTarget = this._renderTarget;
     scene.background.solidColor = this._clearColor;
     scene.background.mode = BackgroundMode.SolidColor;
     camera.cullingMask = this._layer;
     camera.setReplacementShader(this._replaceShader);
     camera.shaderData.setColor(OutlineManager._replaceColorProp, this._replaceColor);
+
+    // Reset internal RT and useless pass
+    camera.enablePostProcess = false;
+    camera.enableHDR = false;
+    camera.depthTextureMode = DepthTextureMode.None;
+    camera.opaqueTextureEnabled = false;
+
     camera.render();
 
     // 2. render screen only
-    this._cameraViewport.copyFrom(camera.viewport);
     this._screenEntity.isActive = true;
+    this._cameraViewport.copyFrom(camera.viewport);
     camera.renderTarget = null;
     camera.viewport = this._outLineViewport;
     camera.clearFlags = CameraClearFlags.None;
@@ -252,6 +265,7 @@ export class OutlineManager extends Script {
       entity.layer = layer;
     }
     this._outlineMaterial.shaderData.setColor(OutlineManager._outlineColorProp, outlineColor);
+
     camera.render();
 
     // 3. restore
@@ -263,6 +277,12 @@ export class OutlineManager extends Script {
 
     scene.background.solidColor = originalSolidColor;
     scene.background.mode = originalBackgroundMode;
+
+    camera.renderTarget = originalRenderTarget;
+    camera.enablePostProcess = originalPostProcessEnabled;
+    camera.enableHDR = originalHDR;
+    camera.depthTextureMode = originalDepthMode;
+    camera.opaqueTextureEnabled = originalOpaqueTextureEnabled;
   }
 
   private _calSublineEntites() {
