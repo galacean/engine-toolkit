@@ -107,22 +107,9 @@ export class OutlineManager extends Script {
 
   set size(value: number) {
     value = Math.max(1, Math.min(value, 6));
+
+    this._checkFrameBufferSize(value);
     this._size = value;
-
-    if (this._renderTarget) {
-      this._renderTarget.getColorTexture().destroy(true);
-      this._renderTarget.destroy();
-    }
-    const { width, height } = this.engine.canvas;
-    const offWidth = width / value;
-    const offHeight = height / value;
-    const renderColorTexture = new Texture2D(this.engine, offWidth, offHeight);
-    const renderTarget = new RenderTarget(this.engine, offWidth, offHeight, renderColorTexture);
-
-    this._outlineMaterial.shaderData.setTexture(OutlineManager._outlineTextureProp, renderColorTexture);
-    this._outlineMaterial.shaderData.setVector2(OutlineManager._texSizeProp, new Vector2(1 / offWidth, 1 / offHeight));
-    renderColorTexture.wrapModeU = renderColorTexture.wrapModeV = TextureWrapMode.Clamp;
-    this._renderTarget = renderTarget;
   }
 
   constructor(entity: Entity) {
@@ -185,6 +172,8 @@ export class OutlineManager extends Script {
   override onEndRender(camera: Camera): void {
     const outlineEntities = this._outlineEntities;
     if (!outlineEntities.length) return;
+    // Check frame buffer size
+    this._checkFrameBufferSize(this._size);
     this._renderEntity(camera, this.subColor, this._subLineEntities);
     this._renderEntity(camera, this.mainColor, outlineEntities);
   }
@@ -291,6 +280,36 @@ export class OutlineManager extends Script {
       OutlineManager._traverseEntity(this._outlineEntities[i], (entity) => {
         this._subLineEntities.push(entity);
       });
+    }
+  }
+
+  private _checkFrameBufferSize(size: number): void {
+    const lastSize = this._size;
+    const { width, height } = this.engine.canvas;
+    const offWidth = width / size;
+    const offHeight = height / size;
+
+    if (
+      !this._renderTarget ||
+      size !== lastSize ||
+      this._renderTarget.width !== offWidth ||
+      this._renderTarget.height !== offHeight
+    ) {
+      if (this._renderTarget) {
+        this._renderTarget.getColorTexture().destroy(true);
+        this._renderTarget.destroy();
+      }
+
+      const renderColorTexture = new Texture2D(this.engine, offWidth, offHeight);
+      const renderTarget = new RenderTarget(this.engine, offWidth, offHeight, renderColorTexture);
+
+      this._outlineMaterial.shaderData.setTexture(OutlineManager._outlineTextureProp, renderColorTexture);
+      this._outlineMaterial.shaderData.setVector2(
+        OutlineManager._texSizeProp,
+        new Vector2(1 / offWidth, 1 / offHeight)
+      );
+      renderColorTexture.wrapModeU = renderColorTexture.wrapModeV = TextureWrapMode.Clamp;
+      this._renderTarget = renderTarget;
     }
   }
 }
