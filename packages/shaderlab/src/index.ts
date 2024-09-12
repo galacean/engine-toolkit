@@ -22,4 +22,7 @@ export function registerShader() {
   shaderRegistered = true;
 }
 
+/**
+ * @internal
+ */
 export { fragmentList };
