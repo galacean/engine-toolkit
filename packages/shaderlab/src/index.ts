@@ -21,3 +21,5 @@ export function registerShader() {
 
   shaderRegistered = true;
 }
+
+export { fragmentList };
