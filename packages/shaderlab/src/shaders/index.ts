@@ -10,9 +10,10 @@ import Skin from "./Skin.glsl";
 import Transform from "./Transform.glsl";
 import shadingPBR from "./shadingPBR";
 
-interface IShaderFragment {
+export interface IShaderFragment {
   includeKey: string;
   source: string;
+  pathInEditor?: string;
 }
 
 const fragmentList: IShaderFragment[] = [

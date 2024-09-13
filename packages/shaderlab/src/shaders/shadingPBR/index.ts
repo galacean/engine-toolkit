@@ -8,16 +8,21 @@ import LightIndirectPBR from "./LightIndirectPBR.glsl";
 import ReflectionLobe from "./ReflectionLobe.glsl";
 import VaryingsPBR from "./VaryingsPBR.glsl";
 import VertexPBR from "./VertexPBR.glsl";
+import { IShaderFragment } from "..";
 
-export default [
-  { source: ForwardPassPBR, includeKey: "ForwardPassPBR.glsl" },
-  { source: AttributesPBR, includeKey: "AttributesPBR.glsl" },
-  { source: VaryingsPBR, includeKey: "VaryingsPBR.glsl" },
-  { source: FragmentPBR, includeKey: "FragmentPBR.glsl" },
-  { source: LightDirectPBR, includeKey: "LightDirectPBR.glsl" },
-  { source: LightIndirectPBR, includeKey: "LightIndirectPBR.glsl" },
-  { source: VertexPBR, includeKey: "VertexPBR.glsl" },
-  { source: BRDF, includeKey: "BRDF.glsl" },
-  { source: LightProbe, includeKey: "LightProbe.glsl" },
-  { source: ReflectionLobe, includeKey: "ReflectionLobe.glsl" }
+const pathInEditor = "shadingPBR";
+
+const fragments: IShaderFragment[] = [
+  { source: ForwardPassPBR, includeKey: "ForwardPassPBR.glsl", pathInEditor },
+  { source: AttributesPBR, includeKey: "AttributesPBR.glsl", pathInEditor },
+  { source: VaryingsPBR, includeKey: "VaryingsPBR.glsl", pathInEditor },
+  { source: FragmentPBR, includeKey: "FragmentPBR.glsl", pathInEditor },
+  { source: LightDirectPBR, includeKey: "LightDirectPBR.glsl", pathInEditor },
+  { source: LightIndirectPBR, includeKey: "LightIndirectPBR.glsl", pathInEditor },
+  { source: VertexPBR, includeKey: "VertexPBR.glsl", pathInEditor },
+  { source: BRDF, includeKey: "BRDF.glsl", pathInEditor },
+  { source: LightProbe, includeKey: "LightProbe.glsl", pathInEditor },
+  { source: ReflectionLobe, includeKey: "ReflectionLobe.glsl", pathInEditor }
 ];
+
+export default fragments;
