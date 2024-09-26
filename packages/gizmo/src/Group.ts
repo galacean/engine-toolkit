@@ -342,7 +342,7 @@ export class Group {
         const renderer = renderers[j];
         if (renderer.entity.isActiveInHierarchy) {
           if (renderer instanceof ParticleRenderer) {
-            // 忽略粒子的包围盒
+            // Ignore particle bounding box.
             continue;
           } else {
             isEffective = true;
