@@ -1,12 +1,4 @@
-import {
-  BoundingBox,
-  Renderer,
-  Vector3,
-  Matrix,
-  Entity,
-  ParticleRenderer,
-  ParticleSimulationSpace
-} from "@galacean/engine";
+import { BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Vector3 } from "@galacean/engine";
 import { AnchorType, CoordinateType } from "./enums/GroupState";
 
 /**
