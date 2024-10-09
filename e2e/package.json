@@ -1,0 +1,22 @@
+{
+  "name": "@galacean/toolkit-e2e",
+  "private": "true",
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "e2e": "vite-node test.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10",
+    "vite": "^5",
+    "vite-node": "^2.0.5"
+  },
+  "dependencies": {
+    "@galacean/engine": "^1.3.0",
+    "@galacean/engine-physics-physx": "^1.3.0",
+    "@galacean/engine-toolkit": "workspace:*"
+  }
+}

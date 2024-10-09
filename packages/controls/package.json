@@ -19,6 +19,7 @@
   "types": "types/index.d.ts",
   "main": "dist/commonjs/browser.js",
   "module": "dist/es/index.js",
+  "debug": "src/index.ts",
   "files": [
     "dist/**/*",
     "types/**/*"
