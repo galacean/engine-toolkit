@@ -1,4 +1,4 @@
-import { BoundingBox, Renderer, Vector3, Matrix, Entity } from "@galacean/engine";
+import { BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Vector3 } from "@galacean/engine";
 import { AnchorType, CoordinateType } from "./enums/GroupState";
 
 /**
@@ -330,11 +330,16 @@ export class Group {
     for (let i = entities.length - 1; i >= 0; i--) {
       const entity = entities[i];
       const renderers = entity.getComponentsIncludeChildren(Renderer, []);
-      isEffective ||= renderers.length > 0;
       for (let j = renderers.length - 1; j >= 0; j--) {
         const renderer = renderers[j];
         if (renderer.entity.isActiveInHierarchy) {
-          BoundingBox.merge(tempBoundBox, renderers[j].bounds, tempBoundBox);
+          if (renderer instanceof ParticleRenderer) {
+            // Ignore particle bounding box.
+            continue;
+          } else {
+            isEffective = true;
+            BoundingBox.merge(tempBoundBox, renderers[j].bounds, tempBoundBox);
+          }
         }
       }
     }
