@@ -11,7 +11,9 @@
 #ifndef FUNCTION_CLEAR_COAT_IBL
     #define FUNCTION_CLEAR_COAT_IBL evaluateClearCoatIBL
 #endif
-
+#ifndef FUNCTION_IRIDESCENCE_IBL
+    #define FUNCTION_IRIDESCENCE_IBL evaluateIridescenceIBL
+#endif
 
 #include "BRDF.glsl"
 #include "Light.glsl"
@@ -66,6 +68,18 @@ float evaluateClearCoatIBL(Varyings varyings, SurfaceData surfaceData, BRDFData 
     return radianceAttenuation;
 }
 
+void evaluateIridescenceIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
+    vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, brdfData.roughness);
+    vec3 envBRDF = envBRDFApprox(brdfData.specularColor, brdfData.roughness, surfaceData.dotNV);
+   
+    #ifdef MATERIAL_ENABLE_IRIDESCENCE
+        envBRDF = mix(envBRDF, brdfData.iridescenceSpecularColor, surfaceData.iridesceceFactor);
+    #endif
+
+    specularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDF;
+
+}
+
 void evaluateSpecularIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
     vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, brdfData.roughness);
     specularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDFApprox(brdfData.specularColor, brdfData.roughness, surfaceData.dotNV );
@@ -84,6 +98,9 @@ void evaluateIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, 
 
     // IBL specular
     FUNCTION_SPECULAR_IBL(varyings, surfaceData, brdfData, radianceAttenuation, specularColor);
+
+    // IBL Iridescence
+    FUNCTION_IRIDESCENCE_IBL(varyings, surfaceData, brdfData, radianceAttenuation, specularColor);
 
     color += diffuseColor + specularColor;
 }

@@ -49,6 +49,12 @@ struct SurfaceData{
         vec3  clearCoatNormal;
         float clearCoatDotNV;
     #endif
+
+    #ifdef MATERIAL_ENABLE_IRIDESCENCE
+        float iridesceceIor;
+        float iridesceceFactor;
+        float iridescenceThickness;
+    #endif
 };
 
 
@@ -60,6 +66,10 @@ struct BRDFData{
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
         vec3  clearCoatSpecularColor;
         float clearCoatRoughness;
+    #endif
+
+    #ifdef MATERIAL_ENABLE_IRIDESCENCE
+        vec3  iridescenceSpecularColor;
     #endif
 };
 
@@ -202,6 +212,100 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 	return RECIPROCAL_PI * diffuseColor;
 }
 
+#ifdef MATERIAL_ENABLE_IRIDESCENCE
+    float sqr(float x) { 
+        return x * x; 
+    }
+
+    // Conversion f0/ior
+    vec3 iorToFresnel(vec3 transmittedIor, float incidentIor) {
+        return pow((transmittedIor - incidentIor) / (transmittedIor + incidentIor),vec3(2.0));
+    } 
+
+    float iorToFresnel(float transmittedIor, float incidentIor) {
+        return pow((transmittedIor - incidentIor) / (transmittedIor + incidentIor),2.0);
+    } 
+
+    // Assume air interface for top
+    // Note: We don't handle the case fresnel0 == 1
+    vec3 fresnelToIor(vec3 F0){
+        vec3 sqrtF0 = sqrt(F0);
+        return (vec3(1.0) + sqrtF0) / (vec3(1.0) - sqrtF0);
+    }
+
+    // Fresnel equations for dielectric/dielectric interfaces.
+    // Ref: https://belcour.github.io/blog/research/publication/2017/05/01/brdf-thin-film.html
+    // Evaluation XYZ sensitivity curves in Fourier space
+    vec3 evalSensitivity(float opd, vec3 shift){
+        // Use Gaussian fits, given by 3 parameters: val, pos and var
+        float phase = 2.0 * PI * opd * 1.0e-9;
+        const vec3 val = vec3(5.4856e-13, 4.4201e-13, 5.2481e-13);
+        const vec3 pos = vec3(1.6810e+06, 1.7953e+06, 2.2084e+06);
+        const vec3 var = vec3(4.3278e+09, 9.3046e+09, 6.6121e+09);
+        vec3 xyz = val * sqrt(2.0 * PI * var) * cos(pos * phase + shift) * exp(-var * sqr(phase));
+        xyz.x += 9.7470e-14 * sqrt(2.0 * PI * 4.5282e+09) * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * sqr(phase));
+        xyz /= 1.0685e-7;
+        // XYZ to RGB color space
+        const mat3 XYZ_TO_RGB = mat3( 3.2404542, -0.9692660,  0.0556434,
+                                     -1.5371385,  1.8760108, -0.2040259,
+                                     -0.4985314,  0.0415560,  1.0572252);
+        vec3 rgb = XYZ_TO_RGB * xyz;
+        return rgb;
+    }
+
+    vec3 EvalIridescence(float outsideIOR, float cosTheta1, float eta2, vec3 baseF0,float iridescenceThickness){ 
+        vec3 iridescence = vec3(1.0);
+        // Force iridescenceIOR -> outsideIOR when thinFilmThickness -> 0.0
+        float iridescenceIOR = mix( outsideIOR, eta2, smoothstep( 0.0, 0.03, iridescenceThickness ) );
+        // Evaluate the cosTheta on the base layer (Snell law)
+        float sinTheta2Sq = pow( outsideIOR / iridescenceIOR, 2.0) * (1.0 - pow( cosTheta1, 2.0));
+        float cosTheta2Sq = 1.0 - sinTheta2Sq;
+        // Handle total internal reflection
+        if (cosTheta2Sq < 0.0) {
+           return iridescence;
+        }
+        float cosTheta2 = sqrt(cosTheta2Sq);
+            
+        // First interface
+        float R0 = iorToFresnel(iridescenceIOR, outsideIOR);
+        float R12 = F_Schlick(R0, cosTheta1);
+        float R21  = R12;
+        float T121 = 1.0 - R12;
+        float phi12 = 0.0;
+        if (iridescenceIOR < outsideIOR) {phi12 = PI;}
+        float phi21 = PI - phi12;
+        
+        // Second interface
+        vec3 baseIor = fresnelToIor(clamp(baseF0, 0.0, 0.9999)); // guard against 1.0
+        vec3 R1  =iorToFresnel(baseIor, iridescenceIOR);
+        vec3 R23 = F_Schlick(R1, cosTheta2);
+        vec3 phi23 =vec3(0.0);
+        if (baseIor[0] < iridescenceIOR) {phi23[0] = PI;}
+        if (baseIor[1] < iridescenceIOR) {phi23[1] = PI;}
+        if (baseIor[2] < iridescenceIOR) {phi23[2] = PI;}
+        
+        // Phase shift
+        float OPD = 2.0 * iridescenceIOR  * iridescenceThickness * cosTheta2;
+        vec3 phi = vec3(phi21) + phi23;
+        
+        // Compound terms
+        vec3 R123 = clamp(R12 * R23, 1e-5, 0.9999);
+        vec3 r123 = sqrt(R123);
+        vec3 Rs = sqr(T121) * R23 / (vec3(1.0) - R123);
+        // Reflectance term for m = 0 (DC term amplitude)
+        vec3 C0 = R12 + Rs;
+        iridescence = C0;
+        // Reflectance term for m > 0 (pairs of diracs)
+        vec3 Cm = Rs - T121;
+        for (int m = 1; m <= 2; ++m) {
+             Cm *= r123;
+             vec3 Sm = 2.0 * evalSensitivity(float(m) * OPD, float(m) * phi);
+             iridescence += Cm * Sm;
+            }
+        iridescence = max(iridescence, vec3(0.0)); 
+        return iridescence;
+    }
+#endif
 
 void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     vec3 albedoColor = surfaceData.albedoColor;
@@ -224,6 +328,12 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     #ifdef MATERIAL_ENABLE_CLEAR_COAT
         brdfData.clearCoatRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.clearCoatRoughness + getAARoughnessFactor(surfaceData.clearCoatNormal), 1.0));
         brdfData.clearCoatSpecularColor = vec3(0.04);
+    #endif
+
+    #ifdef MATERIAL_ENABLE_IRIDESCENCE
+        float topIor = 1.0;
+        float NdotV = saturate(dot(surfaceData.normal, surfaceData.viewDir ) );
+        brdfData.iridescenceSpecularColor = EvalIridescence(topIor, NdotV, surfaceData.iridesceceIor, brdfData.specularColor, surfaceData.iridescenceThickness);   
     #endif
 }
 
