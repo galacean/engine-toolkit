@@ -150,4 +150,10 @@ function makeRollupConfig(pkg) {
   return configs;
 }
 
-export default Promise.all(pkgs.map(makeRollupConfig).flat());
+const builderConfigs = pkgs.map(makeRollupConfig).flat();
+
+builderConfigs.sort((_, b) => {
+  if (b.output.format === "umd") return -1
+})
+
+export default Promise.all(builderConfigs);

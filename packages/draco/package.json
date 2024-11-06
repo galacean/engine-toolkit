@@ -5,6 +5,9 @@
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
+  "repository": {
+    "url": "https://github.com/galacean/engine-toolkit.git"
+  },
   "license": "MIT",
   "scripts": {
     "b:types": "tsc"
