@@ -50,17 +50,6 @@ float material_OcclusionTextureCoord;
     #endif
 #endif
 
-#ifdef MATERIAL_ENABLE_SHEEN
-    vec3 material_SheenColor;
-    float material_SheenRoughness;
-    #ifdef MATERIAL_HAS_SHEENCOLOR_TEXTURE
-       sampler2D material_SheenColorTexture;
-    #endif
-    #ifdef MATERIAL_HAS_SHEENROUGHNESS_TEXTURE
-       sampler2D material_SheenRoughnessTexture;
-    #endif
-#endif
-
 // Texture
 #ifdef MATERIAL_HAS_BASETEXTURE
     sampler2D material_BaseTexture;

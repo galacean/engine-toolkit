@@ -56,13 +56,6 @@ struct SurfaceData{
         float iridescenceThickness;
     #endif
 
-    //sheen
-    #ifdef MATERIAL_ENABLE_SHEEN
-        float sheenIntensity;
-        vec3  sheenColor;
-        float sheenRoughness;
-    #endif
-
 };
 
 
@@ -312,21 +305,6 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
             }
         iridescence = max(iridescence, vec3(0.0)); 
         return iridescence;
-    }
-#endif
-
-#ifdef MATERIAL_ENABLE_SHEEN
-    //http://www.aconty.com/pdf/s2017_pbs_imageworks_sheen.pdf
-    float D_Charlie(float roughness, float dotNH) {
-        float invAlpha  = 1.0 / roughness;
-        float cos2h = dotNH * dotNH;
-        float sin2h = max(1.0 - cos2h, 0.0078125); // 2^(-14/2), so sin2h^2 > 0 in fp16
-        return (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
-    }
-
-    //https://blog.selfshadow.com/publications/s2013-shading-course/#course_content
-    float V_Neubelt(float dotNV, float dotNL) {
-        return 1.0 / (4.0 * (dotNL + dotNV - dotNL * dotNV));
     }
 #endif
 
