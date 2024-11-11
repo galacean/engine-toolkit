@@ -42,7 +42,7 @@ Shader "PBR.gs" {
       }
 
       Header("Thin Film Iridescence"){
-        material_IridescenceInfo("Iridescence", Vector4) = (0, 0, 0, 0);
+        material_IridescenceInfo("Iridescence", Vector4) = (0, 1.3, 100, 400);
         material_IridescenceThicknessTexture("IridescenceThicknessTexture", Texture2D);
         material_IridescenceTexture("IridescenceTexture", Texture2D);
       }

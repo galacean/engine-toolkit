@@ -55,6 +55,14 @@ struct SurfaceData{
         float iridesceceFactor;
         float iridescenceThickness;
     #endif
+
+    //sheen
+    #ifdef MATERIAL_ENABLE_SHEEN
+        float sheenIntensity;
+        vec3  sheenColor;
+        float sheenRoughness;
+    #endif
+
 };
 
 
@@ -253,7 +261,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         return rgb;
     }
 
-    vec3 EvalIridescence(float outsideIOR, float cosTheta1, float eta2, vec3 baseF0,float iridescenceThickness){ 
+    vec3 evalIridescence(float outsideIOR, float cosTheta1, float eta2, vec3 baseF0,float iridescenceThickness){ 
         vec3 iridescence = vec3(1.0);
         // Force iridescenceIOR -> outsideIOR when thinFilmThickness -> 0.0
         float iridescenceIOR = mix( outsideIOR, eta2, smoothstep( 0.0, 0.03, iridescenceThickness ) );
@@ -307,6 +315,21 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
     }
 #endif
 
+#ifdef MATERIAL_ENABLE_SHEEN
+    //http://www.aconty.com/pdf/s2017_pbs_imageworks_sheen.pdf
+    float D_Charlie(float roughness, float dotNH) {
+        float invAlpha  = 1.0 / roughness;
+        float cos2h = dotNH * dotNH;
+        float sin2h = max(1.0 - cos2h, 0.0078125); // 2^(-14/2), so sin2h^2 > 0 in fp16
+        return (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
+    }
+
+    //https://blog.selfshadow.com/publications/s2013-shading-course/#course_content
+    float V_Neubelt(float dotNV, float dotNL) {
+        return 1.0 / (4.0 * (dotNL + dotNV - dotNL * dotNV));
+    }
+#endif
+
 void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     vec3 albedoColor = surfaceData.albedoColor;
     vec3 specularColor = surfaceData.specularColor;
@@ -332,8 +355,7 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
 
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
         float topIor = 1.0;
-        float NdotV = saturate(dot(surfaceData.normal, surfaceData.viewDir ) );
-        brdfData.iridescenceSpecularColor = EvalIridescence(topIor, NdotV, surfaceData.iridesceceIor, brdfData.specularColor, surfaceData.iridescenceThickness);   
+        brdfData.iridescenceSpecularColor = evalIridescence(topIor, surfaceData.dotNV, surfaceData.iridesceceIor, brdfData.specularColor, surfaceData.iridescenceThickness);   
     #endif
 }
 

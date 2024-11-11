@@ -50,6 +50,17 @@ float material_OcclusionTextureCoord;
     #endif
 #endif
 
+#ifdef MATERIAL_ENABLE_SHEEN
+    vec3 material_SheenColor;
+    float material_SheenRoughness;
+    #ifdef MATERIAL_HAS_SHEENCOLOR_TEXTURE
+       sampler2D material_SheenColorTexture;
+    #endif
+    #ifdef MATERIAL_HAS_SHEENROUGHNESS_TEXTURE
+       sampler2D material_SheenRoughnessTexture;
+    #endif
+#endif
+
 // Texture
 #ifdef MATERIAL_HAS_BASETEXTURE
     sampler2D material_BaseTexture;
@@ -254,15 +265,15 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
         float iridesceceThicknessMin = material_IridescenceInfo.z;
         float iridesceceThicknessMax = material_IridescenceInfo.w;
         #ifdef MATERIAL_HAS_IRIDESCENCE_THICKNESS_TEXTURE
-           vec3 iridescenceThicknessInfo = (texture2D( material_IridescenceThicknessTexture, uv)).rgb;
-           surfaceData.iridescenceThickness = mix(iridesceceThicknessMin, iridesceceThicknessMax, iridescenceThicknessInfo.g);
+           float iridescenceThicknessWeight = texture2D( material_IridescenceThicknessTexture, uv).g;
         #else
-           surfaceData.iridescenceThickness = iridesceceThicknessMax;
+           float iridescenceThicknessWeight = 1.0;
         #endif
-
+           surfaceData.iridescenceThickness = mix(iridesceceThicknessMin, iridesceceThicknessMax, iridescenceThicknessWeight);
+       
         #ifdef MATERIAL_HAS_IRIDESCENCE_TEXTURE
-           vec3 iridecenceIntensity = (texture2D( material_IridescenceTexture, uv)).rgb;
-           surfaceData.iridesceceFactor *= iridecenceIntensity.x;
+           float iridecenceIntensity = (texture2D( material_IridescenceTexture, uv)).r;
+           surfaceData.iridesceceFactor *= iridecenceIntensity;
         #endif
     #endif
 
