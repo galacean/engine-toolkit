@@ -214,10 +214,6 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 }
 
 #ifdef MATERIAL_ENABLE_IRIDESCENCE
-    float sqr(float x) { 
-        return x * x; 
-    }
-
     // Conversion f0/ior
     vec3 iorToFresnel(vec3 transmittedIor, float incidentIor) {
         return pow((transmittedIor - incidentIor) / (transmittedIor + incidentIor),vec3(2.0));
@@ -243,8 +239,8 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         const vec3 val = vec3(5.4856e-13, 4.4201e-13, 5.2481e-13);
         const vec3 pos = vec3(1.6810e+06, 1.7953e+06, 2.2084e+06);
         const vec3 var = vec3(4.3278e+09, 9.3046e+09, 6.6121e+09);
-        vec3 xyz = val * sqrt(2.0 * PI * var) * cos(pos * phase + shift) * exp(-var * sqr(phase));
-        xyz.x += 9.7470e-14 * sqrt(2.0 * PI * 4.5282e+09) * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * sqr(phase));
+        vec3 xyz = val * sqrt(2.0 * PI * var) * cos(pos * phase + shift) * exp(-var * pow2(phase));
+        xyz.x += 9.7470e-14 * sqrt(2.0 * PI * 4.5282e+09) * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * pow2(phase));
         xyz /= 1.0685e-7;
         // XYZ to RGB color space
         const mat3 XYZ_TO_RGB = mat3( 3.2404542, -0.9692660,  0.0556434,
@@ -292,7 +288,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         // Compound terms
         vec3 R123 = clamp(R12 * R23, 1e-5, 0.9999);
         vec3 r123 = sqrt(R123);
-        vec3 Rs = sqr(T121) * R23 / (vec3(1.0) - R123);
+        vec3 Rs = pow2(T121) * R23 / (vec3(1.0) - R123);
         // Reflectance term for m = 0 (DC term amplitude)
         vec3 C0 = R12 + Rs;
         iridescence = C0;
