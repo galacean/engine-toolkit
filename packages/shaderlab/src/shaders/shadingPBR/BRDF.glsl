@@ -250,12 +250,12 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         return rgb;
     }
 
-    vec3 evalIridescence(float outsideIOR, float cosTheta1, float eta2, vec3 baseF0,float iridescenceThickness){ 
+    vec3 evalIridescence(float outsideIOR, float dotNV, float eta2, vec3 baseF0,float iridescenceThickness){ 
         vec3 iridescence = vec3(1.0);
         // Force iridescenceIOR -> outsideIOR when thinFilmThickness -> 0.0
         float iridescenceIOR = mix( outsideIOR, eta2, smoothstep( 0.0, 0.03, iridescenceThickness ) );
         // Evaluate the cosTheta on the base layer (Snell law)
-        float sinTheta2Sq = pow( outsideIOR / iridescenceIOR, 2.0) * (1.0 - pow( cosTheta1, 2.0));
+        float sinTheta2Sq = pow( outsideIOR / iridescenceIOR, 2.0) * (1.0 - pow( dotNV, 2.0));
         float cosTheta2Sq = 1.0 - sinTheta2Sq;
         // Handle total internal reflection
         if (cosTheta2Sq < 0.0) {
@@ -264,22 +264,22 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         float cosTheta2 = sqrt(cosTheta2Sq);
             
         // First interface
-        float R0 = iorToFresnel(iridescenceIOR, outsideIOR);
-        float R12 = F_Schlick(R0, cosTheta1);
-        float R21  = R12;
-        float T121 = 1.0 - R12;
+        float F0 = iorToFresnel(iridescenceIOR, outsideIOR);
+        float reflectance = F_Schlick(F0, dotNV);
+        float T121 = 1.0 - reflectance;
         float phi12 = 0.0;
-        if (iridescenceIOR < outsideIOR) {phi12 = PI;}
+        // iridescenceIOR has limited greater than 1.0.
+        // if (iridescenceIOR < outsideIOR) {phi12 = PI;} 
         float phi21 = PI - phi12;
         
         // Second interface
-        vec3 baseIor = fresnelToIor(clamp(baseF0, 0.0, 0.9999)); // guard against 1.0
-        vec3 R1  =iorToFresnel(baseIor, iridescenceIOR);
+        vec3 baseIOR = fresnelToIor(clamp(baseF0, 0.0, 0.9999)); // guard against 1.0
+        vec3 R1  = iorToFresnel(baseIOR, iridescenceIOR);
         vec3 R23 = F_Schlick(R1, cosTheta2);
         vec3 phi23 =vec3(0.0);
-        if (baseIor[0] < iridescenceIOR) {phi23[0] = PI;}
-        if (baseIor[1] < iridescenceIOR) {phi23[1] = PI;}
-        if (baseIor[2] < iridescenceIOR) {phi23[2] = PI;}
+        if (baseIOR[0] < iridescenceIOR) {phi23[0] = PI;}
+        if (baseIOR[1] < iridescenceIOR) {phi23[1] = PI;}
+        if (baseIOR[2] < iridescenceIOR) {phi23[2] = PI;}
         
         // Phase shift
         float OPD = 2.0 * iridescenceIOR  * iridescenceThickness * cosTheta2;
