@@ -328,8 +328,8 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     #endif
 
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
-        float topIor = 1.0;
-        brdfData.iridescenceSpecularColor = evalIridescence(topIor, surfaceData.dotNV, surfaceData.iridesceceIOR, brdfData.specularColor, surfaceData.iridescenceThickness);   
+        float topIOR = 1.0;
+        brdfData.iridescenceSpecularColor = evalIridescence(topIOR, surfaceData.dotNV, surfaceData.iridesceceIOR, brdfData.specularColor, surfaceData.iridescenceThickness);   
     #endif
 }
 
