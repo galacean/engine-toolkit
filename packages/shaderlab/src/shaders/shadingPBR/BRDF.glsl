@@ -215,17 +215,17 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 
 #ifdef MATERIAL_ENABLE_IRIDESCENCE
     // Conversion f0/ior
-    vec3 iorToFresnel(vec3 transmittedIor, float incidentIor) {
-        return pow((transmittedIor - incidentIor) / (transmittedIor + incidentIor),vec3(2.0));
+    vec3 iorToFresnel(vec3 transmittedIOR, float incidentIOR) {
+        return pow((transmittedIOR - incidentIOR) / (transmittedIOR + incidentIOR),vec3(2.0));
     } 
 
-    float iorToFresnel(float transmittedIor, float incidentIor) {
-        return pow((transmittedIor - incidentIor) / (transmittedIor + incidentIor),2.0);
+    float iorToFresnel(float transmittedIOR, float incidentIOR) {
+        return pow((transmittedIOR - incidentIOR) / (transmittedIOR + incidentIOR),2.0);
     } 
 
     // Assume air interface for top
     // Note: We don't handle the case fresnel0 == 1
-    vec3 fresnelToIor(vec3 F0){
+    vec3 fresnelToIOR(vec3 F0){
         vec3 sqrtF0 = sqrt(F0);
         return (vec3(1.0) + sqrtF0) / (vec3(1.0) - sqrtF0);
     }
@@ -273,7 +273,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         float phi21 = PI - phi12;
         
         // Second interface
-        vec3 baseIOR = fresnelToIor(clamp(baseF0, 0.0, 0.9999)); // guard against 1.0
+        vec3 baseIOR = fresnelToIOR(clamp(baseF0, 0.0, 0.9999)); // guard against 1.0
         vec3 R1  = iorToFresnel(baseIOR, iridescenceIOR);
         vec3 R23 = F_Schlick(R1, cosTheta2);
         vec3 phi23 =vec3(0.0);
