@@ -214,7 +214,6 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 }
 
 #ifdef MATERIAL_ENABLE_IRIDESCENCE
-    // Conversion f0/ior
     vec3 iorToFresnel0(vec3 transmittedIOR, float incidentIOR) {
         return pow((transmittedIOR - incidentIOR) / (transmittedIOR + incidentIOR),vec3(2.0));
     } 
@@ -225,8 +224,8 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 
     // Assume air interface for top
     // Note: We don't handle the case fresnel0 == 1
-    vec3 fresnelToIOR(vec3 F0){
-        vec3 sqrtF0 = sqrt(F0);
+    vec3 fresnelToIOR(vec3 f0){
+        vec3 sqrtF0 = sqrt(f0);
         return (vec3(1.0) + sqrtF0) / (vec3(1.0) - sqrtF0);
     }
 
@@ -282,7 +281,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         if (baseIOR[2] < iridescenceIOR) {phi23[2] = PI;}
         
         // Phase shift
-        float OPD = 2.0 * iridescenceIOR  * iridescenceThickness * cosTheta2;
+        float opd = 2.0 * iridescenceIOR  * iridescenceThickness * cosTheta2;
         vec3 phi = vec3(phi21) + phi23;
         
         // Compound terms
@@ -296,7 +295,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         vec3 cm = rs - t121;
         for (int m = 1; m <= 2; ++m) {
              cm *= r123;
-             vec3 Sm = 2.0 * evalSensitivity(float(m) * OPD, float(m) * phi);
+             vec3 Sm = 2.0 * evalSensitivity(float(m) * opd, float(m) * phi);
              iridescence += cm * Sm;
             }
         iridescence = max(iridescence, vec3(0.0)); 
