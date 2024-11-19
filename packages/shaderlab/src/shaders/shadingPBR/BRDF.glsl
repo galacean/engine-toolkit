@@ -215,11 +215,11 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
 
 #ifdef MATERIAL_ENABLE_IRIDESCENCE
     // Conversion f0/ior
-    vec3 iorToFresnel(vec3 transmittedIOR, float incidentIOR) {
+    vec3 iorToFresnel0(vec3 transmittedIOR, float incidentIOR) {
         return pow((transmittedIOR - incidentIOR) / (transmittedIOR + incidentIOR),vec3(2.0));
     } 
 
-    float iorToFresnel(float transmittedIOR, float incidentIOR) {
+    float iorToFresnel0(float transmittedIOR, float incidentIOR) {
         return pow((transmittedIOR - incidentIOR) / (transmittedIOR + incidentIOR),2.0);
     } 
 
@@ -264,9 +264,9 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         float cosTheta2 = sqrt(cosTheta2Sq);
             
         // First interface
-        float F0 = iorToFresnel(iridescenceIOR, outsideIOR);
-        float reflectance = F_Schlick(F0, dotNV);
-        float T121 = 1.0 - reflectance;
+        float f0 = iorToFresnel0(iridescenceIOR, outsideIOR);
+        float reflectance = F_Schlick(f0, dotNV);
+        float t121 = 1.0 - reflectance;
         float phi12 = 0.0;
         // iridescenceIOR has limited greater than 1.0.
         // if (iridescenceIOR < outsideIOR) {phi12 = PI;} 
@@ -274,8 +274,8 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         
         // Second interface
         vec3 baseIOR = fresnelToIOR(clamp(baseF0, 0.0, 0.9999)); // guard against 1.0
-        vec3 R1  = iorToFresnel(baseIOR, iridescenceIOR);
-        vec3 R23 = F_Schlick(R1, cosTheta2);
+        vec3 r1  = iorToFresnel0(baseIOR, iridescenceIOR);
+        vec3 r23 = F_Schlick(r1, cosTheta2);
         vec3 phi23 =vec3(0.0);
         if (baseIOR[0] < iridescenceIOR) {phi23[0] = PI;}
         if (baseIOR[1] < iridescenceIOR) {phi23[1] = PI;}
@@ -286,18 +286,18 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         vec3 phi = vec3(phi21) + phi23;
         
         // Compound terms
-        vec3 R123 = clamp(R12 * R23, 1e-5, 0.9999);
-        vec3 r123 = sqrt(R123);
-        vec3 Rs = pow2(T121) * R23 / (vec3(1.0) - R123);
+        vec3 r123 = clamp(r12 * r23, 1e-5, 0.9999);
+        vec3 r123 = sqrt(r123);
+        vec3 rs = pow2(t121) * r23 / (vec3(1.0) - r123);
         // Reflectance term for m = 0 (DC term amplitude)
-        vec3 C0 = R12 + Rs;
-        iridescence = C0;
+        vec3 c0 = r12 + rs;
+        iridescence = c0;
         // Reflectance term for m > 0 (pairs of diracs)
-        vec3 Cm = Rs - T121;
+        vec3 cm = rs - t121;
         for (int m = 1; m <= 2; ++m) {
-             Cm *= r123;
+             cm *= r123;
              vec3 Sm = 2.0 * evalSensitivity(float(m) * OPD, float(m) * phi);
-             iridescence += Cm * Sm;
+             iridescence += cm * Sm;
             }
         iridescence = max(iridescence, vec3(0.0)); 
         return iridescence;
