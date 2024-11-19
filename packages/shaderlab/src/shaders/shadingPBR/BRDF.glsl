@@ -154,14 +154,14 @@ float D_GGX(float alpha, float dotNH ) {
     }
 #endif
 
-float isotropicLobe(float alpha, float dotNV, float dotNL, float dotNH) {
+float DG_GGX(float alpha, float dotNV, float dotNL, float dotNH) {
 	float D = D_GGX( alpha, dotNH );
 	float G = G_GGX_SmithCorrelated( alpha, dotNL, dotNV );
     return G * D;
 }
 
 #ifdef MATERIAL_ENABLE_ANISOTROPY
-    float anisotropicLobe(vec3 h, vec3 l, SurfaceData surfaceData, float alpha, float dotNV, float dotNL, float dotNH) {
+    float DG_GGX_anisotropic(vec3 h, vec3 l, SurfaceData surfaceData, float alpha, float dotNV, float dotNL, float dotNH) {
         vec3 t = surfaceData.anisotropicT;
         vec3 b = surfaceData.anisotropicB;
         vec3 v = surfaceData.viewDir;
@@ -205,9 +205,9 @@ vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, BRDFData
 	
 
     #ifdef MATERIAL_ENABLE_ANISOTROPY
-        float GD = anisotropicLobe(halfDir, incidentDirection, surfaceData, alpha, dotNV, dotNL, dotNH);
+        float GD = DG_GGX_anisotropic(halfDir, incidentDirection, surfaceData, alpha, dotNV, dotNL, dotNH);
     #else
-        float GD = isotropicLobe(alpha, dotNV, dotNL, dotNH);
+        float GD = DG_GGX(alpha, dotNV, dotNL, dotNH);
     #endif
     return F * GD;
 }
@@ -270,7 +270,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         float reflectance = F_Schlick(f0, dotNV);
         float t121 = 1.0 - reflectance;
         float phi12 = 0.0;
-        // iridescenceIOR has limited greater than 1.0.
+        // iridescenceIOR has limited greater than 1.0
         // if (iridescenceIOR < outsideIOR) {phi12 = PI;} 
         float phi21 = PI - phi12;
         
@@ -288,16 +288,16 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         vec3 phi = vec3(phi21) + phi23;
         
         // Compound terms
-        vec3 R123 = clamp(reflectance * r23, 1e-5, 0.9999);
-        vec3 r123 = sqrt(R123);
-        vec3 rs = pow2(t121) * r23 / (vec3(1.0) - R123);
+        vec3 r123 = clamp(reflectance * r23, 1e-5, 0.9999);
+        vec3 sr123 = sqrt(r123);
+        vec3 rs = pow2(t121) * r23 / (vec3(1.0) - r123);
         // Reflectance term for m = 0 (DC term amplitude)
         vec3 c0 = reflectance + rs;
         iridescence = c0;
         // Reflectance term for m > 0 (pairs of diracs)
         vec3 cm = rs - t121;
         for (int m = 1; m <= 2; ++m) {
-             cm *= r123;
+             cm *= sr123;
              vec3 sm = 2.0 * evalSensitivity(float(m) * opd, float(m) * phi);
              iridescence += cm * sm;
             }

@@ -251,18 +251,15 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
         surfaceData.iridesceceFactor = material_IridescenceInfo.x;
         surfaceData.iridesceceIOR = material_IridescenceInfo.y;
 
-        float iridesceceThicknessMin = material_IridescenceInfo.z;
-        float iridesceceThicknessMax = material_IridescenceInfo.w;
         #ifdef MATERIAL_HAS_IRIDESCENCE_THICKNESS_TEXTURE
            float iridescenceThicknessWeight = texture2D( material_IridescenceThicknessTexture, uv).g;
+           surfaceData.iridescenceThickness = mix(material_IridescenceInfo.z, material_IridescenceInfo.w, iridescenceThicknessWeight);
         #else
-           float iridescenceThicknessWeight = 1.0;
+           surfaceData.iridescenceThickness = aterial_IridescenceInfo.w;
         #endif
-           surfaceData.iridescenceThickness = mix(iridesceceThicknessMin, iridesceceThicknessMax, iridescenceThicknessWeight);
        
         #ifdef MATERIAL_HAS_IRIDESCENCE_TEXTURE
-           float iridecenceIntensity = (texture2D( material_IridescenceTexture, uv)).r;
-           surfaceData.iridesceceFactor *= iridecenceIntensity;
+           surfaceData.iridesceceFactor *= texture2D( material_IridescenceTexture, uv).r;
         #endif
     #endif
 
