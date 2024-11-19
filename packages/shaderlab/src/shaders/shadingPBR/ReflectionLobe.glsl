@@ -6,13 +6,7 @@ void diffuseLobe(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, 
 }
 
 void specularLobe(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 specularColor){
-    vec3 BRDF_Specular_GGX = BRDF_Specular_GGX( incidentDirection, surfaceData, surfaceData.normal, brdfData.specularColor, brdfData.roughness);
-    
-    #ifdef MATERIAL_ENABLE_IRIDESCENCE
-        BRDF_Specular_GGX = mix(BRDF_Specular_GGX, brdfData.iridescenceSpecularColor, surfaceData.iridesceceFactor);
-    #endif
-
-    specularColor += attenuationIrradiance * BRDF_Specular_GGX;
+    specularColor += attenuationIrradiance *  BRDF_Specular_GGX( incidentDirection, surfaceData, brdfData, surfaceData.normal, brdfData.specularColor, brdfData.roughness);
 }
 
 float clearCoatLobe(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 color, inout vec3 specularColor){

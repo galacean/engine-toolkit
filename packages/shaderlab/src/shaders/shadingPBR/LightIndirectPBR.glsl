@@ -65,15 +65,16 @@ float evaluateClearCoatIBL(Varyings varyings, SurfaceData surfaceData, BRDFData 
     return radianceAttenuation;
 }
 
-void evaluateSpecularIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
+void evaluateSpecularIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 outSpecularColor){
     vec3 radiance = getLightProbeRadiance(surfaceData, surfaceData.normal, brdfData.roughness);
-    vec3 envBRDFApprox = envBRDFApprox(brdfData.specularColor, brdfData.roughness, surfaceData.dotNV);
-    
+  
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
-        envBRDFApprox = mix(envBRDFApprox, brdfData.iridescenceSpecularColor, surfaceData.iridesceceFactor);
+        vec3 speculaColor = mix(brdfData.specularColor, brdfData.iridescenceSpecularColor, surfaceData.iridesceceFactor);
+    #else
+        vec3 speculaColor = brdfData.specularColor;
     #endif
 
-    specularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDFApprox;
+    outSpecularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDFApprox(speculaColor, brdfData.roughness, surfaceData.dotNV);
 }
 
 

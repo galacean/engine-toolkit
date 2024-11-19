@@ -154,16 +154,14 @@ float D_GGX(float alpha, float dotNH ) {
     }
 #endif
 
-vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
-	vec3 F = F_Schlick( specularColor, dotLH );
+float isotropicLobe(float alpha, float dotNV, float dotNL, float dotNH) {
 	float D = D_GGX( alpha, dotNH );
 	float G = G_GGX_SmithCorrelated( alpha, dotNL, dotNV );
-
-	return F * ( G * D );
+    return G * D;
 }
 
 #ifdef MATERIAL_ENABLE_ANISOTROPY
-    vec3 anisotropicLobe(vec3 h, vec3 l, SurfaceData surfaceData, vec3 specularColor, float alpha, float dotNV, float dotNL, float dotNH, float dotLH) {
+    float anisotropicLobe(vec3 h, vec3 l, SurfaceData surfaceData, float alpha, float dotNV, float dotNL, float dotNH) {
         vec3 t = surfaceData.anisotropicT;
         vec3 b = surfaceData.anisotropicB;
         vec3 v = surfaceData.viewDir;
@@ -181,16 +179,15 @@ vec3 isotropicLobe(vec3 specularColor, float alpha, float dotNV, float dotNL, fl
         float ab = max(alpha * (1.0 - surfaceData.anisotropy), MIN_ROUGHNESS);
 
         // specular anisotropic BRDF
-    	vec3 F = F_Schlick( specularColor, dotLH );
         float D = D_GGX_Anisotropic(at, ab, dotTH, dotBH, dotNH);
         float G = G_GGX_SmithCorrelated_Anisotropic(at, ab, dotTV, dotBV, dotTL, dotBL, dotNV, dotNL);
 
-        return F * ( G * D );
+        return G * D;
     }
 #endif
 
 // GGX Distribution, Schlick Fresnel, GGX-Smith Visibility
-vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, vec3 normal, vec3 specularColor, float roughness ) {
+vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, BRDFData brdfData, vec3 normal, vec3 specularColor, float roughness ) {
 
 	float alpha = pow2( roughness ); // UE4's roughness
 
@@ -201,12 +198,18 @@ vec3 BRDF_Specular_GGX(vec3 incidentDirection, SurfaceData surfaceData, vec3 nor
 	float dotNH = saturate( dot( normal, halfDir ) );
 	float dotLH = saturate( dot( incidentDirection, halfDir ) );
 
-    #ifdef MATERIAL_ENABLE_ANISOTROPY
-        return anisotropicLobe(halfDir, incidentDirection, surfaceData, specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
-    #else
-        return isotropicLobe(specularColor, alpha, dotNV, dotNL, dotNH, dotLH);
+    vec3 F = F_Schlick( specularColor, dotLH );
+    #ifdef MATERIAL_ENABLE_IRIDESCENCE
+        F = mix(F, brdfData.iridescenceSpecularColor, surfaceData.iridesceceFactor);
     #endif
+	
 
+    #ifdef MATERIAL_ENABLE_ANISOTROPY
+        float GD = anisotropicLobe(halfDir, incidentDirection, surfaceData, alpha, dotNV, dotNL, dotNH);
+    #else
+        float GD = isotropicLobe(alpha, dotNV, dotNL, dotNH);
+    #endif
+    return F * GD;
 }
 
 vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
@@ -285,11 +288,11 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         vec3 phi = vec3(phi21) + phi23;
         
         // Compound terms
-        vec3 r123 = clamp(r12 * r23, 1e-5, 0.9999);
-        vec3 r123 = sqrt(r123);
-        vec3 rs = pow2(t121) * r23 / (vec3(1.0) - r123);
+        vec3 R123 = clamp(reflectance * r23, 1e-5, 0.9999);
+        vec3 r123 = sqrt(R123);
+        vec3 rs = pow2(t121) * r23 / (vec3(1.0) - R123);
         // Reflectance term for m = 0 (DC term amplitude)
-        vec3 c0 = r12 + rs;
+        vec3 c0 = reflectance + rs;
         iridescence = c0;
         // Reflectance term for m > 0 (pairs of diracs)
         vec3 cm = rs - t121;
@@ -298,8 +301,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
              vec3 sm = 2.0 * evalSensitivity(float(m) * opd, float(m) * phi);
              iridescence += cm * sm;
             }
-        iridescence = max(iridescence, vec3(0.0)); 
-        return iridescence;
+        return iridescence = max(iridescence, vec3(0.0)); 
     }
 #endif
 
