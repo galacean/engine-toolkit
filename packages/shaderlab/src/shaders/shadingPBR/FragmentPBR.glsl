@@ -39,6 +39,17 @@ float material_OcclusionTextureCoord;
     #endif
 #endif
 
+#ifdef MATERIAL_ENABLE_IRIDESCENCE
+    vec4 material_IridescenceInfo;
+    #ifdef MATERIAL_HAS_IRIDESCENCE_THICKNESS_TEXTURE
+       sampler2D material_IridescenceThicknessTexture;
+    #endif
+
+    #ifdef MATERIAL_HAS_IRIDESCENCE_TEXTURE
+       sampler2D material_IridescenceTexture;
+    #endif
+#endif
+
 // Texture
 #ifdef MATERIAL_HAS_BASETEXTURE
     sampler2D material_BaseTexture;
@@ -233,6 +244,23 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
         surfaceData.anisotropicT = normalize(mat3(surfaceData.tangent, surfaceData.bitangent, surfaceData.normal) * anisotropicDirection);
         surfaceData.anisotropicB = normalize(cross(surfaceData.normal, surfaceData.anisotropicT));
         surfaceData.anisotropicN = getAnisotropicBentNormal(surfaceData);
+    #endif
+
+    //Iridescence
+    #ifdef MATERIAL_ENABLE_IRIDESCENCE
+        surfaceData.iridesceceFactor = material_IridescenceInfo.x;
+        surfaceData.iridesceceIOR = material_IridescenceInfo.y;
+
+        #ifdef MATERIAL_HAS_IRIDESCENCE_THICKNESS_TEXTURE
+           float iridescenceThicknessWeight = texture2D( material_IridescenceThicknessTexture, uv).g;
+           surfaceData.iridescenceThickness = mix(material_IridescenceInfo.z, material_IridescenceInfo.w, iridescenceThicknessWeight);
+        #else
+           surfaceData.iridescenceThickness = aterial_IridescenceInfo.w;
+        #endif
+       
+        #ifdef MATERIAL_HAS_IRIDESCENCE_TEXTURE
+           surfaceData.iridesceceFactor *= texture2D( material_IridescenceTexture, uv).r;
+        #endif
     #endif
 
     // AO

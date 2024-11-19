@@ -41,6 +41,12 @@ Shader "PBR.gs" {
         material_ClearCoatNormalTexture("ClearCoatNormalTexture", Texture2D);
       }
 
+      Header("Thin Film Iridescence"){
+        material_IridescenceInfo("IridescenceInfo", Vector4) = (0, 1.3, 100, 400);
+        material_IridescenceThicknessTexture("IridescenceThicknessTexture", Texture2D);
+        material_IridescenceTexture("IridescenceTexture", Texture2D);
+      }
+
       Header("Common") {
         material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
         material_TilingOffset("TilingOffset", Vector4) = (1, 1, 0, 0);
@@ -60,6 +66,9 @@ Shader "PBR.gs" {
         MATERIAL_HAS_CLEAR_COAT_TEXTURE("HAS_CLEAR_COAT_TEXTURE");
         MATERIAL_HAS_CLEAR_COAT_ROUGHNESS_TEXTURE("HAS_CLEAR_COAT_ROUGHNESS_TEXTURE");
         MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE("HAS_CLEAR_COAT_NORMAL_TEXTURE");
+        MATERIAL_ENABLE_IRIDESCENCE("ENABLE_IRIDESCENCE");
+        MATERIAL_HAS_IRIDESCENCE_THICKNESS_TEXTURE("HAS_IRIDESCENCE_THICKNESS_TEXTURE");
+        MATERIAL_HAS_IRIDESCENCE_TEXTURE("HAS_IRIDESCENCE_TEXTURE");
         MATERIAL_IS_TRANSPARENT("IS_TRANSPARENT");
         MATERIAL_IS_ALPHA_CUTOFF("IS_ALPHA_CUTOFF");
       }

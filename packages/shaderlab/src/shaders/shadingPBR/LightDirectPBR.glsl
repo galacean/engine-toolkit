@@ -34,7 +34,7 @@ void surfaceShading(Varyings varyings, SurfaceData surfaceData, BRDFData brdfDat
     FUNCTION_DIFFUSE_LOBE(varyings, surfaceData, brdfData, attenuationIrradiance, diffuseColor);
     // Specular Lobe
     FUNCTION_SPECULAR_LOBE(varyings, surfaceData, brdfData, incidentDirection, attenuationIrradiance, specularColor);
-
+    
     color += diffuseColor + specularColor;
 
 }
