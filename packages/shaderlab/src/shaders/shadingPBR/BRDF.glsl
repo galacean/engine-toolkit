@@ -295,8 +295,8 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         vec3 cm = rs - t121;
         for (int m = 1; m <= 2; ++m) {
              cm *= r123;
-             vec3 Sm = 2.0 * evalSensitivity(float(m) * opd, float(m) * phi);
-             iridescence += cm * Sm;
+             vec3 sm = 2.0 * evalSensitivity(float(m) * opd, float(m) * phi);
+             iridescence += cm * sm;
             }
         iridescence = max(iridescence, vec3(0.0)); 
         return iridescence;
