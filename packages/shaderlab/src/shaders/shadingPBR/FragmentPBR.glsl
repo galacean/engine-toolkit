@@ -249,7 +249,7 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
     //Iridescence
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
         surfaceData.iridesceceFactor = material_IridescenceInfo.x;
-        surfaceData.iridesceceIor = material_IridescenceInfo.y;
+        surfaceData.iridesceceIOR = material_IridescenceInfo.y;
 
         float iridesceceThicknessMin = material_IridescenceInfo.z;
         float iridesceceThicknessMax = material_IridescenceInfo.w;

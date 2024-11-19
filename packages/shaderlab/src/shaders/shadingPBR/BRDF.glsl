@@ -51,7 +51,7 @@ struct SurfaceData{
     #endif
 
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
-        float iridesceceIor;
+        float iridesceceIOR;
         float iridesceceFactor;
         float iridescenceThickness;
     #endif
@@ -329,7 +329,7 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
 
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
         float topIor = 1.0;
-        brdfData.iridescenceSpecularColor = evalIridescence(topIor, surfaceData.dotNV, surfaceData.iridesceceIor, brdfData.specularColor, surfaceData.iridescenceThickness);   
+        brdfData.iridescenceSpecularColor = evalIridescence(topIor, surfaceData.dotNV, surfaceData.iridesceceIOR, brdfData.specularColor, surfaceData.iridescenceThickness);   
     #endif
 }
 
