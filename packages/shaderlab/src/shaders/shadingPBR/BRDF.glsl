@@ -252,10 +252,10 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         return rgb;
     }
 
-    vec3 evalIridescence(float outsideIOR, float dotNV, float eta2, vec3 baseF0,float iridescenceThickness){ 
+    vec3 evalIridescenceSpecular(float outsideIOR, float dotNV, float thinIOR, vec3 baseF0,float iridescenceThickness){ 
         vec3 iridescence = vec3(1.0);
         // Force iridescenceIOR -> outsideIOR when thinFilmThickness -> 0.0
-        float iridescenceIOR = mix( outsideIOR, eta2, smoothstep( 0.0, 0.03, iridescenceThickness ) );
+        float iridescenceIOR = mix( outsideIOR, thinIOR, smoothstep( 0.0, 0.03, iridescenceThickness ) );
         // Evaluate the cosTheta on the base layer (Snell law)
         float sinTheta2Sq = pow( outsideIOR / iridescenceIOR, 2.0) * (1.0 - pow( dotNV, 2.0));
         float cosTheta2Sq = 1.0 - sinTheta2Sq;
@@ -330,7 +330,7 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
 
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
         float topIOR = 1.0;
-        brdfData.iridescenceSpecularColor = evalIridescence(topIOR, surfaceData.dotNV, surfaceData.iridesceceIOR, brdfData.specularColor, surfaceData.iridescenceThickness);   
+        brdfData.iridescenceSpecularColor = evalIridescenceSpecular(topIOR, surfaceData.dotNV, surfaceData.iridesceceIOR, brdfData.specularColor, surfaceData.iridescenceThickness);   
     #endif
 }
 
