@@ -47,6 +47,14 @@ Shader "PBR.gs" {
         material_IridescenceTexture("IridescenceTexture", Texture2D);
       }
 
+      Header("Sheen"){
+        material_Sheen("Sheen", Range(0, 1, 0.01)) = 0;
+        material_SheenColor("SheenColor", Color ) = (0, 0, 0, 1);
+        material_SheenRoughness("SheenRoughness", Range(0, 1, 0.01)) = 0;
+        material_SheenTexture("SheenTexture", Texture2D);
+        material_SheenRoughnessTexture("SheenRoughnessTexture", Texture2D);
+      }
+
       Header("Common") {
         material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
         material_TilingOffset("TilingOffset", Vector4) = (1, 1, 0, 0);
@@ -69,6 +77,9 @@ Shader "PBR.gs" {
         MATERIAL_ENABLE_IRIDESCENCE("ENABLE_IRIDESCENCE");
         MATERIAL_HAS_IRIDESCENCE_THICKNESS_TEXTURE("HAS_IRIDESCENCE_THICKNESS_TEXTURE");
         MATERIAL_HAS_IRIDESCENCE_TEXTURE("HAS_IRIDESCENCE_TEXTURE");
+        MATERIAL_ENABLE_SHEEN("ENABLE_SHEEN");
+        MATERIAL_HAS_SHEEN_TEXTURE("HAS_SHEEN_TEXTURE");
+        MATERIAL_HAS_SHEEN_ROUGHNESS_TEXTURE("HAS_SHEEN_ROUGHNESS_TEXTURE");
         MATERIAL_IS_TRANSPARENT("IS_TRANSPARENT");
         MATERIAL_IS_ALPHA_CUTOFF("IS_ALPHA_CUTOFF");
       }

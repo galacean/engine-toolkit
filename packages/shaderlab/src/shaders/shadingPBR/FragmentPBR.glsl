@@ -50,6 +50,19 @@ float material_OcclusionTextureCoord;
     #endif
 #endif
 
+#ifdef MATERIAL_ENABLE_SHEEN
+    float material_Sheen;
+    float material_SheenRoughness;
+    vec3 material_SheenColor;
+    #ifdef MATERIAL_HAS_SHEEN_TEXTURE
+       sampler2D material_SheenTexture;
+    #endif
+
+    #ifdef MATERIAL_HAS_SHEEN_ROUGHNESS_TEXTURE
+       sampler2D material_SheenRoughnessTexture;
+    #endif
+#endif
+
 // Texture
 #ifdef MATERIAL_HAS_BASETEXTURE
     sampler2D material_BaseTexture;
@@ -261,6 +274,25 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
         #ifdef MATERIAL_HAS_IRIDESCENCE_TEXTURE
            surfaceData.iridesceceFactor *= texture2D( material_IridescenceTexture, uv).r;
         #endif
+    #endif
+
+    #ifdef MATERIAL_ENABLE_SHEEN
+        vec3 sheencolor = material_SheenColor * material_Sheen;
+        #ifdef MATERIAL_HAS_SHEEN_TEXTURE
+            vec4 sheenTexturecolor = texture2D(material_SheenTexture, uv);
+            #ifndef ENGINE_IS_COLORSPACE_GAMMA
+                sheenTexturecolor = gammaToLinear(sheenTexturecolor);
+            #endif
+            sheencolor *= sheenTexturecolor.rgb;
+        #endif
+        surfaceData.sheenColor = sheencolor;
+
+        float sheenRoughness = clamp(material_SheenRoughness, 0.01, 1.0);
+        #ifdef MATERIAL_HAS_SHEEN_ROUGHNESS_TEXTURE
+            vec4 sheenRoughnessTexture = (texture2D(material_SheenRoughnessTexture, uv));
+            sheenRoughness *= sheenRoughnessTexture.a;
+        #endif
+        surfaceData.sheenRoughness = sheenRoughness;
     #endif
 
     // AO

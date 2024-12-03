@@ -50,6 +50,10 @@ void evaluateDiffuseIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brd
        irradiance *= PI;
     #endif
 
+    #ifdef MATERIAL_ENABLE_SHEEN
+    diffuseColor *= brdfData.sheenScaling;
+    #endif
+
     diffuseColor += surfaceData.diffuseAO * irradiance * BRDF_Diffuse_Lambert( brdfData.diffuseColor );
 }
 
@@ -74,7 +78,14 @@ void evaluateSpecularIBL(Varyings varyings, SurfaceData surfaceData, BRDFData br
         vec3 speculaColor = brdfData.specularColor;
     #endif
 
-    outSpecularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDFApprox(speculaColor, brdfData.roughness, surfaceData.dotNV);
+    #ifdef MATERIAL_ENABLE_SHEEN
+    outSpecularColor *= brdfData.sheenScaling;
+    vec3 environmentBRDF = brdfData.sheenDFG * surfaceData.sheenColor;
+    #else
+    vec3 environmentBRDF = envBRDFApprox(speculaColor, brdfData.roughness, surfaceData.dotNV);
+    #endif
+    
+    outSpecularColor += surfaceData.specularAO * radianceAttenuation * radiance * environmentBRDF;
 }
 
 

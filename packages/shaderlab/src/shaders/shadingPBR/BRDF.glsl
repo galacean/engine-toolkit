@@ -56,6 +56,11 @@ struct SurfaceData{
         float iridescenceThickness;
     #endif
 
+    #ifdef MATERIAL_ENABLE_SHEEN
+        float sheenRoughness;
+        vec3  sheenColor;
+    #endif
+
 };
 
 
@@ -72,6 +77,13 @@ struct BRDFData{
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
         vec3  iridescenceSpecularColor;
     #endif
+
+    #ifdef MATERIAL_ENABLE_SHEEN
+        float sheenRoughness;
+        float sheenScaling;
+        float sheenDFG;
+    #endif
+    
 };
 
 
@@ -305,6 +317,43 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
     }
 #endif
 
+#ifdef MATERIAL_ENABLE_SHEEN
+    // http://www.aconty.com/pdf/s2017_pbs_imageworks_sheen.pdf
+    float D_Charlie(float roughness, float dotNH) {
+        float invAlpha  = 1.0 / roughness;
+        float cos2h = dotNH * dotNH;
+        float sin2h = max(1.0 - cos2h, 0.0078125); // 2^(-14/2), so sin2h^2 > 0 in fp16
+        return (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
+    }
+
+    // Neubelt and Pettineo 2013, "Crafting a Next-gen Material Pipeline for The Order: 1886".
+    float V_Neubelt(float NoV, float NoL) {
+        return saturate(1.0 / (4.0 * (NoL + NoV - NoL * NoV)));
+    }
+
+    vec3 BRDF_Sheen(vec3 incidentDirection, SurfaceData surfaceData, vec3 sheenColor, float sheenRoughness) {
+        vec3 halfDir = normalize(incidentDirection + surfaceData.viewDir);
+        float dotNL = saturate(dot(surfaceData.normal, incidentDirection));
+        float dotNH = saturate(dot(surfaceData.normal, halfDir));
+        float D = D_Charlie(sheenRoughness, dotNH);
+        float V = V_Neubelt(surfaceData.dotNV, dotNL);
+        vec3 F = sheenColor;
+        return  D * V * F;
+    }
+
+    // This is a curve-fit approxmation to the "Charlie sheen" BRDF integrated over the hemisphere from
+    // Estevez and Kulla 2017, "Production Friendly Microfacet Sheen BRDF". The analysis can be found
+    // in the Sheen section of https://drive.google.com/file/d/1T0D1VSyR4AllqIJTQAraEIzjlb5h4FKH/view?usp=sharing
+    float IBLSheenBRDF(SurfaceData surfaceData, float roughness) {
+        float dotNV = surfaceData.dotNV;
+        float r2 = roughness * roughness;
+        float a = roughness < 0.25 ? -339.2 * r2 + 161.4 * roughness - 25.9 : -8.48 * r2 + 14.3 * roughness - 9.95;
+        float b = roughness < 0.25 ? 44.0 * r2 - 23.7 * roughness + 3.26 : 1.97 * r2 - 3.27 * roughness + 0.72;
+        float DG = exp( a * dotNV + b ) + ( roughness < 0.25 ? 0.0 : 0.1 * ( roughness - 0.25 ) );
+        return saturate( DG * RECIPROCAL_PI );
+    }
+#endif
+
 void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     vec3 albedoColor = surfaceData.albedoColor;
     vec3 specularColor = surfaceData.specularColor;
@@ -331,6 +380,14 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     #ifdef MATERIAL_ENABLE_IRIDESCENCE
         float topIOR = 1.0;
         brdfData.iridescenceSpecularColor = evalIridescenceSpecular(topIOR, surfaceData.dotNV, surfaceData.iridesceceIOR, brdfData.specularColor, surfaceData.iridescenceThickness);   
+    #endif
+
+    #ifdef MATERIAL_ENABLE_SHEEN
+        brdfData.sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
+        brdfData.sheenDFG = IBLSheenBRDF(surfaceData, brdfData.sheenRoughness);
+        // sheen energy compensation approximation calculation in ‘Sheen DFG LUT integrated over diffuse IBL’
+        // https://drive.google.com/file/d/1T0D1VSyR4AllqIJTQAraEIzjlb5h4FKH/view?usp=sharing
+        brdfData.sheenScaling = 1.0 - 0.157 * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }
 
