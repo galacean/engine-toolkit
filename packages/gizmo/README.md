@@ -36,7 +36,7 @@ Show the gizmo to control the scale. Dragging the center cube scales along all t
 
 ## Example
 
-[Gizmo-Examples](https://oasisengine.cn/#/examples/latest/gizmo)
+[Gizmo-Examples](https://galacean.antgroup.com/engine/examples/gizmo/)
 
 ## npm
 
@@ -59,21 +59,15 @@ import { Gizmo, Group, AnchorType, CoordinateType, State } from "@galacean/engin
 const cameraEntity = rootEntity.createChild("camera");
 const camera = cameraEntity.addComponent(Camera);
 
-// Initialize group for selection
-const group = new Group();
-
 // add gizmo
 const gizmoEntity = rootEntity.createChild("editor-gizmo");
-const gizmo = gizmoEntity.addComponent(Gizmo);
-gizmo.init(camera, group);
-gizmo.state = State.translate;
+const gizmo = gizmoEntity.addComponent(Gizmo, { camera, state: State.translate });
 ```
 
 ## Links
 
 - [Repository](https://github.com/galacean/engine-toolkit)
-- [Documentation](https://oasisengine.cn/#/docs/latest/cn/install)
-- [API References](https://oasisengine.cn/#/api/latest/core)
+- [Documentation](https://galacean.antgroup.com/engine/docs/)
 
 ## License
 
