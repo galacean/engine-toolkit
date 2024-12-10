@@ -14,6 +14,9 @@
 #ifndef FUNCTION_CLEAR_COAT_LOBE
     #define FUNCTION_CLEAR_COAT_LOBE clearCoatLobe
 #endif
+#ifndef FUNCTION_SHEEN_LOBE
+    #define FUNCTION_SHEEN_LOBE SheenLobe
+#endif
 
 #include "BRDF.glsl"
 #include "Light.glsl"
@@ -34,6 +37,8 @@ void surfaceShading(Varyings varyings, SurfaceData surfaceData, BRDFData brdfDat
     FUNCTION_DIFFUSE_LOBE(varyings, surfaceData, brdfData, attenuationIrradiance, diffuseColor);
     // Specular Lobe
     FUNCTION_SPECULAR_LOBE(varyings, surfaceData, brdfData, incidentDirection, attenuationIrradiance, specularColor);
+    // Sheen Lobe
+    FUNCTION_SHEEN_LOBE(varyings, surfaceData, brdfData, incidentDirection, diffuseColor, specularColor);
     
     color += diffuseColor + specularColor;
 

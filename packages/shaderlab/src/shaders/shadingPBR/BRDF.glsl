@@ -80,8 +80,7 @@ struct BRDFData{
 
     #ifdef MATERIAL_ENABLE_SHEEN
         float sheenRoughness;
-        float sheenScaling;
-        float sheenDFG;
+        float sheenEnergy;
     #endif
     
 };
@@ -331,26 +330,14 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         return saturate(1.0 / (4.0 * (NoL + NoV - NoL * NoV)));
     }
 
-    vec3 BRDF_Sheen(vec3 incidentDirection, SurfaceData surfaceData, vec3 sheenColor, float sheenRoughness) {
+    vec3 sheenBRDF(vec3 incidentDirection, SurfaceData surfaceData, vec3 sheenColor, float sheenRoughness) {
         vec3 halfDir = normalize(incidentDirection + surfaceData.viewDir);
         float dotNL = saturate(dot(surfaceData.normal, incidentDirection));
         float dotNH = saturate(dot(surfaceData.normal, halfDir));
         float D = D_Charlie(sheenRoughness, dotNH);
         float V = V_Neubelt(surfaceData.dotNV, dotNL);
-        vec3 F = sheenColor;
+        vec3 F = sheenColor.rgb;
         return  D * V * F;
-    }
-
-    // This is a curve-fit approxmation to the "Charlie sheen" BRDF integrated over the hemisphere from
-    // Estevez and Kulla 2017, "Production Friendly Microfacet Sheen BRDF". The analysis can be found
-    // in the Sheen section of https://drive.google.com/file/d/1T0D1VSyR4AllqIJTQAraEIzjlb5h4FKH/view?usp=sharing
-    float IBLSheenBRDF(SurfaceData surfaceData, float roughness) {
-        float dotNV = surfaceData.dotNV;
-        float r2 = roughness * roughness;
-        float a = roughness < 0.25 ? -339.2 * r2 + 161.4 * roughness - 25.9 : -8.48 * r2 + 14.3 * roughness - 9.95;
-        float b = roughness < 0.25 ? 44.0 * r2 - 23.7 * roughness + 3.26 : 1.97 * r2 - 3.27 * roughness + 0.72;
-        float DG = exp( a * dotNV + b ) + ( roughness < 0.25 ? 0.0 : 0.1 * ( roughness - 0.25 ) );
-        return saturate( DG * RECIPROCAL_PI );
     }
 #endif
 
@@ -384,10 +371,9 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
 
     #ifdef MATERIAL_ENABLE_SHEEN
         brdfData.sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
-        brdfData.sheenDFG = IBLSheenBRDF(surfaceData, brdfData.sheenRoughness);
         // sheen energy compensation approximation calculation in ‘Sheen DFG LUT integrated over diffuse IBL’
         // https://drive.google.com/file/d/1T0D1VSyR4AllqIJTQAraEIzjlb5h4FKH/view?usp=sharing
-        brdfData.sheenScaling = 1.0 - 0.157 * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
+        brdfData.sheenEnergy = 1.0 - 0.157 * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }
 
