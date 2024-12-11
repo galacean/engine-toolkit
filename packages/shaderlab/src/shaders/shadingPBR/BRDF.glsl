@@ -80,7 +80,7 @@ struct BRDFData{
 
     #ifdef MATERIAL_ENABLE_SHEEN
         float sheenRoughness;
-        float sheenEnergy;
+        float sheenScaling;
     #endif
     
 };
