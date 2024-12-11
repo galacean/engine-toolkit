@@ -15,7 +15,7 @@
     #define FUNCTION_CLEAR_COAT_LOBE clearCoatLobe
 #endif
 #ifndef FUNCTION_SHEEN_LOBE
-    #define FUNCTION_SHEEN_LOBE SheenLobe
+    #define FUNCTION_SHEEN_LOBE sheenLobe
 #endif
 
 #include "BRDF.glsl"

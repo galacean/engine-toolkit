@@ -9,7 +9,7 @@ void specularLobe(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData,
         specularColor += attenuationIrradiance *  BRDF_Specular_GGX( incidentDirection, surfaceData, brdfData, surfaceData.normal, brdfData.specularColor, brdfData.roughness);
 }
 
-void SheenLobe(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 diffuseColor, inout vec3 specularColor){
+void sheenLobe(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 attenuationIrradiance, inout vec3 diffuseColor, inout vec3 specularColor){
     #ifdef MATERIAL_ENABLE_SHEEN
         diffuseColor *= brdfData.sheenScaling;
         specularColor *= brdfData.sheenScaling;

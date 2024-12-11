@@ -81,6 +81,7 @@ struct BRDFData{
     #ifdef MATERIAL_ENABLE_SHEEN
         float sheenRoughness;
         float sheenScaling;
+        float IBLsheenDFG;
     #endif
     
 };
@@ -372,10 +373,8 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
 
     #ifdef MATERIAL_ENABLE_SHEEN
         brdfData.sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
-        // sheen energy compensation approximation calculation in ‘Sheen DFG LUT integrated over diffuse IBL’
-        // https://drive.google.com/file/d/1T0D1VSyR4AllqIJTQAraEIzjlb5h4FKH/view?usp=sharing
-        float IBLSheenDFG = IBLSheenDFG(surfaceData, brdfData.sheenRoughness);
-        brdfData.sheenScaling = 1.0 - IBLSheenDFG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
+        brdfData.IBLsheenDFG = IBLSheenDFG(surfaceData, brdfData.sheenRoughness);
+        brdfData.sheenScaling = 1.0 - brdfData.IBLsheenDFG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }
 
