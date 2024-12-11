@@ -1,8 +1,7 @@
-#ifndef LIGHT_PROBE
-#define LIGHT_PROBE
-
+#ifndef LIGHT_INDIRECT_FUNCTIONS_INCLUDED
+#define LIGHT_INDIRECT_FUNCTIONS_INCLUDED
+#include "Light.glsl"
 // ------------------------Specular------------------------
-
 // ref: https://www.unrealengine.com/blog/physically-based-shading-on-mobile - environmentBRDF for GGX on mobile
 vec3 envBRDFApprox(vec3 specularColor, float roughness, float dotNV ) {
 

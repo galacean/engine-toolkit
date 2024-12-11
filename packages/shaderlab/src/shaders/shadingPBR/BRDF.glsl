@@ -85,6 +85,7 @@ struct BRDFData{
     
 };
 
+#include "LightIndirectFunctions.glsl"
 
 float getAARoughnessFactor(vec3 normal) {
     // Kaplanyan 2016, "Stable specular highlights"
@@ -336,7 +337,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         float dotNH = saturate(dot(surfaceData.normal, halfDir));
         float D = D_Charlie(sheenRoughness, dotNH);
         float V = V_Neubelt(surfaceData.dotNV, dotNL);
-        vec3 F = sheenColor.rgb;
+        vec3 F = sheenColor;
         return  D * V * F;
     }
 #endif
@@ -373,7 +374,8 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
         brdfData.sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
         // sheen energy compensation approximation calculation in ‘Sheen DFG LUT integrated over diffuse IBL’
         // https://drive.google.com/file/d/1T0D1VSyR4AllqIJTQAraEIzjlb5h4FKH/view?usp=sharing
-        brdfData.sheenEnergy = 1.0 - 0.157 * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
+        float IBLSheenDFG = IBLSheenDFG(surfaceData, brdfData.sheenRoughness);
+        brdfData.sheenScaling = 1.0 - IBLSheenDFG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }
 

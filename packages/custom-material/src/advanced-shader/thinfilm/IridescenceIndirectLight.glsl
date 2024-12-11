@@ -1,7 +1,7 @@
 #define FUNCTION_SPECULAR_IBL evaluateSpecularIBLIridescence
 #include "BRDF.glsl"
 #include "./IridescenceFunction.glsl"
-#include "LightProbe.glsl"
+#include "LightIndirectFunctions.glsl"
 
 void evaluateSpecularIBLIridescence(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, float radianceAttenuation, inout vec3 specularColor){
  

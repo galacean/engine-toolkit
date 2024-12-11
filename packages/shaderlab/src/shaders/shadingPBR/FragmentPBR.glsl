@@ -276,7 +276,7 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
     #endif
 
     #ifdef MATERIAL_ENABLE_SHEEN
-        vec3 sheenColor = material_SheenColor.rgb;
+        vec3 sheenColor = material_SheenColor;
         #ifdef MATERIAL_HAS_SHEEN_TEXTURE
             vec4 sheenTextureColor = texture2D(material_SheenTexture, uv);
             #ifndef ENGINE_IS_COLORSPACE_GAMMA
@@ -288,8 +288,7 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
 
         surfaceData.sheenRoughness = material_SheenRoughness;
         #ifdef MATERIAL_HAS_SHEEN_ROUGHNESS_TEXTURE
-            vec4 sheenRoughnessTexture = texture2D(material_SheenRoughnessTexture, uv);
-            surfaceData.sheenRoughness *= sheenRoughnessTexture.a;
+            surfaceData.sheenRoughness *= texture2D(material_SheenRoughnessTexture, uv).a;
         #endif
     #endif
 

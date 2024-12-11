@@ -1,6 +1,6 @@
 import AttributesPBR from "./AttributesPBR.glsl";
 import BRDF from "./BRDF.glsl";
-import LightProbe from "./LightProbe.glsl";
+import LightIndirectFunctions from "./LightIndirectFunctions.glsl";
 import ForwardPassPBR from "./ForwardPassPBR.glsl";
 import FragmentPBR from "./FragmentPBR.glsl";
 import LightDirectPBR from "./LightDirectPBR.glsl";
@@ -18,6 +18,6 @@ export default [
   { source: LightIndirectPBR, includeKey: "LightIndirectPBR.glsl" },
   { source: VertexPBR, includeKey: "VertexPBR.glsl" },
   { source: BRDF, includeKey: "BRDF.glsl" },
-  { source: LightProbe, includeKey: "LightProbe.glsl" },
+  { source: LightIndirectFunctions, includeKey: "LightIndirectFunctions.glsl" },
   { source: ReflectionLobe, includeKey: "ReflectionLobe.glsl" }
 ];
