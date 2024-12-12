@@ -47,33 +47,20 @@ Shader "PBR.gs" {
         material_IridescenceTexture("IridescenceTexture", Texture2D);
       }
 
+      Header("Sheen"){
+        ui_SheenIntensity("Intensity", Range(0, 1, 0.01)) = 0;
+        ui_SheenColor("Color", Color ) = (0, 0, 0, 0);
+        material_SheenRoughness("Roughness", Range(0, 1, 0.01)) = 0;
+        material_SheenTexture("ColorTexture", Texture2D);
+        material_SheenRoughnessTexture("RoughnessTexture", Texture2D);
+      }
+
       Header("Common") {
         material_AlphaCutoff( "AlphaCutoff", Range(0, 1, 0.01) ) = 0;
         material_TilingOffset("TilingOffset", Vector4) = (1, 1, 0, 0);
       }
     }
-
-    EditorMacros {
-      Header("Conditional Macors") {
-        MATERIAL_HAS_BASETEXTURE("HAS_BASETEXTURE");
-        MATERIAL_HAS_ROUGHNESS_METALLIC_TEXTURE("HAS_ROUGHNESS_METALLIC_TEXTURE");
-        MATERIAL_ENABLE_ANISOTROPY("ENABLE_ANISOTROPY");
-        MATERIAL_HAS_ANISOTROPY_TEXTURE("HAS_ANISOTROPY_TEXTURE")
-        MATERIAL_HAS_NORMALTEXTURE("HAS_NORMALTEXTURE");
-        MATERIAL_HAS_EMISSIVETEXTURE("HAS_EMISSIVETEXTURE");
-        MATERIAL_HAS_OCCLUSION_TEXTURE("HAS_OCCLUSION_TEXTURE");
-        MATERIAL_ENABLE_CLEAR_COAT("ENABLE_CLEAR_COAT");
-        MATERIAL_HAS_CLEAR_COAT_TEXTURE("HAS_CLEAR_COAT_TEXTURE");
-        MATERIAL_HAS_CLEAR_COAT_ROUGHNESS_TEXTURE("HAS_CLEAR_COAT_ROUGHNESS_TEXTURE");
-        MATERIAL_HAS_CLEAR_COAT_NORMAL_TEXTURE("HAS_CLEAR_COAT_NORMAL_TEXTURE");
-        MATERIAL_ENABLE_IRIDESCENCE("ENABLE_IRIDESCENCE");
-        MATERIAL_HAS_IRIDESCENCE_THICKNESS_TEXTURE("HAS_IRIDESCENCE_THICKNESS_TEXTURE");
-        MATERIAL_HAS_IRIDESCENCE_TEXTURE("HAS_IRIDESCENCE_TEXTURE");
-        MATERIAL_IS_TRANSPARENT("IS_TRANSPARENT");
-        MATERIAL_IS_ALPHA_CUTOFF("IS_ALPHA_CUTOFF");
-      }
-    }
-    
+        
     SubShader "Default" {
       UsePass "pbr/Default/ShadowCaster"
 
