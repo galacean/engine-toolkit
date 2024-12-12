@@ -10,7 +10,7 @@
 #endif
 
 #ifdef MATERIAL_ENABLE_SHEEN
-    sampler2D material_SheenLUT;
+    sampler2D scene_prefilteredLUT;
 #endif
 
 struct SurfaceData{
@@ -345,7 +345,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
     }
 
     float prefilteredDFG(float NoV, float perceptualRoughness) {
-        return textureLod(material_SheenLUT, vec2(NoV, perceptualRoughness), 0.0).b;
+        return textureLod(scene_prefilteredLUT, vec2(NoV, perceptualRoughness), 0.0).b;
     }
 #endif
 
