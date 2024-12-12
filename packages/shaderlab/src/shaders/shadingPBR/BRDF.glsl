@@ -86,7 +86,6 @@ struct BRDFData{
     
 };
 
-#include "LightIndirectFunctions.glsl"
 
 float getAARoughnessFactor(vec3 normal) {
     // Kaplanyan 2016, "Stable specular highlights"
