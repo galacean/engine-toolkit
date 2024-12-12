@@ -345,7 +345,11 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
     }
 
     float prefilteredSheenDFG(float dotNV, float sheenRoughness) {
-        return textureLod(scene_prefilteredLUT, vec2(dotNV, sheenRoughness), 0.0).b;
+        #ifdef HAS_TEX_LOD
+            return texture2DLodEXT(scene_prefilteredLUT, vec2(dotNV, sheenRoughness), 0.0).b;
+        #else
+            return texture2D(scene_prefilteredLUT, vec2(dotNV, sheenRoughness)).b;
+        #endif  
     }
 #endif
 
