@@ -14,7 +14,7 @@ void sheenLobe(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, ve
         diffuseColor *= brdfData.sheenScaling;
         specularColor *= brdfData.sheenScaling;
 
-        specularColor += attenuationIrradiance * sheenBRDF(incidentDirection, surfaceData, surfaceData.sheenColor, brdfData.sheenPerceptualRoughness);
+        specularColor += attenuationIrradiance * sheenBRDF(incidentDirection, surfaceData, surfaceData.sheenColor, brdfData.sheenRoughness);
     #endif
 }
 
