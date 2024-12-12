@@ -79,7 +79,7 @@ struct BRDFData{
     #endif
 
     #ifdef MATERIAL_ENABLE_SHEEN
-        float sheenRoughness;
+        float sheenPerceptualRoughness;
         float sheenScaling;
         float iblSheenDFG;
     #endif
@@ -402,8 +402,8 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
 
     #ifdef MATERIAL_ENABLE_SHEEN
         float sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
-        brdfData.sheenRoughness = pow2(sheenRoughness);
-        brdfData.iblSheenDFG = iblSheenDFG(surfaceData, brdfData.sheenRoughness);
+        brdfData.sheenPerceptualRoughness = pow2(sheenRoughness);
+        brdfData.iblSheenDFG = iblSheenDFG(surfaceData, brdfData.sheenPerceptualRoughness);
         brdfData.sheenScaling = 1.0 - brdfData.iblSheenDFG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }

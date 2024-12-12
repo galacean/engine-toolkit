@@ -48,8 +48,8 @@ Shader "PBR.gs" {
       }
 
       Header("Sheen"){
-        UI_SheenIntensity("Intensity", Range(0, 1, 0.01)) = 0;
-        UI_SheenColor("Color", Color ) = (0, 0, 0, 0);
+        ui_SheenIntensity("Intensity", Range(0, 1, 0.01)) = 0;
+        ui_SheenColor("Color", Color ) = (0, 0, 0, 0);
         material_SheenRoughness("Roughness", Range(0, 1, 0.01)) = 0;
         material_SheenTexture("ColorTexture", Texture2D);
         material_SheenRoughnessTexture("RoughnessTexture", Texture2D);
