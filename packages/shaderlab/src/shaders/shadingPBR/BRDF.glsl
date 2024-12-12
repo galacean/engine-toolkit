@@ -81,7 +81,7 @@ struct BRDFData{
     #ifdef MATERIAL_ENABLE_SHEEN
         float sheenPerceptualRoughness;
         float sheenScaling;
-        float iblSheenDFG;
+        float  approxIBLSheenDG;
     #endif
     
 };
@@ -344,7 +344,7 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
     // This is a curve-fit approxmation to the "Charlie sheen" BRDF integrated over the hemisphere from
     // Estevez and Kulla 2017, "Production Friendly Microfacet Sheen BRDF". The analysis can be found
     // in the Sheen section of https://drive.google.com/file/d/1T0D1VSyR4AllqIJTQAraEIzjlb5h4FKH/view?usp=sharing
-    float iblSheenDFG(SurfaceData surfaceData, float sheenRoughness) {
+    float  approxIBLSheenDG(SurfaceData surfaceData, float sheenRoughness) {
     float dotNV = surfaceData.dotNV;
     float a = sheenRoughness < 0.25 ? -339.2 * sheenRoughness + 161.4 * sheenRoughness - 25.9 : -8.48 * sheenRoughness + 14.3 * sheenRoughness - 9.95;
     float b = sheenRoughness < 0.25 ? 44.0 * sheenRoughness - 23.7 * sheenRoughness + 3.26 : 1.97 * sheenRoughness - 3.27 * sheenRoughness + 0.72;
@@ -402,8 +402,8 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     #ifdef MATERIAL_ENABLE_SHEEN
         float sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
         brdfData.sheenPerceptualRoughness = pow2(sheenRoughness);
-        brdfData.iblSheenDFG = iblSheenDFG(surfaceData, brdfData.sheenPerceptualRoughness);
-        brdfData.sheenScaling = 1.0 - brdfData.iblSheenDFG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
+        brdfData. approxIBLSheenDG =  approxIBLSheenDG(surfaceData, brdfData.sheenPerceptualRoughness);
+        brdfData.sheenScaling = 1.0 - brdfData. approxIBLSheenDG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }
 
