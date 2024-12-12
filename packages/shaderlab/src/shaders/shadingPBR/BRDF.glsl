@@ -402,8 +402,8 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
     #ifdef MATERIAL_ENABLE_SHEEN
         float sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
         brdfData.sheenPerceptualRoughness = pow2(sheenRoughness);
-        brdfData. approxIBLSheenDG =  approxIBLSheenDG(surfaceData, brdfData.sheenPerceptualRoughness);
-        brdfData.sheenScaling = 1.0 - brdfData. approxIBLSheenDG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
+        brdfData.approxIBLSheenDG = approxIBLSheenDG(surfaceData, brdfData.sheenPerceptualRoughness);
+        brdfData.sheenScaling = 1.0 - brdfData.approxIBLSheenDG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }
 
