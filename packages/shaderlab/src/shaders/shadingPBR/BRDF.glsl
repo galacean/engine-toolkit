@@ -344,8 +344,8 @@ vec3 BRDF_Diffuse_Lambert(vec3 diffuseColor) {
         return  D * V * F;
     }
 
-    float prefilteredDFG(float NoV, float perceptualRoughness) {
-        return textureLod(scene_prefilteredLUT, vec2(NoV, perceptualRoughness), 0.0).b;
+    float prefilteredSheenDFG(float dotNV, float sheenRoughness) {
+        return textureLod(scene_prefilteredLUT, vec2(dotNV, sheenRoughness), 0.0).b;
     }
 #endif
 
@@ -398,7 +398,7 @@ void initBRDFData(SurfaceData surfaceData, out BRDFData brdfData){
 
     #ifdef MATERIAL_ENABLE_SHEEN
         brdfData.sheenRoughness = max(MIN_PERCEPTUAL_ROUGHNESS, min(surfaceData.sheenRoughness + getAARoughnessFactor(surfaceData.normal), 1.0));
-        brdfData.approxIBLSheenDG = prefilteredDFG(surfaceData.dotNV, brdfData.sheenRoughness);
+        brdfData.approxIBLSheenDG = prefilteredSheenDFG(surfaceData.dotNV, brdfData.sheenRoughness);
         brdfData.sheenScaling = 1.0 - brdfData.approxIBLSheenDG * max(max(surfaceData.sheenColor.r, surfaceData.sheenColor.g), surfaceData.sheenColor.b);
     #endif
 }
