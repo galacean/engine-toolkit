@@ -84,7 +84,7 @@ void evaluateSheenIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfD
         diffuseColor *= brdfData.sheenScaling;
         specularColor *= brdfData.sheenScaling;
 
-        vec3 reflectance = radianceAttenuation * brdfData.IBLsheenDFG * surfaceData.sheenColor;
+        vec3 reflectance = radianceAttenuation * brdfData.iblSheenDFG * surfaceData.sheenColor;
         specularColor += reflectance;
     #endif
 }
