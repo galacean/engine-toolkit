@@ -220,7 +220,7 @@ export class Group {
     this._entities.push(entity);
     const fun = this._onEntityWorldTransformChange(entity);
     // @ts-ignore
-    const flagManager = entity.transform._updateFlagManager;
+    const flagManager = entity._updateFlagManager;
     flagManager.addListener(fun);
     this._listeners.push({ flagManager, fun });
     fun();
