@@ -11,10 +11,12 @@
 #ifndef FUNCTION_CLEAR_COAT_IBL
     #define FUNCTION_CLEAR_COAT_IBL evaluateClearCoatIBL
 #endif
-
+#ifndef FUNCTION_SHEEN_IBL
+    #define FUNCTION_SHEEN_IBL evaluateSheenIBL
+#endif
 #include "BRDF.glsl"
 #include "Light.glsl"
-#include "LightProbe.glsl"
+#include "LightIndirectFunctions.glsl"
 
 // ------------------------Diffuse------------------------
 
@@ -77,6 +79,15 @@ void evaluateSpecularIBL(Varyings varyings, SurfaceData surfaceData, BRDFData br
     outSpecularColor += surfaceData.specularAO * radianceAttenuation * radiance * envBRDFApprox(speculaColor, brdfData.roughness, surfaceData.dotNV);
 }
 
+void evaluateSheenIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData,  float radianceAttenuation, inout vec3 diffuseColor, inout vec3 specularColor){
+    #ifdef MATERIAL_ENABLE_SHEEN
+        diffuseColor *= brdfData.sheenScaling;
+        specularColor *= brdfData.sheenScaling;
+
+        vec3 reflectance = surfaceData.specularAO * radianceAttenuation * brdfData.approxIBLSheenDG * surfaceData.sheenColor;
+        specularColor += reflectance;
+    #endif
+}
 
 void evaluateIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color){
     vec3 diffuseColor = vec3(0);
@@ -90,8 +101,12 @@ void evaluateIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, 
 
     // IBL specular
     FUNCTION_SPECULAR_IBL(varyings, surfaceData, brdfData, radianceAttenuation, specularColor);
-
+  
+    // IBL sheen
+    FUNCTION_SHEEN_IBL(varyings, surfaceData, brdfData, radianceAttenuation, diffuseColor, specularColor);
+    
     color += diffuseColor + specularColor;
+
 }
 
 
