@@ -3,6 +3,12 @@
 
 #include "Normal.glsl"
 
+// #if MATERIAL_ENABLE_SS_REFRACTION 
+    // #define REFRACTION_SPHERE 
+    // #define REFRACTION_PLANE 
+    // #define REFRACTION_THIN 
+// #endif
+
 float material_AlphaCutoff;
 vec4 material_BaseColor;
 float material_Metal;
@@ -62,6 +68,28 @@ float material_OcclusionTextureCoord;
     #endif
 #endif
 
+#ifdef MATERIAL_ENABLE_SS_REFRACTION 
+    #define REFRACTION_SPHERE 
+    #define REFRACTION_PLANE 
+    #define REFRACTION_THIN 
+
+    vec3 material_attenuationColor;
+    float material_attenuationDistance;
+
+    // #ifdef MATERIAL_ENABLE_SS_REFRACTION
+    float material_transmission;
+    //     #ifdef MATERIAL_HAS_TRANSMISSION_TEXTURE
+    //         sampler2D material_TransmissionTexture;
+    //     #endif
+    // #endif
+
+    // #ifdef MATERIAL_ENABLE_THICKNESS
+        float material_thickness;
+            // #ifdef MATERIAL_HAS_THICKNESS_TEXTURE
+            //     sampler2D material_ThicknessTexture;
+            // #endif
+    // #endif
+#endif
 // Texture
 #ifdef MATERIAL_HAS_BASETEXTURE
     sampler2D material_BaseTexture;
@@ -166,7 +194,7 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
     surfaceData.emissiveColor = emissiveRadiance;
     surfaceData.metallic = metallic;
     surfaceData.roughness = roughness;
-    surfaceData.f0 = f0;
+    surfaceData.IOR = material_IOR;
 
     #ifdef MATERIAL_IS_TRANSPARENT
         surfaceData.opacity = baseColor.a;
@@ -292,6 +320,34 @@ SurfaceData getSurfaceData(Varyings v, vec2 aoUV, bool isFrontFacing){
         #endif
     #endif
 
+
+ #ifdef MATERIAL_ENABLE_SS_REFRACTION 
+        surfaceData.attenuationColor = material_attenuationColor;
+
+        // #if REFRACTION_THIN
+        // #define REFRACTION_THIN_DISTANCE 0.005
+        // surfaceData.attenuationDistance = REFRACTION_THIN_DISTANCE;
+        // #else
+        surfaceData.attenuationDistance = material_attenuationDistance;
+        // #endif
+
+        // #ifdef MATERIAL_HAS_TRANSMISSION
+            surfaceData.transmission = material_transmission;
+            // #ifdef MATERIAL_HAS_TRANSMISSION_TEXTURE
+            //     surfaceData.transmission *= texture2D( material_TransmissionTexture, uv).r;
+            // #endif
+        // #else
+            // surfaceData.transmission = 1.0;
+        // #endif
+
+        // #ifdef MATERIAL_ENABLE_THICKNESS
+            surfaceData.thickness = max(0.0, material_thickness);
+            // #ifdef MATERIAL_HAS_THICKNESS_TEXTURE
+            //     surfaceData.thickness *= texture2D( material_ThicknessTexture, uv).g;
+            // #endif
+        // #endif
+
+    #endif
     // AO
     float diffuseAO = 1.0;
     float specularAO = 1.0;

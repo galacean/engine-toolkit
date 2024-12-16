@@ -15,6 +15,7 @@
     #define FUNCTION_SHEEN_IBL evaluateSheenIBL
 #endif
 #include "BRDF.glsl"
+#include "BTDF.glsl"
 #include "Light.glsl"
 #include "LightIndirectFunctions.glsl"
 
@@ -92,7 +93,7 @@ void evaluateSheenIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfD
 void evaluateIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, inout vec3 color){
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
-
+    vec3 transmissioncolor = vec3(0);
     // IBL diffuse
     FUNCTION_DIFFUSE_IBL(varyings, surfaceData, brdfData, diffuseColor);
 
@@ -105,8 +106,18 @@ void evaluateIBL(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, 
     // IBL sheen
     FUNCTION_SHEEN_IBL(varyings, surfaceData, brdfData, radianceAttenuation, diffuseColor, specularColor);
     
+
+//    #ifdef MATERIAL_ENABLE_SS_REFRACTION 
+    // vec3 Ft = evaluateRefraction(varyings, surfaceData, brdfData, specularColor);
+    // Ft *= surfaceData.transmission;
+    // diffuseColor *= (1.0 - surfaceData.transmission);
+    // #endif
+
     color += diffuseColor + specularColor;
 
+    // #ifdef MATERIAL_ENABLE_SS_REFRACTION 
+        // color.rgb += Ft;
+    // #endif
 }
 
 
