@@ -5,6 +5,7 @@ import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 export class Utils {
   static rotateCircleRadius = 1.6;
   static scaleFactor = 0.05773502691896257;
+  static rectFactor = 0.05;
 
   static redMaterialTrans: PlainColorMaterial;
   static lightRedMaterial: PlainColorMaterial;
@@ -28,6 +29,9 @@ export class Utils {
   static greyMaterial: PlainColorMaterial;
   static lightMaterial: PlainColorMaterial;
   static invisibleMaterialScale: PlainColorMaterial;
+
+  static visibleMaterialRect: PlainColorMaterial;
+  static invisibleMaterialRect: PlainColorMaterial;
 
   static lineMesh: ModelMesh;
   static lineMeshShort: ModelMesh;
@@ -68,7 +72,6 @@ export class Utils {
     Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialRotate = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
     Utils.invisibleMaterialRotate.renderState.rasterState.cullMode = CullMode.Off;
-
     Utils.invisibleMaterialCircle = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
 
     // scale material
@@ -76,10 +79,12 @@ export class Utils {
     Utils.greenMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0.5, 0.8, 0.2, 1.0);
     Utils.blueMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0.3, 0.5, 1.0, 1.0);
     Utils.greyMaterial = this._createPlainColorMaterial(engine, State.scale, 0.75, 0.75, 0.75, 1.0);
-
     Utils.lightMaterial = this._createPlainColorMaterial(engine, State.scale, 0.7, 0.7, 0.7, 1.0);
-
     Utils.invisibleMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0, 0, 0, 0);
+
+    // rect material
+    Utils.visibleMaterialRect = this._createPlainColorMaterial(engine, State.rect, 163 / 255, 171 / 255, 180 / 255, 1);
+    Utils.invisibleMaterialRect = this._createPlainColorMaterial(engine, State.rect, 0, 0, 0, 0);
 
     Utils.lineMesh = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.5);
     Utils.lineMeshShort = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.3);

@@ -42,6 +42,10 @@ export class Group {
   private _coordinateType: CoordinateType = CoordinateType.Local;
   private _dirtyFlag: GroupDirtyFlag = GroupDirtyFlag.All;
 
+  get entities(): Entity[] {
+    return this._entities;
+  }
+
   /**
    * get anchor type
    * @return anchor type, pivot or center
@@ -179,6 +183,15 @@ export class Group {
   }
 
   /**
+   * 获取主要的 Entity，即第一个选中的 Entity
+   * @return Entity
+   */
+  getPrimaryEntity(): Entity {
+    const { _entities: entities } = this;
+    return entities.length > 0 ? entities[0] : null;
+  }
+
+  /**
    * 从上个状态的矩阵变换到目标矩阵
    * from 矩阵计算所有节点的在本次变换中的 local 姿态
    * to 矩阵计算所有节点的在本次变换后的 world 姿态
@@ -187,7 +200,7 @@ export class Group {
    */
   applyTransform(from: Matrix, to: Matrix): void {
     const { _entities: entities } = this;
-    if (this._entities.length <= 0) {
+    if (entities.length <= 0) {
       return;
     }
     if (Matrix.equals(from, to)) {
@@ -288,8 +301,9 @@ export class Group {
           (e[12] = tempVec3.x), (e[13] = tempVec3.y), (e[14] = tempVec3.z);
           break;
         case AnchorType.Pivot:
-          // align to the first entity
-          const worldE = this._entities[0].transform.worldMatrix.elements;
+          // align to the primary entity
+          const primaryEntity = this.getPrimaryEntity();
+          const worldE = primaryEntity.transform.worldMatrix.elements;
           (e[12] = worldE[12]), (e[13] = worldE[13]), (e[14] = worldE[14]);
           break;
       }
@@ -302,8 +316,9 @@ export class Group {
       const { elements: e } = this._worldMatrix;
       switch (this._coordinateType) {
         case CoordinateType.Local:
-          // align to the first entity
-          const wE = this._entities[0].transform.worldMatrix.elements;
+          // align to the primary entity
+          const primaryEntity = this.getPrimaryEntity();
+          const wE = primaryEntity.transform.worldMatrix.elements;
           const sx = 1 / Math.sqrt(wE[0] ** 2 + wE[1] ** 2 + wE[2] ** 2);
           const sy = 1 / Math.sqrt(wE[4] ** 2 + wE[5] ** 2 + wE[6] ** 2);
           const sz = 1 / Math.sqrt(wE[8] ** 2 + wE[9] ** 2 + wE[10] ** 2);
@@ -327,9 +342,10 @@ export class Group {
     tempBoundBox.max.set(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
     const { _entities: entities } = this;
     let isEffective = false;
+    const renderers = [];
     for (let i = entities.length - 1; i >= 0; i--) {
       const entity = entities[i];
-      const renderers = entity.getComponentsIncludeChildren(Renderer, []);
+      entity.getComponentsIncludeChildren(Renderer, renderers);
       for (let j = renderers.length - 1; j >= 0; j--) {
         const renderer = renderers[j];
         if (renderer.entity.isActiveInHierarchy) {

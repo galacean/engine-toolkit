@@ -15,7 +15,11 @@ export enum State {
    */
   scale = 0x4,
   /**
-   * all state
+   * translate , rotate and scale
    */
-  all = 0xf
+  all = 0x7,
+  /**
+   * rect
+   */
+  rect = 0x8
 }

@@ -1,27 +1,28 @@
 import {
   Camera,
-  Entity,
-  Ray,
-  Layer,
-  PointerButton,
-  Vector3,
-  MathUtil,
-  Script,
-  Pointer,
-  PointerPhase,
-  Vector2,
   Component,
+  Entity,
+  Layer,
+  MathUtil,
+  Matrix,
   MeshRenderer,
-  Matrix
+  Pointer,
+  PointerButton,
+  PointerPhase,
+  Ray,
+  Script,
+  Vector2,
+  Vector3
 } from "@galacean/engine";
+import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
+import { Group, GroupDirtyFlag } from "./Group";
+import { RectControl } from "./Rect";
+import { RotateControl } from "./Rotate";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
-import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
 import { State } from "./enums/GizmoState";
-import { Group, GroupDirtyFlag } from "./Group";
-import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
@@ -141,6 +142,7 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.translate, TranslateControl);
     this._createGizmoControl(State.rotate, RotateControl);
     this._createGizmoControl(State.scale, ScaleControl);
+    this._createGizmoControl(State.rect, RectControl);
 
     this.layer = Layer.Layer31;
     this.state = this._type;
