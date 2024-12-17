@@ -27,8 +27,8 @@ import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
  */
 export class Gizmo extends Script {
   epsilon = 0.05;
+  readonly group: Group = new Group();
 
-  private _initialized = false;
   private _isStarted = false;
   private _lastDistance: number = -1;
   private _lastOrthoSize: number = -1;
@@ -41,8 +41,6 @@ export class Gizmo extends Script {
   private _controlMap: Array<GizmoComponent> = [];
   private _currentControl: GizmoComponent;
 
-  private _group: Group = new Group();
-
   private _tempVec30: Vector3 = new Vector3();
   private _tempVec31: Vector3 = new Vector3();
   private _worldMat: Matrix = new Matrix();
@@ -52,28 +50,6 @@ export class Gizmo extends Script {
 
   private _type: State = null;
   private _scalar: number = 1;
-
-  /**
-   * initial scene camera & select group in gizmo
-   */
-  init(camera: Camera, group: Group) {
-    if (camera !== this._sceneCamera) {
-      if (camera) {
-        this._group = group;
-        this._sceneCamera = camera;
-        this._framebufferPicker = camera.entity.addComponent(FramebufferPicker);
-        this._framebufferPicker.frameBufferSize = new Vector2(256, 256);
-
-        this._controlMap.forEach((gizmoControl) => {
-          gizmoControl.init(camera, this._group);
-        });
-
-        this._initialized = true;
-      } else {
-        this._initialized = false;
-      }
-    }
-  }
 
   /**
    * gizmo layer, default Layer31
@@ -129,7 +105,7 @@ export class Gizmo extends Script {
     Utils.scaleFactor = this._scalar * 0.05773502691896257;
   }
 
-  constructor(entity: Entity) {
+  constructor(entity: Entity, props: { camera: Camera; layer?: Layer; state?: State }) {
     super(entity);
     if (!this.entity.engine.physicsManager) {
       throw new Error("PhysicsManager is not initialized");
@@ -142,14 +118,12 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.rotate, RotateControl);
     this._createGizmoControl(State.scale, ScaleControl);
 
-    this.layer = Layer.Layer31;
-    this.state = this._type;
+    this.layer = props.layer ?? Layer.Layer31;
+    this.state = props.state ?? this._type;
+    this._init(props.camera);
   }
 
   override onUpdate() {
-    if (!this._initialized) {
-      return;
-    }
     const { inputManager } = this.engine;
     const { pointers } = inputManager;
     const pointer = pointers.find((pointer: Pointer) => {
@@ -162,7 +136,7 @@ export class Gizmo extends Script {
         this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
       });
     }
-    this._group.getWorldPosition(this._tempVec30);
+    this.group.getWorldPosition(this._tempVec30);
     if (this._isStarted) {
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
@@ -171,14 +145,14 @@ export class Gizmo extends Script {
       } else {
         this._triggerGizmoEnd();
       }
-      if (this._group._gizmoTransformDirty) {
+      if (this.group._gizmoTransformDirty) {
         this._traverseControl(this._type, (control) => {
           this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
         });
-        this._group._gizmoTransformDirty = false;
+        this.group._gizmoTransformDirty = false;
       }
     } else {
-      this._group.getWorldPosition(this._tempVec30);
+      this.group.getWorldPosition(this._tempVec30);
 
       const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
       const currDistance = Vector3.distance(cameraPosition, this._tempVec30);
@@ -197,11 +171,11 @@ export class Gizmo extends Script {
         this._lastOrthoSize = this._sceneCamera.orthographicSize;
       }
 
-      if (this._group._gizmoTransformDirty || distanceDirty || orthoSizeDirty) {
+      if (this.group._gizmoTransformDirty || distanceDirty || orthoSizeDirty) {
         this._traverseControl(this._type, (control) => {
           this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
         });
-        this._group._gizmoTransformDirty = false;
+        this.group._gizmoTransformDirty = false;
       }
       if (pointer) {
         const { x, y } = pointer.position;
@@ -231,6 +205,21 @@ export class Gizmo extends Script {
 
   override onLateUpdate(deltaTime: number): void {
     this._adjustAxisAlpha();
+  }
+
+  /**
+   * initial scene camera & select group in gizmo
+   */
+  private _init(camera: Camera) {
+    if (camera !== this._sceneCamera) {
+      this._sceneCamera = camera;
+      this._framebufferPicker = camera.entity.addComponent(FramebufferPicker);
+      this._framebufferPicker.frameBufferSize = new Vector2(256, 256);
+
+      this._controlMap.forEach((gizmoControl) => {
+        gizmoControl.init(camera, this.group);
+      });
+    }
   }
 
   private _createGizmoControl(type: State, gizmoComponent: new (entity: Entity) => GizmoComponent): void {
@@ -282,7 +271,7 @@ export class Gizmo extends Script {
 
   private _triggerGizmoEnd(): void {
     this._currentControl && this._currentControl.onMoveEnd();
-    this._group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
+    this.group.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     this._traverseControl(this._type, (control) => {
       control.entity.isActive = true;
     });
@@ -348,7 +337,7 @@ export class Gizmo extends Script {
   private _getAlphaFactor(axis: Vector3): number {
     const { _worldMat: worldMat, _tempVec30: cameraDir, _tempVec31: tempVec, epsilon } = this;
     cameraDir.copyFrom(this._sceneCamera.entity.transform.worldForward).normalize();
-    this._group.getWorldMatrix(worldMat);
+    this.group.getWorldMatrix(worldMat);
 
     // angel between camera direction and gizmo axis direction
     Vector3.transformNormal(axis, worldMat, tempVec);
@@ -359,7 +348,7 @@ export class Gizmo extends Script {
     } else {
       // perspective camera needs to consider position
       // angle between camera direction and camera-entity position
-      this._group.getWorldPosition(tempVec);
+      this.group.getWorldPosition(tempVec);
       Vector3.subtract(this._sceneCamera.entity.transform.worldPosition, tempVec, tempVec);
       const cosThetaPos = Math.abs(Vector3.dot(tempVec.normalize(), cameraDir));
 
