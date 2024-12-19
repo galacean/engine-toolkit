@@ -193,7 +193,7 @@ export class SphereScript extends Script {
     const { _tempQuat: tempQuat, _tempQuat2: tempQuat2 } = this;
 
     Quaternion.rotationAxisAngle(SphereScript._startAxis, y, tempQuat);
-    Quaternion.rotationYawPitchRoll(x, 0, 0, tempQuat2);
+    Quaternion.rotationYawPitchRoll(0, x, 0, tempQuat2);
     Quaternion.multiply(tempQuat, tempQuat2, tempQuat);
     Vector3.subtract(SphereScript._startPos, this._target, this._rotateVec);
 
