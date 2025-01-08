@@ -64,14 +64,14 @@ export class GridControl extends Script {
     material.nearClipPlane = camera.nearClipPlane;
     material.farClipPlane = camera.farClipPlane;
 
-    const logDistance = Math.log2(this.distance);
-    const upperDistance = Math.pow(2, Math.floor(logDistance) + 1);
-    const lowerDistance = Math.pow(2, Math.floor(logDistance));
+    const logDistance = Math.log10(this.distance);
+    const upperDistance = Math.pow(10, Math.floor(logDistance) + 1);
+    const lowerDistance = Math.pow(10, Math.floor(logDistance));
     material.fade = (this.distance - lowerDistance) / (upperDistance - lowerDistance);
 
     const level = -Math.floor(logDistance);
-    material.primaryScale = Math.pow(2, level);
-    material.secondaryScale = Math.pow(2, level + 1);
+    material.primaryScale = Math.pow(10, level);
+    material.secondaryScale = Math.pow(10, level + 1);
     material.axisIntensity = 0.3 / material.primaryScale;
 
     if (this._flipGrid) {
