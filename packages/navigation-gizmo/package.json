@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-navigation-gizmo",
-  "version": "1.4.0-alpha.4",
+  "version": "1.4.0-beta.0",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -24,7 +24,7 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "@galacean/engine": "^1.3.0-beta.6"
+    "@galacean/engine": "^1.4.0-beta.2"
   },
   "dependencies": {
     "@galacean/engine-toolkit-controls": "workspace:*",
