@@ -7,6 +7,7 @@ import {
   MathUtil,
   Matrix,
   Pointer,
+  PointerEventData,
   Quaternion,
   Ray,
   Script,
@@ -115,7 +116,7 @@ export class SphereScript extends Script {
     }
   }
 
-  override onPointerDown(pointer: Pointer) {
+  override onPointerDown(eventData: PointerEventData) {
     this._disableComponent();
     this._recoverTextColor();
 
@@ -123,7 +124,7 @@ export class SphereScript extends Script {
     SphereScript._startPos.copyFrom(this._sceneCameraEntity.transform.worldPosition);
 
     SphereScript._startQuat.copyFrom(this._directionEntity.transform.worldRotationQuaternion);
-    SphereScript._startPointer.copyFrom(pointer.position);
+    SphereScript._startPointer.copyFrom(eventData.pointer.position);
 
     this._tempUpVec.copyFrom(this._sceneCameraEntity.transform.worldUp);
     this._isBack = this._tempUpVec.y <= 0;
@@ -141,16 +142,16 @@ export class SphereScript extends Script {
     }
 
     this._isTriggered = true;
-    this._navigateCamera(pointer);
+    this._navigateCamera(eventData.pointer);
   }
 
-  override onPointerDrag(pointer: Pointer) {
-    this._navigateCamera(pointer);
+  override onPointerDrag(eventData: PointerEventData) {
+    this._navigateCamera(eventData.pointer);
   }
 
-  override onPointerUp(pointer: Pointer) {
+  override onPointerUp(eventData: PointerEventData) {
     if (this._isTriggered) {
-      this._gizmoCamera.screenPointToRay(pointer.position, this._ray);
+      this._gizmoCamera.screenPointToRay(eventData.pointer.position, this._ray);
       const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
       if (!result) {
         this._roundEntity.isActive = false;
