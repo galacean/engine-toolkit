@@ -1,5 +1,6 @@
-import { BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Vector3 } from "@galacean/engine";
-import { AnchorType, CoordinateType } from "./enums/GroupState";
+import { BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Transform, Vector3 } from "@galacean/engine";
+import { UITransform } from "@galacean/engine-ui";
+import { AnchorType, CoordinateType, SearchComponentType } from "./enums/GroupState";
 
 /**
  * dirty flag for the group
@@ -40,6 +41,7 @@ export class Group {
   private _worldMatrix: Matrix = new Matrix();
   private _anchorType: AnchorType = AnchorType.Pivot;
   private _coordinateType: CoordinateType = CoordinateType.Local;
+  private _searchComponentType: SearchComponentType = SearchComponentType.IncludeChildren;
   private _dirtyFlag: GroupDirtyFlag = GroupDirtyFlag.All;
 
   get entities(): Entity[] {
@@ -75,6 +77,22 @@ export class Group {
       this.setDirtyFlagTrue(GroupDirtyFlag.CoordinateDirty);
     }
   }
+
+  /**
+   * search component type
+   * @return current entity or include children
+   */
+  get searchComponentType(): SearchComponentType {
+    return this._searchComponentType;
+  }
+
+  set searchComponentType(value: SearchComponentType) {
+    if (this._searchComponentType !== value) {
+      this._searchComponentType = value;
+      this._dirtyFlag & GroupDirtyFlag.AnchorDirty;
+    }
+  }
+
   /**
    * add entity to the group
    * @param addEntity - entity to add
@@ -220,6 +238,59 @@ export class Group {
     }
   }
 
+  applyScale(from: Vector3, to: Vector3, towards: Vector3): void {
+    
+  }
+
+  applyScaleOrSize(from: Matrix, to: Matrix, refPivot: Vector3): void {
+    const { _entities: entities } = this;
+    if (entities.length <= 0) {
+      return;
+    }
+    if (Matrix.equals(from, to)) {
+      return;
+    }
+    // old worldMatrix.
+    const { _tempMat0: groupWorldInvMat, _tempMat1: nodeMat } = Group;
+    Matrix.invert(from, groupWorldInvMat);
+
+    // 给 Transform 用的
+
+    // 给 UITransform 用的
+    const fromElement = from.elements;
+    const toElement = to.elements;
+    const fromX = fromElement[0] + fromElement[1] + fromElement[2];
+    const fromY = fromElement[4] + fromElement[5] + fromElement[6];
+    const toX = toElement[0] + toElement[1] + toElement[2];
+    const toY = toElement[4] + toElement[5] + toElement[6];
+
+    // update entities worldMatrix
+    for (let i = entities.length - 1; i >= 0; i--) {
+      const nodeTrans = entities[i].transform;
+      if (nodeTrans instanceof UITransform) {
+        const { size, pivot, worldPosition } = <UITransform>nodeTrans;
+        size.set((size.x * toX) / fromX, (size.y * toY) / fromY);
+      } else if (nodeTrans instanceof Transform) {
+        // get entity's localMatrix.
+        Matrix.multiply(groupWorldInvMat, nodeTrans.worldMatrix, nodeMat);
+        // update entity's worldMatrix.
+        Matrix.multiply(to, nodeMat, nodeMat);
+        nodeTrans.worldMatrix = nodeMat;
+      }
+    }
+  }
+
+  applyPivot(from: Vector3, to: Vector3): void {
+    const { _entities: entities } = this;
+    if (entities.length <= 0) {
+      return;
+    }
+    if (Vector3.equals(from, to)) {
+      return;
+    }
+    // update entities pivot
+  }
+
   /**
    * force update group dirty flag
    * @param flag - group dirty flag
@@ -345,7 +416,11 @@ export class Group {
     const renderers = [];
     for (let i = entities.length - 1; i >= 0; i--) {
       const entity = entities[i];
-      entity.getComponentsIncludeChildren(Renderer, renderers);
+      if (this._searchComponentType === SearchComponentType.CurrentEntity) {
+        entity.getComponents(Renderer, renderers);
+      } else {
+        entity.getComponentsIncludeChildren(Renderer, renderers);
+      }
       for (let j = renderers.length - 1; j >= 0; j--) {
         const renderer = renderers[j];
         if (renderer.entity.isActiveInHierarchy) {

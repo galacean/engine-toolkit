@@ -13,18 +13,16 @@ import {
   Quaternion,
   Ray,
   Renderer,
-  SkinnedMeshRenderer,
-  SpriteRenderer,
   SubMesh,
-  TextRenderer,
   Vector2,
   Vector3
 } from "@galacean/engine";
+import { UITransform } from "@galacean/engine-ui";
 import { Group } from "./Group";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
 import { State } from "./enums/GizmoState";
-import { CoordinateType } from "./enums/GroupState";
+import { AnchorType, CoordinateType } from "./enums/GroupState";
 import { Icon } from "./icon/Icon";
 
 enum CoordinatePlane {
@@ -317,7 +315,7 @@ export class RectControl extends GizmoComponent {
     const ele = groupWorldMatrix.elements;
 
     // 获取当前的包围盒
-    const bounds = this._updateBounds();
+    const bounds = this._updateBounds(groupWorldMatrix);
     const { min, max } = bounds;
     const extent = RectControl._vec33;
     length = bounds.getExtent(extent).length();
@@ -372,6 +370,7 @@ export class RectControl extends GizmoComponent {
     const cameraPosition = this._camera.entity.transform.worldPosition;
     const vec3 = RectControl._vec30.set(ele[12], ele[13], ele[14]);
     const scale = Vector3.distance(cameraPosition, vec3) * Utils.rectFactor;
+    const anchorType = group.anchorType;
     switch (mostSuitablePlane) {
       case CoordinatePlane.XoY:
         {
@@ -404,7 +403,11 @@ export class RectControl extends GizmoComponent {
           planeTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
           planeTransform.scale.set(max.x - min.x, scale, max.y - min.y);
           const centerTransform = this._centerXoY.transform;
-          centerTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
+          if (anchorType === AnchorType.Center) {
+            centerTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
+          } else {
+            centerTransform.position.set(0, 0, 0);
+          }
           centerTransform.scale.set(scale, scale, scale);
           this._XoZ.isActive = false;
           this._YoZ.isActive = false;
@@ -442,7 +445,11 @@ export class RectControl extends GizmoComponent {
           planeTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
           planeTransform.scale.set(max.x - min.x, scale, max.z - min.z);
           const centerTransform = this._centerXoZ.transform;
-          centerTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
+          if (anchorType === AnchorType.Center) {
+            centerTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
+          } else {
+            centerTransform.position.set(0, 0, 0);
+          }
           centerTransform.scale.set(scale, scale, scale);
           this._YoZ.isActive = false;
         }
@@ -480,7 +487,11 @@ export class RectControl extends GizmoComponent {
           planeTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
           planeTransform.scale.set(max.y - min.y, scale, max.z - min.z);
           const centerTransform = this._centerYoZ.transform;
-          centerTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
+          if (anchorType === AnchorType.Center) {
+            centerTransform.position.set((min.x + max.x) / 2, (min.y + max.y) / 2, (min.z + max.z) / 2);
+          } else {
+            centerTransform.position.set(0, 0, 0);
+          }
           centerTransform.scale.set(scale, scale, scale);
         }
         break;
@@ -501,7 +512,7 @@ export class RectControl extends GizmoComponent {
    * 当 Group 的 Matrix 发生改变的时候会重新计算包围盒
    * @returns
    */
-  private _updateBounds(): BoundingBox {
+  private _updateBounds(worldMatrix: Matrix): BoundingBox {
     const bounds = this._bounds;
     const { min, max } = bounds;
     min.set(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
@@ -510,82 +521,51 @@ export class RectControl extends GizmoComponent {
     const { min: tempMin, max: tempMax } = tempBounds;
     const group = this._group;
     const { entities, coordinateType } = group;
-    // 需要注意的是，Gizmo 的参照坐标系是以 PrimaryEntity 为准，且忽略缩放的
-    // @mark：
-    // 在 Local 模式下，它可能是个异形的坐标系，即 X Y Z 轴在世界基准下可能并不垂直
-    // 我认为，这样的坐标系才是真正的 Local 坐标系，也更加准确
-    // **这点和 Unity 不一样**
-    const primaryEntity = group.getPrimaryEntity();
     const renderers = [];
     // 计算 Bounds 的 local scale
-    const worldMatrix = primaryEntity.transform.worldMatrix;
     const ele = worldMatrix.elements;
+    const primaryEntity = group.getPrimaryEntity();
     if (coordinateType === CoordinateType.Local) {
-      const sx = Math.sqrt(ele[0] ** 2 + ele[1] ** 2 + ele[2] ** 2);
-      const sy = Math.sqrt(ele[4] ** 2 + ele[5] ** 2 + ele[6] ** 2);
-      const sz = Math.sqrt(ele[8] ** 2 + ele[9] ** 2 + ele[10] ** 2);
       const worldInvMatrix = RectControl._matrix1;
       Matrix.invert(worldMatrix, worldInvMatrix);
       for (let i = 0, n = entities.length; i < n; i++) {
         const entity = entities[i];
+        let isPrimary = entity === primaryEntity;
         if (!entity.isActiveInHierarchy) continue;
-        const isPrimary = entity === primaryEntity;
-        entity.getComponentsIncludeChildren(Renderer, renderers);
+        const transform = entity.transform;
+        if (transform instanceof UITransform) {
+          const { x: width, y: height } = (<UITransform>transform).size;
+          let { x: pivotX, y: pivotY } = (<UITransform>transform).pivot;
+          tempMin.set(-width * pivotX, -height * pivotY, 0);
+          tempMax.set(width * (1 - pivotX), height * (1 - pivotY), 0);
+          if (isPrimary) {
+            const worldScale = (<UITransform>transform).lossyWorldScale;
+            const { x: sx, y: sy, z: sz } = worldScale;
+            tempMin.set(tempMin.x * sx, tempMin.y * sy, tempMin.z * sz);
+            tempMax.set(tempMax.x * sx, tempMax.y * sy, tempMax.z * sz);
+            BoundingBox.merge(bounds, tempBounds, bounds);
+          } else {
+            const mat = (<UITransform>transform).worldMatrix as unknown as Matrix;
+            tempBounds.transform(mat);
+            tempBounds.transform(worldInvMatrix);
+            BoundingBox.merge(bounds, tempBounds, bounds);
+          }
+          continue;
+        }
+        entity.getComponents(Renderer, renderers);
         for (let j = 0, n = renderers.length; j < n; j++) {
           const renderer = renderers[j];
-          if (isPrimary) {
-            if (renderer instanceof SkinnedMeshRenderer) {
-              tempBounds.copyFrom(renderer.localBounds);
-              (tempMin.x *= sx), (tempMin.y *= sy), (tempMin.z *= sz);
-              (tempMax.x *= sx), (tempMax.y *= sy), (tempMax.z *= sz);
-              BoundingBox.merge(bounds, tempBounds, bounds);
-            } else if (renderer instanceof MeshRenderer) {
-              tempBounds.copyFrom(renderer.mesh.bounds);
-              (tempMin.x *= sx), (tempMin.y *= sy), (tempMin.z *= sz);
-              (tempMax.x *= sx), (tempMax.y *= sy), (tempMax.z *= sz);
-              BoundingBox.merge(bounds, tempBounds, bounds);
-            } else if (renderer instanceof SpriteRenderer) {
-              const sprite = renderer.sprite;
-              if (sprite) {
-                const { width, height } = renderer;
-                let { x: pivotX, y: pivotY } = sprite.pivot;
-                pivotX = renderer.flipX ? 1 - pivotX : pivotX;
-                pivotY = renderer.flipY ? 1 - pivotY : pivotY;
-                tempBounds.min.set(-width * pivotX, -height * pivotY, 0);
-                tempBounds.max.set(width * (1 - pivotX), height * (1 - pivotY), 0);
-              } else {
-                tempBounds.min.set(0, 0, 0);
-                tempBounds.max.set(0, 0, 0);
-              }
-              (tempMin.x *= sx), (tempMin.y *= sy), (tempMin.z *= sz);
-              (tempMax.x *= sx), (tempMax.y *= sy), (tempMax.z *= sz);
-              BoundingBox.merge(bounds, tempBounds, bounds);
-            } else if (renderer instanceof TextRenderer) {
-              // 需要等 UI 代码合并
-              continue;
-            } else if (renderer instanceof ParticleRenderer) {
-              // 粒子没有包围盒
-              continue;
-            } else {
-              // @Todo：UI
-            }
-          } else {
-            if (renderer instanceof ParticleRenderer) {
-              // 粒子没有包围盒
-              continue;
-            } else {
-              tempBounds.copyFrom(renderer.bounds);
-              tempBounds.transform(worldInvMatrix);
-              BoundingBox.merge(bounds, tempBounds, bounds);
-            }
-          }
+          if (renderer instanceof ParticleRenderer) continue;
+          tempBounds.copyFrom(renderer.bounds);
+          tempBounds.transform(worldInvMatrix);
+          BoundingBox.merge(bounds, tempBounds, bounds);
         }
       }
     } else {
       for (let i = 0, n = entities.length; i < n; i++) {
         const entity = entities[i];
         if (!entity.isActiveInHierarchy) continue;
-        entity.getComponentsIncludeChildren(Renderer, renderers);
+        entity.getComponents(Renderer, renderers);
         for (let j = 0, n = renderers.length; j < n; j++) {
           const renderer = renderers[j];
           if (renderer instanceof ParticleRenderer) {
@@ -699,6 +679,7 @@ export class RectControl extends GizmoComponent {
   private _curHitLocalPosition: Vector3 = new Vector3();
   // 这个 matrix 是带缩放的
   private _fromMatrix: Matrix = new Matrix();
+  private _fromScale: Vector3 = new Vector3();
   private xSize: number;
   private ySize: number;
   private zSize: number;
@@ -756,7 +737,7 @@ export class RectControl extends GizmoComponent {
       case "vertexXoZRightTopRotate":
       case "vertexXoZLeftDownRotate":
       case "vertexXoZLeftTopRotate":
-        // 绕 - Y 轴旋转
+        // 绕 Y 轴旋转
         normal.set(0, -1, 0);
         preAngle = Math.atan2(this._startHitLocalPosition.z, this._startHitLocalPosition.x);
         angle = Math.atan2(temp0.z, temp0.x) - preAngle;
@@ -782,7 +763,9 @@ export class RectControl extends GizmoComponent {
   }
 
   /**
-   * 操作大小，会改变 Transform 的 scale 或 size（基于初始平面的单轴）
+   * 操作大小，
+   * 会改变 Transform 的 scale
+   * 会癌变 UITransform 的 size（基于初始平面的单轴）
    */
   private _onMoveSide(ray: Ray): void {
     const curHitLocalPosition = this._curHitLocalPosition;
@@ -794,46 +777,53 @@ export class RectControl extends GizmoComponent {
 
     const toMatrix = RectControl._matrix1;
     const scale = new Vector3(1, 1, 1);
-    const translate = new Vector3(0, 0, 0);
+    const refPivot = new Vector3(0, 0, 0);
+    const bounds = this._bounds;
     switch (this._axisName) {
       case "sideXoYLeft":
       case "sideXoZLeft":
-        scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
-        translate.x -= (this.xSize * (scale.x - 1)) / 2;
+        const maxX = bounds.max.x;
+        scale.x = (maxX - temp0.x) / (maxX - this._startHitLocalPosition.x);
+        refPivot.x = 0;
         break;
       case "sideXoYRight":
       case "sideXoZRight":
-        scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
-        translate.x += (this.xSize * (scale.x - 1)) / 2;
+        const minX = bounds.min.x;
+        scale.x = (temp0.x - minX) / (this._startHitLocalPosition.x - minX);
+        refPivot.x = 1;
         break;
       case "sideYoZLeft":
       case "sideXoYDown":
-        scale.y = (temp0.y / this._startHitLocalPosition.y + 1) / 2;
-        translate.y -= (this.ySize * (scale.y - 1)) / 2;
+        const maxY = bounds.max.y;
+        scale.y = (maxY - temp0.y) / (maxY - this._startHitLocalPosition.y);
+        refPivot.y = 0;
         break;
       case "sideYoZRight":
       case "sideXoYTop":
-        scale.y = (temp0.y / this._startHitLocalPosition.y + 1) / 2;
-        translate.y += (this.ySize * (scale.y - 1)) / 2;
+        const minY = bounds.min.y;
+        scale.y = (temp0.y - minY) / (this._startHitLocalPosition.y - minY);
+        refPivot.y = 1;
         break;
       case "sideXoZDown":
       case "sideYoZDown":
-        scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
-        translate.z -= (this.zSize * (scale.z - 1)) / 2;
+        const minZ = bounds.min.z;
+        scale.z = (temp0.z - minZ) / (this._startHitLocalPosition.z - minZ);
+        refPivot.z = 0;
         break;
       case "sideXoZTop":
       case "sideYoZTop":
-        scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
-        translate.z += (this.zSize * (scale.z - 1)) / 2;
+        const maxZ = bounds.max.z;
+        scale.z = (maxZ - temp0.z) / (maxZ - this._startHitLocalPosition.z);
+        refPivot.z = 1;
         break;
       default:
         break;
     }
-    Matrix.affineTransformation(scale, new Quaternion(), translate, toMatrix);
+    Matrix.affineTransformation(scale, new Quaternion(), new Vector3(0, 0, 0), toMatrix);
     const startGroupMatrix = this._startGroupWorldMatrix;
     Matrix.multiply(startGroupMatrix, toMatrix, toMatrix);
     const fromMatrix = this._fromMatrix;
-    this._group.applyTransform(fromMatrix, toMatrix);
+    this._group.applyScaleOrSize(fromMatrix, toMatrix, refPivot);
     fromMatrix.copyFrom(toMatrix);
     curHitLocalPosition.copyFrom(temp0);
   }
@@ -875,6 +865,7 @@ export class RectControl extends GizmoComponent {
     this.xSize = max.x - min.x;
     this.ySize = max.y - min.y;
     this.zSize = max.z - min.z;
+    this._fromScale.set(1, 1, 1);
   }
 
   /**
@@ -893,62 +884,55 @@ export class RectControl extends GizmoComponent {
     const toMatrix = RectControl._matrix1;
     const scale = new Vector3(1, 1, 1);
     const translate = new Vector3(0, 0, 0);
+    const refPivot = new Vector3(0, 0, 0);
     switch (this._axisName) {
       case "vertexXoYLeftTop":
         // X 与 Y 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.y = (temp0.y / this._startHitLocalPosition.y + 1) / 2;
-        translate.x -= (this.xSize * (scale.x - 1)) / 2;
-        translate.y += (this.ySize * (scale.y - 1)) / 2;
+        refPivot.set(0, 1, 0);
         break;
       case "vertexXoYRightTop":
         // X 与 Y 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.y = (temp0.y / this._startHitLocalPosition.y + 1) / 2;
-        translate.x += (this.xSize * (scale.x - 1)) / 2;
-        translate.y += (this.ySize * (scale.y - 1)) / 2;
+        refPivot.set(1, 1, 0);
         break;
       case "vertexXoYRightDown":
         // X 与 Y 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.y = (temp0.y / this._startHitLocalPosition.y + 1) / 2;
-        translate.x += (this.xSize * (scale.x - 1)) / 2;
-        translate.y -= (this.ySize * (scale.y - 1)) / 2;
+        refPivot.set(1, 0, 0);
         break;
       case "vertexXoYLeftDown":
         // X 与 Y 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.y = (temp0.y / this._startHitLocalPosition.y + 1) / 2;
-        translate.x -= (this.xSize * (scale.x - 1)) / 2;
-        translate.y -= (this.ySize * (scale.y - 1)) / 2;
+        refPivot.set(0, 0, 0);
         break;
       case "vertexXoZLeftTop":
         // X 与 Z 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
-        translate.x -= (this.xSize * (scale.x - 1)) / 2;
-        translate.z += (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(0, 0, 1);
         break;
       case "vertexXoZRightTop":
         // X 与 Z 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
-        translate.x += (this.xSize * (scale.x - 1)) / 2;
-        translate.z += (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(1, 0, 1);
         break;
       case "vertexXoZRightDown":
         // X 与 Z 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
-        translate.x += (this.xSize * (scale.x - 1)) / 2;
-        translate.z -= (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(1, 0, 0);
         break;
       case "vertexXoZLeftDown":
         // X 与 Z 轴同时缩放
         scale.x = (temp0.x / this._startHitLocalPosition.x + 1) / 2;
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
-        translate.x -= (this.xSize * (scale.x - 1)) / 2;
-        translate.z -= (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(0, 0, 0);
         break;
       case "vertexYoZLeftTop":
         // Y 与 Z 轴同时缩放
@@ -956,6 +940,7 @@ export class RectControl extends GizmoComponent {
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
         translate.y -= (this.ySize * (scale.y - 1)) / 2;
         translate.z += (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(0, 0, 1);
         break;
       case "vertexYoZRightTop":
         // Y 与 Z 轴同时缩放
@@ -963,6 +948,7 @@ export class RectControl extends GizmoComponent {
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
         translate.y += (this.ySize * (scale.y - 1)) / 2;
         translate.z += (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(0, 1, 1);
         break;
       case "vertexYoZRightDown":
         // Y 与 Z 轴同时缩放
@@ -970,6 +956,7 @@ export class RectControl extends GizmoComponent {
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
         translate.y += (this.ySize * (scale.y - 1)) / 2;
         translate.z -= (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(0, 1, 0);
         break;
       case "vertexYoZLeftDown":
         // Y 与 Z 轴同时缩放
@@ -977,6 +964,7 @@ export class RectControl extends GizmoComponent {
         scale.z = (temp0.z / this._startHitLocalPosition.z + 1) / 2;
         translate.y -= (this.ySize * (scale.y - 1)) / 2;
         translate.z -= (this.zSize * (scale.z - 1)) / 2;
+        refPivot.set(0, 0, 0);
         break;
       default:
         break;
@@ -985,7 +973,7 @@ export class RectControl extends GizmoComponent {
     const startGroupMatrix = this._startGroupWorldMatrix;
     Matrix.multiply(startGroupMatrix, toMatrix, toMatrix);
     const fromMatrix = this._fromMatrix;
-    this._group.applyTransform(fromMatrix, toMatrix);
+    this._group.applyScaleOrSize(fromMatrix, toMatrix);
     fromMatrix.copyFrom(toMatrix);
     curHitLocalPosition.copyFrom(temp0);
   }
@@ -993,5 +981,15 @@ export class RectControl extends GizmoComponent {
   /**
    * 操作中心点，会改变 UITransform 的锚点
    */
-  private _onMoveCenter(ray: Ray): void {}
+  private _onMoveCenter(ray: Ray): void {
+    const curHitLocalPosition = this._curHitLocalPosition;
+    const worldToLocal = this._startGroupWorldInvMatrix;
+    Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
+    Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
+
+    const temp0 = RectControl._vec30;
+    curHitLocalPosition.copyFrom(temp0);
+  }
+
+  private getLocalBounds(renderer: Renderer, out: BoundingBox): void {}
 }

@@ -23,6 +23,7 @@ import { TranslateControl } from "./Translate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
 import { State } from "./enums/GizmoState";
+import { SearchComponentType } from "./enums/GroupState";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
@@ -104,7 +105,8 @@ export class Gizmo extends Script {
 
   set state(targetState: State) {
     this._type = targetState;
-
+    this._group.searchComponentType =
+      targetState === State.rect ? SearchComponentType.CurrentEntity : SearchComponentType.IncludeChildren;
     this._traverseControl(
       targetState,
       (control) => {

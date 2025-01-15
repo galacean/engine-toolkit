@@ -25,3 +25,8 @@ export enum CoordinateType {
    */
   Global
 }
+
+export enum SearchComponentType {
+  CurrentEntity,
+  IncludeChildren
+}
