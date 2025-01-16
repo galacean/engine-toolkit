@@ -28,7 +28,8 @@ import {
   CircleShape,
   ConeShape,
   HemisphereShape,
-  SphereShape
+  SphereShape,
+  MathUtil
 } from "@galacean/engine";
 import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { WireframePrimitive } from "./WireframePrimitive";
@@ -350,7 +351,12 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    Quaternion.rotationYawPitchRoll(
+      MathUtil.degreeToRadian(rotation.y),
+      MathUtil.degreeToRadian(rotation.x),
+      MathUtil.degreeToRadian(rotation.z),
+      tempRotation
+    );
     this._localRotation(positionsOffset, tempRotation);
     Vector3.multiply(position, worldScale, tempVector);
     this._localTranslate(positionsOffset, tempVector);
@@ -382,7 +388,12 @@ export class WireframeManager extends Script {
       indices,
       this._indicesCount
     );
-    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    Quaternion.rotationYawPitchRoll(
+      MathUtil.degreeToRadian(rotation.y),
+      MathUtil.degreeToRadian(rotation.x),
+      MathUtil.degreeToRadian(rotation.z),
+      tempRotation
+    );
     this._localRotation(positionsOffset, tempRotation);
     Vector3.multiply(position, worldScale, tempVector);
     this._localTranslate(positionsOffset, tempVector);
@@ -431,7 +442,12 @@ export class WireframeManager extends Script {
       case ColliderShapeUpAxis.Z:
         tempAxis.set(halfSqrt, 0, 0, halfSqrt);
     }
-    Quaternion.rotationYawPitchRoll(rotation.x, rotation.y, rotation.z, tempRotation);
+    Quaternion.rotationYawPitchRoll(
+      MathUtil.degreeToRadian(rotation.y),
+      MathUtil.degreeToRadian(rotation.x),
+      MathUtil.degreeToRadian(rotation.z),
+      tempRotation
+    );
     Quaternion.multiply(tempRotation, tempAxis, tempRotation);
     this._localRotation(positionsOffset, tempRotation);
     Vector3.multiply(position, worldScale, tempVector);

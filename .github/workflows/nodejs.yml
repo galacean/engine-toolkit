@@ -40,9 +40,13 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-
-      - run: npm run ci
-      - run: pnpm install codecov -w
+      - name: Build
+        run: pnpm b:all
+      - name: test-cov
+        run: npm run test-cov
       - name: Upload coverage to Codecov
-        run: ./node_modules/.bin/codecov
-      - run: curl -s https://codecov.io/bash
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          fail_ci_if_error: true
+          flags: unittests
