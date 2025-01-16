@@ -973,7 +973,7 @@ export class RectControl extends GizmoComponent {
     const startGroupMatrix = this._startGroupWorldMatrix;
     Matrix.multiply(startGroupMatrix, toMatrix, toMatrix);
     const fromMatrix = this._fromMatrix;
-    this._group.applyScaleOrSize(fromMatrix, toMatrix);
+    // this._group.applyScaleOrSize(fromMatrix, toMatrix);
     fromMatrix.copyFrom(toMatrix);
     curHitLocalPosition.copyFrom(temp0);
   }
