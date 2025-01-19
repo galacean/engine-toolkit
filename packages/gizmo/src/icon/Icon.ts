@@ -28,6 +28,7 @@ export class Icon extends Script {
   private _renderer: MeshRenderer;
   private _pixelViewport: Vector4 = new Vector4();
   private _texture: string | Texture2D;
+  private _isGray: boolean = false;
 
   get material(): IconMaterial {
     return this._material;
@@ -35,6 +36,14 @@ export class Icon extends Script {
 
   get size(): Vector2 {
     return this._size;
+  }
+
+  setGray(value: boolean) {
+    if (value) {
+      this._material.baseColor.set(0.75, 0.75, 0.75, 0.6);
+    } else {
+      this._material.baseColor.set(1, 1, 1, 1);
+    }
   }
 
   set size(val: Vector2) {
