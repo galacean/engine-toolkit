@@ -237,6 +237,17 @@ export class Group {
     }
   }
 
+  applyPivot(from: Vector3, to: Vector3): void {
+    const { _entities: entities } = this;
+    if (entities.length <= 0) {
+      return;
+    }
+    if (Vector3.equals(from, to)) {
+      return;
+    }
+    // update entities pivot
+  }
+
   /**
    * force update group dirty flag
    * @param flag - group dirty flag
