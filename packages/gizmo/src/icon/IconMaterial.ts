@@ -90,7 +90,7 @@ void main() {
 
      #ifdef MATERIAL_HAS_BASETEXTURE
         vec4 textureColor = texture2D(material_BaseTexture, v_uv);
-        baseColor *= textureColor;
+        baseColor.a *= textureColor.a;
      #endif
 
     #ifdef MATERIAL_IS_ALPHA_CUTOFF

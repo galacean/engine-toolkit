@@ -16,7 +16,6 @@ export class WireframePrimitive {
     return 8;
   }
 
-
   /**
    * Get rect wire frame position count.
    */
@@ -758,9 +757,11 @@ export class WireframePrimitive {
   }
 
   /**
-   * Store hemisphere wireframe mesh data.
-   * @param radius - The radius of hemisphere
-   * @param axis - The default direction
+   * Store rect wireframe mesh data.
+   * @param width - The width of rect
+   * @param height - The height of rect
+   * @param pivotX - The pivot x of rect
+   * @param pivotY - The pivot y of rect
    * @param positions - position array
    * @param positionOffset - The min of index list
    * @param indices - index array
