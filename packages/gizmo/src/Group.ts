@@ -1,5 +1,4 @@
-import { BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Transform, Vector3 } from "@galacean/engine";
-import { UITransform } from "@galacean/engine-ui";
+import { BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Vector3 } from "@galacean/engine";
 import { AnchorType, CoordinateType, SearchComponentType } from "./enums/GroupState";
 
 /**
@@ -89,7 +88,7 @@ export class Group {
   set searchComponentType(value: SearchComponentType) {
     if (this._searchComponentType !== value) {
       this._searchComponentType = value;
-      this._dirtyFlag & GroupDirtyFlag.AnchorDirty;
+      this.setDirtyFlagTrue(GroupDirtyFlag.AnchorDirty);
     }
   }
 
@@ -236,17 +235,6 @@ export class Group {
       Matrix.multiply(to, nodeMat, nodeMat);
       nodeTrans.worldMatrix = nodeMat;
     }
-  }
-
-  applyPivot(from: Vector3, to: Vector3): void {
-    const { _entities: entities } = this;
-    if (entities.length <= 0) {
-      return;
-    }
-    if (Vector3.equals(from, to)) {
-      return;
-    }
-    // update entities pivot
   }
 
   /**
