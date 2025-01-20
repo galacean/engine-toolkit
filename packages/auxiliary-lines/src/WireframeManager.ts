@@ -1,35 +1,36 @@
 import {
   BoolUpdateFlag,
   BoxColliderShape,
+  BoxShape,
   Camera,
   CapsuleColliderShape,
+  CircleShape,
   Collider,
   ColliderShapeUpAxis,
   Color,
-  dependentComponents,
+  ConeShape,
+  DependentMode,
   DirectLight,
   Entity,
   GLCapabilityType,
+  HemisphereShape,
+  MathUtil,
   Matrix,
   MeshRenderer,
   MeshTopology,
   ModelMesh,
+  ParticleRenderer,
   PointLight,
   Quaternion,
   Renderer,
   Script,
   SphereColliderShape,
+  SphereShape,
   SpotLight,
   Transform,
+  Vector2,
   Vector3,
-  DependentMode,
-  ParticleRenderer,
-  BoxShape,
-  CircleShape,
-  ConeShape,
-  HemisphereShape,
-  SphereShape,
-  MathUtil
+  dependentComponents
 } from "@galacean/engine";
 import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 import { WireframePrimitive } from "./WireframePrimitive";
@@ -582,6 +583,26 @@ export class WireframeManager extends Script {
     const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createSphereWireframe(radius, localPositions, positionsOffset, indices, this._indicesCount);
     this._indicesCount += sphereIndicesCount;
+    this._wireframeElements.push(new WireframeElement(transform, positionsOffset, false));
+  }
+
+  addRectShapeWireframe(size: Vector2, pivot: Vector2, transform: Transform): void {
+    const positionsOffset = this._localPositions.length;
+    const cuboidIndicesCount = WireframePrimitive.rectIndexCount;
+    this._growthIndexMemory(cuboidIndicesCount);
+    this._growthPosition(WireframePrimitive.rectPositionCount);
+    const { _indices: indices, _localPositions: localPositions } = this;
+    WireframePrimitive.createRectWireframe(
+      size.x,
+      size.y,
+      pivot.x,
+      pivot.y,
+      localPositions,
+      positionsOffset,
+      indices,
+      this._indicesCount
+    );
+    this._indicesCount += WireframePrimitive.rectIndexCount;
     this._wireframeElements.push(new WireframeElement(transform, positionsOffset, false));
   }
 

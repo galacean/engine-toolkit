@@ -115,6 +115,40 @@ export class RectControl extends GizmoComponent {
   private _centerYoZ: Entity;
   private _centerYoZPick: MeshRenderer;
   // ------- YoZ 平面结束 -------
+  // 判断光标方向
+  private _cursorTempVec30: Vector3 = new Vector3();
+  private _cursorTempVec31: Vector3 = new Vector3();
+  // 计算包围盒的临时矩阵
+  private _tempLocalMatrix: Matrix = new Matrix();
+  // 点击开始时 Group 的世界矩阵
+  private _startWorldMatrix: Matrix = new Matrix();
+  // 点击开始时 Group 的世界逆矩阵
+  private _startWorldInvMatrix: Matrix = new Matrix();
+  // 点击开始时 UIRender 的锚点（仅在移动锚点时生效）
+  private _startPivot: Vector2 = new Vector2();
+  // 点击开始时 UIRender 的局部位置
+  private _startPosition: Vector3 = new Vector3();
+  // 局部平面，会随着当前面向的平面发生改变
+  private _curLocalPlane: Plane = new Plane(new Vector3(0, 1, 0), 0);
+  private _startHitLocalPosition: Vector3 = new Vector3();
+  private _curHitLocalPosition: Vector3 = new Vector3();
+  // 这个 matrix 是带缩放的
+  private _fromMatrix: Matrix = new Matrix();
+  private _fromScale: Vector3 = new Vector3();
+  private _tempAffineTranslate: Vector3 = new Vector3();
+  private _tempAffineQuat: Quaternion = new Quaternion();
+  private _tempAffineScale: Vector3 = new Vector3();
+  // 计算拖动边和顶点时的临时变量
+  private _fixedLocalPoint: Vector3 = new Vector3();
+  private _fixedWorldPoint: Vector3 = new Vector3();
+  private _tempVec30: Vector3 = new Vector3();
+  private _tempVec31: Vector3 = new Vector3();
+  private _uiTransformInfoMap = new Map<UITransform, { width: number; height: number }>();
+  private _mat0: Matrix = new Matrix();
+  private _mat1: Matrix = new Matrix();
+  private _mat2: Matrix = new Matrix();
+  private _mat3: Matrix = new Matrix();
+  private _mat4: Matrix = new Matrix();
 
   constructor(entity: Entity) {
     super(entity);
@@ -419,21 +453,21 @@ export class RectControl extends GizmoComponent {
     this._camera.worldToScreenPoint(point1, point1);
     this._camera.worldToScreenPoint(point2, point2);
     const value = Math.atan2(point2.y - point1.y, point2.x - point1.x) / Math.PI;
-    if (value > 0.875 || value <= -0.875) {
+    if (value > 0.94 || value <= -0.94) {
       this._engine.dispatch("RectCursorChange", "ew-resize");
-    } else if (value > -0.875 && value <= -0.625) {
+    } else if (value > -0.94 && value <= -0.56) {
       this._engine.dispatch("RectCursorChange", "nwse-resize");
-    } else if (value > -0.625 && value <= -0.375) {
+    } else if (value > -0.56 && value <= -0.44) {
       this._engine.dispatch("RectCursorChange", "ns-resize");
-    } else if (value > -0.375 && value <= -0.125) {
+    } else if (value > -0.44 && value <= -0.06) {
       this._engine.dispatch("RectCursorChange", "nesw-resize");
-    } else if (value > -0.125 && value <= 0.125) {
+    } else if (value > -0.06 && value <= 0.06) {
       this._engine.dispatch("RectCursorChange", "ew-resize");
-    } else if (value > 0.125 && value <= 0.375) {
+    } else if (value > 0.06 && value <= 0.44) {
       this._engine.dispatch("RectCursorChange", "nwse-resize");
-    } else if (value > 0.375 && value <= 0.625) {
+    } else if (value > 0.44 && value <= 0.56) {
       this._engine.dispatch("RectCursorChange", "ns-resize");
-    } else if (value > 0.625 && value <= 0.875) {
+    } else if (value > 0.56 && value <= 0.94) {
       this._engine.dispatch("RectCursorChange", "nesw-resize");
     }
   }
@@ -554,6 +588,7 @@ export class RectControl extends GizmoComponent {
   onMoveEnd(): void {
     this._axisName = "";
     this._lockPlane = false;
+    this._uiTransformInfoMap.clear();
   }
 
   /** Called when gizmo's transform is dirty.*/
@@ -788,7 +823,6 @@ export class RectControl extends GizmoComponent {
   /** Called when axis alpha needs to be modified.*/
   onAlphaChange(axisName: string, value: number): void {}
 
-  private _tempLocalMatrix: Matrix = new Matrix();
   /**
    * 当 Group 的 Matrix 发生改变的时候会重新计算包围盒
    * @returns
@@ -958,26 +992,6 @@ export class RectControl extends GizmoComponent {
     return pickRenderer;
   }
 
-  // 点击开始时 Group 的世界矩阵
-  private _startWorldMatrix: Matrix = new Matrix();
-  // 点击开始时 Group 的世界逆矩阵
-  private _startWorldInvMatrix: Matrix = new Matrix();
-  // 点击开始时 UIRender 的锚点（仅在移动锚点时生效）
-  private _startPivot: Vector2 = new Vector2();
-  // 点击开始时 UIRender 的局部位置
-  private _startPosition: Vector3 = new Vector3();
-
-  // 局部平面，会随着当前面向的平面发生改变
-  private _curLocalPlane: Plane = new Plane(new Vector3(0, 1, 0), 0);
-  private _startHitLocalPosition: Vector3 = new Vector3();
-  private _curHitLocalPosition: Vector3 = new Vector3();
-  // 这个 matrix 是带缩放的
-  private _fromMatrix: Matrix = new Matrix();
-  private _fromScale: Vector3 = new Vector3();
-  private xSize: number;
-  private ySize: number;
-  private zSize: number;
-
   /**
    * 操作位置拖动，会改变 Transform 的 position（基于初始平面的双轴）
    * @param ray
@@ -996,7 +1010,9 @@ export class RectControl extends GizmoComponent {
     Vector3.subtract(temp0, startHitLocalPosition, temp1);
     const fromMatrix = this._fromMatrix;
     const toMatrix = RectControl._matrix1;
-    Matrix.affineTransformation(new Vector3(1, 1, 1), new Quaternion(), temp1, toMatrix);
+    const affineTranslate = this._tempAffineTranslate.set(1, 1, 1);
+    const affineQuat = this._tempAffineQuat.identity();
+    Matrix.affineTransformation(affineTranslate, affineQuat, temp1, toMatrix);
     Matrix.multiply(startGroupWorldMatrix, toMatrix, toMatrix);
     this._group.applyTransform(fromMatrix, toMatrix);
     fromMatrix.copyFrom(toMatrix);
@@ -1083,25 +1099,13 @@ export class RectControl extends GizmoComponent {
         break;
     }
     // 将射线转至局部
-    // @todo：这里如果使用世界平面而非局部平面，性能是否会更好？
     Vector3.transformCoordinate(ray.origin, worldToLocal, ray.origin);
     Vector3.transformNormal(ray.direction, worldToLocal, ray.direction);
     ray.getPoint(ray.intersectPlane(curLocalPlane), this._startHitLocalPosition);
     this._curHitLocalPosition.copyFrom(this._startHitLocalPosition);
     this._fromMatrix.copyFrom(localToWorld);
-    const { min, max } = this._bounds;
-    this.xSize = max.x - min.x;
-    this.ySize = max.y - min.y;
-    this.zSize = max.z - min.z;
     this._fromScale.set(1, 1, 1);
   }
-
-  private _fixedLocalPoint: Vector3 = new Vector3();
-  private _fixedWorldPoint: Vector3 = new Vector3();
-  private _tempVec30: Vector3 = new Vector3();
-  private _tempVec31: Vector3 = new Vector3();
-
-  private _uiTransformInfoMap = new Map<UITransform, { width: number; height: number }>();
 
   private _onMoveSide(ray: Ray): void {
     const startHitLocalPosition = this._startHitLocalPosition;
@@ -1150,9 +1154,9 @@ export class RectControl extends GizmoComponent {
     }
     // 将 fixedPointer 转成 World 坐标
     // 3. 简单来说，这个 fixedPointer 在缩放或者调整 Size 后，保持位置不变
-    const quaternion = new Quaternion();
-    const translate = new Vector3(0, 0, 0);
-    const scale = this._tempVec30.set(
+    const quaternion = this._tempAffineQuat.identity();
+    const translate = this._tempAffineTranslate.set(0, 0, 0);
+    const scale = this._tempAffineScale.set(
       scaleX ? (temp0.x - fixedLocalPoint.x) / (startHitLocalPosition.x - fixedLocalPoint.x) : 1,
       scaleY ? (temp0.y - fixedLocalPoint.y) / (startHitLocalPosition.y - fixedLocalPoint.y) : 1,
       scaleZ ? (temp0.z - fixedLocalPoint.z) / (startHitLocalPosition.z - fixedLocalPoint.z) : 1
@@ -1169,15 +1173,15 @@ export class RectControl extends GizmoComponent {
         const transform = <UITransform>entity.transform;
         // 当前节点在 group 中的局部矩阵和局部逆矩阵
         const worldMatrix = transform.worldMatrix;
-        const localMatrix = new Matrix();
-        const localInvMatrix = new Matrix();
-        const lossyMatrix = new Matrix();
+        const localMatrix = this._mat0;
+        const localInvMatrix = this._mat1;
+        const lossyMatrix = this._mat2;
         Matrix.multiply(worldToLocal, worldMatrix, localMatrix);
         Matrix.invert(localMatrix, localInvMatrix);
         Matrix.multiply(localInvMatrix, toMatrix, lossyMatrix);
         Matrix.multiply(lossyMatrix, localMatrix, lossyMatrix);
         // 计算固定点在当前节点的局部坐标
-        const fixedPointInUI = new Vector3();
+        const fixedPointInUI = this._tempVec30;
         Vector3.transformCoordinate(fixedLocalPoint, localInvMatrix, fixedPointInUI);
         // 避免分母为 0
         let sizeX = transform.size.x || 0.1;
@@ -1217,7 +1221,7 @@ export class RectControl extends GizmoComponent {
         const transform = <Transform>entity.transform;
         // Transform 修改 scale 和 position
         // 固定的世界节点在当前节点的局部坐标
-        const invMatrix = new Matrix();
+        const invMatrix = this._mat0;
         const tempVec31 = this._tempVec31;
         Matrix.invert(transform.worldMatrix, invMatrix);
         Vector3.transformCoordinate(fixedWorldPoint, invMatrix, tempVec31);
@@ -1227,7 +1231,7 @@ export class RectControl extends GizmoComponent {
         Matrix.invert(invMatrix, invMatrix);
         Matrix.multiply(invMatrix, worldMatrix, worldMatrix);
         // 当前新的叠加矩阵
-        const curMatrix = new Matrix();
+        const curMatrix = this._mat1;
         Matrix.multiply(localToWorld, toMatrix, curMatrix);
         Matrix.multiply(curMatrix, worldMatrix, worldMatrix);
         const curEle = worldMatrix.elements;
@@ -1299,9 +1303,9 @@ export class RectControl extends GizmoComponent {
     }
     // 将 fixedPointer 转成 World 坐标
     // 3. 简单来说，这个 fixedPointer 在缩放或者调整 Size 后，保持位置不变
-    const quaternion = new Quaternion();
-    const translate = new Vector3(0, 0, 0);
-    const scale = this._tempVec30.set(
+    const quaternion = this._tempAffineQuat.identity();
+    const translate = this._tempAffineTranslate.set(0, 0, 0);
+    const scale = this._tempAffineScale.set(
       scaleX ? (temp0.x - fixedLocalPoint.x) / (startHitLocalPosition.x - fixedLocalPoint.x) : 1,
       scaleY ? (temp0.y - fixedLocalPoint.y) / (startHitLocalPosition.y - fixedLocalPoint.y) : 1,
       scaleZ ? (temp0.z - fixedLocalPoint.z) / (startHitLocalPosition.z - fixedLocalPoint.z) : 1
@@ -1317,15 +1321,15 @@ export class RectControl extends GizmoComponent {
         const transform = <UITransform>entity.transform;
         // 当前节点在 group 中的局部矩阵和局部逆矩阵
         const worldMatrix = transform.worldMatrix;
-        const localMatrix = new Matrix();
-        const localInvMatrix = new Matrix();
-        const lossyMatrix = new Matrix();
+        const localMatrix = this._mat0;
+        const localInvMatrix = this._mat1;
+        const lossyMatrix = this._mat2;
         Matrix.multiply(worldToLocal, worldMatrix, localMatrix);
         Matrix.invert(localMatrix, localInvMatrix);
         Matrix.multiply(localInvMatrix, toMatrix, lossyMatrix);
         Matrix.multiply(lossyMatrix, localMatrix, lossyMatrix);
         // 计算固定点在当前节点的局部坐标
-        const fixedPointInUI = new Vector3();
+        const fixedPointInUI = this._tempVec30;
         Vector3.transformCoordinate(fixedLocalPoint, localInvMatrix, fixedPointInUI);
         // 避免分母为 0
         let sizeX = transform.size.x || 0.1;
@@ -1365,7 +1369,7 @@ export class RectControl extends GizmoComponent {
         const transform = <Transform>entity.transform;
         // Transform 修改 scale 和 position
         // 固定的世界节点在当前节点的局部坐标
-        const invMatrix = new Matrix();
+        const invMatrix = this._mat0;
         const tempVec31 = this._tempVec31;
         Matrix.invert(transform.worldMatrix, invMatrix);
         Vector3.transformCoordinate(fixedWorldPoint, invMatrix, tempVec31);
@@ -1375,7 +1379,7 @@ export class RectControl extends GizmoComponent {
         Matrix.invert(invMatrix, invMatrix);
         Matrix.multiply(invMatrix, worldMatrix, worldMatrix);
         // 当前新的叠加矩阵
-        const curMatrix = new Matrix();
+        const curMatrix = this._mat1;
         Matrix.multiply(localToWorld, toMatrix, curMatrix);
         Matrix.multiply(curMatrix, worldMatrix, worldMatrix);
         const curEle = worldMatrix.elements;
@@ -1416,9 +1420,6 @@ export class RectControl extends GizmoComponent {
     this._curHitLocalPosition.copyFrom(this._startHitLocalPosition);
     this._fromMatrix.identity();
     const { min, max } = this._bounds;
-    this.xSize = max.x - min.x;
-    this.ySize = max.y - min.y;
-    this.zSize = max.z - min.z;
     this._fromScale.set(1, 1, 1);
     const fixedLocalPoint = this._fixedLocalPoint;
     const fixedWorldPoint = this._fixedWorldPoint;
@@ -1476,8 +1477,6 @@ export class RectControl extends GizmoComponent {
     }
   }
 
-  private _cursorTempVec30: Vector3 = new Vector3();
-  private _cursorTempVec31: Vector3 = new Vector3();
   private _onMoveSideStart(ray: Ray): void {
     const localToWorld = this._startWorldMatrix;
     this._group.getWorldMatrix(localToWorld);
@@ -1505,9 +1504,6 @@ export class RectControl extends GizmoComponent {
     this._curHitLocalPosition.copyFrom(this._startHitLocalPosition);
     this._fromMatrix.identity();
     const { min, max } = this._bounds;
-    this.xSize = max.x - min.x;
-    this.ySize = max.y - min.y;
-    this.zSize = max.z - min.z;
     this._fromScale.set(1, 1, 1);
     const fixedLocalPoint = this._fixedLocalPoint;
     const fixedWorldPoint = this._fixedWorldPoint;
@@ -1610,12 +1606,6 @@ export class RectControl extends GizmoComponent {
     );
   }
 
-  private _checkHandleType(): void {
-    const group = this._group;
-    if (!group) return;
-    const entities = group.entities;
-  }
-
   private _getLocalBoundsByTransform(transform: UITransform, out: BoundingBox): void {
     const { min: tempMin, max: tempMax } = out;
     const { x: width, y: height } = (<UITransform>transform).size;
@@ -1639,8 +1629,4 @@ export class RectControl extends GizmoComponent {
       return false;
     }
   }
-}
-
-enum GroupElementType {
-  None
 }

@@ -10,6 +10,21 @@ export class WireframePrimitive {
   static circleVertexCount = 40;
 
   /**
+   * Get rect wire frame index count.
+   */
+  static get rectIndexCount(): number {
+    return 8;
+  }
+
+
+  /**
+   * Get rect wire frame position count.
+   */
+  static get rectPositionCount(): number {
+    return 4;
+  }
+
+  /**
    * Get cuboid wire frame index count.
    */
   static get cuboidIndexCount(): number {
@@ -740,5 +755,42 @@ export class WireframePrimitive {
       indices,
       indicesOffset + WireframePrimitive.circleVertexCount
     );
+  }
+
+  /**
+   * Store hemisphere wireframe mesh data.
+   * @param radius - The radius of hemisphere
+   * @param axis - The default direction
+   * @param positions - position array
+   * @param positionOffset - The min of index list
+   * @param indices - index array
+   * @param indicesOffset - index array offset
+   */
+  static createRectWireframe(
+    width: number,
+    height: number,
+    pivotX: number,
+    pivotY: number,
+    positions: Vector3[],
+    positionOffset: number,
+    indices: Uint16Array | Uint32Array,
+    indicesOffset: number
+  ): void {
+    // 0 -- 3
+    // |    |
+    // 1 -- 2
+    positions[positionOffset].set(-width * pivotX, height * (1 - pivotY), 0);
+    positions[positionOffset + 1].set(-width * pivotX, -height * pivotY, 0);
+    positions[positionOffset + 2].set(width * (1 - pivotX), -height * pivotY, 0);
+    positions[positionOffset + 3].set(width * (1 - pivotX), height * (1 - pivotY), 0);
+
+    indices[indicesOffset++] = positionOffset;
+    indices[indicesOffset++] = positionOffset + 1;
+    indices[indicesOffset++] = positionOffset + 1;
+    indices[indicesOffset++] = positionOffset + 2;
+    indices[indicesOffset++] = positionOffset + 2;
+    indices[indicesOffset++] = positionOffset + 3;
+    indices[indicesOffset++] = positionOffset + 3;
+    indices[indicesOffset++] = positionOffset;
   }
 }

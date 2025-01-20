@@ -168,18 +168,18 @@ export class Gizmo extends Script {
     }
     this._group.getWorldPosition(this._tempVec30);
     if (this._isStarted) {
+      if (this._group._gizmoTransformDirty) {
+        this._traverseControl(this._type, (control) => {
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
+        });
+        this._group._gizmoTransformDirty = false;
+      }
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
           this._triggerGizmoMove();
         }
       } else {
         this._triggerGizmoEnd();
-      }
-      if (this._group._gizmoTransformDirty) {
-        this._traverseControl(this._type, (control) => {
-          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
-        });
-        this._group._gizmoTransformDirty = false;
       }
     } else {
       this._group.getWorldPosition(this._tempVec30);
