@@ -1,27 +1,29 @@
 import {
   Camera,
-  Entity,
-  Ray,
-  Layer,
-  PointerButton,
-  Vector3,
-  MathUtil,
-  Script,
-  Pointer,
-  PointerPhase,
-  Vector2,
   Component,
+  Entity,
+  Layer,
+  MathUtil,
+  Matrix,
   MeshRenderer,
-  Matrix
+  Pointer,
+  PointerButton,
+  PointerPhase,
+  Ray,
+  Script,
+  Vector2,
+  Vector3
 } from "@galacean/engine";
+import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
+import { Group, GroupDirtyFlag } from "./Group";
+import { RectControl } from "./Rect";
+import { RotateControl } from "./Rotate";
 import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
-import { RotateControl } from "./Rotate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
 import { State } from "./enums/GizmoState";
-import { Group, GroupDirtyFlag } from "./Group";
-import { FramebufferPicker } from "@galacean/engine-toolkit-framebuffer-picker";
+import { SearchComponentType } from "./enums/GroupState";
 /**
  * Gizmo controls, including translate, rotate, scale
  */
@@ -103,7 +105,8 @@ export class Gizmo extends Script {
 
   set state(targetState: State) {
     this._type = targetState;
-
+    this._group.searchComponentType =
+      targetState === State.rect ? SearchComponentType.CurrentEntity : SearchComponentType.IncludeChildren;
     this._traverseControl(
       targetState,
       (control) => {
@@ -141,6 +144,7 @@ export class Gizmo extends Script {
     this._createGizmoControl(State.translate, TranslateControl);
     this._createGizmoControl(State.rotate, RotateControl);
     this._createGizmoControl(State.scale, ScaleControl);
+    this._createGizmoControl(State.rect, RectControl);
 
     this.layer = Layer.Layer31;
     this.state = this._type;
@@ -164,18 +168,18 @@ export class Gizmo extends Script {
     }
     this._group.getWorldPosition(this._tempVec30);
     if (this._isStarted) {
+      if (this._group._gizmoTransformDirty) {
+        this._traverseControl(this._type, (control) => {
+          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
+        });
+        this._group._gizmoTransformDirty = false;
+      }
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
           this._triggerGizmoMove();
         }
       } else {
         this._triggerGizmoEnd();
-      }
-      if (this._group._gizmoTransformDirty) {
-        this._traverseControl(this._type, (control) => {
-          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
-        });
-        this._group._gizmoTransformDirty = false;
       }
     } else {
       this._group.getWorldPosition(this._tempVec30);
