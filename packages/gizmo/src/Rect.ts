@@ -653,9 +653,19 @@ export class RectControl extends GizmoComponent {
     }
 
     this._middleEntity.transform.worldMatrix = groupWorldMatrix;
-    const cameraPosition = this._camera.entity.transform.worldPosition;
-    const vec3 = RectControl._vec30.set(ele[12], ele[13], ele[14]);
-    const scale = Vector3.distance(cameraPosition, vec3) * Utils.rectFactor;
+    let scale: number;
+    if (this._camera.isOrthographic) {
+      scale = isModified
+        ? this._camera.orthographicSize * Utils.rectFactor * 3 * 0.8
+        : this._camera.orthographicSize * Utils.rectFactor * 3;
+    } else {
+      const cameraPosition = this._camera.entity.transform.worldPosition;
+      const vec3 = RectControl._vec30.set(ele[12], ele[13], ele[14]);
+      scale = isModified
+        ? Vector3.distance(cameraPosition, vec3) * Utils.rectFactor * 0.8
+        : Vector3.distance(cameraPosition, vec3) * Utils.rectFactor;
+    }
+
     const anchorType = group.anchorType;
     switch (mostSuitablePlane) {
       case CoordinatePlane.XoY:
@@ -916,7 +926,7 @@ export class RectControl extends GizmoComponent {
     // Invisible Renderer (for pick)
     const pickRenderer = entity.addComponent(MeshRenderer);
     pickRenderer.priority = 3;
-    const pickMesh = PrimitiveMesh.createCylinder(engine, 0.15, 0.15, 1);
+    const pickMesh = PrimitiveMesh.createCylinder(engine, 0.2, 0.2, 1);
     pickRenderer.mesh = pickMesh;
     pickRenderer.setMaterial(Utils.invisibleMaterialRect);
     return entity;
