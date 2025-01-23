@@ -84,11 +84,11 @@ void PBRFragment(Varyings varyings) {
   surfaceData.normal =calculateEyeNormal(varyings.uv, tbn, gl_FrontFacing);
   surfaceData.f0 = 0.04; 
 
-
   // Can modify surfaceData here
   initBRDFData(surfaceData, brdfData);
 
-  vec4 color = vec4(0, 0, 0, surfaceData.opacity);
+  vec3 totalDiffuseColor = vec3(0, 0, 0);
+  vec3 totalSpecularColor = vec3(0, 0, 0);
 
   // Get shadow attenuation
   float shadowAttenuation = 1.0;
@@ -102,10 +102,13 @@ void PBRFragment(Varyings varyings) {
   #endif
 
   // Evaluate direct lighting
-  evaluateDirectRadiance(varyings, surfaceData, brdfData, shadowAttenuation, color.rgb);
+  evaluateDirectRadiance(varyings, surfaceData, brdfData, shadowAttenuation, totalDiffuseColor, totalSpecularColor);
 
   // IBL
-  evaluateIBL(varyings, surfaceData, brdfData, color.rgb);
+  evaluateIBL(varyings, surfaceData, brdfData, totalDiffuseColor, totalSpecularColor);
+
+  // Final color
+  vec4 color = vec4(totalDiffuseColor + totalSpecularColor, surfaceData.opacity);
 
   // Emissive
   color.rgb += surfaceData.emissiveColor;
