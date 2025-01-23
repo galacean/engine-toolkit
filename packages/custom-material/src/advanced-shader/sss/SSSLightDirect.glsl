@@ -4,7 +4,7 @@
 #include "ReflectionLobe.glsl"
 #include "./SSSFunction.glsl"
 
-void surfaceShadingSSS(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 lightColor, inout vec3 color) {
+void surfaceShadingSSS(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 lightColor, inout vec3 totalDiffuseColor, inout vec3 totalSpecularColor) {
 
     vec3 diffuseColor = vec3(0);
     vec3 specularColor = vec3(0);
@@ -31,7 +31,9 @@ void surfaceShadingSSS(Varyings varyings, SurfaceData surfaceData, BRDFData brdf
     if(surfaceData.dotNV > EPSILON){
         specularLobe(varyings, surfaceData, brdfData, incidentDirection, attenuationIrradiance, specularColor);
     }
-    color += diffuseColor + specularColor;
+
+    totalDiffuseColor += diffuseColor;
+    totalSpecularColor += specularColor;
 }
 
 #include "LightDirectPBR.glsl"
