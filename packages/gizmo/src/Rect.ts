@@ -14,7 +14,10 @@ import {
   Ray,
   Renderer,
   SkinnedMeshRenderer,
+  SpriteMask,
+  SpriteRenderer,
   SubMesh,
+  TextRenderer,
   Transform,
   Vector2,
   Vector3
@@ -1635,6 +1638,23 @@ export class RectControl extends GizmoComponent {
       } else {
         return false;
       }
+    } else if (renderer instanceof SpriteRenderer || renderer instanceof SpriteMask) {
+      const { min: tempMin, max: tempMax } = out;
+      const { width, height } = renderer;
+      const sprite = renderer.sprite;
+      let pivotX = sprite?.pivot.x || 0.5;
+      let pivotY = sprite?.pivot.y || 0.5;
+      tempMin.set(-width * pivotX, -height * pivotY, 0);
+      tempMax.set(width * (1 - pivotX), height * (1 - pivotY), 0);
+      return true;
+    } else if (renderer instanceof TextRenderer) {
+      const { min: tempMin, max: tempMax } = out;
+      const { width, height } = renderer;
+      const pivotX = 0.5;
+      const pivotY = 0.5;
+      tempMin.set(-width * pivotX, -height * pivotY, 0);
+      tempMax.set(width * (1 - pivotX), height * (1 - pivotY), 0);
+      return true;
     } else if (renderer instanceof ParticleRenderer) {
       return false;
     }
