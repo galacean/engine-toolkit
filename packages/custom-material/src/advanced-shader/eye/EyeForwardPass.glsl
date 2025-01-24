@@ -76,7 +76,7 @@ void PBRFragment(Varyings varyings) {
   #ifdef RENDERER_HAS_TANGENT
    mat3 tbn = mat3(surfaceData.tangent, surfaceData.bitangent, surfaceData.normal);
   #else
-   mat3 tbn = getTBNByDerivatives(aoUV, normal, varyings.positionWS, gl_FrontFacing);
+   mat3 tbn = getTBNByDerivatives(aoUV, surfaceData.normal, varyings.positionWS, gl_FrontFacing);
   #endif
 
   // Modify surfaceData by eye algorithm
