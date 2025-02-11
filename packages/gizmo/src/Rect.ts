@@ -47,6 +47,7 @@ export class RectControl extends GizmoComponent {
   private static _vec32: Vector3 = new Vector3();
   private static _vec33: Vector3 = new Vector3();
 
+  private _startPriority = 99999999;
   // 当前操作的辅助线
   private _axisName: string = "";
   // 当前操作的平面
@@ -928,7 +929,7 @@ export class RectControl extends GizmoComponent {
     renderer.setMaterial(Utils.visibleMaterialRect);
     // Invisible Renderer (for pick)
     const pickRenderer = entity.addComponent(MeshRenderer);
-    pickRenderer.priority = 3;
+    pickRenderer.priority = 3 + this._startPriority;
     const pickMesh = PrimitiveMesh.createCylinder(engine, 0.2, 0.2, 1);
     pickRenderer.mesh = pickMesh;
     pickRenderer.setMaterial(Utils.invisibleMaterialRect);
@@ -948,7 +949,7 @@ export class RectControl extends GizmoComponent {
     icon.registerIconToViewportCamera(this._camera);
     // Invisible Renderer (for pick)
     const pickRenderer = entity.addComponent(MeshRenderer);
-    pickRenderer.priority = 4;
+    pickRenderer.priority = 4 + this._startPriority;
     const pickMesh = PrimitiveMesh.createSphere(engine, this._pickRadius);
     pickRenderer.mesh = pickMesh;
     pickRenderer.setMaterial(Utils.invisibleMaterialRect);
@@ -958,7 +959,7 @@ export class RectControl extends GizmoComponent {
     rotateEntity.transform.position = rotatePointerLocalPosition;
     // Invisible Renderer (for pick)
     const rotatePickRenderer = rotateEntity.addComponent(MeshRenderer);
-    rotatePickRenderer.priority = 4;
+    rotatePickRenderer.priority = 4 + this._startPriority;
     const rotatePickMesh = PrimitiveMesh.createSphere(engine, this._pickRadius);
     rotatePickRenderer.mesh = rotatePickMesh;
     rotatePickRenderer.setMaterial(Utils.invisibleMaterialRect);
@@ -971,7 +972,7 @@ export class RectControl extends GizmoComponent {
     // Invisible Renderer (for pick)
     const pickRenderer = entity.addComponent(MeshRenderer);
     const pickMesh = PrimitiveMesh.createPlane(this.engine, 1, 1);
-    pickRenderer.priority = 2;
+    pickRenderer.priority = 2 + this._startPriority;
     pickRenderer.mesh = pickMesh;
     pickRenderer.setMaterial(Utils.invisibleMaterialRect);
     return entity;
@@ -988,7 +989,7 @@ export class RectControl extends GizmoComponent {
     icon.registerIconToViewportCamera(this._camera);
     // Invisible Renderer (for pick)
     const pickRenderer = entity.addComponent(MeshRenderer);
-    pickRenderer.priority = 1;
+    pickRenderer.priority = 1 + this._startPriority;
     const pickMesh = PrimitiveMesh.createSphere(engine, 0.5);
     pickRenderer.mesh = pickMesh;
     pickRenderer.setMaterial(Utils.invisibleMaterialRect);
@@ -998,7 +999,7 @@ export class RectControl extends GizmoComponent {
   private _createCenterPick(center: Entity): MeshRenderer {
     // Invisible Renderer (for pick)
     const pickRenderer = center.addComponent(MeshRenderer);
-    pickRenderer.priority = 10;
+    pickRenderer.priority = 10 + this._startPriority;
     const pickMesh = PrimitiveMesh.createSphere(center.engine, 0.5);
     pickRenderer.mesh = pickMesh;
     pickRenderer.setMaterial(Utils.invisibleMaterialRect);
@@ -1642,8 +1643,8 @@ export class RectControl extends GizmoComponent {
       const { min: tempMin, max: tempMax } = out;
       const { width, height } = renderer;
       const sprite = renderer.sprite;
-      let pivotX = sprite?.pivot.x || 0.5;
-      let pivotY = sprite?.pivot.y || 0.5;
+      let pivotX = sprite?.pivot.x ?? 0.5;
+      let pivotY = sprite?.pivot.y ?? 0.5;
       tempMin.set(-width * pivotX, -height * pivotY, 0);
       tempMax.set(width * (1 - pivotX), height * (1 - pivotY), 0);
       return true;
