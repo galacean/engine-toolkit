@@ -1,4 +1,4 @@
-import { BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Vector3 } from "@galacean/engine";
+import { BoolUpdateFlag, BoundingBox, Entity, Matrix, ParticleRenderer, Renderer, Vector3 } from "@galacean/engine";
 import { AnchorType, CoordinateType, SearchComponentType } from "./enums/GroupState";
 
 /**
@@ -33,7 +33,7 @@ export class Group {
   private static _tempBoundBox: BoundingBox = new BoundingBox();
 
   // @internal
-  _gizmoTransformDirty: boolean = true;
+  _transformFlag: BoolUpdateFlag = new BoolUpdateFlag();
 
   private _entities: Entity[] = [];
   private _listeners: { flagManager; fun: (entity: Entity) => void }[] = [];
@@ -243,7 +243,7 @@ export class Group {
    */
   setDirtyFlagTrue(flag: GroupDirtyFlag): void {
     this._dirtyFlag |= flag;
-    this._gizmoTransformDirty = true;
+    this._transformFlag.dispatch();
   }
 
   private _applyAdd(entity: Entity): void {
