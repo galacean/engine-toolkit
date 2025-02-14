@@ -116,7 +116,7 @@ export class SphereScript extends Script {
     }
   }
 
-  override onPointerDown(eventData: PointerEventData) {
+  override onPointerBeginDrag(eventData: PointerEventData) {
     this._disableComponent();
     this._recoverTextColor();
 
@@ -140,42 +140,34 @@ export class SphereScript extends Script {
     } else {
       this._startRadian = Math.acos(MathUtil.clamp(dot / radius, -1, 1));
     }
-
-    this._isTriggered = true;
     this._navigateCamera(eventData.pointer);
   }
 
   override onPointerDrag(eventData: PointerEventData) {
     this._navigateCamera(eventData.pointer);
-  }
 
-  override onPointerUp(eventData: PointerEventData) {
-    if (this._isTriggered) {
-      this._gizmoCamera.screenPointToRay(eventData.pointer.position, this._ray);
-      const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
-      if (!result) {
-        this._roundEntity.isActive = false;
-        this._xEntity.isActive = false;
-        this._yEntity.isActive = false;
-        this._zEntity.isActive = false;
-      }
+    this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
+    Matrix.lookAt(this._currentPos, this._target, this._upVec, this._tempMat);
+    this._tempMat.invert();
+    this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
 
-      this._isTriggered = false;
-      this._enableComponent();
-    }
-  }
-  override onUpdate() {
-    if (this._isTriggered) {
-      this._upVec.copyFrom(this._isBack ? this._bottomVec : this._topVec);
-      Matrix.lookAt(this._currentPos, this._target, this._upVec, this._tempMat);
-      this._tempMat.invert();
-      this._sceneCameraEntity.transform.worldMatrix = this._tempMat;
-    }
     SphereScript._tempMat.copyFrom(this._sceneCamera.viewMatrix);
     const { elements: ele } = SphereScript._tempMat;
     // ignore translate
     ele[12] = ele[13] = ele[14] = 0;
     this._directionEntity.transform.worldMatrix = SphereScript._tempMat;
+  }
+
+  override onPointerEndDrag(eventData: PointerEventData): void {
+    this._gizmoCamera.screenPointToRay(eventData.pointer.position, this._ray);
+    const result = this.engine.physicsManager.raycast(this._ray, Number.MAX_VALUE, Layer.Everything);
+    if (!result) {
+      this._roundEntity.isActive = false;
+      this._xEntity.isActive = false;
+      this._yEntity.isActive = false;
+      this._zEntity.isActive = false;
+    }
+    this._enableComponent();
   }
 
   // delta x translate to rotation around axis y

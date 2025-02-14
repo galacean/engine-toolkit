@@ -1,5 +1,7 @@
 import {
+  BoolUpdateFlag,
   Camera,
+  CameraModifyFlags,
   Component,
   Entity,
   Layer,
@@ -32,9 +34,6 @@ export class Gizmo extends Script {
 
   private _initialized = false;
   private _isStarted = false;
-  private _lastDistance: number = -1;
-  private _lastOrthoSize: number = -1;
-  private _lastIsOrtho: boolean = false;
 
   private _sceneCamera: Camera;
   private _layer: Layer;
@@ -55,15 +54,29 @@ export class Gizmo extends Script {
   private _type: State = null;
   private _scalar: number = 1;
 
+  private _cameraTransformFlag: BoolUpdateFlag;
+  private _cameraModifyDirtyFlag: number = 0;
+
   /**
    * initial scene camera & select group in gizmo
    */
   init(camera: Camera, group: Group) {
-    if (camera !== this._sceneCamera) {
+    const preCamera = this._sceneCamera;
+    if (camera !== preCamera) {
+      if (preCamera) {
+        this._cameraTransformFlag?.clearFromManagers();
+        this._cameraTransformFlag = null;
+        // @ts-ignore
+        preCamera._unRegisterModifyListener(this._onCameraModifyListener);
+      }
       if (camera) {
         this._group = group;
         this._sceneCamera = camera;
-        this._framebufferPicker = camera.entity.addComponent(FramebufferPicker);
+        const cameraEntity = camera.entity;
+        this._cameraTransformFlag = cameraEntity.registerWorldChangeFlag();
+        // @ts-ignore
+        camera._registerModifyListener(this._onCameraModifyListener);
+        this._framebufferPicker = cameraEntity.addComponent(FramebufferPicker);
         this._framebufferPicker.frameBufferSize = new Vector2(256, 256);
 
         this._controlMap.forEach((gizmoControl) => {
@@ -75,6 +88,14 @@ export class Gizmo extends Script {
         this._initialized = false;
       }
     }
+  }
+
+  /**
+   * 监听相机的属性改变
+   * @param flag - 相机属性标记
+   */
+  private _onCameraModifyListener(flag: CameraModifyFlags): void {
+    this._cameraModifyDirtyFlag |= flag;
   }
 
   /**
@@ -138,6 +159,8 @@ export class Gizmo extends Script {
       throw new Error("PhysicsManager is not initialized");
     }
 
+    this._onCameraModifyListener = this._onCameraModifyListener.bind(this);
+
     Utils.init(this.engine);
 
     // setup mesh
@@ -159,21 +182,28 @@ export class Gizmo extends Script {
     const pointer = pointers.find((pointer: Pointer) => {
       return pointer.phase !== PointerPhase.Up && pointer.phase !== PointerPhase.Leave;
     });
-
-    if (this._lastIsOrtho !== this._sceneCamera.isOrthographic) {
-      this._lastIsOrtho = this._sceneCamera.isOrthographic;
+    const isAll = this._type === State.all;
+    const groupTransformFlag = this._group._transformFlag;
+    const cameraTransformFlag = this._cameraTransformFlag;
+    const cameraModifyDirtyFlag = this._cameraModifyDirtyFlag;
+    if (cameraModifyDirtyFlag & CameraModifyFlags.ProjectionType) {
       this._traverseControl(this._type, (control) => {
-        this._type === State.all ? control.onSwitch(true) : control.onSwitch(false);
+        control.onSwitch(isAll);
       });
     }
-    this._group.getWorldPosition(this._tempVec30);
+    if (
+      groupTransformFlag.flag ||
+      cameraTransformFlag.flag ||
+      (cameraModifyDirtyFlag & CameraModifyFlags.OrthographicSize && this._sceneCamera.isOrthographic)
+    ) {
+      this._traverseControl(this._type, (control) => {
+        control.onUpdate(isAll);
+      });
+      groupTransformFlag.flag = false;
+      cameraTransformFlag.flag = false;
+    }
+    this._cameraModifyDirtyFlag = 0;
     if (this._isStarted) {
-      if (this._group._gizmoTransformDirty) {
-        this._traverseControl(this._type, (control) => {
-          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
-        });
-        this._group._gizmoTransformDirty = false;
-      }
       if (pointer && (pointer.pressedButtons & PointerButton.Primary) !== 0) {
         if (pointer.deltaPosition.x !== 0 || pointer.deltaPosition.y !== 0) {
           this._triggerGizmoMove();
@@ -182,31 +212,6 @@ export class Gizmo extends Script {
         this._triggerGizmoEnd();
       }
     } else {
-      this._group.getWorldPosition(this._tempVec30);
-
-      const cameraPosition = this._sceneCamera.entity.transform.worldPosition;
-      const currDistance = Vector3.distance(cameraPosition, this._tempVec30);
-      let distanceDirty = false;
-      if (Math.abs(this._lastDistance - currDistance) > MathUtil.zeroTolerance) {
-        distanceDirty = true;
-        this._lastDistance = currDistance;
-      }
-
-      let orthoSizeDirty = false;
-      if (
-        this._sceneCamera.isOrthographic &&
-        Math.abs(this._lastOrthoSize - this._sceneCamera.orthographicSize) > MathUtil.zeroTolerance
-      ) {
-        orthoSizeDirty = true;
-        this._lastOrthoSize = this._sceneCamera.orthographicSize;
-      }
-
-      if (this._group._gizmoTransformDirty || distanceDirty || orthoSizeDirty) {
-        this._traverseControl(this._type, (control) => {
-          this._type === State.all ? control.onUpdate(true) : control.onUpdate(false);
-        });
-        this._group._gizmoTransformDirty = false;
-      }
       if (pointer) {
         const { x, y } = pointer.position;
         const { canvas } = this.engine;
@@ -222,7 +227,6 @@ export class Gizmo extends Script {
         } else {
           const originLayer = this._sceneCamera.cullingMask;
           this._sceneCamera.cullingMask = this._layer;
-
           const result = this._framebufferPicker.pick(pointer.position.x, pointer.position.y);
           this._sceneCamera.cullingMask = originLayer;
           result.then((result) => {
