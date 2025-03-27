@@ -45,9 +45,6 @@ vec3 calculateEyeColor(Varyings varyings, mat3 tbn, SurfaceData surfaceData)
   #ifdef MATERIAL_HAS_SCLERA_TEXTURE  
    vec4 scleraColor = texture2D(material_ScleraTexture, scleraUV);
    scleraColor *= material_ScleraColor;
-  #ifndef ENGINE_IS_COLORSPACE_GAMMA
-   scleraColor = gammaToLinear(scleraColor);
-  #endif
   #else
    vec4 scleraColor = vec4(1.0);
   #endif
@@ -88,9 +85,6 @@ vec3 calculateEyeColor(Varyings varyings, mat3 tbn, SurfaceData surfaceData)
   vec4 parallax = vec4(0.0);
   #ifdef MATERIAL_HAS_IRIS_TEXTURE
    parallax = texture2D(material_IrisTexture, pupilUV - offset);
-  #ifndef ENGINE_IS_COLORSPACE_GAMMA
-   parallax = gammaToLinear(parallax);
-  #endif
    parallax.rgb *= material_IrisColor.rgb;
   #endif
 

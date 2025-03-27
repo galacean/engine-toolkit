@@ -156,6 +156,7 @@ void main() {
 }`,
 
   `
+#include <common>
 #include <transform_declare>
 
 uniform float u_far;
@@ -215,6 +216,10 @@ void main() {
     // adding multiple resolution for the grid
     gl_FragColor = (grid(fragPos3D, u_primaryScale, u_fade) + grid(fragPos3D, u_secondaryScale, 1.0 - u_fade));
     gl_FragColor.a *= fading;
+
+    gl_FragColor = gammaToLinear(gl_FragColor);
+
+    gl_FragColor = outputTransform(gl_FragColor);
 }
 `
 );
