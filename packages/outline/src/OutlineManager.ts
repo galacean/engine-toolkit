@@ -64,6 +64,7 @@ export class OutlineManager extends Script {
   private _layerMap: Array<{ entity: Entity; layer: Layer }> = [];
   private _cameraViewport: Vector4 = new Vector4();
   private _outLineViewport: Vector4 = new Vector4(0, 0, 1, 1);
+  private _tempColor = new Color();
 
   /**
    * Outline layer, default Layer29.
@@ -193,7 +194,7 @@ export class OutlineManager extends Script {
     const originalClearFlags = camera.clearFlags;
     const originalCullingMask = camera.cullingMask;
     const originalEnableFrustumCulling = camera.enableFrustumCulling;
-    const originalSolidColor = scene.background.solidColor;
+    const originalSolidColor = scene.background.solidColor.copyTo(this._tempColor);
     const originalBackgroundMode = scene.background.mode;
 
     const originalRenderTarget = camera.renderTarget;
