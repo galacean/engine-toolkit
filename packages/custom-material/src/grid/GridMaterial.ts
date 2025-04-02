@@ -217,7 +217,7 @@ void main() {
     gl_FragColor = (grid(fragPos3D, u_primaryScale, u_fade) + grid(fragPos3D, u_secondaryScale, 1.0 - u_fade));
     gl_FragColor.a *= fading;
 
-    gl_FragColor = gammaToLinear(gl_FragColor);
+    gl_FragColor = sRGBToLinear(gl_FragColor);
 
     gl_FragColor = outputTransform(gl_FragColor);
 }
