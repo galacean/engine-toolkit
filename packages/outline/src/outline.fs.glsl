@@ -74,6 +74,6 @@ void main(){
   // float sobelFactor = sobel();
   gl_FragColor = mix( vec4(0), vec4(material_OutlineColor, 1.0), sobelFactor);
 
-  gl_FragColor = outputTransform(gl_FragColor);
+  gl_FragColor = outputSRGBCorrection(gl_FragColor);
 
 }
