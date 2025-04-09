@@ -98,7 +98,7 @@ export class FramebufferPicker extends Script {
         engine,
         size.x,
         size.y,
-        new Texture2D(engine, size.x, size.y, TextureFormat.R8G8B8A8, false)
+        new Texture2D(engine, size.x, size.y, TextureFormat.R8G8B8A8, false, false)
       );
     }
   }

@@ -99,7 +99,7 @@ void main() {
         }
     #endif
 
-    gl_FragColor = baseColor;
+    gl_FragColor = outputSRGBCorrection(baseColor);
 }
 `
 );
