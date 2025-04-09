@@ -194,7 +194,7 @@ export class OutlineManager extends Script {
     const originalClearFlags = camera.clearFlags;
     const originalCullingMask = camera.cullingMask;
     const originalEnableFrustumCulling = camera.enableFrustumCulling;
-    const originalSolidColor = scene.background.solidColor.copyTo(this._tempColor);
+    const originalSolidColor = scene.background.solidColor.copyTo(this._tempColor) as Color;
     const originalBackgroundMode = scene.background.mode;
 
     const originalRenderTarget = camera.renderTarget;
