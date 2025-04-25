@@ -89,7 +89,6 @@ void main() {
         
     #include <FogFragment>
         
-    gl_FragColor = outputSRGBCorrection(gl_FragColor);
 
 }
 `;

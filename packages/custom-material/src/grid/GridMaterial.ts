@@ -219,7 +219,6 @@ void main() {
 
     gl_FragColor = sRGBToLinear(gl_FragColor);
 
-    gl_FragColor = outputSRGBCorrection(gl_FragColor);
 }
 `
 );

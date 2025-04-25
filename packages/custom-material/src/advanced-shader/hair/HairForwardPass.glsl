@@ -103,7 +103,7 @@ void PBRFragment(Varyings varyings) {
       color = fog(color, varyings.positionVS);
   #endif
 
-  gl_FragColor = outputSRGBCorrection(color);
+  gl_FragColor = color;
 }
 
 #endif
