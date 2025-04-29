@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-custom-material",
-  "version": "1.5.0-beta.0",
+  "version": "1.5.0-alpha.0",
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
