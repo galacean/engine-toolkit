@@ -1,13 +1,16 @@
 import {
+  AntiAliasing,
   BackgroundMode,
   BaseMaterial,
   Camera,
   CameraClearFlags,
   Color,
+  CullMode,
   DependentMode,
   DepthTextureMode,
   Entity,
   Layer,
+  MSAASamples,
   MeshRenderer,
   PrimitiveMesh,
   RenderTarget,
@@ -202,6 +205,8 @@ export class OutlineManager extends Script {
     const originalHDR = camera.enableHDR;
     const originalDepthMode = camera.depthTextureMode;
     const originalOpaqueTextureEnabled = camera.opaqueTextureEnabled;
+    const originalAntiAliasing = camera.antiAliasing;
+    const orignalMSAASamples = camera.msaaSamples;
 
     const renderers = this._renderers;
     const layerMap = this._layerMap;
@@ -238,6 +243,8 @@ export class OutlineManager extends Script {
     camera.enableHDR = false;
     camera.depthTextureMode = DepthTextureMode.None;
     camera.opaqueTextureEnabled = false;
+    camera.antiAliasing = AntiAliasing.None;
+    camera.msaaSamples = MSAASamples.None;
 
     camera.render();
 
@@ -273,6 +280,8 @@ export class OutlineManager extends Script {
     camera.enableHDR = originalHDR;
     camera.depthTextureMode = originalDepthMode;
     camera.opaqueTextureEnabled = originalOpaqueTextureEnabled;
+    camera.antiAliasing = originalAntiAliasing;
+    camera.msaaSamples = orignalMSAASamples;
   }
 
   private _calSublineEntites() {
