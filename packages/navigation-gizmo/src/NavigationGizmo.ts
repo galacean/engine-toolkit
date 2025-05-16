@@ -7,6 +7,7 @@ import {
   FontStyle,
   Layer,
   Material,
+  Matrix,
   MeshRenderer,
   Script,
   SphereColliderShape,
@@ -28,11 +29,14 @@ function traverseEntity(entity: Entity, callback: (entity: Entity) => any) {
 }
 
 export class NavigationGizmo extends Script {
+  private static _tempMat: Matrix = new Matrix();
+
   private _sceneCamera: Camera;
   private _gizmoLayer: Layer = Layer.Layer30;
 
   private _gizmoCamera: Camera;
   private _gizmoEntity: Entity;
+  private _directionEntity: Entity;
   private _utils: Utils;
   private _target: Vector3 = new Vector3();
 
@@ -152,12 +156,19 @@ export class NavigationGizmo extends Script {
 
   override onUpdate() {
     this._gizmoCamera.viewport.set(this.position.x, this.position.y, this.size.x, this.size.y);
+
+    const matrix = NavigationGizmo._tempMat
+    matrix.copyFrom(this._sceneCamera.viewMatrix);
+    const { elements: ele } = matrix;
+    // ignore translate
+    ele[12] = ele[13] = ele[14] = 0;
+    this._directionEntity.transform.worldMatrix = matrix;
   }
 
   private _createGizmo() {
     const utils = this._utils;
     // setup gizmo shape
-    const directionEntity = this._gizmoEntity.createChild("direction");
+    const directionEntity = this._directionEntity = this._gizmoEntity.createChild("direction");
     const axisEntity = directionEntity.createChild("axis");
 
     // axis
@@ -272,7 +283,6 @@ export class NavigationGizmo extends Script {
   }
 
   private _setTarget(): void {
-    this._sphereScript.target.copyFrom(this._target);
     Object.keys(this._endScript).forEach((key) => {
       this._endScript[key].target.copyFrom(this._target);
     });
