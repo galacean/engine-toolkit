@@ -71,9 +71,7 @@ export class Core {
 
     let data: PerformanceData = {
       fps: Math.round((this.updateCounter * 1000) / (now - this.updateTime)),
-      memory:
-        performance.memory &&
-        (performance.memory.usedJSHeapSize / 1048576) >> 0,
+      memory: performance.memory && (performance.memory.usedJSHeapSize / 1048576) >> 0,
       drawCall: this.drawCallHook.drawCall,
       triangles: this.drawCallHook.triangles,
       lines: this.drawCallHook.lines,
@@ -82,10 +80,7 @@ export class Core {
       size: this.requestHook.size,
       shaders: this.shaderHook.shaders,
       webglContext:
-        window.hasOwnProperty("WebGL2RenderingContext") &&
-        this.gl instanceof WebGL2RenderingContext
-          ? "2.0"
-          : "1.0",
+        window.hasOwnProperty("WebGL2RenderingContext") && this.gl instanceof WebGL2RenderingContext ? "2.0" : "1.0"
     };
 
     this.reset();

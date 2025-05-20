@@ -73,7 +73,6 @@ export class NavigationGizmo extends Script {
     if (sceneCamera !== camera) {
       if (camera) {
         sceneCamera = this._sceneCamera = camera;
-        this._sphereScript.camera = camera;
         Object.keys(this._endScript).forEach((key) => {
           this._endScript[key].camera = camera;
         });
@@ -157,7 +156,7 @@ export class NavigationGizmo extends Script {
   override onUpdate() {
     this._gizmoCamera.viewport.set(this.position.x, this.position.y, this.size.x, this.size.y);
 
-    const matrix = NavigationGizmo._tempMat
+    const matrix = NavigationGizmo._tempMat;
     matrix.copyFrom(this._sceneCamera.viewMatrix);
     const { elements: ele } = matrix;
     // ignore translate
@@ -168,7 +167,7 @@ export class NavigationGizmo extends Script {
   private _createGizmo() {
     const utils = this._utils;
     // setup gizmo shape
-    const directionEntity = this._directionEntity = this._gizmoEntity.createChild("direction");
+    const directionEntity = (this._directionEntity = this._gizmoEntity.createChild("direction"));
     const axisEntity = directionEntity.createChild("axis");
 
     // axis
