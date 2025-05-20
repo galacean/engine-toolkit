@@ -10,4 +10,3 @@ export { ControlFreePointer } from "./inputDevice/ControlFreePointer";
 export { ControlHandlerType } from "./enums/ControlHandlerType";
 
 export type { IControlInput } from "./inputDevice/IControlInput";
-

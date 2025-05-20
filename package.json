@@ -74,7 +74,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@galacean/engine": "^1.4.0"
+      "@galacean/engine": "1.5.0-alpha.1"
     }
   }
 }

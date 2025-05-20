@@ -1,10 +1,8 @@
-
 let requestSize = 0;
 
 export function hookRequest() {
-
   let originalSend = XMLHttpRequest.prototype.send;
-  
+
   const cacheMap = new Map<string, number>();
   function addRequestSize(url: string, size: number) {
     if (cacheMap.get(url) == undefined) {
@@ -12,7 +10,7 @@ export function hookRequest() {
       requestSize += size;
     }
   }
-  
+
   XMLHttpRequest.prototype.send = function (body) {
     this.addEventListener(
       "load",
@@ -27,21 +25,18 @@ export function hookRequest() {
         } else if (this.responseType === "json") {
           size = new Blob([JSON.stringify(this.response)]).size;
         }
-  
+
         addRequestSize((this as XMLHttpRequest).responseURL, size);
       },
       false
     );
-  
+
     originalSend.call(this, body);
-  
-    var originalImageSrc = Object.getOwnPropertyDescriptor(
-      Image.prototype,
-      "src"
-    ).set;
-  
+
+    var originalImageSrc = Object.getOwnPropertyDescriptor(Image.prototype, "src").set;
+
     this.originalImageSrc = originalImageSrc;
-  
+
     Object.defineProperty(Image.prototype, "src", {
       set: function (value) {
         fetch(value).then((response) => {
@@ -52,11 +47,10 @@ export function hookRequest() {
           }
         });
         originalImageSrc.call(this, value);
-      },
+      }
     });
   };
 }
-
 
 export class RequestHook {
   private _originalSend;
@@ -80,7 +74,7 @@ export class RequestHook {
       Object.defineProperty(Image.prototype, "src", {
         set: function (value) {
           this.src.call(this, value);
-        },
+        }
       });
     }
     this._hooked = false;
@@ -88,7 +82,5 @@ export class RequestHook {
 }
 
 function formatNumber(num: number): string {
-  return Number(num).toFixed(
-    Math.max(6 - num.toString().split(".")[0].length, 0)
-  );
+  return Number(num).toFixed(Math.max(6 - num.toString().split(".")[0].length, 0));
 }

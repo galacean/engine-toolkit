@@ -13,7 +13,7 @@ import {
   WebGLEngine,
   Vector2
 } from "@galacean/engine";
-import { BoxSelectionComponent } from './BoxSelectionComponent';
+import { BoxSelectionComponent } from "./BoxSelectionComponent";
 import { BoxSelectionSSHelper } from "./BoxSelectionSSHelper";
 import { IBoxSelectionHelper } from "./types";
 
@@ -65,20 +65,20 @@ export class BoxSelectionControls extends Script {
     }
     const canvas = this.engine.canvas;
     if (this.input.isPointerDown(PointerButton.Primary)) {
-      const x = p.position.x / canvas.width * 2 - 1;
-      const y = 1 - p.position.y / canvas.height * 2;
+      const x = (p.position.x / canvas.width) * 2 - 1;
+      const y = 1 - (p.position.y / canvas.height) * 2;
       this.startPoint.set(x, y);
       this.helper?.onSelectStart(p.position);
     }
     if (this.input.isPointerUp(PointerButton.Primary)) {
-      const x = p.position.x / canvas.width * 2 - 1;
-      const y = 1 - p.position.y / canvas.height * 2;
+      const x = (p.position.x / canvas.width) * 2 - 1;
+      const y = 1 - (p.position.y / canvas.height) * 2;
       this.endPoint.set(x, y);
       this.helper?.onSelectEnd(p.position);
     }
     if (this.input.isPointerHeldDown(PointerButton.Primary)) {
-      const x = p.position.x / canvas.width * 2 - 1;
-      const y = 1 - p.position.y / canvas.height * 2;
+      const x = (p.position.x / canvas.width) * 2 - 1;
+      const y = 1 - (p.position.y / canvas.height) * 2;
       this.endPoint.set(x, y);
       this.select();
       this.helper?.onSelecting(p.position);
@@ -151,10 +151,10 @@ export class BoxSelectionControls extends Script {
       const right = Math.max(startPoint.x, endPoint.x);
       const down = Math.min(startPoint.y, endPoint.y);
 
-      _vecTopLeft.set(left, top, - 1);
-      _vecTopRight.set(right, top, - 1);
-      _vecDownRight.set(right, down, - 1);
-      _vecDownLeft.set(left, down, - 1);
+      _vecTopLeft.set(left, top, -1);
+      _vecTopRight.set(right, top, -1);
+      _vecDownRight.set(right, down, -1);
+      _vecDownLeft.set(left, down, -1);
 
       _vecFarTopLeft.set(left, top, 1);
       _vecFarTopRight.set(right, top, 1);
