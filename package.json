@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-root",
-  "version": "1.5.0-alpha.1",
+  "version": "1.5.0",
   "packageManager": "pnpm@9.3.0",
   "private": true,
   "workspaces": [
@@ -74,7 +74,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@galacean/engine": "1.5.0-alpha.1"
+      "@galacean/engine": "^1.5.0"
     }
   }
 }
