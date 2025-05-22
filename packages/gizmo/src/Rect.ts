@@ -58,10 +58,14 @@ export class RectControl extends GizmoComponent {
   private _pickRadius: number = 0.4;
   // 是否锁定平面
   private _lockPlane: boolean = false;
+  // 本帧光标格式
+  private _cursorType: string = "default";
 
   private _group: Group;
   private _camera: Camera;
   private _bounds: BoundingBox = new BoundingBox();
+  private _tempBounds: BoundingBox = new BoundingBox();
+  private _tempMatrix: Matrix = new Matrix();
 
   // ------- XoY 平面开始 -------
   private _XoY: Entity;
@@ -331,6 +335,7 @@ export class RectControl extends GizmoComponent {
       default:
         break;
     }
+    this.engine.dispatch("RectCursorChange", this._cursorType);
   }
 
   private _onHoverVertexStart(axisName: string): void {
@@ -399,15 +404,15 @@ export class RectControl extends GizmoComponent {
   }
 
   private _onHoverPlaneStart(): void {
-    this._engine.dispatch("RectCursorChange", "move");
+    this._cursorType = "move";
   }
 
   private _onHoverRotateStart(): void {
-    this._engine.dispatch("RectCursorChange", "alias");
+    this._cursorType = "alias";
   }
 
   private _onHoverCenterStart(): void {
-    this._engine.dispatch("RectCursorChange", "cell");
+    this._cursorType = "cell";
   }
 
   private _onHoverSideStart(axisName: string): void {
@@ -458,21 +463,21 @@ export class RectControl extends GizmoComponent {
     this._camera.worldToScreenPoint(point2, point2);
     const value = Math.atan2(point2.y - point1.y, point2.x - point1.x) / Math.PI;
     if (value > 0.94 || value <= -0.94) {
-      this._engine.dispatch("RectCursorChange", "ew-resize");
+      this._cursorType = "ew-resize";
     } else if (value > -0.94 && value <= -0.56) {
-      this._engine.dispatch("RectCursorChange", "nwse-resize");
+      this._cursorType = "nwse-resize";
     } else if (value > -0.56 && value <= -0.44) {
-      this._engine.dispatch("RectCursorChange", "ns-resize");
+      this._cursorType = "ns-resize";
     } else if (value > -0.44 && value <= -0.06) {
-      this._engine.dispatch("RectCursorChange", "nesw-resize");
+      this._cursorType = "nesw-resize";
     } else if (value > -0.06 && value <= 0.06) {
-      this._engine.dispatch("RectCursorChange", "ew-resize");
+      this._cursorType = "ew-resize";
     } else if (value > 0.06 && value <= 0.44) {
-      this._engine.dispatch("RectCursorChange", "nwse-resize");
+      this._cursorType = "nwse-resize";
     } else if (value > 0.44 && value <= 0.56) {
-      this._engine.dispatch("RectCursorChange", "ns-resize");
+      this._cursorType = "ns-resize";
     } else if (value > 0.56 && value <= 0.94) {
-      this._engine.dispatch("RectCursorChange", "nesw-resize");
+      this._cursorType = "nesw-resize";
     }
   }
 
@@ -480,8 +485,9 @@ export class RectControl extends GizmoComponent {
   onHoverEnd(): void {
     // @ts-ignore
     if (!this.entity.parent.getComponent(Gizmo)._isStarted) {
-      this._engine.dispatch("RectCursorChange", "default");
+      this._cursorType = "default";
     }
+    this.engine.dispatch("RectCursorChange", this._cursorType);
   }
 
   /** Called when gizmo starts to move.*/
@@ -1630,7 +1636,19 @@ export class RectControl extends GizmoComponent {
 
   private _getLocalBoundsByRenderer(renderer: Renderer, out: BoundingBox): boolean {
     if (renderer instanceof SkinnedMeshRenderer) {
-      out.copyFrom(renderer.localBounds);
+      const rootBone = renderer.rootBone;
+      const localBounds = renderer.localBounds;
+      if (rootBone) {
+        const rootBoneWorldMatrix = rootBone.transform.worldMatrix;
+        const tempBounds = this._tempBounds;
+        BoundingBox.transform(localBounds, rootBoneWorldMatrix, tempBounds);
+        const invMatrix = this._tempMatrix;
+        Matrix.invert(renderer.entity.transform.worldMatrix, invMatrix);
+        tempBounds.transform(invMatrix);
+        out.copyFrom(tempBounds);
+      } else {
+        out.copyFrom(renderer.localBounds);
+      }
       return true;
     } else if (renderer instanceof MeshRenderer) {
       if (renderer.mesh) {
@@ -1649,12 +1667,8 @@ export class RectControl extends GizmoComponent {
       tempMax.set(width * (1 - pivotX), height * (1 - pivotY), 0);
       return true;
     } else if (renderer instanceof TextRenderer) {
-      const { min: tempMin, max: tempMax } = out;
-      const { width, height } = renderer;
-      const pivotX = 0.5;
-      const pivotY = 0.5;
-      tempMin.set(-width * pivotX, -height * pivotY, 0);
-      tempMax.set(width * (1 - pivotX), height * (1 - pivotY), 0);
+      // @ts-ignore
+      out.copyFrom(renderer._localBounds);
       return true;
     } else if (renderer instanceof ParticleRenderer) {
       return false;
