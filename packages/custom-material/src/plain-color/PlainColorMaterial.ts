@@ -62,7 +62,7 @@ void main() {
 uniform vec4 material_BaseColor;
 
 void main() {
-     vec4 baseColor = material_BaseColor;
+    vec4 baseColor = material_BaseColor;
 
     #ifdef MATERIAL_IS_ALPHA_CUTOFF
         if( baseColor.a < material_AlphaCutoff ) {
@@ -71,10 +71,6 @@ void main() {
     #endif
 
     gl_FragColor = baseColor;
-
-     #ifndef ENGINE_IS_COLORSPACE_GAMMA
-        gl_FragColor = linearToGamma(gl_FragColor);
-    #endif
 }
 `
 );

@@ -1,3 +1,4 @@
+#include <common>
 uniform vec3 material_OutlineColor;
 uniform sampler2D material_OutlineTexture;
 uniform vec2 material_TexSize;
@@ -66,17 +67,10 @@ float sobel() {
   return abs(edgeX) + abs(edgeY);
 }
 
-vec4 linearToGamma(vec4 linearIn){
-    return vec4( pow(linearIn.rgb, vec3(1.0 / 2.2)), linearIn.a);
-}
+
 
 void main(){
   float sobelFactor = step(1.0, sobel());
   // float sobelFactor = sobel();
   gl_FragColor = mix( vec4(0), vec4(material_OutlineColor, 1.0), sobelFactor);
-
-    #ifndef ENGINE_IS_COLORSPACE_GAMMA
-        gl_FragColor = linearToGamma(gl_FragColor);
-    #endif
-
 }

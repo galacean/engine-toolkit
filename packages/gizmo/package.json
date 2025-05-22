@@ -1,6 +1,6 @@
 {
   "name": "@galacean/engine-toolkit-gizmo",
-  "version": "1.4.3",
+  "version": "1.5.0-alpha.1",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -24,8 +24,8 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "@galacean/engine": "^1.4.0",
-    "@galacean/engine-ui": "1.4.0"
+    "@galacean/engine": "1.5.0-alpha.1",
+    "@galacean/engine-ui": "1.5.0-alpha.1"
   },
   "dependencies": {
     "@galacean/engine-toolkit-framebuffer-picker": "workspace:*",

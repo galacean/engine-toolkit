@@ -74,9 +74,6 @@ void main() {
     vec3 emissiveRadiance = material_EmissiveColor;
     #ifdef MATERIAL_HAS_EMISSIVETEXTURE
         vec4 emissiveColor = texture2D(material_EmissiveTexture, v_uv);
-        #ifndef ENGINE_IS_COLORSPACE_GAMMA
-            emissiveColor = gammaToLinear(emissiveColor);
-        #endif
         emissiveRadiance *= emissiveColor.rgb;
     #endif
         
@@ -92,9 +89,6 @@ void main() {
         
     #include <FogFragment>
         
-    #ifndef ENGINE_IS_COLORSPACE_GAMMA
-        gl_FragColor = linearToGamma(gl_FragColor);
-    #endif
 
 }
 `;

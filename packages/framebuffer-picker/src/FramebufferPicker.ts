@@ -1,9 +1,11 @@
 import {
+  AntiAliasing,
   Camera,
   dependentComponents,
   DependentMode,
   DepthTextureMode,
   Logger,
+  MSAASamples,
   Renderer,
   RenderTarget,
   Scene,
@@ -98,7 +100,7 @@ export class FramebufferPicker extends Script {
         engine,
         size.x,
         size.y,
-        new Texture2D(engine, size.x, size.y, TextureFormat.R8G8B8A8, false)
+        new Texture2D(engine, size.x, size.y, TextureFormat.R8G8B8A8, false, false)
       );
     }
   }
@@ -141,6 +143,8 @@ export class FramebufferPicker extends Script {
     const originalHDR = camera.enableHDR;
     const originalDepthMode = camera.depthTextureMode;
     const originalOpaqueTextureEnabled = camera.opaqueTextureEnabled;
+    const originalAntiAliasing = camera.antiAliasing;
+    const orignalMSAASamples = camera.msaaSamples;
 
     this._updateRenderersPickColor(camera.scene);
     // Prepare render target and shader
@@ -155,6 +159,8 @@ export class FramebufferPicker extends Script {
     camera.enableHDR = false;
     camera.depthTextureMode = DepthTextureMode.None;
     camera.opaqueTextureEnabled = false;
+    camera.antiAliasing = AntiAliasing.None;
+    camera.msaaSamples = MSAASamples.None;
 
     camera.render();
 
@@ -168,6 +174,8 @@ export class FramebufferPicker extends Script {
     camera.enableHDR = originalHDR;
     camera.depthTextureMode = originalDepthMode;
     camera.opaqueTextureEnabled = originalOpaqueTextureEnabled;
+    camera.antiAliasing = originalAntiAliasing;
+    camera.msaaSamples = orignalMSAASamples;
   }
 
   private _readPixelFromRenderTarget(x: number, y: number, xEnd?: number, yEnd?: number): Uint8Array {

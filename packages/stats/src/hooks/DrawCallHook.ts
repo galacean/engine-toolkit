@@ -1,4 +1,4 @@
-import { log, errorLog } from "../log";
+import { errorLog, log } from "../log";
 
 /**
  * @class DrawCallHook
@@ -53,7 +53,10 @@ export default class DrawCallHook {
   }
 
   private hasInstancedFunction(gl: WebGLRenderingContext | WebGL2RenderingContext): boolean {
-    return (gl instanceof WebGL2RenderingContext || ((gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced")));
+    return (
+      gl instanceof WebGL2RenderingContext ||
+      ((gl as any).hasOwnProperty("drawElementsInstanced") && (gl as any).hasOwnProperty("drawArraysInstanced"))
+    );
   }
 
   private hookedDrawElements(mode: number, count: number, type: number, offset: number): void {
@@ -66,7 +69,13 @@ export default class DrawCallHook {
     this.update(count, mode);
   }
 
-  private hookedDrawElementsInstanced(mode: number, count: number, type: number, offset: number, primcount: number): void {
+  private hookedDrawElementsInstanced(
+    mode: number,
+    count: number,
+    type: number,
+    offset: number,
+    primcount: number
+  ): void {
     this.realDrawElementsInstanced.call(this.gl, mode, count, type, offset, primcount);
     this.update(count, mode);
   }

@@ -17,12 +17,12 @@ export class Tween<T extends Interpolation> extends Script {
   public static readonly Easing = Easing;
 
   public static readonly Events = {
-    PAUSE: 'pause',
-    START: 'start',
-    END: 'end',
-    RESUME: 'resume',
-    LOOP: 'loop'
-  }
+    PAUSE: "pause",
+    START: "start",
+    END: "end",
+    RESUME: "resume",
+    LOOP: "loop"
+  };
 
   public static readonly State = {
     IDLE: "idle",
@@ -101,16 +101,19 @@ export class Tween<T extends Interpolation> extends Script {
     }
 
     if (v.constructor !== this._from?.constructor) {
-      throw new Error(`Cannot set type "${v.constructor.name}" to type "${this._from?.constructor.name ?? null}"`)
+      throw new Error(`Cannot set type "${v.constructor.name}" to type "${this._from?.constructor.name ?? null}"`);
     }
 
     this._from.copyFrom(v as any);
 
-    if (this.state === Tween.State.IDLE && this.target && (this.fillMode === Tween.FillMode.FORWARDS || this.fillMode === Tween.FillMode.BOTH)) {
+    if (
+      this.state === Tween.State.IDLE &&
+      this.target &&
+      (this.fillMode === Tween.FillMode.FORWARDS || this.fillMode === Tween.FillMode.BOTH)
+    ) {
       this.target.copyFrom(v as any);
     }
   }
-
 
   get to() {
     return this._to;
@@ -122,12 +125,16 @@ export class Tween<T extends Interpolation> extends Script {
     }
 
     if (v.constructor !== this._to?.constructor) {
-      throw new Error(`Cannot set type "${v.constructor.name}" to type "${this._to?.constructor.name ?? null}"`)
+      throw new Error(`Cannot set type "${v.constructor.name}" to type "${this._to?.constructor.name ?? null}"`);
     }
 
     this._to.copyFrom(v as any);
 
-    if (this.state === Tween.State.STOPPED && this.target && (this.fillMode === Tween.FillMode.BACKWARDS || this.fillMode === Tween.FillMode.BOTH)) {
+    if (
+      this.state === Tween.State.STOPPED &&
+      this.target &&
+      (this.fillMode === Tween.FillMode.BACKWARDS || this.fillMode === Tween.FillMode.BOTH)
+    ) {
       this.target.copyFrom(v as any);
     }
   }
@@ -168,7 +175,7 @@ export class Tween<T extends Interpolation> extends Script {
       if (this.fillMode === Tween.FillMode.NONE || this.fillMode === Tween.FillMode.FORWARDS) {
         target.copyFrom(this._oldValue as any);
       } else {
-        if (this.yoyo && (this.currentLoop & 1)) {
+        if (this.yoyo && this.currentLoop & 1) {
           target.copyFrom(this.from as any);
         } else {
           target.copyFrom(this.to as any);
@@ -184,7 +191,7 @@ export class Tween<T extends Interpolation> extends Script {
       }
     }
 
-    if (this.yoyo && (this.currentLoop & 1)) {
+    if (this.yoyo && this.currentLoop & 1) {
       (this._currentClass as any).lerp(this.from, this.to, this._easingFunc(1 - this.progress), target);
     } else {
       (this._currentClass as any).lerp(this.from, this.to, this._easingFunc(this.progress), target);
