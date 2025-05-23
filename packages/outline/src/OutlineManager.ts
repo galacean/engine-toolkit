@@ -57,8 +57,8 @@ export class OutlineManager extends Script {
   private _size: number = 1;
   private _clearColor: Color = new Color(1, 1, 1, 1);
   private _replaceColor: Color = new Color(1, 0, 0, 1);
-  private _outlineMainColor: Color = new Color(0.95, 0.35, 0.14, 1);
-  private _outlineSubColor: Color = new Color(0.16, 0.67, 0.89, 1);
+  private _outlineMainColor: Color = new Color(0.89, 0.10048150993772331, 0.017389102368488736, 1);
+  private _outlineSubColor: Color = new Color(0.021980947079887205, 0.40644830114675407, 0.7677687605549981, 1);
   private _layer: Layer = Layer.Layer29;
   private _outlineEntities: Entity[] = [];
   private _subLineEntities: Entity[] = [];
