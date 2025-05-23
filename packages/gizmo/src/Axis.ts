@@ -6,8 +6,8 @@ export class Axis extends Component {
   private _material: PlainColorMaterial;
   private _color: Color = new Color();
   private _highLightColor: Color = new Color();
-  private _yellowColor: Color = new Color(1.0, 0.95, 0.0, 1.0);
-  private _grayColor: Color = new Color(0.75, 0.75, 0.75, 0.6);
+  private _yellowColor: Color = new Color(1.0, 0.89, 0.0, 1.0);
+  private _grayColor: Color = new Color(0.5225215539683921, 0.5225215539683921, 0.5225215539683921, 0.6);
 
   constructor(entity: Entity) {
     super(entity);

@@ -34,17 +34,17 @@ export class Utils {
   constructor(engine: Engine) {
     const redMaterial = new PlainColorMaterial(engine);
     redMaterial.isTransparent = true;
-    redMaterial.baseColor.set(1.0, 0.25, 0.25, 1.0);
+    redMaterial.baseColor.set(1.0, 0.05087608817155679, 0.05087608817155679, 1.0);
     this.redMaterial = redMaterial;
 
     const greenMaterial = new PlainColorMaterial(engine);
     greenMaterial.isTransparent = true;
-    greenMaterial.baseColor.set(0.5, 0.8, 0.2, 1.0);
+    greenMaterial.baseColor.set(0.21404114048223255, 0.6038273388553378, 0.033104766570885055, 1.0);
     this.greenMaterial = greenMaterial;
 
     const blueMaterial = new PlainColorMaterial(engine);
     blueMaterial.isTransparent = true;
-    blueMaterial.baseColor.set(0.3, 0.5, 1.0, 1.0);
+    blueMaterial.baseColor.set(0.07323895587840543, 0.21404114048223255, 1.0, 1.0);
     this.blueMaterial = blueMaterial;
 
     const bgMaterial = new PlainColorMaterial(engine);
@@ -54,7 +54,7 @@ export class Utils {
 
     const greyMaterial = new PlainColorMaterial(engine);
     greyMaterial.isTransparent = true;
-    greyMaterial.baseColor.set(0.5, 0.5, 0.5, 1);
+    greyMaterial.baseColor.set(0.21404114048223255, 0.21404114048223255, 0.21404114048223255, 1);
     this.greyMaterial = greyMaterial;
 
     this.axisMesh = PrimitiveMesh.createCylinder(engine, 0.12, 0.12, this.axisLength);

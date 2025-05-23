@@ -30,9 +30,9 @@ export class SkeletonViewer extends Script {
   /** Skeleton Decrease Factor. */
   scaleFactor: number = 0.85;
   /** The min color.  */
-  colorMin: Color = new Color(0.35, 0.35, 0.35, 1);
+  colorMin: Color = new Color(0.10048150993772331, 0.10048150993772331, 0.10048150993772331, 1);
   /** The max color. */
-  colorMax: Color = new Color(0.7, 0.7, 0.7, 1);
+  colorMax: Color = new Color(0.44798841244188325, 0.44798841244188325, 0.44798841244188325, 1);
 
   private _debugMesh: MeshRenderer[] = [];
   private _material: Material;

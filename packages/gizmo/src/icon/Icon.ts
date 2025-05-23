@@ -40,9 +40,9 @@ export class Icon extends Script {
 
   setGray(value: boolean) {
     if (value) {
-      this._material.baseColor.set(0.75, 0.75, 0.75, 1);
+      this._material.baseColor.set(0.5225215539683921, 0.5225215539683921, 0.5225215539683921, 1);
     } else {
-      this._material.baseColor.set(0, 157 / 255, 1, 1);
+      this._material.baseColor.set(0, 0.33716361504833037, 1, 1);
     }
   }
 
@@ -101,7 +101,7 @@ export class Icon extends Script {
     this._material = iconMaterial;
     iconMaterial.shaderData.setVector2("u_size", this._size);
     meshRenderer.enabled = false;
-    iconMaterial.baseColor.set(0, 157 / 255, 1, 1);
+    iconMaterial.baseColor.set(0, 0.33716361504833037, 1, 1);
   }
 
   registerIconToViewportCamera(camera: Camera): void {

@@ -55,40 +55,133 @@ export class Utils {
 
   static init(engine: Engine) {
     // translate material
-    Utils.redMaterialTrans = this._createPlainColorMaterial(engine, State.translate, 1.0, 0.25, 0.25, 1.0);
-    Utils.lightRedMaterial = this._createPlainColorMaterial(engine, State.translate, 1.0, 0.25, 0.25, 0.9);
-    Utils.greenMaterialTrans = this._createPlainColorMaterial(engine, State.translate, 0.5, 0.8, 0.2, 1.0);
-    Utils.lightGreenMaterial = this._createPlainColorMaterial(engine, State.translate, 0.5, 0.8, 0.2, 0.9);
-    Utils.blueMaterialTrans = this._createPlainColorMaterial(engine, State.translate, 0.3, 0.5, 1.0, 1.0);
-    Utils.lightBlueMaterial = this._createPlainColorMaterial(engine, State.translate, 0.3, 0.5, 1.0, 0.9);
+    Utils.redMaterialTrans = this._createPlainColorMaterial(
+      engine,
+      State.translate,
+      1.0,
+      0.05087608817155679,
+      0.05087608817155679
+    );
+    Utils.lightRedMaterial = this._createPlainColorMaterial(
+      engine,
+      State.translate,
+      1.0,
+      0.05087608817155679,
+      0.05087608817155679,
+      0.9
+    );
+    Utils.greenMaterialTrans = this._createPlainColorMaterial(
+      engine,
+      State.translate,
+      0.21404114048223255,
+      0.6038273388553378,
+      0.033104766570885055
+    );
+    Utils.lightGreenMaterial = this._createPlainColorMaterial(
+      engine,
+      State.translate,
+      0.21404114048223255,
+      0.6038273388553378,
+      0.033104766570885055,
+      0.9
+    );
+    Utils.blueMaterialTrans = this._createPlainColorMaterial(
+      engine,
+      State.translate,
+      0.07323895587840543,
+      0.21404114048223255,
+      1.0
+    );
+    Utils.lightBlueMaterial = this._createPlainColorMaterial(
+      engine,
+      State.translate,
+      0.07323895587840543,
+      0.21404114048223255,
+      1.0,
+      0.9
+    );
     Utils.invisibleMaterialTrans = this._createPlainColorMaterial(engine, State.translate, 0, 0, 0, 0);
 
     // rotate material
-    Utils.redArcMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.25, 0.25);
-    Utils.greenArcMaterial = this._createPlainColorMaterial(engine, State.rotate, 0.5, 0.8, 0.2);
-    Utils.blueArcMaterial = this._createPlainColorMaterial(engine, State.rotate, 0.3, 0.5, 1.0);
-    Utils.yellowMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.95, 0.0, 1.0);
-    Utils.rotatePlaneMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.95, 0.0, 0.2);
+    Utils.redArcMaterial = this._createPlainColorMaterial(
+      engine,
+      State.rotate,
+      1.0,
+      0.05087608817155679,
+      0.05087608817155679
+    );
+    Utils.greenArcMaterial = this._createPlainColorMaterial(
+      engine,
+      State.rotate,
+      0.21404114048223255,
+      0.6038273388553378,
+      0.033104766570885055
+    );
+    Utils.blueArcMaterial = this._createPlainColorMaterial(
+      engine,
+      State.rotate,
+      0.07323895587840543,
+      0.21404114048223255,
+      1.0
+    );
+    Utils.yellowMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.8900054069935289, 0.0);
+    Utils.rotatePlaneMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.8900054069935289, 0.0, 0.2);
     Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialRotate = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
     Utils.invisibleMaterialRotate.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialCircle = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
 
     // scale material
-    Utils.redMaterialScale = this._createPlainColorMaterial(engine, State.scale, 1.0, 0.25, 0.25, 1.0);
-    Utils.greenMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0.5, 0.8, 0.2, 1.0);
-    Utils.blueMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0.3, 0.5, 1.0, 1.0);
-    Utils.greyMaterial = this._createPlainColorMaterial(engine, State.scale, 0.75, 0.75, 0.75, 1.0);
-    Utils.lightMaterial = this._createPlainColorMaterial(engine, State.scale, 0.7, 0.7, 0.7, 1.0);
+    Utils.redMaterialScale = this._createPlainColorMaterial(
+      engine,
+      State.scale,
+      1.0,
+      0.05087608817155679,
+      0.05087608817155679
+    );
+    Utils.greenMaterialScale = this._createPlainColorMaterial(
+      engine,
+      State.scale,
+      0.21404114048223255,
+      0.6038273388553378,
+      0.033104766570885055
+    );
+    Utils.blueMaterialScale = this._createPlainColorMaterial(
+      engine,
+      State.scale,
+      0.07323895587840543,
+      0.21404114048223255,
+      1.0
+    );
+    Utils.greyMaterial = this._createPlainColorMaterial(
+      engine,
+      State.scale,
+      0.5225215539683921,
+      0.5225215539683921,
+      0.5225215539683921
+    );
+    Utils.lightMaterial = this._createPlainColorMaterial(
+      engine,
+      State.scale,
+      0.44798841244188325,
+      0.44798841244188325,
+      0.44798841244188325
+    );
     Utils.invisibleMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0, 0, 0, 0);
 
     // rect material
-    Utils.visibleMaterialRect = this._createPlainColorMaterial(engine, State.rect, 163 / 255, 171 / 255, 180 / 255, 1);
+    Utils.visibleMaterialRect = this._createPlainColorMaterial(
+      engine,
+      State.rect,
+      0.3662525955988395,
+      0.4072402119017367,
+      0.45641102318040466
+    );
     Utils.invisibleMaterialRect = this._createPlainColorMaterial(engine, State.rect, 0, 0, 0, 0);
 
     Utils.lineMesh = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.5);
     Utils.lineMeshShort = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.3);
-    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.08, 0.3);
+    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.08, 0.07323895587840543);
     Utils.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
     Utils.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.32, 0.32, 0.32);
     Utils.axisSphereMesh = PrimitiveMesh.createSphere(engine, 1.8, 48);
