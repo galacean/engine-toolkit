@@ -124,7 +124,7 @@ function makeRollupConfig(pkg) {
     configs.push({
       input: path.join(pkg.location, "src", "index.ts"),
       output: {
-        file: path.join(pkg.location, "dist", "browser.js"),
+        file: path.join(pkg.location, "dist", "umd", "browser.js"),
         format: "umd",
         name: umdConfig.name,
         globals: {
@@ -140,7 +140,7 @@ function makeRollupConfig(pkg) {
   configs.push({
     input: path.join(pkg.location, "src", "index.ts"),
     output: {
-      file: path.join(pkg.location, "miniprogram.js"),
+      file: path.join(pkg.location, "dist", "miniprogram.js"),
       sourcemap: false,
       format: "cjs"
     },
