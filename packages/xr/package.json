@@ -21,7 +21,8 @@
   "umd": {
     "name": "Galacean.Toolkit.XR",
     "globals": {
-      "@galacean/engine": "Galacean"
+      "@galacean/engine": "Galacean",
+      "@galacean/engine-xr": "Galacean.XR"
     }
   },
   "module": "dist/es/index.js",
