@@ -18,6 +18,12 @@
   },
   "types": "types/index.d.ts",
   "main": "dist/commonjs/browser.js",
+  "umd": {
+    "name": "Galacean.Toolkit.XR",
+    "globals": {
+      "@galacean/engine": "Galacean"
+    }
+  },
   "module": "dist/es/index.js",
   "ignoreMiniProgram": true,
   "files": [
