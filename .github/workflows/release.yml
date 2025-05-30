@@ -8,7 +8,7 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
-      sepcific_tag:
+      specific_tag:
         description: 'Specific tag to release'
         required: false
         default: ''
