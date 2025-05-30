@@ -127,7 +127,10 @@ function makeRollupConfig(pkg) {
         file: path.join(pkg.location, "dist", "browser.js"),
         format: "umd",
         name: umdConfig.name,
-        globals: globals
+        globals: {
+          ...globals,
+          ...umdConfig.globals
+        }
       },
       external: Object.keys(umdConfig.globals ?? {}),
       plugins: [...plugins, minify({ sourceMap: true })]
