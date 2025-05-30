@@ -41,6 +41,8 @@ jobs:
 
       - name: Release current monorepo
         uses: galacean/publish@main
+        with:
+          specific_tag: ${{ inputs.specific_tag }}
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           NPM_CONFIG_PROVENANCE: true
