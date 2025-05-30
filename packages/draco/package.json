@@ -14,7 +14,7 @@
   },
   "types": "types/index.d.ts",
   "main": "dist/main.js",
-  "module": "dist/module.js",
+  "module": "dist/es/index.js",
   "files": [
     "dist/**/*",
     "types/**/*"
