@@ -10,8 +10,9 @@ declare global {
 }
 
 const LIB_PATH =
-  typeof window.__DRACO_LIB_PATH__ === "string" ||
-  "https://gw.alipayobjects.com/os/lib/alipay/draco-javascript/1.3.6/lib/";
+  typeof window.__DRACO_LIB_PATH__ === "string"
+    ? window.__DRACO_LIB_PATH__
+    : "https://gw.alipayobjects.com/os/lib/alipay/draco-javascript/1.3.6/lib/";
 const JS_FILE = "draco_decoder_gltf.js";
 
 const WASM_FILE = "draco_decoder_gltf.r3bin";
