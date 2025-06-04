@@ -97,9 +97,16 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
     });
   }
 
-  private _initialize(customDracoLibPath): void {
+  private _initialize(customDracoLibPath?: string): void {
+    const LIB_PATH =
+      typeof customDracoLibPath === "string"
+        ? customDracoLibPath
+        : "https://gw.alipayobjects.com/os/lib/alipay/draco-javascript/1.3.6/lib/";
     if (!KHR_draco_mesh_compression._decoder) {
-      KHR_draco_mesh_compression._decoder = new DRACODecoder(customDracoLibPath);
+      KHR_draco_mesh_compression._decoder = new DRACODecoder(LIB_PATH);
+    } else if (LIB_PATH !== KHR_draco_mesh_compression._decoder.LIB_PATH) {
+      // If the custom path is different, reinitialize the decoder
+      KHR_draco_mesh_compression._decoder = new DRACODecoder(LIB_PATH);
     }
   }
 

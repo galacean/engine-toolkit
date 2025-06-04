@@ -15,17 +15,15 @@ export class DRACODecoder {
   private currentTaskId: number = 1;
   private taskCache = new WeakMap();
   private loadLibPromise: Promise<any>;
-  private LIB_PATH = "https://gw.alipayobjects.com/os/lib/alipay/draco-javascript/1.3.6/lib/";
+  LIB_PATH: string;
 
-  constructor(LIB_PATH?: string, config: IDecoderConfig = { type: "wasm", workerLimit: 4 }) {
+  constructor(LIB_PATH: string, config: IDecoderConfig = { type: "wasm", workerLimit: 4 }) {
     if (config.workerLimit > this.workerLimit) {
       Logger.warn("DRACOWorkerPool: Can not initialize worker pool with limit:" + config.workerLimit);
     } else {
       this.workerLimit = config.workerLimit ?? 4;
     }
-    if (typeof LIB_PATH === "string") {
-      this.LIB_PATH = LIB_PATH;
-    }
+    this.LIB_PATH = LIB_PATH;
     this.useJS = typeof WebAssembly !== "object" || config.type === "js";
     this.loadLibPromise = this.preloadLib();
   }
