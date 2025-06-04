@@ -38,11 +38,12 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
     glTFPrimitive: IMeshPrimitive,
     glTFMesh: IMesh
   ) {
-    this._initialize();
     const {
       glTF,
-      glTFResource: { engine }
+      glTFResource: { engine },
+      params: { customDracoLibPath }
     } = context;
+    this._initialize(customDracoLibPath);
     const { bufferViews, accessors } = glTF;
     const { bufferView: bufferViewIndex, attributes: gltfAttributeMap } = schema;
 
@@ -96,8 +97,11 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
     });
   }
 
-  private _initialize(): void {
+  private _initialize(customDracoLibPath): void {
     if (!KHR_draco_mesh_compression._decoder) {
+      if (typeof customDracoLibPath === "string") {
+        DRACODecoder.LIB_PATH = customDracoLibPath;
+      }
       KHR_draco_mesh_compression._decoder = new DRACODecoder();
     }
   }
