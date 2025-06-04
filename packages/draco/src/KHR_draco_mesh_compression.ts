@@ -99,12 +99,7 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
 
   private _initialize(customDracoLibPath): void {
     if (!KHR_draco_mesh_compression._decoder) {
-      if (typeof customDracoLibPath === "string") {
-        DRACODecoder.LIB_PATH = customDracoLibPath;
-      }
-      KHR_draco_mesh_compression._decoder = new DRACODecoder();
-    } else if (customDracoLibPath && DRACODecoder.LIB_PATH !== customDracoLibPath) {
-      KHR_draco_mesh_compression._decoder = new DRACODecoder();
+      KHR_draco_mesh_compression._decoder = new DRACODecoder(customDracoLibPath);
     }
   }
 
