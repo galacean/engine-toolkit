@@ -29,7 +29,7 @@ export interface IKHRDracoMeshCompression {
 
 @registerGLTFExtension("KHR_draco_mesh_compression", GLTFExtensionMode.CreateAndParse)
 class KHR_draco_mesh_compression extends GLTFExtensionParser {
-  private static _decoder: DRACODecoder;
+  private static _decoders = new Map<string, DRACODecoder>();
   private static _tempVector3 = new Vector3();
 
   override createAndParse(
@@ -43,7 +43,11 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
       glTFResource: { engine },
       params: { customDracoLibPath }
     } = context;
-    this._initialize(customDracoLibPath);
+    const LIB_PATH =
+      typeof customDracoLibPath === "string"
+        ? customDracoLibPath
+        : "https://gw.alipayobjects.com/os/lib/alipay/draco-javascript/1.3.6/lib/";
+    this._initialize(LIB_PATH);
     const { bufferViews, accessors } = glTF;
     const { bufferView: bufferViewIndex, attributes: gltfAttributeMap } = schema;
 
@@ -69,44 +73,40 @@ class KHR_draco_mesh_compression extends GLTFExtensionParser {
 
     return context.get<ArrayBuffer>(GLTFParserType.Buffer).then((buffers) => {
       const buffer = GLTFUtils.getBufferViewData(bufferViews[bufferViewIndex], buffers);
-      return KHR_draco_mesh_compression._decoder.decode(buffer, taskConfig).then((decodedGeometry) => {
-        const mesh = new ModelMesh(engine, glTFMesh.name);
-        return this._parseMeshFromGLTFPrimitiveDraco(
-          context,
-          mesh,
-          glTFMesh,
-          glTFPrimitive,
-          glTF,
-          (attributeSemantic) => {
-            for (let j = 0; j < decodedGeometry.attributes.length; j++) {
-              if (decodedGeometry.attributes[j].name === attributeSemantic) {
-                return decodedGeometry.attributes[j].array;
+      return KHR_draco_mesh_compression._decoders
+        .get(LIB_PATH)
+        .decode(buffer, taskConfig)
+        .then((decodedGeometry) => {
+          const mesh = new ModelMesh(engine, glTFMesh.name);
+          return this._parseMeshFromGLTFPrimitiveDraco(
+            context,
+            mesh,
+            glTFMesh,
+            glTFPrimitive,
+            glTF,
+            (attributeSemantic) => {
+              for (let j = 0; j < decodedGeometry.attributes.length; j++) {
+                if (decodedGeometry.attributes[j].name === attributeSemantic) {
+                  return decodedGeometry.attributes[j].array;
+                }
               }
-            }
-            return null;
-          },
-          (attributeSemantic, shapeIndex) => {
-            throw "BlendShape animation is not supported when using draco.";
-          },
-          () => {
-            return decodedGeometry.index.array;
-          },
-          context.params.keepMeshData
-        );
-      });
+              return null;
+            },
+            (attributeSemantic, shapeIndex) => {
+              throw "BlendShape animation is not supported when using draco.";
+            },
+            () => {
+              return decodedGeometry.index.array;
+            },
+            context.params.keepMeshData
+          );
+        });
     });
   }
 
-  private _initialize(customDracoLibPath?: string): void {
-    const LIB_PATH =
-      typeof customDracoLibPath === "string"
-        ? customDracoLibPath
-        : "https://gw.alipayobjects.com/os/lib/alipay/draco-javascript/1.3.6/lib/";
-    if (!KHR_draco_mesh_compression._decoder) {
-      KHR_draco_mesh_compression._decoder = new DRACODecoder(LIB_PATH);
-    } else if (LIB_PATH !== KHR_draco_mesh_compression._decoder.LIB_PATH) {
-      // If the custom path is different, reinitialize the decoder
-      KHR_draco_mesh_compression._decoder = new DRACODecoder(LIB_PATH);
+  private _initialize(LIB_PATH: string): void {
+    if (!KHR_draco_mesh_compression._decoders.get(LIB_PATH)) {
+      KHR_draco_mesh_compression._decoders.set(LIB_PATH, new DRACODecoder(LIB_PATH));
     }
   }
 

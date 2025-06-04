@@ -15,7 +15,7 @@ export class DRACODecoder {
   private currentTaskId: number = 1;
   private taskCache = new WeakMap();
   private loadLibPromise: Promise<any>;
-  LIB_PATH: string;
+  private _libPath: string;
 
   constructor(LIB_PATH: string, config: IDecoderConfig = { type: "wasm", workerLimit: 4 }) {
     if (config.workerLimit > this.workerLimit) {
@@ -23,7 +23,7 @@ export class DRACODecoder {
     } else {
       this.workerLimit = config.workerLimit ?? 4;
     }
-    this.LIB_PATH = LIB_PATH;
+    this._libPath = LIB_PATH;
     this.useJS = typeof WebAssembly !== "object" || config.type === "js";
     this.loadLibPromise = this.preloadLib();
   }
@@ -35,7 +35,7 @@ export class DRACODecoder {
 
     return new Promise((resolve, reject) => {
       if (this.useJS) {
-        request(`${this.LIB_PATH}${JS_FILE}`, { type: "text" })
+        request(`${this._libPath}${JS_FILE}`, { type: "text" })
           .then((jsSource) => {
             const body = [jsSource, workerString].join("\n");
             const workerSourceURL = URL.createObjectURL(new Blob([body]));
@@ -46,8 +46,8 @@ export class DRACODecoder {
           });
       } else {
         Promise.all([
-          request(`${this.LIB_PATH}${WASM_WRAPPER_FILE}`, { type: "text" }),
-          request(`${this.LIB_PATH}${WASM_FILE}`, { type: "arraybuffer" })
+          request(`${this._libPath}${WASM_WRAPPER_FILE}`, { type: "text" }),
+          request(`${this._libPath}${WASM_FILE}`, { type: "arraybuffer" })
         ])
           .then((resources) => {
             const [wrapperSource, decoderWASMBinary] = resources;
