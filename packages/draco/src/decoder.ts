@@ -4,9 +4,7 @@ import { DRACOWorker, ITaskConfig } from "./DRACOWorker";
 
 import workerString from "./worker/worker.js";
 
-const LIB_PATH = "https://gw.alipayobjects.com/os/lib/alipay/draco-javascript/1.3.6/lib/";
 const JS_FILE = "draco_decoder_gltf.js";
-
 const WASM_FILE = "draco_decoder_gltf.r3bin";
 const WASM_WRAPPER_FILE = "draco_wasm_wrapper_gltf.js";
 
@@ -17,13 +15,15 @@ export class DRACODecoder {
   private currentTaskId: number = 1;
   private taskCache = new WeakMap();
   private loadLibPromise: Promise<any>;
+  private _libPath: string;
 
-  constructor(config: IDecoderConfig = { type: "wasm", workerLimit: 4 }) {
+  constructor(LIB_PATH: string, config: IDecoderConfig = { type: "wasm", workerLimit: 4 }) {
     if (config.workerLimit > this.workerLimit) {
       Logger.warn("DRACOWorkerPool: Can not initialize worker pool with limit:" + config.workerLimit);
     } else {
       this.workerLimit = config.workerLimit ?? 4;
     }
+    this._libPath = LIB_PATH;
     this.useJS = typeof WebAssembly !== "object" || config.type === "js";
     this.loadLibPromise = this.preloadLib();
   }
@@ -35,7 +35,7 @@ export class DRACODecoder {
 
     return new Promise((resolve, reject) => {
       if (this.useJS) {
-        request(`${LIB_PATH}${JS_FILE}`, { type: "text" })
+        request(`${this._libPath}${JS_FILE}`, { type: "text" })
           .then((jsSource) => {
             const body = [jsSource, workerString].join("\n");
             const workerSourceURL = URL.createObjectURL(new Blob([body]));
@@ -46,8 +46,8 @@ export class DRACODecoder {
           });
       } else {
         Promise.all([
-          request(`${LIB_PATH}${WASM_WRAPPER_FILE}`, { type: "text" }),
-          request(`${LIB_PATH}${WASM_FILE}`, { type: "arraybuffer" })
+          request(`${this._libPath}${WASM_WRAPPER_FILE}`, { type: "text" }),
+          request(`${this._libPath}${WASM_FILE}`, { type: "arraybuffer" })
         ])
           .then((resources) => {
             const [wrapperSource, decoderWASMBinary] = resources;
