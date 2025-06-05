@@ -1,5 +1,6 @@
 import resolve from "@rollup/plugin-node-resolve";
 import glslify from "rollup-plugin-glslify";
+import license from "rollup-plugin-license";
 import { binary2base64 } from "rollup-plugin-binary2base64";
 import commonjs from "@rollup/plugin-commonjs";
 import miniProgramPlugin from "./rollup.miniprogram.plugin.mjs";
@@ -65,6 +66,10 @@ const plugins = [
   }),
   commonjs()
 ];
+
+function generatePkgLicenseHeader(pkgJson) {
+  return `@license ${pkgJson.license}\n@package ${pkgJson.name}\n@version ${pkgJson.version}`;
+}
 
 function makeRollupConfig(pkg) {
   const externals = Object.keys(
@@ -133,7 +138,15 @@ function makeRollupConfig(pkg) {
         }
       },
       external: Object.keys(umdConfig.globals ?? {}),
-      plugins: [...plugins, minify({ sourceMap: true })]
+      plugins: [
+        ...plugins,
+        minify({ sourceMap: true }),
+        license({
+          banner: {
+            content: generatePkgLicenseHeader(pkg.pkgJson)
+          }
+        })
+      ]
     });
   }
 
@@ -156,7 +169,7 @@ function makeRollupConfig(pkg) {
 const builderConfigs = pkgs.map(makeRollupConfig).flat();
 
 builderConfigs.sort((_, b) => {
-  if (b.output.format === "umd") return -1
-})
+  if (b.output.format === "umd") return -1;
+});
 
 export default Promise.all(builderConfigs);
