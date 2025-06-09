@@ -18,6 +18,13 @@
   },
   "types": "types/index.d.ts",
   "main": "dist/commonjs/browser.js",
+  "umd": {
+    "name": "Galacean.Toolkit.XR",
+    "globals": {
+      "@galacean/engine": "Galacean",
+      "@galacean/engine-xr": "Galacean.XR"
+    }
+  },
   "module": "dist/es/index.js",
   "ignoreMiniProgram": true,
   "files": [
@@ -26,6 +33,6 @@
   ],
   "peerDependencies": {
     "@galacean/engine": "^1.4.0",
-    "@galacean/engine-xr": "^1.3.0-beta.6"
+    "@galacean/engine-xr": "^1.4.0"
   }
 }
