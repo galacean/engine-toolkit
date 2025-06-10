@@ -20,6 +20,6 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@galacean/engine": "^1.3.0-beta.6"
+    "@galacean/engine": "1.3.0"
   }
 }
