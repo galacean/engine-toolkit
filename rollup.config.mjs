@@ -127,7 +127,10 @@ function makeRollupConfig(pkg) {
         file: path.join(pkg.location, "dist", "umd", "browser.js"),
         format: "umd",
         name: umdConfig.name,
-        globals: globals
+        globals: {
+          ...globals,
+          ...umdConfig.globals
+        }
       },
       external: Object.keys(umdConfig.globals ?? {}),
       plugins: [...plugins, minify({ sourceMap: true })]
@@ -153,7 +156,7 @@ function makeRollupConfig(pkg) {
 const builderConfigs = pkgs.map(makeRollupConfig).flat();
 
 builderConfigs.sort((_, b) => {
-  if (b.output.format === "umd") return -1
-})
+  if (b.output.format === "umd") return -1;
+});
 
 export default Promise.all(builderConfigs);
