@@ -1,7 +1,7 @@
 {
   "name": "@galacean/engine-toolkit-tests",
   "private": true,
-  "version": "1.5.3",
+  "version": "1.5.4",
   "license": "MIT",
   "module": "dist/es/index.js",
   "types": "types/index.d.ts",
