@@ -518,7 +518,7 @@ export class WireframeManager extends Script {
     const { _indices: indices, _localPositions: localPositions } = this;
     WireframePrimitive.createCircleWireframe(
       radius,
-      0,
+      2,
       new Vector3(),
       localPositions,
       positionsOffset,
