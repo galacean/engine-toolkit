@@ -32,7 +32,8 @@ export default {
         'translate': State.translate,
         'rotate': State.rotate,
         'scale': State.scale,
-        'all': State.all
+        'all': State.all,
+        'translateYZ': State.translateYZ
       },
       defaultValue: 'translate'
     },
@@ -62,10 +63,10 @@ export const GizmoDemo = {
     const camera = cameraEntity.addComponent(Camera);
     camera.enableFrustumCulling = true;
 
-    const orbitControl = cameraEntity.addComponent(OrbitControl);
-    orbitControl.target = new Vector3(0, 0, 0);
-    orbitControl.minDistance = 2;
-    orbitControl.maxDistance = 50;
+    // const orbitControl = cameraEntity.addComponent(OrbitControl);
+    // orbitControl.target = new Vector3(0, 0, 0);
+    // orbitControl.minDistance = 2;
+    // orbitControl.maxDistance = 50;
 
     
     const lightEntity = rootEntity.createChild("light");
