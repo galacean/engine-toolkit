@@ -77,6 +77,7 @@ export class Axis extends Component {
   /** recover axis color */
   recover(): void {
     this._material.baseColor.copyFrom(this._color);
+    this._alpha = this._color.a;
   }
   /** change axis alpha */
   alpha(v: number): void {
