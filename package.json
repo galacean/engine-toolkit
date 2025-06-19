@@ -25,6 +25,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
+  "publishConfig": {},
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",

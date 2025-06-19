@@ -11,6 +11,7 @@ import {
   Layer
 } from "@galacean/engine";
 import { Gizmo, Group, State } from "../packages/gizmo/src";
+import { Meta } from "@storybook/html-vite";
 
 export default {
   title: 'Toolkit/Gizmo',
@@ -39,7 +40,7 @@ export default {
       defaultValue: 0.8
     }
   }
-};
+} as Meta;
 
 export const GizmoDemo = {
   args: {
@@ -55,7 +56,7 @@ export const GizmoDemo = {
     const rootEntity = scene.createRootEntity("root");
 
     const cameraEntity = rootEntity.createChild("camera");
-    cameraEntity.transform.setPosition(0, 2, 5);
+    cameraEntity.transform.setPosition(4, 4, 4);
     cameraEntity.transform.lookAt(new Vector3(0, 0, 0));
     const camera = cameraEntity.addComponent(Camera);
     camera.enableFrustumCulling = true;

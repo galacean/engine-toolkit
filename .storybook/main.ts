@@ -1,6 +1,7 @@
 
 
 import { join, dirname } from "path";
+import { string } from "rollup-plugin-string";
 
 function getAbsolutePath(value) {
   return dirname(require.resolve(join(value, 'package.json')))
@@ -22,6 +23,16 @@ const config = {
   },
   "core": {
     "disableTelemetry": true
+  },
+  "viteFinal": async (config) => {
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      string({
+        include: ['**/*.glsl', '**/*.shader', '**/*.vs.glsl', '**/*.fs.glsl']
+      })
+    );
+    
+    return config;
   }
 };
 

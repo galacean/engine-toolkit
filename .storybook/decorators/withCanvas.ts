@@ -37,10 +37,19 @@ export const withCanvas = makeDecorator({
       return enginePromise;
     };
     
+    const resizeObserver = new ResizeObserver(() => {
+      context.getEngine().then((engine) => {
+        engine.canvas.resizeByClientSize(window.devicePixelRatio);
+      })
+    })
+    resizeObserver.observe(container)
+
+
     useEffect(() => {
       return () => {
         enginePromise.then(engine => {
           engine.destroy();
+          resizeObserver.unobserve(container);
         });
       };
     }, []);
