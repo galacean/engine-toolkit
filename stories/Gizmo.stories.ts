@@ -11,6 +11,7 @@ import {
   Layer
 } from "@galacean/engine";
 import { Gizmo, Group, State } from "../packages/gizmo/src";
+import { OrbitControl } from "../packages/controls/src";
 import { Meta } from "@storybook/html-vite";
 
 export default {
@@ -37,7 +38,7 @@ export default {
     },
     gizmoSize: {
       control: { type: 'range', min: 0, max: 2, step: 0.1 },
-      defaultValue: 0.8
+      defaultValue: 2
     }
   }
 } as Meta;
@@ -45,7 +46,7 @@ export default {
 export const GizmoDemo = {
   args: {
     gizmoState: "translate",
-    gizmoSize: 0.8
+    gizmoSize: 2
   },
   render:async (args, context) => {
     const engine: WebGLEngine = await context.getEngine();
@@ -60,6 +61,12 @@ export const GizmoDemo = {
     cameraEntity.transform.lookAt(new Vector3(0, 0, 0));
     const camera = cameraEntity.addComponent(Camera);
     camera.enableFrustumCulling = true;
+
+    const orbitControl = cameraEntity.addComponent(OrbitControl);
+    orbitControl.target = new Vector3(0, 0, 0);
+    orbitControl.minDistance = 2;
+    orbitControl.maxDistance = 50;
+
     
     const lightEntity = rootEntity.createChild("light");
     lightEntity.transform.setPosition(1, 3, 2);

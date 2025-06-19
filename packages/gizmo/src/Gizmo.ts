@@ -22,6 +22,7 @@ import { ScaleControl } from "./Scale";
 import { TranslateControl } from "./Translate";
 import { GizmoComponent } from "./Type";
 import { Utils } from "./Utils";
+import { GizmoUtils } from "./constants";
 import { State } from "./enums/GizmoState";
 import { SearchComponentType } from "./enums/GroupState";
 /**
@@ -130,6 +131,7 @@ export class Gizmo extends Script {
   set size(value: number) {
     this._scalar = MathUtil.clamp(value, 0.01, Infinity);
     Utils.scaleFactor = this._scalar * 0.05773502691896257;
+    GizmoUtils.scaleFactor = this._scalar * 0.05773502691896257;
   }
 
   constructor(entity: Entity) {
@@ -139,6 +141,7 @@ export class Gizmo extends Script {
     }
 
     Utils.init(this.engine);
+    GizmoUtils.init(this.engine);
 
     // setup mesh
     this._createGizmoControl(State.translate, TranslateControl);

@@ -1,13 +1,12 @@
-import { Component, Entity, MeshRenderer, Color } from "@galacean/engine";
+import { Component, Entity, MeshRenderer, Color, UnlitMaterial } from "@galacean/engine";
 import { AxisProps } from "./Type";
-import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
 
 export class Axis extends Component {
-  private _material: PlainColorMaterial;
+  private _material: UnlitMaterial;
   private _color: Color = new Color();
   private _highLightColor: Color = new Color();
-  private _yellowColor: Color = new Color(1.0, 0.89, 0.0, 1.0);
-  private _grayColor: Color = new Color(0.5225215539683921, 0.5225215539683921, 0.5225215539683921, 0.6);
+  private _yellowColor: Color = new Color(1.0, 1.0, 0.0, 1.0);
+  private _grayColor: Color = new Color(0.5225215539683921, 0.5225215539683921, 0.5225215539683921, 0);
 
   constructor(entity: Entity) {
     super(entity);
@@ -66,6 +65,7 @@ export class Axis extends Component {
   }
   /** change axis color into gray */
   gray(): void {
+    console.log('this._material.isTransparent', this._material.isTransparent) 
     this._material.baseColor.copyFrom(this._grayColor);
   }
   /** recover axis color */

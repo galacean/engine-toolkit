@@ -1,10 +1,11 @@
-import { Camera, Entity, Plane, Ray, Vector3, Matrix } from "@galacean/engine";
+import { Camera, Entity, Plane, Ray, Vector3, Matrix, MeshRenderer, UnlitMaterial, ModelMesh } from "@galacean/engine";
 
 import { Axis } from "./Axis";
-import { Utils } from "./Utils";
+import { GizmoUtils, X_AXIS_ROTATION, Y_AXIS_ROTATION, Z_AXIS_ROTATION, XY_PLANE_ROTATION, YZ_PLANE_ROTATION, XZ_PLANE_ROTATION, LINE_TRANSLATION, END_TRANSLATION, PLANE_TRANSLATION } from "./constants";
 import { Group } from "./Group";
 import { GizmoComponent, AxisProps, axisVector, axisPlane, axisType } from "./Type";
 import { State } from "./enums/GizmoState";
+import { GizmoMesh } from "./GizmoMesh";
 
 /** @internal */
 export class TranslateControl extends GizmoComponent {
@@ -29,12 +30,17 @@ export class TranslateControl extends GizmoComponent {
   private _tempVec2: Vector3 = new Vector3();
   private _tempMat: Matrix = new Matrix();
   private _tempScale: number = 1;
+  
+  // Reference line entities and meshes
+  private _referenceLineEntity: Entity;
+  private _referenceLineMesh: ModelMesh;
 
   constructor(entity: Entity) {
     super(entity);
     this.type = State.translate;
     this._initAxis();
     this._createAxis(entity);
+    this._createReferenceLine(entity);
   }
 
   init(camera: Camera, group: Group): void {
@@ -50,6 +56,20 @@ export class TranslateControl extends GizmoComponent {
     const currEntity = this.gizmoEntity.findByName(axisName);
     const currComponent = currEntity.getComponent(Axis);
     currComponent.highLight && currComponent.highLight();
+    
+    // Make all other axes gray
+    const axesEntity = this.gizmoEntity.children;
+    for (let entity of axesEntity) {
+      if (entity.name !== axisName) {
+        const component = entity.getComponent(Axis);
+        component.gray && component.gray();
+      }
+    }
+    
+    // Show reference line for axis (not for planes)
+    if (axisName === "x" || axisName === "y" || axisName === "z") {
+      this._showReferenceLine(axisName);
+    }
   }
 
   onHoverEnd(): void {
@@ -60,6 +80,11 @@ export class TranslateControl extends GizmoComponent {
     }
 
     this._selectedAxis = null;
+    
+    // Hide reference line
+    if (this._referenceLineEntity) {
+      this._referenceLineEntity.isActive = false;
+    }
   }
 
   onMoveStart(ray: Ray, axisName: string): void {
@@ -86,6 +111,11 @@ export class TranslateControl extends GizmoComponent {
       } else {
         currComponent.gray && currComponent.gray();
       }
+    }
+    
+    // Show reference line for axis (not for planes)
+    if (axisName === "x" || axisName === "y" || axisName === "z") {
+      this._showReferenceLine(axisName);
     }
   }
 
@@ -118,6 +148,11 @@ export class TranslateControl extends GizmoComponent {
       const currEntity = entityArray[i];
       const currComponent = currEntity.getComponent(Axis);
       currComponent.recover && currComponent.recover();
+    }
+    
+    // Hide reference line
+    if (this._referenceLineEntity) {
+      this._referenceLineEntity.isActive = false;
     }
   }
 
@@ -153,58 +188,57 @@ export class TranslateControl extends GizmoComponent {
     this._translateControlMap = [
       {
         name: "x",
-        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.redMaterialTrans,
-        axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisHelperMaterial: Utils.invisibleMaterialTrans,
-        axisRotation: [new Vector3(0, 0, -90), new Vector3(0, 0, -90)],
-        axisTranslation: [new Vector3(0.75, 0, 0), new Vector3(1.5, 0, 0)]
+        axisMesh: [GizmoUtils.lineMesh, GizmoUtils.axisArrowMesh],
+        axisMaterial: GizmoUtils.redMaterialTrans,
+        axisHelperMesh: [GizmoUtils.axisHelperLineMesh],
+        axisHelperMaterial: GizmoUtils.invisibleMaterialTrans,
+        axisRotation: [X_AXIS_ROTATION, X_AXIS_ROTATION],
+        axisTranslation: [LINE_TRANSLATION, END_TRANSLATION]
       },
       {
         name: "y",
-        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.greenMaterialTrans,
-        axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisHelperMaterial: Utils.invisibleMaterialTrans,
-        axisRotation: [new Vector3(0, 90, 0), new Vector3(0, 0, 0)],
+        axisMesh: [GizmoUtils.lineMesh, GizmoUtils.axisArrowMesh],
+        axisMaterial: GizmoUtils.greenMaterialTrans,
+        axisHelperMesh: [GizmoUtils.axisHelperLineMesh],
+        axisHelperMaterial: GizmoUtils.invisibleMaterialTrans,
+        axisRotation: [Y_AXIS_ROTATION, new Vector3(0, 0, 0)],
         axisTranslation: [new Vector3(0, 0.75, 0), new Vector3(0, 1.5, 0)]
       },
       {
         name: "z",
-        axisMesh: [Utils.lineMesh, Utils.axisArrowMesh],
-        axisMaterial: Utils.blueMaterialTrans,
-        axisHelperMesh: [Utils.axisHelperLineMesh],
-        axisHelperMaterial: Utils.invisibleMaterialTrans,
-        axisRotation: [new Vector3(0, 90, 90), new Vector3(0, 90, 90)],
+        axisMesh: [GizmoUtils.lineMesh, GizmoUtils.axisArrowMesh],
+        axisMaterial: GizmoUtils.blueMaterialTrans,
+        axisHelperMesh: [GizmoUtils.axisHelperLineMesh],
+        axisHelperMaterial: GizmoUtils.invisibleMaterialTrans,
+        axisRotation: [Z_AXIS_ROTATION, Z_AXIS_ROTATION],
         axisTranslation: [new Vector3(0, 0, 0.75), new Vector3(0, 0, 1.5)]
       },
       {
         name: "xy",
-        axisMesh: [Utils.axisPlaneMesh],
-        axisMaterial: Utils.lightBlueMaterial,
-        axisHelperMesh: [Utils.axisHelperPlaneMesh],
-        axisHelperMaterial: Utils.invisibleMaterialTrans,
-        axisRotation: [new Vector3(0, 90, 90)],
-        axisTranslation: [new Vector3(0.5, 0.5, 0)]
+        axisMesh: [GizmoUtils.axisPlaneMesh],
+        axisMaterial: GizmoUtils.xyMaterial,
+        axisHelperMesh: [GizmoUtils.axisHelperPlaneMesh],
+        axisHelperMaterial: GizmoUtils.invisibleMaterialTrans,
+        axisRotation: [XY_PLANE_ROTATION],
+        axisTranslation: [PLANE_TRANSLATION]
       },
       {
         name: "yz",
-        axisMesh: [Utils.axisPlaneMesh],
-        axisMaterial: Utils.lightRedMaterial,
-        axisHelperMesh: [Utils.axisHelperPlaneMesh],
-        axisHelperMaterial: Utils.invisibleMaterialTrans,
-
-        axisRotation: [new Vector3(90, 90, 0)],
-        axisTranslation: [new Vector3(0, 0.5, 0.5)]
+        axisMesh: [GizmoUtils.axisPlaneMesh],
+        axisMaterial: GizmoUtils.yzMaterial,
+        axisHelperMesh: [GizmoUtils.axisHelperPlaneMesh],
+        axisHelperMaterial: GizmoUtils.invisibleMaterialTrans,
+        axisRotation: [YZ_PLANE_ROTATION],
+        axisTranslation: [new Vector3(0, 0.25, 0.25)]
       },
       {
         name: "xz",
-        axisMesh: [Utils.axisPlaneMesh],
-        axisMaterial: Utils.lightGreenMaterial,
-        axisHelperMesh: [Utils.axisHelperPlaneMesh],
-        axisHelperMaterial: Utils.invisibleMaterialTrans,
-        axisRotation: [new Vector3(0, 0, 0)],
-        axisTranslation: [new Vector3(0.5, 0, 0.5)]
+        axisMesh: [GizmoUtils.axisPlaneMesh],
+        axisMaterial: GizmoUtils.xzMaterial,
+        axisHelperMesh: [GizmoUtils.axisHelperPlaneMesh],
+        axisHelperMaterial: GizmoUtils.invisibleMaterialTrans,
+        axisRotation: [XZ_PLANE_ROTATION],
+        axisTranslation: [new Vector3(0.25, 0, 0.25)]
       }
     ];
   }
@@ -235,6 +269,69 @@ export class TranslateControl extends GizmoComponent {
 
       currentComponent.initAxis(currentGeometry);
     }
+  }
+  
+  private _createReferenceLine(entity: Entity): void {
+    console.log('_createReferenceLine')
+    // Create reference line entity
+    this._referenceLineEntity = entity.createChild("referenceLine");
+    this._referenceLineEntity.isActive = false;
+
+    // Create a long line mesh for reference that extends in both directions
+    const lineLength = 1000; // Very long line to appear infinite
+    const start = new Vector3(-lineLength, 0, 0); // Negative direction
+    const end = new Vector3(lineLength, 0, 0);   // Positive direction
+    this._referenceLineMesh = GizmoMesh.createLine(this.engine, [start, end]);
+    
+    // Add renderer
+    const renderer = this._referenceLineEntity.addComponent(MeshRenderer);
+    renderer.receiveShadows = false;
+    renderer.castShadows = false;
+    renderer.mesh = this._referenceLineMesh;
+    
+    // Create white material for the reference line
+    const whiteMaterial = new UnlitMaterial(this.engine);
+    whiteMaterial.isTransparent = true;
+    whiteMaterial.renderState.depthState.enabled = false;
+    whiteMaterial.baseColor.set(1, 1, 1, 0.5); // White with some transparency
+    whiteMaterial.name = "referenceLineMaterial";
+    
+    renderer.setMaterial(whiteMaterial);
+  }
+  
+  private _showReferenceLine(axisName: string): void {
+    console.log('_showReferenceLine', axisName, this._referenceLineEntity);
+    if (!this._referenceLineEntity) return;
+    
+    // Reset rotation
+    // this._referenceLineEntity.transform.rotation.set(0, 0, 0);
+    
+    // Show the reference line
+    
+    // Update the scale to match the current gizmo scale
+    this._referenceLineEntity.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
+    
+    // Update the position to match the current gizmo position
+    // This ensures the reference line follows the gizmo when it moves
+    this._referenceLineEntity.transform.worldMatrix = this.gizmoEntity.transform.worldMatrix.clone();
+
+    // Set rotation based on axis
+    switch (axisName) {
+      case "x":
+        // X axis is default
+        break;
+      case "y":
+        // Rotate to align with Y axis
+        this._referenceLineEntity.transform.rotation.set(0, 0, 90);
+        break;
+      case "z":
+        // Rotate to align with Z axis
+        this._referenceLineEntity.transform.rotation.set(0, -90, 0);
+        break;
+    }
+
+    this._referenceLineEntity.isActive = true;
+        
   }
 
   private _getHitPlane(): void {
@@ -271,14 +368,18 @@ export class TranslateControl extends GizmoComponent {
     this._group.getWorldMatrix(_tempMat);
 
     if (this._camera.isOrthographic) {
-      this._tempScale = this._camera.orthographicSize * Utils.scaleFactor * 3;
+      this._tempScale = this._camera.orthographicSize * GizmoUtils.scaleFactor * 3;
     } else {
       _tempVec0.set(_tempMat.elements[12], _tempMat.elements[13], _tempMat.elements[14]);
-      this._tempScale = this._scale = Vector3.distance(cameraPosition, _tempVec0) * Utils.scaleFactor;
+      this._tempScale = this._scale = Vector3.distance(cameraPosition, _tempVec0) * GizmoUtils.scaleFactor;
     }
     this.gizmoEntity.transform.worldMatrix = this.gizmoHelperEntity.transform.worldMatrix = _tempMat.scale(
       _tempVec0.set(this._tempScale, this._tempScale, this._tempScale)
     );
+    
+    if (this._referenceLineEntity && this._referenceLineEntity.isActive) {
+      this._referenceLineEntity.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
+    }
   }
 
   private _changeAxisAlpha(axisName: string, value: number) {

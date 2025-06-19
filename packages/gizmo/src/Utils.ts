@@ -1,37 +1,39 @@
-import { Engine, PrimitiveMesh, ModelMesh, CullMode, Vector3 } from "@galacean/engine";
+import { Engine, PrimitiveMesh, ModelMesh, CullMode, Vector3, Color, UnlitMaterial } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { GizmoMesh } from "./GizmoMesh";
-import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
+
 export class Utils {
   static rotateCircleRadius = 1.6;
   static scaleFactor = 0.05773502691896257;
   static rectFactor = 0.05;
 
-  static redMaterialTrans: PlainColorMaterial;
-  static lightRedMaterial: PlainColorMaterial;
-  static greenMaterialTrans: PlainColorMaterial;
-  static lightGreenMaterial: PlainColorMaterial;
-  static blueMaterialTrans: PlainColorMaterial;
-  static lightBlueMaterial: PlainColorMaterial;
-  static invisibleMaterialTrans: PlainColorMaterial;
+  static redMaterialTrans: UnlitMaterial;
+  static lightRedMaterial: UnlitMaterial;
+  static greenMaterialTrans: UnlitMaterial;
+  static lightGreenMaterial: UnlitMaterial;
+  static blueMaterialTrans: UnlitMaterial;
+  static lightBlueMaterial: UnlitMaterial;
+  static invisibleMaterialTrans: UnlitMaterial;
 
-  static redArcMaterial: PlainColorMaterial;
-  static greenArcMaterial: PlainColorMaterial;
-  static blueArcMaterial: PlainColorMaterial;
-  static yellowMaterial: PlainColorMaterial;
-  static rotatePlaneMaterial: PlainColorMaterial;
-  static invisibleMaterialRotate: PlainColorMaterial;
-  static invisibleMaterialCircle: PlainColorMaterial;
+  static yzMaterial: UnlitMaterial;
 
-  static redMaterialScale: PlainColorMaterial;
-  static greenMaterialScale: PlainColorMaterial;
-  static blueMaterialScale: PlainColorMaterial;
-  static greyMaterial: PlainColorMaterial;
-  static lightMaterial: PlainColorMaterial;
-  static invisibleMaterialScale: PlainColorMaterial;
+  static redArcMaterial: UnlitMaterial;
+  static greenArcMaterial: UnlitMaterial;
+  static blueArcMaterial: UnlitMaterial;
+  static yellowMaterial: UnlitMaterial;
+  static rotatePlaneMaterial: UnlitMaterial;
+  static invisibleMaterialRotate: UnlitMaterial;
+  static invisibleMaterialCircle: UnlitMaterial;
 
-  static visibleMaterialRect: PlainColorMaterial;
-  static invisibleMaterialRect: PlainColorMaterial;
+  static redMaterialScale: UnlitMaterial;
+  static greenMaterialScale: UnlitMaterial;
+  static blueMaterialScale: UnlitMaterial;
+  static greyMaterial: UnlitMaterial;
+  static lightMaterial: UnlitMaterial;
+  static invisibleMaterialScale: UnlitMaterial;
+
+  static visibleMaterialRect: UnlitMaterial;
+  static invisibleMaterialRect: UnlitMaterial;
 
   static lineMesh: ModelMesh;
   static lineMeshShort: ModelMesh;
@@ -58,45 +60,45 @@ export class Utils {
     Utils.redMaterialTrans = this._createPlainColorMaterial(
       engine,
       State.translate,
-      1.0,
-      0.05087608817155679,
-      0.05087608817155679
+      1,
+      0,
+      0
     );
     Utils.lightRedMaterial = this._createPlainColorMaterial(
       engine,
       State.translate,
       1.0,
-      0.05087608817155679,
-      0.05087608817155679,
+      0,
+      0,
       0.9
     );
     Utils.greenMaterialTrans = this._createPlainColorMaterial(
       engine,
       State.translate,
-      0.21404114048223255,
-      0.6038273388553378,
-      0.033104766570885055
+      0,
+      1,
+      0
     );
     Utils.lightGreenMaterial = this._createPlainColorMaterial(
       engine,
       State.translate,
-      0.21404114048223255,
-      0.6038273388553378,
-      0.033104766570885055,
+      0,
+      1,
+      0,
       0.9
     );
     Utils.blueMaterialTrans = this._createPlainColorMaterial(
       engine,
       State.translate,
-      0.07323895587840543,
-      0.21404114048223255,
+      0,
+      0,
       1.0
     );
     Utils.lightBlueMaterial = this._createPlainColorMaterial(
       engine,
       State.translate,
-      0.07323895587840543,
-      0.21404114048223255,
+      0,
+      0,
       1.0,
       0.9
     );
@@ -124,7 +126,13 @@ export class Utils {
       0.21404114048223255,
       1.0
     );
-    Utils.yellowMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.8900054069935289, 0.0);
+    const yellowColor = Color.lerp(
+      Utils.redArcMaterial.baseColor,
+      Utils.greenArcMaterial.baseColor,
+      0.5,
+      new Color()
+    )
+    
     Utils.rotatePlaneMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.8900054069935289, 0.0, 0.2);
     Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialRotate = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
@@ -167,6 +175,11 @@ export class Utils {
       0.44798841244188325,
       0.44798841244188325
     );
+
+    const yzColor = Color.lerp(Utils.greenMaterialTrans.baseColor, Utils.blueMaterialTrans.baseColor, 0.5, new Color());
+
+    Utils.yzMaterial = this._createPlainColorMaterial(engine, State.translateYZ, yzColor.r, yzColor.g, yzColor.b);
+
     Utils.invisibleMaterialScale = this._createPlainColorMaterial(engine, State.scale, 0, 0, 0, 0);
 
     // rect material
@@ -179,10 +192,10 @@ export class Utils {
     );
     Utils.invisibleMaterialRect = this._createPlainColorMaterial(engine, State.rect, 0, 0, 0, 0);
 
-    Utils.lineMesh = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.5);
-    Utils.lineMeshShort = PrimitiveMesh.createCylinder(engine, 0.02, 0.02, 1.3);
-    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.08, 0.07323895587840543);
-    Utils.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.35, 0.35);
+    Utils.lineMesh = PrimitiveMesh.createCylinder(engine, 0.003, 0.003, 1.5);
+    Utils.lineMeshShort = PrimitiveMesh.createCylinder(engine, 0.003, 0.003, 1.3);
+    Utils.axisArrowMesh = PrimitiveMesh.createCone(engine, 0.05, 0.2, 8);
+    Utils.axisPlaneMesh = PrimitiveMesh.createPlane(engine, 0.5, 0.5);
     Utils.axisCubeMesh = PrimitiveMesh.createCuboid(engine, 0.32, 0.32, 0.32);
     Utils.axisSphereMesh = PrimitiveMesh.createSphere(engine, 1.8, 48);
     Utils.axisEndCubeMesh = PrimitiveMesh.createCuboid(engine, 0.25, 0.25, 0.25);
@@ -208,8 +221,8 @@ export class Utils {
     g: number = 1.0,
     b: number = 1.0,
     a: number = 1.0
-  ): PlainColorMaterial {
-    const material = new PlainColorMaterial(engine);
+  ): UnlitMaterial {
+    const material = new UnlitMaterial(engine);
     material.isTransparent = true;
     material.renderState.depthState.enabled = false;
     material.baseColor.set(r, g, b, a);

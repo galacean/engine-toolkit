@@ -1,5 +1,4 @@
-import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Pointer } from "@galacean/engine";
-import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
+import { Component, Entity, Ray, Vector3, Mesh, Camera, Plane, ModelMesh, Pointer, UnlitMaterial } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { Group } from "./Group";
 
@@ -67,9 +66,9 @@ export const axisPlane = [
 export interface AxisProps {
   name: string;
   axisMesh: Array<ModelMesh>;
-  axisMaterial: PlainColorMaterial;
+  axisMaterial: UnlitMaterial;
   axisHelperMesh: Array<Mesh>;
-  axisHelperMaterial: PlainColorMaterial;
+  axisHelperMaterial: UnlitMaterial;
   axisRotation: Array<Vector3>;
   axisTranslation: Array<Vector3>;
   priority?: number;
