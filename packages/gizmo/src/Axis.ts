@@ -7,6 +7,7 @@ export class Axis extends Component {
   private _highLightColor: Color = new Color();
   private _yellowColor: Color = new Color(1.0, 1.0, 0.0, 1.0);
   private _grayColor: Color = new Color(0.5225215539683921, 0.5225215539683921, 0.5225215539683921, 0);
+  private _alpha: number = 1.0;
 
   constructor(entity: Entity) {
     super(entity);
@@ -16,6 +17,7 @@ export class Axis extends Component {
   initAxis(value: AxisProps): void {
     this._material = value.axisMaterial;
     this._color.copyFrom(value.axisMaterial.baseColor);
+    this._alpha = this._color.a;
 
     this._highLightColor.copyFrom(this._color);
     this._highLightColor.r = this._highLightColor.r + 0.3;
@@ -54,19 +56,23 @@ export class Axis extends Component {
   /** highlight axis */
   highLight(): void {
     this._material.baseColor.copyFrom(this._highLightColor);
+    this._alpha = this._highLightColor.a;
   }
   /** unhighligh axis */
   unLight(): void {
     this._material.baseColor.copyFrom(this._color);
+    this._alpha = this._color.a;
   }
   /** change axis color into yellow */
   yellow(): void {
     this._material.baseColor.copyFrom(this._yellowColor);
+    this._alpha = this._yellowColor.a;
   }
   /** change axis color into gray */
   gray(): void {
-    console.log('this._material.isTransparent', this._material.isTransparent) 
+    console.log('this._material.isTransparent', this._material.isTransparent)
     this._material.baseColor.copyFrom(this._grayColor);
+    this._alpha = this._grayColor.a;
   }
   /** recover axis color */
   recover(): void {
@@ -74,6 +80,6 @@ export class Axis extends Component {
   }
   /** change axis alpha */
   alpha(v: number): void {
-    this._material.baseColor.a = v;
+    this._material.baseColor.a = this._alpha * v;
   }
 }
