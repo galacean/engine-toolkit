@@ -1,4 +1,4 @@
-import { Camera, Entity, Plane, Ray, Vector3, Matrix, MeshRenderer, UnlitMaterial, ModelMesh } from "@galacean/engine";
+import { Camera, Entity, Plane, Ray, Vector3, Matrix, MeshRenderer, UnlitMaterial, ModelMesh, Shader, ShaderData, Color } from "@galacean/engine";
 
 import { Axis } from "./Axis";
 import { GizmoUtils, X_AXIS_ROTATION, Y_AXIS_ROTATION, Z_AXIS_ROTATION, XY_PLANE_ROTATION, YZ_PLANE_ROTATION, XZ_PLANE_ROTATION, LINE_TRANSLATION, END_TRANSLATION, PLANE_TRANSLATION } from "./constants";
@@ -32,15 +32,22 @@ export class TranslateControl extends GizmoComponent {
   private _tempScale: number = 1;
   
   // Reference line entities and meshes
-  private _referenceLineEntity: Entity;
-  private _referenceLineMesh: ModelMesh;
+  private _referenceLineEntityX: Entity;
+  private _referenceLineEntityY: Entity;
+  private _referenceLineEntityZ: Entity;
+  private _referenceLineMeshX: ModelMesh;
+  private _referenceLineMeshY: ModelMesh;
+  private _referenceLineMeshZ: ModelMesh;
+  private _referenceLineMaterialX: UnlitMaterial;
+  private _referenceLineMaterialY: UnlitMaterial;
+  private _referenceLineMaterialZ: UnlitMaterial;
 
   constructor(entity: Entity) {
     super(entity);
     this.type = State.translate;
     this._initAxis();
     this._createAxis(entity);
-    this._createReferenceLine(entity);
+    this._createReferenceLines(entity);
   }
 
   init(camera: Camera, group: Group): void {
@@ -81,10 +88,10 @@ export class TranslateControl extends GizmoComponent {
 
     this._selectedAxis = null;
     
-    // Hide reference line
-    if (this._referenceLineEntity) {
-      this._referenceLineEntity.isActive = false;
-    }
+    // Hide all reference lines
+    this._referenceLineEntityX.isActive = false;
+    this._referenceLineEntityY.isActive = false;
+    this._referenceLineEntityZ.isActive = false;
   }
 
   onMoveStart(ray: Ray, axisName: string): void {
@@ -150,10 +157,10 @@ export class TranslateControl extends GizmoComponent {
       currComponent.recover && currComponent.recover();
     }
     
-    // Hide reference line
-    if (this._referenceLineEntity) {
-      this._referenceLineEntity.isActive = false;
-    }
+    // Hide all reference lines
+    this._referenceLineEntityX.isActive = false;
+    this._referenceLineEntityY.isActive = false;
+    this._referenceLineEntityZ.isActive = false;
   }
 
   onUpdate(isModified: boolean = false): void {
@@ -271,67 +278,140 @@ export class TranslateControl extends GizmoComponent {
     }
   }
   
-  private _createReferenceLine(entity: Entity): void {
-    console.log('_createReferenceLine')
-    // Create reference line entity
-    this._referenceLineEntity = entity.createChild("referenceLine");
-    this._referenceLineEntity.isActive = false;
-
-    // Create a long line mesh for reference that extends in both directions
+  private _createReferenceLines(entity: Entity): void {
     const lineLength = 1000; // Very long line to appear infinite
-    const start = new Vector3(-lineLength, 0, 0); // Negative direction
-    const end = new Vector3(lineLength, 0, 0);   // Positive direction
-    this._referenceLineMesh = GizmoMesh.createLine(this.engine, [start, end]);
     
-    // Add renderer
-    const renderer = this._referenceLineEntity.addComponent(MeshRenderer);
-    renderer.receiveShadows = false;
-    renderer.castShadows = false;
-    renderer.mesh = this._referenceLineMesh;
+    // Create shader for gradient lines if it doesn't exist
+    if (!Shader.find("gradientLine")) {
+      this._createGradientLineShader();
+    }
     
-    // Create white material for the reference line
-    const whiteMaterial = new UnlitMaterial(this.engine);
-    whiteMaterial.isTransparent = true;
-    whiteMaterial.renderState.depthState.enabled = false;
-    whiteMaterial.baseColor.set(1, 1, 1, 0.5); // White with some transparency
-    whiteMaterial.name = "referenceLineMaterial";
+    // Create X axis reference line
+    this._referenceLineEntityX = entity.createChild("referenceLineX");
+    this._referenceLineEntityX.isActive = false;
+    const startX = new Vector3(-lineLength, 0, 0);
+    const endX = new Vector3(lineLength, 0, 0);
+    this._referenceLineMeshX = GizmoMesh.createLine(this.engine, [startX, endX]);
     
-    renderer.setMaterial(whiteMaterial);
+    // Create Y axis reference line
+    this._referenceLineEntityY = entity.createChild("referenceLineY");
+    this._referenceLineEntityY.isActive = false;
+    const startY = new Vector3(0, -lineLength, 0);
+    const endY = new Vector3(0, lineLength, 0);
+    this._referenceLineMeshY = GizmoMesh.createLine(this.engine, [startY, endY]);
+    
+    // Create Z axis reference line
+    this._referenceLineEntityZ = entity.createChild("referenceLineZ");
+    this._referenceLineEntityZ.isActive = false;
+    const startZ = new Vector3(0, 0, -lineLength);
+    const endZ = new Vector3(0, 0, lineLength);
+    this._referenceLineMeshZ = GizmoMesh.createLine(this.engine, [startZ, endZ]);
+    
+    // Create materials for each line with matching colors
+    this._referenceLineMaterialX = this._createGradientMaterial(GizmoUtils.redMaterialTrans.baseColor);
+    this._referenceLineMaterialY = this._createGradientMaterial(GizmoUtils.greenMaterialTrans.baseColor);
+    this._referenceLineMaterialZ = this._createGradientMaterial(GizmoUtils.blueMaterialTrans.baseColor);
+    
+    // Add renderers for each line
+    const rendererX = this._referenceLineEntityX.addComponent(MeshRenderer);
+    rendererX.receiveShadows = false;
+    rendererX.castShadows = false;
+    rendererX.mesh = this._referenceLineMeshX;
+    rendererX.setMaterial(this._referenceLineMaterialX);
+    
+    const rendererY = this._referenceLineEntityY.addComponent(MeshRenderer);
+    rendererY.receiveShadows = false;
+    rendererY.castShadows = false;
+    rendererY.mesh = this._referenceLineMeshY;
+    rendererY.setMaterial(this._referenceLineMaterialY);
+    
+    const rendererZ = this._referenceLineEntityZ.addComponent(MeshRenderer);
+    rendererZ.receiveShadows = false;
+    rendererZ.castShadows = false;
+    rendererZ.mesh = this._referenceLineMeshZ;
+    rendererZ.setMaterial(this._referenceLineMaterialZ);
+  }
+  
+  private _createGradientLineShader(): void {
+    const vertexSource = `
+      #include <common>
+      #include <common_vert>
+      
+      uniform mat4 u_MVPMat;
+      
+      attribute vec3 a_Position;
+      
+      varying float v_Distance;
+      
+      void main() {
+        gl_Position = u_MVPMat * vec4(a_Position, 1.0);
+        v_Distance = length(a_Position);
+      }
+    `;
+    
+    const fragmentSource = `
+      #include <common>
+      
+      uniform vec4 u_LineColor;
+      uniform float u_MaxDistance;
+      
+      varying float v_Distance;
+      
+      void main() {
+        float normalizedDistance = v_Distance / u_MaxDistance;
+        float alpha = max(0.0, 1.0 - normalizedDistance);
+        gl_FragColor = vec4(u_LineColor.rgb, u_LineColor.a * alpha);
+      }
+    `;
+    
+    Shader.create("gradientLine", vertexSource, fragmentSource);
+  }
+  
+  private _createGradientMaterial(color: Color): UnlitMaterial {
+    const material = new UnlitMaterial(this.engine);
+    // material.shader = Shader.find("gradientLine")
+
+    material.isTransparent = true;
+    material.renderState.depthState.enabled = false;
+    
+    material.shaderData.setColor("u_LineColor", color);
+    material.shaderData.setFloat("u_MaxDistance", 50.0);
+    
+    return material;
   }
   
   private _showReferenceLine(axisName: string): void {
-    console.log('_showReferenceLine', axisName, this._referenceLineEntity);
-    if (!this._referenceLineEntity) return;
+    // Hide all reference lines first
+    this._referenceLineEntityX.isActive = false;
+    this._referenceLineEntityY.isActive = false;
+    this._referenceLineEntityZ.isActive = false;
     
-    // Reset rotation
-    // this._referenceLineEntity.transform.rotation.set(0, 0, 0);
-    
-    // Show the reference line
-    
-    // Update the scale to match the current gizmo scale
-    this._referenceLineEntity.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
-    
-    // Update the position to match the current gizmo position
-    // This ensures the reference line follows the gizmo when it moves
-    this._referenceLineEntity.transform.worldMatrix = this.gizmoEntity.transform.worldMatrix.clone();
-
-    // Set rotation based on axis
+    // Show the appropriate reference line based on the axis
+    let referenceLine: Entity;
     switch (axisName) {
       case "x":
-        // X axis is default
+        referenceLine = this._referenceLineEntityX;
         break;
       case "y":
-        // Rotate to align with Y axis
-        this._referenceLineEntity.transform.rotation.set(0, 0, 90);
+        referenceLine = this._referenceLineEntityY;
         break;
       case "z":
-        // Rotate to align with Z axis
-        this._referenceLineEntity.transform.rotation.set(0, -90, 0);
+        referenceLine = this._referenceLineEntityZ;
         break;
+      default:
+        return; // No reference line for plane controls
     }
-
-    this._referenceLineEntity.isActive = true;
-        
+    
+    if (referenceLine) {
+      // Show the reference line
+      referenceLine.isActive = true;
+      
+      // Update the scale to match the current gizmo scale
+      referenceLine.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
+      
+      // Update the position to match the current gizmo position
+      referenceLine.transform.worldMatrix = this.gizmoEntity.transform.worldMatrix.clone();
+    }
   }
 
   private _getHitPlane(): void {
@@ -377,8 +457,18 @@ export class TranslateControl extends GizmoComponent {
       _tempVec0.set(this._tempScale, this._tempScale, this._tempScale)
     );
     
-    if (this._referenceLineEntity && this._referenceLineEntity.isActive) {
-      this._referenceLineEntity.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
+    // Update reference lines if any are active
+    if (this._referenceLineEntityX.isActive) {
+      this._referenceLineEntityX.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
+      this._referenceLineEntityX.transform.worldMatrix = _tempMat.clone();
+    }
+    if (this._referenceLineEntityY.isActive) {
+      this._referenceLineEntityY.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
+      this._referenceLineEntityY.transform.worldMatrix = _tempMat.clone();
+    }
+    if (this._referenceLineEntityZ.isActive) {
+      this._referenceLineEntityZ.transform.scale.set(this._tempScale, this._tempScale, this._tempScale);
+      this._referenceLineEntityZ.transform.worldMatrix = _tempMat.clone();
     }
   }
 

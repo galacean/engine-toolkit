@@ -6,7 +6,7 @@ export class Axis extends Component {
   private _color: Color = new Color();
   private _highLightColor: Color = new Color();
   private _yellowColor: Color = new Color(1.0, 1.0, 0.0, 1.0);
-  private _grayColor: Color = new Color(0.5225215539683921, 0.5225215539683921, 0.5225215539683921, 0);
+  private _grayColor: Color = new Color(1, 1, 1, 0.05);
   private _alpha: number = 1.0;
 
   constructor(entity: Entity) {
@@ -20,10 +20,10 @@ export class Axis extends Component {
     this._alpha = this._color.a;
 
     this._highLightColor.copyFrom(this._color);
-    this._highLightColor.r = this._highLightColor.r + 0.3;
-    this._highLightColor.g = this._highLightColor.g + 0.3;
-    this._highLightColor.b = this._highLightColor.b + 0.3;
-    this._highLightColor.a = this._highLightColor.a + 0.1;
+    this._highLightColor.r = this._highLightColor.r + 0.6;
+    this._highLightColor.g = this._highLightColor.g + 0.6;
+    this._highLightColor.b = this._highLightColor.b + 0.6;
+    this._highLightColor.a = 1;
 
     // setup visible axis
     for (let i = 0; i < value.axisMesh.length; i++) {
@@ -70,7 +70,6 @@ export class Axis extends Component {
   }
   /** change axis color into gray */
   gray(): void {
-    console.log('this._material.isTransparent', this._material.isTransparent)
     this._material.baseColor.copyFrom(this._grayColor);
     this._alpha = this._grayColor.a;
   }

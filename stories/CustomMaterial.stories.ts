@@ -86,6 +86,8 @@ export const InfinityGrid = {
     const scene = engine.sceneManager.activeScene;
     const rootEntity = scene.createRootEntity();
 
+    scene.background.solidColor = new Color(0.01, 0.01, 0.01, 1);
+
     // Create camera
     const cameraEntity = rootEntity.createChild("camera");
     cameraEntity.transform.setPosition(4, 4, 4);
@@ -104,7 +106,7 @@ export const InfinityGrid = {
     lightEntity.transform.position = new Vector3(0, 5, 10);
     lightEntity.transform.lookAt(new Vector3(0, 0, 0));
     const directLight = lightEntity.addComponent(DirectLight);
-    directLight.color = new Color(1, 1, 1, 1).toLinear(new Color()); 
+    directLight.color = new Color(1, 1, 1, 1);
     
     // Add a sample cube to visualize the grid
     const cubeEntity = rootEntity.createChild("cube");

@@ -39,7 +39,7 @@ export default {
     },
     gizmoSize: {
       control: { type: 'range', min: 0, max: 2, step: 0.1 },
-      defaultValue: 2
+      defaultValue: 1
     }
   }
 } as Meta;
@@ -47,7 +47,7 @@ export default {
 export const GizmoDemo = {
   args: {
     gizmoState: "translate",
-    gizmoSize: 2
+    gizmoSize: 1
   },
   render:async (args, context) => {
     const engine: WebGLEngine = await context.getEngine();
@@ -63,12 +63,12 @@ export const GizmoDemo = {
     const camera = cameraEntity.addComponent(Camera);
     camera.enableFrustumCulling = true;
 
-    // const orbitControl = cameraEntity.addComponent(OrbitControl);
-    // orbitControl.target = new Vector3(0, 0, 0);
-    // orbitControl.minDistance = 2;
-    // orbitControl.maxDistance = 50;
+    const orbitControl = cameraEntity.addComponent(OrbitControl);
+    orbitControl.target = new Vector3(0, 0, 0);
+    orbitControl.minDistance = 2;
+    orbitControl.maxDistance = 50;
 
-    
+
     const lightEntity = rootEntity.createChild("light");
     lightEntity.transform.setPosition(1, 3, 2);
     lightEntity.transform.lookAt(new Vector3(0, 0, 0));
@@ -86,7 +86,6 @@ export const GizmoDemo = {
     
     const group = new Group();
 
-    
     const gizmoEntity = rootEntity.createChild("editor-gizmo");
     gizmoEntity.layer = Layer.Layer31;
 
@@ -100,10 +99,12 @@ export const GizmoDemo = {
 
     engine.on("gizmo-move-start", (axis) => {
       console.log(`Gizmo move started on axis: ${axis}`);
+      orbitControl.enabled = false;
     });
     
     engine.on("gizmo-move-end", () => {
       console.log("Gizmo move ended");
+      orbitControl.enabled = true;
     });
     
     const updateGizmo = () => {

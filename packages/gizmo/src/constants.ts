@@ -17,8 +17,11 @@ export const INVISIBLE_COLOR = new Color(0.0, 0.0, 0.0, 0.0);
 
 // Composite colors
 export const XY_COLOR = Color.lerp(RED_COLOR, GREEN_COLOR, 0.5, new Color());
+XY_COLOR.a = 0.4;
 export const XZ_COLOR = Color.lerp(RED_COLOR, BLUE_COLOR, 0.5, new Color());
+XZ_COLOR.a = 0.4;
 export const YZ_COLOR = Color.lerp(GREEN_COLOR, BLUE_COLOR, 0.5, new Color());
+YZ_COLOR.a = 0.4;
 export const XYZ_COLOR = Color.lerp(Color.lerp(RED_COLOR, GREEN_COLOR, 0.5, new Color()), BLUE_COLOR, 0.5, new Color());
 export const YELLOW_COLOR = Color.lerp(RED_COLOR, GREEN_COLOR, 0.5, new Color())
 export const GREY_COLOR = new Color(0.5225215539683921, 0.5225215539683921, 0.5225215539683921, 1.0);
@@ -31,13 +34,13 @@ export const ROTATE_CIRCLE_RADIUS = 1.6;
 export const RECT_FACTOR = 0.05;
 
 // Line sizes
-export const LINE_RADIUS = 0.005;
+export const LINE_RADIUS = 0.004;
 export const LINE_LENGTH = 1.5;
 export const LINE_LENGTH_SHORT = 1.3;
 
 // Arrow sizes
 export const ARROW_RADIUS = 0.05;
-export const ARROW_HEIGHT = 0.4;
+export const ARROW_HEIGHT = 0.2;
 export const ARROW_SEGMENTS = 8;
 
 // Plane sizes
