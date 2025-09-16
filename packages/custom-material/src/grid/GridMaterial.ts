@@ -126,7 +126,6 @@ attribute vec4 POSITION_FLIP;
 
 uniform mat4 camera_ViewInvMat;
 uniform mat4 camera_ProjMat;
-uniform vec4 camera_ProjectionParams;
 
 varying vec3 nearPoint;
 varying vec3 farPoint;
