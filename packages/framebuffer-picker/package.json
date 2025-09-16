@@ -2,11 +2,13 @@
   "name": "@galacean/engine-toolkit-framebuffer-picker",
   "version": "1.6.0-beta.1",
   "license": "MIT",
-  "module": "dist/es/index.js",
-  "main": "dist/commonjs/browser.js",
+  "module": "src/index.ts",
+  "main": "src/index.ts",
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org",
+    "main": "dist/commonjs/browser.js",
+    "module": "dist/es/index.js"
   },
   "homepage": "https://oasisengine.cn/",
   "repository": {

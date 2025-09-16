@@ -3,7 +3,9 @@
   "version": "1.6.0-beta.1",
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org",
+    "main": "dist/commonjs/browser.js",
+    "module": "dist/es/index.js"
   },
   "homepage": "https://galacean.antgroup.com/",
   "repository": {
@@ -17,7 +19,8 @@
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
   "types": "types/index.d.ts",
-  "main": "dist/commonjs/browser.js",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
   "umd": {
     "name": "Galacean.Toolkit.XR",
     "globals": {
@@ -25,7 +28,6 @@
       "@galacean/engine-xr": "Galacean.XR"
     }
   },
-  "module": "dist/es/index.js",
   "ignoreMiniProgram": true,
   "files": [
     "dist/**/*",
