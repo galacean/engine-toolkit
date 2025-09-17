@@ -24,8 +24,8 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "@galacean/engine": "^1.6.0-alpha.2",
-    "@galacean/engine-ui": "^1.6.0-alpha.2"
+    "@galacean/engine": ">=1.6.0-0",
+    "@galacean/engine-ui": ">=1.6.0-0"
   },
   "dependencies": {
     "@galacean/engine-toolkit-framebuffer-picker": "workspace:*",
