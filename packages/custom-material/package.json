@@ -24,6 +24,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "@galacean/engine": "^1.6.0-alpha.2"
+    "@galacean/engine": ">=1.6.0-0"
   }
 }
