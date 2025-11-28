@@ -1,4 +1,4 @@
-import { Entity, InputManager, MeshRenderer, Vector2, WebGLEngine } from "@galacean/engine";
+import { Entity, InputManager, MeshRenderer, Vector2, WebGLEngine } from "@galacean/engine-backup";
 import { BoxSelectionSSMaterial } from "./BoxSelectionSSMaterial";
 import { PlaneMesh } from "./PlaneMesh";
 import { IBoxSelectionHelper } from "./types";

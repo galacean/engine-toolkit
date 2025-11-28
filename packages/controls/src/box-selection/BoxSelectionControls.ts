@@ -12,7 +12,7 @@ import {
   PointerButton,
   WebGLEngine,
   Vector2
-} from "@galacean/engine";
+} from "@galacean/engine-backup";
 import { BoxSelectionComponent } from "./BoxSelectionComponent";
 import { BoxSelectionSSHelper } from "./BoxSelectionSSHelper";
 import { IBoxSelectionHelper } from "./types";

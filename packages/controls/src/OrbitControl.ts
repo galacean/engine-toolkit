@@ -1,4 +1,4 @@
-import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "@galacean/engine";
+import { Camera, Canvas, InputManager, Script, Transform, Vector3 } from "@galacean/engine-backup";
 import { Spherical } from "./Spherical";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
 import { ControlKeyboard } from "./inputDevice/ControlKeyboard";

@@ -1,4 +1,4 @@
-import { InputManager, Vector3 } from "@galacean/engine";
+import { InputManager, Vector3 } from "@galacean/engine-backup";
 import { OrbitControl } from "../OrbitControl";
 import { ControlHandlerType } from "../enums/ControlHandlerType";
 import { IControlInput } from "./IControlInput";

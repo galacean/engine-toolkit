@@ -1,4 +1,4 @@
-import { Engine, ModelMesh, Vector3 } from "@galacean/engine";
+import { Engine, ModelMesh, Vector3 } from "@galacean/engine-backup";
 
 export class PlaneMesh {
   static createPlane(engine: Engine): ModelMesh {

@@ -1,4 +1,4 @@
-import { Component } from "@galacean/engine";
+import { Component } from "@galacean/engine-backup";
 
 export class BoxSelectionComponent extends Component {
   private _isSelected = false;

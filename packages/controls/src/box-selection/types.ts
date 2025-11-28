@@ -1,4 +1,4 @@
-import { Vector2 } from "@galacean/engine";
+import { Vector2 } from "@galacean/engine-backup";
 
 export interface IBoxSelectionHelper {
   onSelectStart(vec2: Vector2): any;

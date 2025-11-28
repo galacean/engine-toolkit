@@ -1,4 +1,4 @@
-import { InputManager, Keys, Vector3 } from "@galacean/engine";
+import { InputManager, Keys, Vector3 } from "@galacean/engine-backup";
 import { FreeControl } from "../FreeControl";
 import { ControlHandlerType } from "../enums/ControlHandlerType";
 export class ControlFreeKeyboard {

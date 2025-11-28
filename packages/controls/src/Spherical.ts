@@ -1,4 +1,4 @@
-import { MathUtil, Matrix, Vector3 } from "@galacean/engine";
+import { MathUtil, Matrix, Vector3 } from "@galacean/engine-backup";
 // Prevent gimbal lock.
 const ESP = MathUtil.zeroTolerance;
 // Spherical.

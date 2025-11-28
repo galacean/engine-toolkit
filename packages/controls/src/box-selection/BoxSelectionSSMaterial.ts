@@ -1,4 +1,4 @@
-import { BaseMaterial, Engine, Shader, ShaderProperty, Vector2, Vector4 } from "@galacean/engine";
+import { BaseMaterial, Engine, Shader, ShaderProperty, Vector2, Vector4 } from "@galacean/engine-backup";
 
 export class BoxSelectionSSMaterial extends BaseMaterial {
   private static _borderWidth = ShaderProperty.getByName("u_width");

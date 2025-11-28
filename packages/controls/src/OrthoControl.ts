@@ -1,4 +1,4 @@
-import { Camera, Canvas, Entity, InputManager, Script, Transform, Vector3 } from "@galacean/engine";
+import { Camera, Canvas, Entity, InputManager, Script, Transform, Vector3 } from "@galacean/engine-backup";
 import { ControlHandlerType } from "./enums/ControlHandlerType";
 import { ControlKeyboard } from "./inputDevice/ControlKeyboard";
 import { ControlPointer } from "./inputDevice/ControlPointer";
