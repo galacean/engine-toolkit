@@ -1,5 +1,5 @@
 {
-  "name": "@galacean/engine-toolkit-controls",
+  "name": "@galacean/engine-toolkit-controls-backup",
   "version": "1.6.0",
   "license": "MIT",
   "publishConfig": {
@@ -24,6 +24,6 @@
     "types/**/*"
   ],
   "peerDependencies": {
-    "@galacean/engine": ">=1.6.0-0"
+    "@galacean/engine-backup": "0.0.0-experimental-backup.1"
   }
 }
