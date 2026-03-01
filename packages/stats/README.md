@@ -11,6 +11,9 @@ Statistics toolkit to gather performance data
 - points: point count;
 - textures: texture count;
 - shaders: shader count;
+- textureMemory: GPU memory used by textures (MB);
+- bufferMemory: GPU memory used by buffers (MB);
+- totalGPUMemory: total GPU memory used (MB);
 - webglContext: webgl context type;
 
 ## npm
