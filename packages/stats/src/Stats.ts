@@ -7,7 +7,6 @@ import Monitor from "./Monitor";
  */
 export class Stats extends Script {
   private monitor: Monitor;
-  private camera: Camera;
 
   static hookRequest() {
     hookRequest();
@@ -18,7 +17,6 @@ export class Stats extends Script {
   }
 
   override onBeginRender(camera: Camera): void {
-    this.camera = camera;
     if (!this.monitor) {
       this._setupMonitor();
     }
@@ -31,10 +29,6 @@ export class Stats extends Script {
   }
 
   private _setupMonitor() {
-    // @ts-ignore
-    const gl = this.camera.engine._hardwareRenderer.gl;
-    if (gl) {
-      this.monitor = new Monitor(gl);
-    }
+    this.monitor = new Monitor(this.engine);
   }
 }

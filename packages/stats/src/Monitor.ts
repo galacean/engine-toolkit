@@ -1,3 +1,4 @@
+import { Engine } from "@galacean/engine";
 import { Core } from "./Core";
 
 let tpl = `
@@ -13,6 +14,12 @@ let tpl = `
     <dt>Textures</dt>
     <dd>0</dd>
     <dt>Shaders</dt>
+    <dd>0</dd>
+    <dt>Texture Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>Buffer Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>GPU Memory <span class="unit">(MB)</span></dt>
     <dd>0</dd>
     <dt>Network Size <span class="unit">(MB)</span></dt>
     <dd>0</dd>
@@ -61,10 +68,10 @@ export default class Monitor {
   private container: HTMLElement;
   private readonly items: string[];
 
-  constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
-    this.core = new Core(gl);
+  constructor(engine: Engine) {
+    this.core = new Core(engine);
     this.items = [];
-    this.items = ["fps", "memory", "drawCall", "triangles", "textures", "shaders", "size", "webglContext"];
+    this.items = ["fps", "memory", "drawCall", "triangles", "textures", "shaders", "textureMemory", "bufferMemory", "totalGPUMemory", "size", "webglContext"];
     this.createContainer();
     this.update = this.update.bind(this);
   }

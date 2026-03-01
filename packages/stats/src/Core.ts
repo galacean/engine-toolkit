@@ -1,3 +1,4 @@
+import { Engine } from "@galacean/engine";
 import DrawCallHook from "./hooks/DrawCallHook";
 import { RequestHook } from "./hooks/RequestHook";
 import ShaderHook from "./hooks/ShaderHook";
@@ -14,6 +15,7 @@ declare global {
  */
 export class Core {
   private readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
+  private readonly engine: Engine;
   private drawCallHook: DrawCallHook;
   private textureHook: TextureHook;
   private shaderHook: ShaderHook;
@@ -23,8 +25,11 @@ export class Core {
   private updateCounter: number = 0;
   private updateTime: number = 0;
 
-  constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
+  constructor(engine: Engine) {
+    // @ts-ignore
+    const gl = engine._hardwareRenderer.gl;
     this.gl = gl;
+    this.engine = engine;
     this.hook(gl);
   }
 
@@ -69,6 +74,7 @@ export class Core {
 
     this.samplingIndex = 0;
 
+    const renderingStatistics = this.engine.renderingStatistics;
     let data: PerformanceData = {
       fps: Math.round((this.updateCounter * 1000) / (now - this.updateTime)),
       memory: performance.memory && (performance.memory.usedJSHeapSize / 1048576) >> 0,
@@ -79,6 +85,9 @@ export class Core {
       textures: this.textureHook.textures,
       size: this.requestHook.size,
       shaders: this.shaderHook.shaders,
+      textureMemory: formatBytes(renderingStatistics.textureMemory),
+      bufferMemory: formatBytes(renderingStatistics.bufferMemory),
+      totalGPUMemory: formatBytes(renderingStatistics.totalMemory),
       webglContext:
         window.hasOwnProperty("WebGL2RenderingContext") && this.gl instanceof WebGL2RenderingContext ? "2.0" : "1.0"
     };
@@ -101,6 +110,14 @@ interface PerformanceData {
   points: number;
   textures: number;
   shaders: number;
+  textureMemory: string;
+  bufferMemory: string;
+  totalGPUMemory: string;
   size: string;
   webglContext: string;
+}
+
+function formatBytes(bytes: number): string {
+  const mb = bytes / 1048576;
+  return mb.toFixed(2);
 }
