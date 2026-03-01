@@ -17,11 +17,7 @@ let tpl = `
     <dd>0</dd>
     <dt>Triangles</dt>
     <dd>0</dd>
-    <dt>Textures</dt>
-    <dd>0</dd>
-    <dt>Shaders</dt>
-    <dd>0</dd>
-    <dt>WebGL</dt>
+<dt>WebGL</dt>
     <dd></dd>
   </dl>
 `;
@@ -70,7 +66,7 @@ export default class Monitor {
   constructor(engine: Engine) {
     this.core = new Core(engine);
     this.items = [];
-    this.items = ["fps", "memory", "totalGraphicsMemory", "textureMemory", "bufferMemory", "drawCall", "triangles", "textures", "shaders", "webglContext"];
+    this.items = ["fps", "memory", "totalGraphicsMemory", "textureMemory", "bufferMemory", "drawCall", "triangles", "webglContext"];
     this.createContainer();
     this.update = this.update.bind(this);
   }

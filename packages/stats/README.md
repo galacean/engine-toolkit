@@ -12,8 +12,6 @@ Statistics toolkit to gather performance data
 - triangles: triangle count;
 - lines: line count;
 - points: point count;
-- textures: texture count;
-- shaders: shader count;
 - webglContext: webgl context type;
 
 ## npm

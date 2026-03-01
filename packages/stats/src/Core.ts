@@ -1,8 +1,6 @@
 import { Engine } from "@galacean/engine";
 import DrawCallHook from "./hooks/DrawCallHook";
 
-import ShaderHook from "./hooks/ShaderHook";
-import TextureHook from "./hooks/TextureHook";
 
 declare global {
   interface Performance {
@@ -17,8 +15,6 @@ export class Core {
   private readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
   private readonly engine: Engine;
   private drawCallHook: DrawCallHook;
-  private textureHook: TextureHook;
-  private shaderHook: ShaderHook;
 
   private samplingFrames: number = 60;
   private samplingIndex: number = 0;
@@ -35,9 +31,6 @@ export class Core {
 
   private hook(gl: WebGLRenderingContext | WebGL2RenderingContext): void {
     this.drawCallHook = new DrawCallHook(gl);
-    this.textureHook = new TextureHook(gl);
-    this.shaderHook = new ShaderHook(gl);
-
   }
 
   /**
@@ -52,8 +45,6 @@ export class Core {
    */
   public release(): void {
     this.drawCallHook && this.drawCallHook.release();
-    this.textureHook && this.textureHook.release();
-    this.shaderHook && this.shaderHook.release();
   }
 
   /**
@@ -82,9 +73,6 @@ export class Core {
       triangles: this.drawCallHook.triangles,
       lines: this.drawCallHook.lines,
       points: this.drawCallHook.points,
-      textures: this.textureHook.textures,
-
-      shaders: this.shaderHook.shaders,
       textureMemory: formatBytes(renderingStatistics.textureMemory),
       bufferMemory: formatBytes(renderingStatistics.bufferMemory),
       totalGraphicsMemory: formatBytes(renderingStatistics.totalMemory),
@@ -108,8 +96,6 @@ interface PerformanceData {
   triangles: number;
   lines: number;
   points: number;
-  textures: number;
-  shaders: number;
   textureMemory: string;
   bufferMemory: string;
   totalGraphicsMemory: string;
