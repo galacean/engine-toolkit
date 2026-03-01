@@ -1,6 +1,6 @@
 import { Engine } from "@galacean/engine";
 import DrawCallHook from "./hooks/DrawCallHook";
-import { RequestHook } from "./hooks/RequestHook";
+
 import ShaderHook from "./hooks/ShaderHook";
 import TextureHook from "./hooks/TextureHook";
 
@@ -19,7 +19,7 @@ export class Core {
   private drawCallHook: DrawCallHook;
   private textureHook: TextureHook;
   private shaderHook: ShaderHook;
-  private requestHook: RequestHook;
+
   private samplingFrames: number = 60;
   private samplingIndex: number = 0;
   private updateCounter: number = 0;
@@ -37,7 +37,7 @@ export class Core {
     this.drawCallHook = new DrawCallHook(gl);
     this.textureHook = new TextureHook(gl);
     this.shaderHook = new ShaderHook(gl);
-    this.requestHook = new RequestHook();
+
   }
 
   /**
@@ -83,11 +83,11 @@ export class Core {
       lines: this.drawCallHook.lines,
       points: this.drawCallHook.points,
       textures: this.textureHook.textures,
-      size: this.requestHook.size,
+
       shaders: this.shaderHook.shaders,
       textureMemory: formatBytes(renderingStatistics.textureMemory),
       bufferMemory: formatBytes(renderingStatistics.bufferMemory),
-      totalGPUMemory: formatBytes(renderingStatistics.totalMemory),
+      totalGraphicsMemory: formatBytes(renderingStatistics.totalMemory),
       webglContext:
         window.hasOwnProperty("WebGL2RenderingContext") && this.gl instanceof WebGL2RenderingContext ? "2.0" : "1.0"
     };
@@ -112,8 +112,7 @@ interface PerformanceData {
   shaders: number;
   textureMemory: string;
   bufferMemory: string;
-  totalGPUMemory: string;
-  size: string;
+  totalGraphicsMemory: string;
   webglContext: string;
 }
 

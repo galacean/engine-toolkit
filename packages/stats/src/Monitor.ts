@@ -5,7 +5,13 @@ let tpl = `
   <dl>
     <dt>FPS</dt>
     <dd>0</dd>
-    <dt>Memory <span class="unit">(MB)</span></dt>
+    <dt>JS Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>Total Graphics Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>Texture Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>Buffer Memory <span class="unit">(MB)</span></dt>
     <dd>0</dd>
     <dt>DrawCall</dt>
     <dd>0</dd>
@@ -14,14 +20,6 @@ let tpl = `
     <dt>Textures</dt>
     <dd>0</dd>
     <dt>Shaders</dt>
-    <dd>0</dd>
-    <dt>Texture Memory <span class="unit">(MB)</span></dt>
-    <dd>0</dd>
-    <dt>Buffer Memory <span class="unit">(MB)</span></dt>
-    <dd>0</dd>
-    <dt>GPU Memory <span class="unit">(MB)</span></dt>
-    <dd>0</dd>
-    <dt>Network Size <span class="unit">(MB)</span></dt>
     <dd>0</dd>
     <dt>WebGL</dt>
     <dd></dd>
@@ -60,6 +58,7 @@ let css = `
     font-size: ${20 / 7.5}vh;
     padding: ${10 / 7.5}vh 0 ${10 / 7.5}vh;
   }
+
 `;
 
 export default class Monitor {
@@ -71,7 +70,7 @@ export default class Monitor {
   constructor(engine: Engine) {
     this.core = new Core(engine);
     this.items = [];
-    this.items = ["fps", "memory", "drawCall", "triangles", "textures", "shaders", "textureMemory", "bufferMemory", "totalGPUMemory", "size", "webglContext"];
+    this.items = ["fps", "memory", "totalGraphicsMemory", "textureMemory", "bufferMemory", "drawCall", "triangles", "textures", "shaders", "webglContext"];
     this.createContainer();
     this.update = this.update.bind(this);
   }

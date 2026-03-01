@@ -3,17 +3,17 @@
 Statistics toolkit to gather performance data
 
 ## Features
-- fps: frame rate; 
-- memory: CPU memory;
+- fps: frame rate;
+- memory: JS memory (MB);
+- totalGraphicsMemory: total graphics memory (MB);
+- textureMemory: texture memory (MB);
+- bufferMemory: buffer memory (MB);
 - drawCall: draw call count;
 - triangles: triangle count;
 - lines: line count;
 - points: point count;
 - textures: texture count;
 - shaders: shader count;
-- textureMemory: GPU memory used by textures (MB);
-- bufferMemory: GPU memory used by buffers (MB);
-- totalGPUMemory: total GPU memory used (MB);
 - webglContext: webgl context type;
 
 ## npm
