@@ -4,7 +4,7 @@ Statistics toolkit to gather performance data
 
 ## Features
 - fps: frame rate;
-- memory: JS memory (MB);
+- JS Memory: JS heap memory (MB);
 - totalGraphicsMemory: total graphics memory (MB);
 - textureMemory: texture memory (MB);
 - bufferMemory: buffer memory (MB);
