@@ -1,22 +1,23 @@
+import { Engine } from "@galacean/engine";
 import { Core } from "./Core";
 
 let tpl = `
   <dl>
     <dt>FPS</dt>
     <dd>0</dd>
-    <dt>Memory <span class="unit">(MB)</span></dt>
+    <dt>JS Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>Total Graphics Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>Texture Memory <span class="unit">(MB)</span></dt>
+    <dd>0</dd>
+    <dt>Buffer Memory <span class="unit">(MB)</span></dt>
     <dd>0</dd>
     <dt>DrawCall</dt>
     <dd>0</dd>
     <dt>Triangles</dt>
     <dd>0</dd>
-    <dt>Textures</dt>
-    <dd>0</dd>
-    <dt>Shaders</dt>
-    <dd>0</dd>
-    <dt>Network Size <span class="unit">(MB)</span></dt>
-    <dd>0</dd>
-    <dt>WebGL</dt>
+<dt>WebGL</dt>
     <dd></dd>
   </dl>
 `;
@@ -53,6 +54,7 @@ let css = `
     font-size: ${20 / 7.5}vh;
     padding: ${10 / 7.5}vh 0 ${10 / 7.5}vh;
   }
+
 `;
 
 export default class Monitor {
@@ -61,10 +63,10 @@ export default class Monitor {
   private container: HTMLElement;
   private readonly items: string[];
 
-  constructor(gl: WebGLRenderingContext | WebGL2RenderingContext) {
-    this.core = new Core(gl);
+  constructor(engine: Engine) {
+    this.core = new Core(engine);
     this.items = [];
-    this.items = ["fps", "memory", "drawCall", "triangles", "textures", "shaders", "size", "webglContext"];
+    this.items = ["fps", "memory", "totalGraphicsMemory", "textureMemory", "bufferMemory", "drawCall", "triangles", "webglContext"];
     this.createContainer();
     this.update = this.update.bind(this);
   }
