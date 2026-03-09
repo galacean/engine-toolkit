@@ -45,7 +45,7 @@ export class IconMaterial extends BaseMaterial {
   }
 
   override clone(): IconMaterial {
-    const dest = new IconMaterial(this._engine);
+    const dest = new IconMaterial(this.engine);
     this.cloneTo(dest);
     return dest;
   }

@@ -49,7 +49,7 @@ export class BakePBRMaterial extends PBRMaterial {
   }
 
   override clone(): BakePBRMaterial {
-    const dest = new BakePBRMaterial(this._engine);
+    const dest = new BakePBRMaterial(this.engine);
     this.cloneTo(dest);
     return dest;
   }
