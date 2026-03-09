@@ -1,7 +1,6 @@
 import { Engine } from "@galacean/engine";
 import DrawCallHook from "./hooks/DrawCallHook";
 
-
 declare global {
   interface Performance {
     memory: any;

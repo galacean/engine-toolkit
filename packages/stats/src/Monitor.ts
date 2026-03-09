@@ -66,7 +66,16 @@ export default class Monitor {
   constructor(engine: Engine) {
     this.core = new Core(engine);
     this.items = [];
-    this.items = ["fps", "memory", "totalGraphicsMemory", "textureMemory", "bufferMemory", "drawCall", "triangles", "webglContext"];
+    this.items = [
+      "fps",
+      "memory",
+      "totalGraphicsMemory",
+      "textureMemory",
+      "bufferMemory",
+      "drawCall",
+      "triangles",
+      "webglContext"
+    ];
     this.createContainer();
     this.update = this.update.bind(this);
   }
