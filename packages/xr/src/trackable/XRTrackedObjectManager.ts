@@ -54,7 +54,7 @@ export abstract class XRTrackedObjectManager<T extends XRTracked> extends Script
         this._initXRFeature();
         break;
       case XRSessionState.Initialized:
-        const feature = this._engine.xrManager.getFeature(this._feature);
+        const feature = this.engine.xrManager.getFeature(this._feature);
         if (feature) {
           feature.addChangedListener(this._onTrackedChanged);
         } else {
@@ -113,7 +113,7 @@ export abstract class XRTrackedObjectManager<T extends XRTracked> extends Script
   }
 
   private _createTrackedComponents(sessionRelativeData: T): TrackedComponent<T> {
-    const { origin } = this._engine.xrManager;
+    const { origin } = this.engine.xrManager;
     const { prefab } = this;
     let entity: Entity;
     if (!prefab) {

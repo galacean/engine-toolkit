@@ -35,7 +35,7 @@ export class PlainColorMaterial extends BaseMaterial {
   }
 
   override clone(): PlainColorMaterial {
-    const dest = new PlainColorMaterial(this._engine);
+    const dest = new PlainColorMaterial(this.engine);
     this.cloneTo(dest);
     return dest;
   }

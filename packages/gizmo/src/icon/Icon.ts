@@ -72,7 +72,7 @@ export class Icon extends Script {
 
   constructor(entity: Entity) {
     super(entity);
-    const engine = this._engine;
+    const engine = this.engine;
     const meshRenderer = entity.addComponent(MeshRenderer);
     this._renderer = meshRenderer;
     //  2 ---- 3
