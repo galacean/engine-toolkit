@@ -55,6 +55,10 @@ const shaderSource = `Shader "plain-color" {
         #endif
       };
 
+      struct Varyings {
+        float _placeholder;
+      };
+
       Varyings vert(Attributes attr) {
         Varyings v;
 

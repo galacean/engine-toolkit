@@ -13,6 +13,10 @@ const shaderSource = `Shader "box" {
         vec3 POSITION;
       };
 
+      struct Varyings {
+        float _placeholder;
+      };
+
       Varyings vert(Attributes attr) {
         Varyings v;
         gl_Position = vec4(attr.POSITION, 1.0);

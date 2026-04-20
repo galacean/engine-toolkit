@@ -191,5 +191,5 @@ Pass "PlanarShadow" {
 const planarShadow = new ShaderPass(planarShadowPassSource);
 
 if (!Shader.find("planarShadowShader")) {
-  Shader.create("planarShadowShader", [Shader.find("pbr").subShaders[0].passes[0], planarShadow]);
+  Shader.create("planarShadowShader", [Shader.find("PBR").subShaders[0].passes[2], planarShadow]);
 }

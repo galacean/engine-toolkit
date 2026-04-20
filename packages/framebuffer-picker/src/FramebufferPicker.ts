@@ -80,6 +80,10 @@ const colorShaderSource = `Shader "framebuffer-picker-color" {
         #endif
       };
 
+      struct Varyings {
+        float _placeholder;
+      };
+
       Varyings vert(Attributes attr) {
         Varyings v;
 
