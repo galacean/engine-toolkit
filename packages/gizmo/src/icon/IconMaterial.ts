@@ -1,5 +1,119 @@
 import { BaseMaterial, Color, CullMode, Engine, Shader, Texture2D } from "@galacean/engine";
 
+const shaderSource = `Shader "icon" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
+
+      #include "Common/Common.glsl"
+      #include "Common/Transform.glsl"
+      #include "Skin/Skin.glsl"
+      #include "Skin/BlendShape.glsl"
+
+      vec2 u_size;
+      vec4 u_pixelViewport;
+
+      struct Attributes {
+        vec3 POSITION;
+        vec2 TEXCOORD_0;
+        #ifdef RENDERER_HAS_BLENDSHAPE
+          #ifndef RENDERER_BLENDSHAPE_USE_TEXTURE
+            vec3 POSITION_BS0;
+            vec3 POSITION_BS1;
+            #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) && defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
+              vec3 NORMAL_BS0;
+              vec3 NORMAL_BS1;
+              vec3 TANGENT_BS0;
+              vec3 TANGENT_BS1;
+            #else
+              #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) || defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
+                vec3 POSITION_BS2;
+                vec3 POSITION_BS3;
+                #ifdef RENDERER_BLENDSHAPE_HAS_NORMAL
+                  vec3 NORMAL_BS0;
+                  vec3 NORMAL_BS1;
+                  vec3 NORMAL_BS2;
+                  vec3 NORMAL_BS3;
+                #endif
+                #ifdef RENDERER_BLENDSHAPE_HAS_TANGENT
+                  vec3 TANGENT_BS0;
+                  vec3 TANGENT_BS1;
+                  vec3 TANGENT_BS2;
+                  vec3 TANGENT_BS3;
+                #endif
+              #else
+                vec3 POSITION_BS2;
+                vec3 POSITION_BS3;
+                vec3 POSITION_BS4;
+                vec3 POSITION_BS5;
+                vec3 POSITION_BS6;
+                vec3 POSITION_BS7;
+              #endif
+            #endif
+          #endif
+        #endif
+        #ifdef RENDERER_HAS_SKIN
+          vec4 JOINTS_0;
+          vec4 WEIGHTS_0;
+        #endif
+      };
+
+      struct Varyings {
+        vec2 v_uv;
+      };
+
+      Varyings vert(Attributes attr) {
+        Varyings v;
+
+        vec4 position = vec4(attr.POSITION, 1.0);
+
+        #ifdef RENDERER_HAS_BLENDSHAPE
+          calculateBlendShape(attr, position);
+        #endif
+
+        #ifdef RENDERER_HAS_SKIN
+          mat4 skinMatrix = getSkinMatrix(attr);
+          position = skinMatrix * position;
+        #endif
+
+        vec4 translation = renderer_MVPMat[3];
+        translation = translation / translation.w;
+        float xFactor = u_size.x / u_pixelViewport.z * 2.0;
+        float yFactor = u_size.y / u_pixelViewport.w * 2.0;
+        gl_Position = vec4(translation.x + xFactor * position.x, translation.y + yFactor * position.y, translation.z, 1);
+        v.v_uv = attr.TEXCOORD_0;
+
+        return v;
+      }
+
+      vec4 material_BaseColor;
+      #ifdef MATERIAL_HAS_BASETEXTURE
+        sampler2D material_BaseTexture;
+      #endif
+
+      void frag(Varyings v) {
+        vec4 baseColor = material_BaseColor;
+
+        #ifdef MATERIAL_HAS_BASETEXTURE
+          vec4 textureColor = texture2D(material_BaseTexture, v.v_uv);
+          baseColor.a *= textureColor.a;
+        #endif
+
+        #ifdef MATERIAL_IS_ALPHA_CUTOFF
+          if( baseColor.a < material_AlphaCutoff ) {
+            discard;
+          }
+        #endif
+
+        gl_FragColor = baseColor;
+      }
+    }
+  }
+}`;
+
+Shader.find("icon") || Shader.create(shaderSource);
+
 /**
  * Icon Material. don't effected by light and fog.
  */
@@ -50,56 +164,3 @@ export class IconMaterial extends BaseMaterial {
     return dest;
   }
 }
-
-Shader.create(
-  "icon",
-  `
-#include <common>
-#include <common_vert>
-#include <uv_share>
-#include <blendShape_input>
-
-uniform vec2 u_size;
-uniform vec4 u_pixelViewport;
-
-void main() {
-    #include <begin_position_vert>
-    #include <blendShape_vert>
-    #include <skinning_vert>
-
-    vec4 translation = renderer_MVPMat[3];
-    translation = translation / translation.w;
-    float xFactor = u_size.x / u_pixelViewport.z * 2.0;
-    float yFactor = u_size.y / u_pixelViewport.w * 2.0;
-    gl_Position = vec4(translation.x + xFactor * position.x, translation.y + yFactor * position.y, translation.z, 1);
-    v_uv = TEXCOORD_0;
-}
-`,
-
-  `
-#include <common>
-#include <uv_share>
-
-uniform vec4 material_BaseColor;
-#ifdef MATERIAL_HAS_BASETEXTURE
-    uniform sampler2D material_BaseTexture;
-#endif
-
-void main() {
-     vec4 baseColor = material_BaseColor;
-
-     #ifdef MATERIAL_HAS_BASETEXTURE
-        vec4 textureColor = texture2D(material_BaseTexture, v_uv);
-        baseColor.a *= textureColor.a;
-     #endif
-
-    #ifdef MATERIAL_IS_ALPHA_CUTOFF
-        if( baseColor.a < material_AlphaCutoff ) {
-            discard;
-        }
-    #endif
-
-    gl_FragColor = baseColor;
-}
-`
-);

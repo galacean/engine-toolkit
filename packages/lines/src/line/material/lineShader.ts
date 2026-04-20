@@ -1,62 +1,63 @@
 import { Shader } from "@galacean/engine";
 
-//-- Shader 代码
-const vertexSource = `
-attribute vec2 a_pos;
-attribute vec2 a_normal;
-attribute vec2 a_data;
+const shaderSource = `Shader "line" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
 
-uniform mat4 renderer_MVPMat;
-uniform float u_width;
+      mat4 renderer_MVPMat;
+      float u_width;
 
-varying vec2 v_origin;
-varying vec2 v_position;
-varying float v_direction;
-varying float v_part;
+      struct Attributes {
+        vec2 a_pos;
+        vec2 a_normal;
+        vec2 a_data;
+      };
 
-void main() {
-    v_direction = a_data.x;
-    v_part = a_data.y;
-    float layer_index = 1.0;
+      struct Varyings {
+        vec2 v_origin;
+        vec2 v_position;
+        float v_direction;
+        float v_part;
+      };
 
-    v_origin = a_pos;
-    vec2 position = a_pos + a_normal * u_width;
-    v_position = position;
-    gl_Position = renderer_MVPMat * vec4(position, 0.0, 1);
-}
-  `;
+      Varyings vert(Attributes attr) {
+        Varyings v;
+        v.v_direction = attr.a_data.x;
+        v.v_part = attr.a_data.y;
+        float layer_index = 1.0;
 
-const fragmentSource = `
-precision highp float;
+        v.v_origin = attr.a_pos;
+        vec2 position = attr.a_pos + attr.a_normal * u_width;
+        v.v_position = position;
+        gl_Position = renderer_MVPMat * vec4(position, 0.0, 1);
+        return v;
+      }
 
-uniform vec4 u_color;
-uniform int u_join;
-uniform int u_cap;
-uniform float u_width;
+      vec4 u_color;
+      int u_join;
+      int u_cap;
 
-varying vec2 v_origin;
-varying vec2 v_position;
-varying float v_direction;
-varying float v_part;
+      float IS_CAP = 0.0;
 
-float IS_CAP = 0.0;
+      void frag(Varyings v) {
+        vec4 finalColor;
+        if (u_cap == 0 && v.v_part == IS_CAP) {
+          if (distance(v.v_position, v.v_origin) > u_width) {
+            discard;
+          }
+        }
+        if (u_join == 1 && v.v_part > 1.0) {
+          if (distance(v.v_position, v.v_origin) > u_width) {
+            discard;
+          }
+        }
 
-void main() {
-    vec4 finalColor;
-    if (u_cap == 0 && v_part == IS_CAP) {
-      if (distance(v_position, v_origin) > u_width) {
-        discard;
+        gl_FragColor = u_color;
       }
     }
-    if (u_join == 1 && v_part > 1.0) {
-      if (distance(v_position, v_origin) > u_width) {
-        discard;
-      }
-    }
+  }
+}`;
 
-    gl_FragColor = u_color;
-}
-
-  `;
-
-Shader.create("line", vertexSource, fragmentSource);
+Shader.find("line") || Shader.create(shaderSource);

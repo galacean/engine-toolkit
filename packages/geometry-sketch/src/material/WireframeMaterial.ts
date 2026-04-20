@@ -1,81 +1,94 @@
 import { BaseMaterial, Color, Engine, RenderFace, Shader } from "@galacean/engine";
 import { geometryTextureDefine, geometryTextureVert } from "./GeometryShader";
 
-Shader.create(
-  "wireframeShader",
-  `
-#include <common>
-   uniform float u_lineScale;
-   uniform mat4 camera_VPMat;
-   uniform mat4 u_worldMatrix;
-   uniform mat4 u_worldNormal;
+const shaderSource = `Shader "wireframeShader" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
 
-#ifdef RENDERER_HAS_SKIN
-#ifdef RENDERER_USE_JOINT_TEXTURE
-    uniform sampler2D renderer_JointSampler;
-    uniform float renderer_JointCount;
+      #include "Common/Common.glsl"
+      #include "Common/Transform.glsl"
+      #include "Skin/Skin.glsl"
 
-    mat4 getJointMatrix(sampler2D smp, float index) {
-        float base = index / renderer_JointCount;
-        float hf = 0.5 / renderer_JointCount;
-        float v = base + hf;
+      float u_lineScale;
+      mat4 camera_VPMat;
+      mat4 u_worldMatrix;
+      mat4 u_worldNormal;
 
-        vec4 m0 = texture2D(smp, vec2(0.125, v ));
-        vec4 m1 = texture2D(smp, vec2(0.375, v ));
-        vec4 m2 = texture2D(smp, vec2(0.625, v ));
-        vec4 m3 = texture2D(smp, vec2(0.875, v ));
+      ${geometryTextureDefine}
 
-        return mat4(m0, m1, m2, m3);
+      struct Attributes {
+        vec3 POSITION;
+        #ifdef RENDERER_HAS_SKIN
+          vec4 JOINTS_0;
+          vec4 WEIGHTS_0;
+        #endif
+        #ifdef RENDERER_HAS_NORMAL
+          vec3 NORMAL;
+        #endif
+        #ifdef RENDERER_HAS_TANGENT
+          vec4 TANGENT;
+        #endif
+      };
+
+      struct Varyings {
+        vec3 v_baryCenter;
+      };
+
+      Varyings vert(Attributes attr) {
+        Varyings v;
+        int indicesIndex = gl_VertexID / 3;
+        int indicesRow = indicesIndex / int(u_indicesTextureWidth);
+        int indicesCol = indicesIndex % int(u_indicesTextureWidth);
+        vec3 triangleIndices = getIndicesElement(float(indicesRow), float(indicesCol));
+        int subIndex = gl_VertexID % 3;
+        v.v_baryCenter = vec3(0.0);
+        v.v_baryCenter[subIndex] = 1.0;
+
+        int pointIndex = int(triangleIndices[subIndex]);
+        ${geometryTextureVert}
+
+        vec4 position = vec4(POSITION, 1.0);
+
+        #ifdef RENDERER_HAS_NORMAL
+          vec3 normal = vec3(NORMAL);
+          #ifdef RENDERER_HAS_TANGENT
+            vec4 tangent = vec4(TANGENT);
+          #endif
+        #endif
+
+        #ifdef RENDERER_HAS_SKIN
+          mat4 skinMatrix = getSkinMatrix(attr);
+          position = skinMatrix * position;
+        #endif
+
+        gl_Position = u_worldMatrix * position;
+        gl_Position = camera_VPMat * gl_Position;
+        return v;
+      }
+
+      vec4 material_BaseColor;
+
+      float edgeFactor(vec3 baryCenter) {
+        vec3 d = fwidth(baryCenter);
+        vec3 a3 = smoothstep(vec3(0.0), d * 1.5, baryCenter);
+        return min(min(a3.x, a3.y), a3.z);
+      }
+
+      void frag(Varyings v) {
+        if (gl_FrontFacing) {
+          gl_FragColor = vec4(material_BaseColor.xyz, 1.0 - edgeFactor(v.v_baryCenter));
+        } else {
+          // fade back face
+          gl_FragColor = vec4(material_BaseColor.xyz, (1.0 - edgeFactor(v.v_baryCenter)) * 0.3);
+        }
+      }
     }
-#else
-    uniform mat4 renderer_JointMatrix[ RENDERER_JOINTS_NUM ];
-#endif
-#endif
+  }
+}`;
 
-${geometryTextureDefine}
-
-varying vec3 v_baryCenter;
-
-void main() {
-    int indicesIndex = gl_VertexID / 3;
-    int indicesRow = indicesIndex / int(u_indicesTextureWidth);
-    int indicesCol = indicesIndex % int(u_indicesTextureWidth);
-    vec3 triangleIndices = getIndicesElement(float(indicesRow), float(indicesCol));
-    int subIndex = gl_VertexID % 3;
-    v_baryCenter = vec3(0.0);
-    v_baryCenter[subIndex] = 1.0;
-    
-    int pointIndex = int(triangleIndices[subIndex]);
-    ${geometryTextureVert}
-
-    #include <begin_position_vert>
-    #include <begin_normal_vert>
-    #include <skinning_vert>
-    
-    gl_Position = u_worldMatrix * position; 
-    gl_Position = camera_VPMat * gl_Position; 
-}
-`,
-  `
-varying vec3 v_baryCenter;
-
-float edgeFactor(){
-    vec3 d = fwidth(v_baryCenter);
-    vec3 a3 = smoothstep(vec3(0.0), d * 1.5, v_baryCenter);
-    return min(min(a3.x, a3.y), a3.z);
-}
-
-uniform vec4 material_BaseColor;
-void main() {
-    if (gl_FrontFacing) {
-        gl_FragColor = vec4(material_BaseColor.xyz, 1.0 - edgeFactor());
-    } else {
-        // fade back face
-        gl_FragColor = vec4(material_BaseColor.xyz, (1.0 - edgeFactor()) * 0.3);
-    }
-}
-`
-);
+Shader.find("wireframeShader") || Shader.create(shaderSource);
 
 export class WireframeMaterial extends BaseMaterial {
   /**

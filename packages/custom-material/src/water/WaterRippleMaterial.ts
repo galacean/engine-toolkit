@@ -1,49 +1,60 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector3 } from "@galacean/engine";
 
-const vertexSource = `
-  attribute vec3 POSITION;
-  attribute vec2 TEXCOORD_0;
-  attribute vec4 COLOR_0;
-  uniform mat4 renderer_MVPMat;
-  
-  uniform float u_time;
-  uniform vec2 u_foam_speed; 
-  uniform vec2 u_distorsion_speed; 
-  varying vec2 waterTexCoords;
-  varying vec2 normalTexCoords;
-  varying vec4 v_color;
-      
-  void main() {
-    gl_Position = renderer_MVPMat * vec4(POSITION, 1.0);
-    waterTexCoords = TEXCOORD_0 + vec2(u_foam_speed.x * u_time, u_foam_speed.y * u_time);
-    normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));
-    v_color = COLOR_0; 
-  }
-  `;
+const shaderSource = `Shader "water-ripple" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
 
-const fragmentSource = `
-  #include <common>
-  varying vec4 v_color;
-  varying vec2 waterTexCoords;
-  varying vec2 normalTexCoords;
-  uniform sampler2D material_NormalTexture;
-  uniform sampler2D u_foamTex;
-  uniform vec3 u_foamColor;
-  uniform vec2 u_foam_param;
-  uniform float u_distorsion_amount;
-  void main() {  
-    vec4 normalTex = texture2D(material_NormalTexture, normalTexCoords) * 2.0 - 1.0;
-    vec4 waterTex = texture2D(u_foamTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
-    float alphaComp = v_color.r * waterTex.r * u_foam_param.x;
-    float alpha = pow(alphaComp,2.0);
-    alpha = smoothstep(0.5 - u_foam_param.y, 0.5+ u_foam_param.y, alpha);
-    alpha = saturate(alpha);
-    
-    gl_FragColor = vec4(u_foamColor.rgb, alpha);
-  }
-  `;
+      mat4 renderer_MVPMat;
+      float u_time;
+      vec2 u_foam_speed;
+      vec2 u_distorsion_speed;
 
-Shader.create("water-ripple", vertexSource, fragmentSource);
+      struct Attributes {
+        vec3 POSITION;
+        vec2 TEXCOORD_0;
+        vec4 COLOR_0;
+      };
+
+      struct Varyings {
+        vec2 waterTexCoords;
+        vec2 normalTexCoords;
+        vec4 v_color;
+      };
+
+      Varyings vert(Attributes attr) {
+        Varyings v;
+        gl_Position = renderer_MVPMat * vec4(attr.POSITION, 1.0);
+        v.waterTexCoords = attr.TEXCOORD_0 + vec2(u_foam_speed.x * u_time, u_foam_speed.y * u_time);
+        v.normalTexCoords = attr.TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));
+        v.v_color = attr.COLOR_0;
+        return v;
+      }
+
+      #include "Common/Common.glsl"
+
+      sampler2D material_NormalTexture;
+      sampler2D u_foamTex;
+      vec3 u_foamColor;
+      vec2 u_foam_param;
+      float u_distorsion_amount;
+
+      void frag(Varyings v) {
+        vec4 normalTex = texture2D(material_NormalTexture, v.normalTexCoords) * 2.0 - 1.0;
+        vec4 waterTex = texture2D(u_foamTex, v.waterTexCoords + (normalTex.rg * u_distorsion_amount));
+        float alphaComp = v.v_color.r * waterTex.r * u_foam_param.x;
+        float alpha = pow(alphaComp, 2.0);
+        alpha = smoothstep(0.5 - u_foam_param.y, 0.5 + u_foam_param.y, alpha);
+        alpha = saturate(alpha);
+
+        gl_FragColor = vec4(u_foamColor.rgb, alpha);
+      }
+    }
+  }
+}`;
+
+Shader.find("water-ripple") || Shader.create(shaderSource);
 
 export class WaterRippleMaterial extends BaseMaterial {
   private static _foamColor = ShaderProperty.getByName("u_foamColor");

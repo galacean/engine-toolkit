@@ -1,70 +1,76 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector4 } from "@galacean/engine";
 
-const vertexSource = `
-    attribute vec3 POSITION;
-    attribute vec2 TEXCOORD_0;
-    attribute vec4 COLOR_0;
-  
-    uniform mat4 renderer_MVPMat;
-    
-    uniform float u_time;
-    uniform vec2 u_water_speed; 
-    uniform vec2 u_waterfall_speed; 
-    uniform vec2 u_distorsion_speed; 
-  
-    varying vec2 waterTexCoords;
-    varying vec2 waterfallTexCoords;
-    varying vec2 normalTexCoords;
-    varying vec4 v_color;
+const shaderSource = `Shader "water-fall" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
 
-    void main() {
-      gl_Position = renderer_MVPMat * vec4(POSITION, 1.0);
-  
-      waterTexCoords = TEXCOORD_0 + vec2(u_water_speed.x * u_time, u_water_speed.y * u_time);
-      waterfallTexCoords = TEXCOORD_0 + vec2(u_waterfall_speed.x * u_time, u_waterfall_speed.y * u_time);
-      normalTexCoords = TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));    
-      
-      v_color = COLOR_0; 
+      mat4 renderer_MVPMat;
+      float u_time;
+      vec2 u_water_speed;
+      vec2 u_waterfall_speed;
+      vec2 u_distorsion_speed;
+
+      struct Attributes {
+        vec3 POSITION;
+        vec2 TEXCOORD_0;
+        vec4 COLOR_0;
+      };
+
+      struct Varyings {
+        vec2 waterTexCoords;
+        vec2 waterfallTexCoords;
+        vec2 normalTexCoords;
+        vec4 v_color;
+      };
+
+      Varyings vert(Attributes attr) {
+        Varyings v;
+        gl_Position = renderer_MVPMat * vec4(attr.POSITION, 1.0);
+
+        v.waterTexCoords = attr.TEXCOORD_0 + vec2(u_water_speed.x * u_time, u_water_speed.y * u_time);
+        v.waterfallTexCoords = attr.TEXCOORD_0 + vec2(u_waterfall_speed.x * u_time, u_waterfall_speed.y * u_time);
+        v.normalTexCoords = attr.TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));
+
+        v.v_color = attr.COLOR_0;
+        return v;
+      }
+
+      #include "Common/Common.glsl"
+
+      sampler2D material_NormalTexture;
+      sampler2D u_waterTex;
+      sampler2D u_waterfallTex;
+      sampler2D u_edgeNoiseTex;
+
+      vec4 u_edgeColor;
+      vec2 u_edgeParam;
+      float u_distorsion_amount;
+
+      void frag(Varyings v) {
+        vec4 normalTex = texture2D(material_NormalTexture, v.normalTexCoords) * 2.0 - 1.0;
+
+        vec4 waterTex = texture2D(u_waterTex, v.waterTexCoords + (normalTex.rg * u_distorsion_amount));
+        vec4 waterfallTex = texture2D(u_waterfallTex, v.waterfallTexCoords + (normalTex.rg * u_distorsion_amount));
+
+        vec4 streamEdge = texture2D(u_edgeNoiseTex, v.waterTexCoords);
+        vec4 fallEdge = texture2D(u_edgeNoiseTex, v.waterfallTexCoords);
+
+        float edgeShape = mix(fallEdge.r, streamEdge.r, v.v_color.r);
+        edgeShape = saturate(edgeShape * v.v_color.g);
+        edgeShape = saturate(smoothstep(u_edgeParam.x - u_edgeParam.y, u_edgeParam.x + u_edgeParam.y, edgeShape));
+
+        vec4 waterAll = mix(waterfallTex, waterTex, v.v_color.r);
+        vec4 finalCol = mix(waterAll, u_edgeColor, edgeShape);
+
+        gl_FragColor = finalCol;
+      }
     }
-    `;
+  }
+}`;
 
-const fragmentSource = `
-    #include <common>
-    varying vec4 v_color;
-    varying vec2 waterTexCoords;
-    varying vec2 waterfallTexCoords;
-    varying vec2 normalTexCoords;
-  
-    uniform sampler2D material_NormalTexture;
-    uniform sampler2D u_waterTex;
-    uniform sampler2D u_waterfallTex;
-    uniform sampler2D u_edgeNoiseTex;
-  
-    uniform vec4 u_edgeColor;
-    uniform vec2 u_edgeParam;
-    uniform float u_distorsion_amount;
-  
-    void main() {      
-      vec4 normalTex = texture2D(material_NormalTexture, normalTexCoords) * 2.0 - 1.0;
-      
-      vec4 waterTex = texture2D(u_waterTex, waterTexCoords + (normalTex.rg * u_distorsion_amount));
-      vec4 waterfallTex = texture2D(u_waterfallTex, waterfallTexCoords + (normalTex.rg * u_distorsion_amount));
-  
-      vec4 streamEdge = texture2D(u_edgeNoiseTex, waterTexCoords);
-      vec4 fallEdge = texture2D(u_edgeNoiseTex, waterfallTexCoords);
-  
-      float edgeShape = mix(fallEdge.r, streamEdge.r, v_color.r);
-      edgeShape = saturate(edgeShape * v_color.g);
-      edgeShape = saturate(smoothstep(u_edgeParam.x - u_edgeParam.y, u_edgeParam.x + u_edgeParam.y, edgeShape));
-  
-      vec4 waterAll = mix(waterfallTex, waterTex, v_color.r);
-      vec4 finalCol = mix(waterAll, u_edgeColor, edgeShape);
-  
-      gl_FragColor = finalCol;
-    }
-    `;
-
-Shader.create("water-fall", vertexSource, fragmentSource);
+Shader.find("water-fall") || Shader.create(shaderSource);
 
 export class WaterFallMaterial extends BaseMaterial {
   private static _waterSpeed = ShaderProperty.getByName("u_water_speed");

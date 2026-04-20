@@ -24,10 +24,199 @@ import {
   dependentComponents
 } from "@galacean/engine";
 
-import outlineFs from "./outline.fs.glsl";
-import outlineVs from "./outline.vs.glsl";
-import replaceFs from "./replace.fs.glsl";
-import replaceVs from "./replace.vs.glsl";
+const outlinePostprocessShaderSource = `Shader "outline-postprocess-shader" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
+
+      struct Attributes {
+        vec3 POSITION;
+        vec2 TEXCOORD_0;
+      };
+
+      struct Varyings {
+        vec2 v_uv;
+      };
+
+      Varyings vert(Attributes attr) {
+        Varyings v;
+        gl_Position = vec4(attr.POSITION.xzy, 1.0);
+        v.v_uv = attr.TEXCOORD_0;
+        return v;
+      }
+
+      #include "Common/Common.glsl"
+
+      vec3 material_OutlineColor;
+      sampler2D material_OutlineTexture;
+      vec2 material_TexSize;
+
+      float luminance(vec4 color) {
+        return 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
+      }
+
+      float sobel(vec2 uv) {
+        // adapter to webgl 1.0
+        float Gx[9];
+        Gx[0] = -1.0;
+        Gx[1] = 0.0;
+        Gx[2] = 1.0;
+        Gx[3] = -2.0;
+        Gx[4] = 0.0;
+        Gx[5] = 2.0;
+        Gx[6] = -1.0;
+        Gx[7] = 0.0;
+        Gx[8] = 1.0;
+
+        float Gy[9];
+        Gy[0] = -1.0;
+        Gy[1] = -2.0;
+        Gy[2] = -1.0;
+        Gy[3] = 0.0;
+        Gy[4] = 0.0;
+        Gy[5] = 0.0;
+        Gy[6] = 1.0;
+        Gy[7] = 2.0;
+        Gy[8] = 1.0;
+
+        float texColor;
+        float edgeX = 0.0;
+        float edgeY = 0.0;
+        vec2 sampleUV[9];
+
+        sampleUV[0] = uv + material_TexSize.xy * vec2(-1, -1);
+        sampleUV[1] = uv + material_TexSize.xy * vec2(0, -1);
+        sampleUV[2] = uv + material_TexSize.xy * vec2(1, -1);
+        sampleUV[3] = uv + material_TexSize.xy * vec2(-1, 0);
+        sampleUV[4] = uv + material_TexSize.xy * vec2(0, 0);
+        sampleUV[5] = uv + material_TexSize.xy * vec2(1, 0);
+        sampleUV[6] = uv + material_TexSize.xy * vec2(-1, 1);
+        sampleUV[7] = uv + material_TexSize.xy * vec2(0, 1);
+        sampleUV[8] = uv + material_TexSize.xy * vec2(1, 1);
+
+        for (int i = 0; i < 9; i++) {
+          texColor = luminance(texture2D(material_OutlineTexture, sampleUV[i]));
+          edgeX += texColor * Gx[i];
+          edgeY += texColor * Gy[i];
+        }
+
+        return abs(edgeX) + abs(edgeY);
+      }
+
+      void frag(Varyings v) {
+        float sobelFactor = step(1.0, sobel(v.v_uv));
+        gl_FragColor = mix(vec4(0), vec4(material_OutlineColor, 1.0), sobelFactor);
+      }
+    }
+  }
+}`;
+
+const outlineReplaceShaderSource = `Shader "outline-replace-shader" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
+
+      #include "Common/Common.glsl"
+      #include "Common/Transform.glsl"
+      #include "Skin/Skin.glsl"
+      #include "Skin/BlendShape.glsl"
+
+      struct Attributes {
+        vec3 POSITION;
+        #ifdef RENDERER_HAS_BLENDSHAPE
+          #ifndef RENDERER_BLENDSHAPE_USE_TEXTURE
+            vec3 POSITION_BS0;
+            vec3 POSITION_BS1;
+            #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) && defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
+              vec3 NORMAL_BS0;
+              vec3 NORMAL_BS1;
+              vec3 TANGENT_BS0;
+              vec3 TANGENT_BS1;
+            #else
+              #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) || defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
+                vec3 POSITION_BS2;
+                vec3 POSITION_BS3;
+                #ifdef RENDERER_BLENDSHAPE_HAS_NORMAL
+                  vec3 NORMAL_BS0;
+                  vec3 NORMAL_BS1;
+                  vec3 NORMAL_BS2;
+                  vec3 NORMAL_BS3;
+                #endif
+                #ifdef RENDERER_BLENDSHAPE_HAS_TANGENT
+                  vec3 TANGENT_BS0;
+                  vec3 TANGENT_BS1;
+                  vec3 TANGENT_BS2;
+                  vec3 TANGENT_BS3;
+                #endif
+              #else
+                vec3 POSITION_BS2;
+                vec3 POSITION_BS3;
+                vec3 POSITION_BS4;
+                vec3 POSITION_BS5;
+                vec3 POSITION_BS6;
+                vec3 POSITION_BS7;
+              #endif
+            #endif
+          #endif
+        #endif
+        #ifdef RENDERER_HAS_SKIN
+          vec4 JOINTS_0;
+          vec4 WEIGHTS_0;
+        #endif
+        #ifdef RENDERER_HAS_NORMAL
+          vec3 NORMAL;
+        #endif
+        #ifdef RENDERER_HAS_TANGENT
+          vec4 TANGENT;
+        #endif
+      };
+
+      Varyings vert(Attributes attr) {
+        Varyings v;
+
+        vec4 position = vec4(attr.POSITION, 1.0);
+
+        #ifdef RENDERER_HAS_NORMAL
+          vec3 normal = vec3(attr.NORMAL);
+          #ifdef RENDERER_HAS_TANGENT
+            vec4 tangent = vec4(attr.TANGENT);
+          #endif
+        #endif
+
+        #ifdef RENDERER_HAS_BLENDSHAPE
+          calculateBlendShape(attr, position
+            #ifdef RENDERER_HAS_NORMAL
+              , normal
+              #ifdef RENDERER_HAS_TANGENT
+                , tangent
+              #endif
+            #endif
+          );
+        #endif
+
+        #ifdef RENDERER_HAS_SKIN
+          mat4 skinMatrix = getSkinMatrix(attr);
+          position = skinMatrix * position;
+        #endif
+
+        gl_Position = renderer_MVPMat * position;
+
+        return v;
+      }
+
+      vec4 camera_OutlineReplaceColor;
+
+      void frag(Varyings v) {
+        gl_FragColor = camera_OutlineReplaceColor;
+      }
+    }
+  }
+}`;
+
+Shader.find("outline-postprocess-shader") || Shader.create(outlinePostprocessShaderSource);
+Shader.find("outline-replace-shader") || Shader.create(outlineReplaceShaderSource);
 
 /**
  * Show outline of entities.
@@ -323,6 +512,3 @@ export class OutlineManager extends Script {
     }
   }
 }
-
-Shader.create("outline-postprocess-shader", outlineVs, outlineFs);
-Shader.create("outline-replace-shader", replaceVs, replaceFs);

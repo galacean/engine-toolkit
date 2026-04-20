@@ -15,6 +15,45 @@ import {
   Vector3
 } from "@galacean/engine";
 
+const shaderSource = `Shader "skeleton-viewer" {
+  SubShader "Default" {
+    Pass "Forward" {
+      VertexShader = vert;
+      FragmentShader = frag;
+
+      mat4 renderer_MVPMat;
+      mat4 renderer_NormalMat;
+
+      struct Attributes {
+        vec3 POSITION;
+        vec3 NORMAL;
+      };
+
+      struct Varyings {
+        vec3 v_normal;
+      };
+
+      Varyings vert(Attributes attr) {
+        Varyings v;
+        gl_Position = renderer_MVPMat * vec4(attr.POSITION, 1.0);
+        v.v_normal = normalize( mat3(renderer_NormalMat) * attr.NORMAL );
+        return v;
+      }
+
+      vec3 u_colorMin;
+      vec3 u_colorMax;
+
+      void frag(Varyings v) {
+        float ndl = dot(v.v_normal, vec3(0, 1, 0)) * 0.5 + 0.5;
+        vec3 diffuse = mix(u_colorMin, u_colorMax, ndl);
+        gl_FragColor = vec4(diffuse, 1.0);
+      }
+    }
+  }
+}`;
+
+Shader.find("skeleton-viewer") || Shader.create(shaderSource);
+
 /**
  * Skeleton visualization.
  * @example
@@ -168,7 +207,6 @@ export class SkeletonViewer extends Script {
       const bone = bones[i];
       const anchorPoint = bone.transform.worldPosition;
 
-      // 球
       const entity = bone.createChild();
       const renderer = entity.addComponent(MeshRenderer);
       renderer.receiveShadows = false;
@@ -181,7 +219,6 @@ export class SkeletonViewer extends Script {
 
       this._debugMesh.push(renderer);
 
-      // 连接体
       for (let j = 0; j < bone.children.length; j++) {
         const child = bone.children[j];
         const childPoint = child.transform.worldPosition;
@@ -224,33 +261,5 @@ export class SkeletonViewer extends Script {
     }
   }
 }
-
-Shader.create(
-  "skeleton-viewer",
-  `
-  attribute vec3 POSITION;
-  attribute vec3 NORMAL;
-
-  uniform mat4 renderer_MVPMat;
-  uniform mat4 renderer_NormalMat;
-
-  varying vec3 v_normal;
-
-  void main(){
-      gl_Position = renderer_MVPMat * vec4( POSITION , 1.0 );;
-      v_normal = normalize( mat3(renderer_NormalMat) * NORMAL );
-  }`,
-  `
-      uniform vec3 u_colorMin;
-      uniform vec3 u_colorMax;
-      varying vec3 v_normal;
-
-      void main(){
-        float ndl = dot(v_normal, vec3(0, 1, 0)) * 0.5 + 0.5;
-        vec3 diffuse = mix(u_colorMin, u_colorMax, ndl);
-        gl_FragColor = vec4(diffuse, 1.0);
-      }
-      `
-);
 
 const materialMap = new Map<Engine, Material>();

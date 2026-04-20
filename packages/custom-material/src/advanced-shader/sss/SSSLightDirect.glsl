@@ -1,7 +1,7 @@
 #define FUNCTION_SURFACE_SHADING surfaceShadingSSS
 
-#include "BRDF.glsl"
-#include "ReflectionLobe.glsl"
+#include "PBR/BSDF.glsl"
+#include "PBR/ReflectionLobe.glsl"
 #include "./SSSFunction.glsl"
 
 void surfaceShadingSSS(Varyings varyings, SurfaceData surfaceData, BRDFData brdfData, vec3 incidentDirection, vec3 lightColor, inout vec3 totalDiffuseColor, inout vec3 totalSpecularColor) {
@@ -36,4 +36,4 @@ void surfaceShadingSSS(Varyings varyings, SurfaceData surfaceData, BRDFData brdf
     totalSpecularColor += specularColor;
 }
 
-#include "LightDirectPBR.glsl"
+#include "PBR/LightDirectPBR.glsl"
