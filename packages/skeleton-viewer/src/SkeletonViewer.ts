@@ -24,10 +24,7 @@ const shaderSource = `Shader "skeleton-viewer" {
       mat4 renderer_MVPMat;
       mat4 renderer_NormalMat;
 
-      struct Attributes {
-        vec3 POSITION;
-        vec3 NORMAL;
-      };
+      #include "Common/Attributes.glsl"
 
       struct Varyings {
         vec3 v_normal;
@@ -36,7 +33,9 @@ const shaderSource = `Shader "skeleton-viewer" {
       Varyings vert(Attributes attr) {
         Varyings v;
         gl_Position = renderer_MVPMat * vec4(attr.POSITION, 1.0);
-        v.v_normal = normalize( mat3(renderer_NormalMat) * attr.NORMAL );
+        #ifdef RENDERER_HAS_NORMAL
+          v.v_normal = normalize( mat3(renderer_NormalMat) * attr.NORMAL );
+        #endif
         return v;
       }
 

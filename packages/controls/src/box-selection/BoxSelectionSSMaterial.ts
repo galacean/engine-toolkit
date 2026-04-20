@@ -9,9 +9,7 @@ const shaderSource = `Shader "box" {
       #include "Common/Common.glsl"
       #include "Common/Transform.glsl"
 
-      struct Attributes {
-        vec3 POSITION;
-      };
+      #include "Common/Attributes.glsl"
 
       struct Varyings {
         float _placeholder;

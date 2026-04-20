@@ -4,7 +4,7 @@
 #include "Common/Common.glsl"
 #include "Common/Fog.glsl"
 
-#include "PBR/AttributesPBR.glsl"
+#include "Common/Attributes.glsl"
 #include "PBR/VaryingsPBR.glsl"
 #include "PBR/LightDirectPBR.glsl"
 #include "PBR/LightIndirectPBR.glsl"

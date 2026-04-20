@@ -30,10 +30,7 @@ const outlinePostprocessShaderSource = `Shader "outline-postprocess-shader" {
       VertexShader = vert;
       FragmentShader = frag;
 
-      struct Attributes {
-        vec3 POSITION;
-        vec2 TEXCOORD_0;
-      };
+      #include "Common/Attributes.glsl"
 
       struct Varyings {
         vec2 v_uv;
@@ -42,7 +39,9 @@ const outlinePostprocessShaderSource = `Shader "outline-postprocess-shader" {
       Varyings vert(Attributes attr) {
         Varyings v;
         gl_Position = vec4(attr.POSITION.xzy, 1.0);
-        v.v_uv = attr.TEXCOORD_0;
+        #ifdef RENDERER_HAS_UV
+          v.v_uv = attr.TEXCOORD_0;
+        #endif
         return v;
       }
 
@@ -123,55 +122,7 @@ const outlineReplaceShaderSource = `Shader "outline-replace-shader" {
       #include "Skin/Skin.glsl"
       #include "Skin/BlendShape.glsl"
 
-      struct Attributes {
-        vec3 POSITION;
-        #ifdef RENDERER_HAS_BLENDSHAPE
-          #ifndef RENDERER_BLENDSHAPE_USE_TEXTURE
-            vec3 POSITION_BS0;
-            vec3 POSITION_BS1;
-            #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) && defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
-              vec3 NORMAL_BS0;
-              vec3 NORMAL_BS1;
-              vec3 TANGENT_BS0;
-              vec3 TANGENT_BS1;
-            #else
-              #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) || defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
-                vec3 POSITION_BS2;
-                vec3 POSITION_BS3;
-                #ifdef RENDERER_BLENDSHAPE_HAS_NORMAL
-                  vec3 NORMAL_BS0;
-                  vec3 NORMAL_BS1;
-                  vec3 NORMAL_BS2;
-                  vec3 NORMAL_BS3;
-                #endif
-                #ifdef RENDERER_BLENDSHAPE_HAS_TANGENT
-                  vec3 TANGENT_BS0;
-                  vec3 TANGENT_BS1;
-                  vec3 TANGENT_BS2;
-                  vec3 TANGENT_BS3;
-                #endif
-              #else
-                vec3 POSITION_BS2;
-                vec3 POSITION_BS3;
-                vec3 POSITION_BS4;
-                vec3 POSITION_BS5;
-                vec3 POSITION_BS6;
-                vec3 POSITION_BS7;
-              #endif
-            #endif
-          #endif
-        #endif
-        #ifdef RENDERER_HAS_SKIN
-          vec4 JOINTS_0;
-          vec4 WEIGHTS_0;
-        #endif
-        #ifdef RENDERER_HAS_NORMAL
-          vec3 NORMAL;
-        #endif
-        #ifdef RENDERER_HAS_TANGENT
-          vec4 TANGENT;
-        #endif
-      };
+      #include "Common/Attributes.glsl"
 
       Varyings vert(Attributes attr) {
         Varyings v;

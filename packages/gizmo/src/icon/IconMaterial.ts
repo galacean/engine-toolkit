@@ -14,50 +14,7 @@ const shaderSource = `Shader "icon" {
       vec2 u_size;
       vec4 u_pixelViewport;
 
-      struct Attributes {
-        vec3 POSITION;
-        vec2 TEXCOORD_0;
-        #ifdef RENDERER_HAS_BLENDSHAPE
-          #ifndef RENDERER_BLENDSHAPE_USE_TEXTURE
-            vec3 POSITION_BS0;
-            vec3 POSITION_BS1;
-            #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) && defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
-              vec3 NORMAL_BS0;
-              vec3 NORMAL_BS1;
-              vec3 TANGENT_BS0;
-              vec3 TANGENT_BS1;
-            #else
-              #if defined(RENDERER_BLENDSHAPE_HAS_NORMAL) || defined(RENDERER_BLENDSHAPE_HAS_TANGENT)
-                vec3 POSITION_BS2;
-                vec3 POSITION_BS3;
-                #ifdef RENDERER_BLENDSHAPE_HAS_NORMAL
-                  vec3 NORMAL_BS0;
-                  vec3 NORMAL_BS1;
-                  vec3 NORMAL_BS2;
-                  vec3 NORMAL_BS3;
-                #endif
-                #ifdef RENDERER_BLENDSHAPE_HAS_TANGENT
-                  vec3 TANGENT_BS0;
-                  vec3 TANGENT_BS1;
-                  vec3 TANGENT_BS2;
-                  vec3 TANGENT_BS3;
-                #endif
-              #else
-                vec3 POSITION_BS2;
-                vec3 POSITION_BS3;
-                vec3 POSITION_BS4;
-                vec3 POSITION_BS5;
-                vec3 POSITION_BS6;
-                vec3 POSITION_BS7;
-              #endif
-            #endif
-          #endif
-        #endif
-        #ifdef RENDERER_HAS_SKIN
-          vec4 JOINTS_0;
-          vec4 WEIGHTS_0;
-        #endif
-      };
+      #include "Common/Attributes.glsl"
 
       struct Varyings {
         vec2 v_uv;
@@ -82,7 +39,9 @@ const shaderSource = `Shader "icon" {
         float xFactor = u_size.x / u_pixelViewport.z * 2.0;
         float yFactor = u_size.y / u_pixelViewport.w * 2.0;
         gl_Position = vec4(translation.x + xFactor * position.x, translation.y + yFactor * position.y, translation.z, 1);
-        v.v_uv = attr.TEXCOORD_0;
+        #ifdef RENDERER_HAS_UV
+          v.v_uv = attr.TEXCOORD_0;
+        #endif
 
         return v;
       }

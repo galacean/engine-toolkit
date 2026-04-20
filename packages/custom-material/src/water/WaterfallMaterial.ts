@@ -12,11 +12,7 @@ const shaderSource = `Shader "water-fall" {
       vec2 u_waterfall_speed;
       vec2 u_distorsion_speed;
 
-      struct Attributes {
-        vec3 POSITION;
-        vec2 TEXCOORD_0;
-        vec4 COLOR_0;
-      };
+      #include "Common/Attributes.glsl"
 
       struct Varyings {
         vec2 waterTexCoords;
@@ -29,11 +25,15 @@ const shaderSource = `Shader "water-fall" {
         Varyings v;
         gl_Position = renderer_MVPMat * vec4(attr.POSITION, 1.0);
 
-        v.waterTexCoords = attr.TEXCOORD_0 + vec2(u_water_speed.x * u_time, u_water_speed.y * u_time);
-        v.waterfallTexCoords = attr.TEXCOORD_0 + vec2(u_waterfall_speed.x * u_time, u_waterfall_speed.y * u_time);
-        v.normalTexCoords = attr.TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));
+        #ifdef RENDERER_HAS_UV
+          v.waterTexCoords = attr.TEXCOORD_0 + vec2(u_water_speed.x * u_time, u_water_speed.y * u_time);
+          v.waterfallTexCoords = attr.TEXCOORD_0 + vec2(u_waterfall_speed.x * u_time, u_waterfall_speed.y * u_time);
+          v.normalTexCoords = attr.TEXCOORD_0 + vec2(u_distorsion_speed.x * cos(u_time), u_distorsion_speed.y * sin(u_time));
+        #endif
 
-        v.v_color = attr.COLOR_0;
+        #ifdef RENDERER_ENABLE_VERTEXCOLOR
+          v.v_color = attr.COLOR_0;
+        #endif
         return v;
       }
 

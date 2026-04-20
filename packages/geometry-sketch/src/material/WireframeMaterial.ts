@@ -18,19 +18,7 @@ const shaderSource = `Shader "wireframeShader" {
 
       ${geometryTextureDefine}
 
-      struct Attributes {
-        vec3 POSITION;
-        #ifdef RENDERER_HAS_SKIN
-          vec4 JOINTS_0;
-          vec4 WEIGHTS_0;
-        #endif
-        #ifdef RENDERER_HAS_NORMAL
-          vec3 NORMAL;
-        #endif
-        #ifdef RENDERER_HAS_TANGENT
-          vec4 TANGENT;
-        #endif
-      };
+      #include "Common/Attributes.glsl"
 
       struct Varyings {
         vec3 v_baryCenter;
