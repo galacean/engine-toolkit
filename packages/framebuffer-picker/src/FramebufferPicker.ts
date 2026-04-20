@@ -32,13 +32,7 @@ const colorShaderSource = `Shader "framebuffer-picker-color" {
 
       #include "Common/Attributes.glsl"
 
-      struct Varyings {
-        float _placeholder;
-      };
-
-      Varyings vert(Attributes attr) {
-        Varyings v;
-
+      void vert(Attributes attr) {
         vec4 position = vec4(attr.POSITION, 1.0);
 
         #ifdef RENDERER_HAS_NORMAL
@@ -65,13 +59,11 @@ const colorShaderSource = `Shader "framebuffer-picker-color" {
         #endif
 
         gl_Position = renderer_MVPMat * position;
-
-        return v;
       }
 
       vec3 u_pickColor;
 
-      void frag(Varyings v) {
+      void frag() {
         gl_FragColor = vec4(u_pickColor, 1.0);
       }
     }

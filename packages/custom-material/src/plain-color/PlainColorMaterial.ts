@@ -13,13 +13,7 @@ const shaderSource = `Shader "plain-color" {
 
       #include "Common/Attributes.glsl"
 
-      struct Varyings {
-        float _placeholder;
-      };
-
-      Varyings vert(Attributes attr) {
-        Varyings v;
-
+      void vert(Attributes attr) {
         vec4 position = vec4(attr.POSITION, 1.0);
 
         #ifdef RENDERER_HAS_BLENDSHAPE
@@ -32,13 +26,11 @@ const shaderSource = `Shader "plain-color" {
         #endif
 
         gl_Position = renderer_MVPMat * position;
-
-        return v;
       }
 
       vec4 material_BaseColor;
 
-      void frag(Varyings v) {
+      void frag() {
         vec4 baseColor = material_BaseColor;
 
         #ifdef MATERIAL_IS_ALPHA_CUTOFF

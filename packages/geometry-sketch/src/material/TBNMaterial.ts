@@ -20,12 +20,7 @@ const shaderSource = `Shader "tbnShader" {
 
       #include "Common/Attributes.glsl"
 
-      struct Varyings {
-        float _placeholder;
-      };
-
-      Varyings vert(Attributes attr) {
-        Varyings v;
+      void vert(Attributes attr) {
         int pointIndex = gl_VertexID / 2;
         ${geometryTextureVert}
 
@@ -69,12 +64,11 @@ const shaderSource = `Shader "tbnShader" {
       #endif
 
         gl_Position = camera_VPMat * gl_Position;
-        return v;
       }
 
       vec4 material_BaseColor;
 
-      void frag(Varyings v) {
+      void frag() {
         gl_FragColor = material_BaseColor;
       }
     }
