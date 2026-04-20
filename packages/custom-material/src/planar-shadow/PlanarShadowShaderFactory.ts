@@ -187,6 +187,7 @@ Pass "PlanarShadow" {
 }
 `;
 
+// @ts-ignore - ShaderPass single-arg constructor supported in engine but not yet published
 const planarShadow = new ShaderPass(planarShadowPassSource);
 
 if (!Shader.find("planarShadowShader")) {

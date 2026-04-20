@@ -63,7 +63,7 @@ export class Icon extends Script {
       if (value instanceof Texture2D) {
         this._material.baseTexture = value;
       } else {
-        this.engine.resourceManager.load({ url: value, type: AssetType.Texture2D }).then((texture: Texture2D) => {
+        this.engine.resourceManager.load({ url: value, type: AssetType.Texture }).then((texture: Texture2D) => {
           this._material.baseTexture = texture;
         });
       }
