@@ -15,7 +15,8 @@
   },
   "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "scripts": {
-    "b:types": "tsc"
+    "b:types": "tsc",
+    "precompile": "shader-compiler-precompile src libs --clean --emit-index"
   },
   "types": "types/index.d.ts",
   "files": [

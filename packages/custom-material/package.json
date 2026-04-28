@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
+    "precompile": "shader-compiler-precompile src libs --clean --emit-index",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
   "publishConfig": {
@@ -19,6 +20,18 @@
   "types": "types/index.d.ts",
   "main": "dist/commonjs/browser.js",
   "module": "dist/es/index.js",
+  "exports": {
+    ".": {
+      "module": "./dist/es/index.js",
+      "default": "./dist/commonjs/browser.js",
+      "types": "./types/index.d.ts"
+    },
+    "./sources": {
+      "module": "./dist/es/sources.module.js",
+      "default": "./dist/commonjs/sources.main.js",
+      "types": "./types/sources.d.ts"
+    }
+  },
   "files": [
     "dist/**/*",
     "types/**/*"

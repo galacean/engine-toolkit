@@ -43,12 +43,10 @@ const mainFields = ["module", "main"];
 
 const plugins = [
   resolve({ extensions, preferBuiltins: true, mainFields }),
-  shaderCompiler({
-    precompile: {
-      input: path.join(process.cwd(), "packages/custom-material/src"),
-      output: path.join(process.cwd(), "packages/custom-material/libs")
-    }
-  }),
+  // Transform-only — `.shader`/`.glsl`/`.gsp` files become string/JSON modules.
+  // Each package owns its own `precompile` npm script that drives the CLI to
+  // emit `.gsp` artifacts under `<pkg>/libs/`; rollup never runs precompile.
+  shaderCompiler(),
   swc(
     defineRollupSwcOption({
       include: /\.[mc]?[jt]sx?$/,
@@ -162,6 +160,21 @@ function makeRollupConfig(pkg) {
       .map((name) => `${name}/dist/miniprogram`),
     plugins: [...plugins, ...miniProgramPlugin]
   });
+
+  // Optional `./sources` subpath entry — emits raw `.shader` strings for editor.
+  // Opt-in by checking `exports["./sources"]` in the package's package.json.
+  if (pkg.pkgJson.exports?.["./sources"]) {
+    const sourcesInput = path.join(pkg.location, "src", "sources.ts");
+    configs.push({
+      input: sourcesInput,
+      output: [
+        { file: path.join(pkg.location, "dist", "es", "sources.module.js"), format: "es", sourcemap: true },
+        { file: path.join(pkg.location, "dist", "commonjs", "sources.main.js"), format: "commonjs", sourcemap: true }
+      ],
+      external: externals,
+      plugins
+    });
+  }
 
   return configs;
 }

@@ -1,49 +1,5 @@
 import { BaseMaterial, Color, CullMode, Engine, Shader } from "@galacean/engine";
-
-const shaderSource = `Shader "plain-color" {
-  SubShader "Default" {
-    Pass "Forward" {
-      VertexShader = vert;
-      FragmentShader = frag;
-
-      #include "Common/Common.glsl"
-      #include "Common/Transform.glsl"
-      #include "Skin/Skin.glsl"
-      #include "Skin/BlendShape.glsl"
-
-      #include "Common/Attributes.glsl"
-
-      void vert(Attributes attr) {
-        vec4 position = vec4(attr.POSITION, 1.0);
-
-        #ifdef RENDERER_HAS_BLENDSHAPE
-          calculateBlendShape(attr, position);
-        #endif
-
-        #ifdef RENDERER_HAS_SKIN
-          mat4 skinMatrix = getSkinMatrix(attr);
-          position = skinMatrix * position;
-        #endif
-
-        gl_Position = renderer_MVPMat * position;
-      }
-
-      vec4 material_BaseColor;
-
-      void frag() {
-        vec4 baseColor = material_BaseColor;
-
-        #ifdef MATERIAL_IS_ALPHA_CUTOFF
-          if( baseColor.a < material_AlphaCutoff ) {
-            discard;
-          }
-        #endif
-
-        gl_FragColor = baseColor;
-      }
-    }
-  }
-}`;
+import shaderSource from "./PlainColor.shader";
 
 Shader.find("plain-color") || Shader.create(shaderSource);
 
