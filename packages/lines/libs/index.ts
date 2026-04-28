@@ -2,4 +2,8 @@
 import DashSource from "./line/material/Dash.gsp";
 import LineSource from "./line/material/Line.gsp";
 
-export { DashSource, LineSource };
+// prettier-ignore
+export {
+  DashSource,
+  LineSource
+};

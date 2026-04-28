@@ -11,6 +11,7 @@ import WaterFallSource from "./water/WaterFall.gsp";
 import WaterRippleSource from "./water/WaterRipple.gsp";
 import WaterSource from "./water/Water.gsp";
 
+// prettier-ignore
 export {
   BakePBRSource,
   EyeSource,

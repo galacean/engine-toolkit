@@ -2,4 +2,8 @@
 import OutlinePostprocessSource from "./OutlinePostprocess.gsp";
 import OutlineReplaceSource from "./OutlineReplace.gsp";
 
-export { OutlinePostprocessSource, OutlineReplaceSource };
+// prettier-ignore
+export {
+  OutlinePostprocessSource,
+  OutlineReplaceSource
+};
