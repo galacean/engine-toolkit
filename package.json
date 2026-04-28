@@ -17,7 +17,7 @@
     "ci": "pnpm install && npm run build && npm run b:types && npm run test-cov",
     "lint": "eslint packages/*/src --ext .ts",
     "watch": "rollup -cw -m inline",
-    "b:types": "pnpm -r --filter=./packages/* run b:types",
+    "b:types": "pnpm -r --workspace-concurrency=1 --filter=./packages/* run b:types",
     "precompile": "pnpm -r --filter=./packages/* --if-present run precompile",
     "build": "npm run precompile && rollup -c",
     "b:all": "npm run precompile && pnpm run b:types && cross-env BUILD_TYPE=ALL rollup -c",

@@ -14,7 +14,6 @@
     "incremental": false
   },
   "include": [
-    "src/**/*",
-    "libs/**/*"
+    "src/**/*"
   ]
 }

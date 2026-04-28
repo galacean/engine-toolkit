@@ -22,7 +22,7 @@ function walk(dir) {
 }
 
 const pkgsRoot = path.join(process.cwd(), "packages");
-const pkgs = fs
+const rawPkgs = fs
   .readdirSync(pkgsRoot)
   .map((dir) => path.join(pkgsRoot, dir))
   .filter((dir) => fs.statSync(dir).isDirectory())
@@ -32,6 +32,33 @@ const pkgs = fs
       pkgJson: JSON.parse(fs.readFileSync(path.resolve(location, "package.json"), { encoding: "utf-8" }))
     };
   });
+
+// Topological sort by intra-workspace deps so consumers (e.g. auxiliary-lines
+// → custom-material) build after their providers. Without this, rollup's
+// `Promise.all` over the flattened config array races, and on a cold checkout
+// the consumer's bundle fails to resolve the provider's not-yet-emitted
+// `dist/es/index.js`.
+const pkgs = (() => {
+  const byName = new Map(rawPkgs.map((p) => [p.pkgJson.name, p]));
+  const sorted = [];
+  const visited = new Set();
+  const visiting = new Set();
+  function visit(p) {
+    if (visited.has(p)) return;
+    if (visiting.has(p)) return; // skip cycles (shouldn't exist, but safe)
+    visiting.add(p);
+    const allDeps = { ...(p.pkgJson.dependencies ?? {}), ...(p.pkgJson.peerDependencies ?? {}) };
+    for (const dep of Object.keys(allDeps)) {
+      const depPkg = byName.get(dep);
+      if (depPkg) visit(depPkg);
+    }
+    visiting.delete(p);
+    visited.add(p);
+    sorted.push(p);
+  }
+  rawPkgs.forEach(visit);
+  return sorted;
+})();
 
 // "@galacean/engine-toolkit" 、 "@galacean/engine-toolkit-controls" ...
 function toGlobalName(pkgName) {
