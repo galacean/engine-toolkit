@@ -2,7 +2,4 @@
 import TBNSource from "./material/TBN.gsp";
 import WireframeSource from "./material/Wireframe.gsp";
 
-export {
-  TBNSource,
-  WireframeSource
-};
+export { TBNSource, WireframeSource };
