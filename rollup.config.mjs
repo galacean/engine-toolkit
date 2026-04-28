@@ -1,5 +1,5 @@
 import resolve from "@rollup/plugin-node-resolve";
-import glslify from "rollup-plugin-glslify";
+import { shaderCompiler } from "@galacean/engine-shader-compiler/bundler";
 import license from "rollup-plugin-license";
 import { binary2base64 } from "rollup-plugin-binary2base64";
 import commonjs from "@rollup/plugin-commonjs";
@@ -9,7 +9,6 @@ import camelCase from "camelcase";
 import fs from "fs";
 import path from "path";
 import replace from "@rollup/plugin-replace";
-import { string } from "rollup-plugin-string";
 
 function walk(dir) {
   let files = fs.readdirSync(dir);
@@ -44,11 +43,12 @@ const mainFields = ["module", "main"];
 
 const plugins = [
   resolve({ extensions, preferBuiltins: true, mainFields }),
-  glslify({
-    include: [/\.glsl$/],
-    exclude: "**/packages/shaderlab/src/shaders/**"
+  shaderCompiler({
+    precompile: {
+      input: path.join(process.cwd(), "packages/custom-material/src"),
+      output: path.join(process.cwd(), "packages/custom-material/libs")
+    }
   }),
-  string({ include: ["**/*.shader", "**/packages/shaderlab/src/**/*.(glsl|gs)"] }),
   swc(
     defineRollupSwcOption({
       include: /\.[mc]?[jt]sx?$/,

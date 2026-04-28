@@ -5,8 +5,11 @@ Shader "PlanarShadow" {
     UsePass "pbr/Default/Forward"
 
     Pass "planarShadow" {
+      VertexShader = vert;
+      FragmentShader = frag;
+
       // render states
-      DepthState {
+      DepthState = {
         WriteEnabled = true;
       }
 
@@ -18,7 +21,7 @@ Shader "PlanarShadow" {
         DestinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
       }
 
-      StencilState {
+      StencilState = {
         Enabled = true;
         ReferenceValue = 0;
         CompareFunctionFront = CompareFunction.Equal;
@@ -33,7 +36,7 @@ Shader "PlanarShadow" {
 
       BlendState = blendState;
 
-      RenderQueueType = RenderQueueType.Transparent;
+      RenderQueueType = Transparent;
 
       vec3 u_lightDir;
       float u_planarHeight;
@@ -82,13 +85,13 @@ Shader "PlanarShadow" {
 
       struct a2v {
         vec4 POSITION;
-        vec4 JOINTS_0; 
+        vec4 JOINTS_0;
         vec4 WEIGHTS_0;
-      }
+      };
 
       struct v2f {
         vec4 color;
-      }
+      };
 
       v2f vert(a2v v) {
         v2f o;
@@ -125,10 +128,8 @@ Shader "PlanarShadow" {
         // shadow color
         o.color = u_planarShadowColor;
         o.color.a *= falloff;
+        return o;
       }
-      
-      VertexShader = vert;
-      FragmentShader = frag;
 
       void frag(v2f i) {
         gl_FragColor = i.color;

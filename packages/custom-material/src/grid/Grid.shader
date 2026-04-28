@@ -11,12 +11,12 @@ Shader "Grid" {
 
       struct a2v {
         vec3 POSITION;
-      }
+      };
 
       struct v2f {
         vec3 nearPoint;
         vec3 farPoint;
-      }
+      };
 
       vec3 UnprojectPoint(float x, float y, float z, mat4 viewInvMat, mat4 projInvMat) {
         vec4 unprojectedPoint =  viewInvMat * projInvMat * vec4(x, y, z, 1.0);
