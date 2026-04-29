@@ -17,7 +17,7 @@
     "precompile": "shader-compiler-precompile src libs --clean --emit-index",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
-  "types": "types/index.d.ts",
+  "types": "types/src/index.d.ts",
   "main": "dist/commonjs/browser.js",
   "module": "dist/es/index.js",
   "files": [

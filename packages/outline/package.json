@@ -18,7 +18,7 @@
     "b:types": "tsc",
     "precompile": "shader-compiler-precompile src libs --clean --emit-index"
   },
-  "types": "types/index.d.ts",
+  "types": "types/src/index.d.ts",
   "files": [
     "dist/**/*",
     "types/**/*"

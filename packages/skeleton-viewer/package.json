@@ -16,7 +16,7 @@
     "url": "https://github.com/galacean/engine-toolkit"
   },
   "bugs": "https://github.com/galacean/engine-toolkit/issues",
-  "types": "types/index.d.ts",
+  "types": "types/src/index.d.ts",
   "module": "dist/es/index.js",
   "main": "dist/commonjs/browser.js",
   "files": [
