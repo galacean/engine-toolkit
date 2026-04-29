@@ -11,6 +11,7 @@
   "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install",
     "test": "cross-env TS_NODE_PROJECT=tsconfig.tests.json floss --path tests -r ts-node/register",
     "test-debug": "cross-env TS_NODE_PROJECT=tsconfig.tests.json floss --path tests -r ts-node/register --debug",
     "test-cov": "cross-env TS_NODE_PROJECT=tsconfig.tests.json nyc --reporter=lcov floss --path tests -r ts-node/register",
@@ -60,12 +61,6 @@
     "rollup-plugin-swc3": "^0.8.0",
     "ts-node": "^10",
     "typescript": "^4.8.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   },
   "lint-staged": {
     "*.{ts}": [
