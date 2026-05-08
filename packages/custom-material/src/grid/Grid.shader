@@ -4,7 +4,7 @@ Shader "grid" {
       VertexShader = vert;
       FragmentShader = frag;
 
-      #include "Common/Common.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
 
       mat4 camera_ViewInvMat;
       mat4 camera_ProjMat;
@@ -42,7 +42,7 @@ Shader "grid" {
         return v;
       }
 
-      #include "Common/Transform.glsl"
+      #include "ShaderLibrary/Common/Transform.glsl"
 
       float u_far;
       float u_near;

@@ -1,5 +1,5 @@
 import resolve from "@rollup/plugin-node-resolve";
-import { shaderCompiler } from "@galacean/engine-shader-compiler/bundler";
+import { shaderCompiler } from "@galacean/engine-shader-compiler/bundler/rollup";
 import license from "rollup-plugin-license";
 import { binary2base64 } from "rollup-plugin-binary2base64";
 import commonjs from "@rollup/plugin-commonjs";
@@ -70,9 +70,9 @@ const mainFields = ["module", "main"];
 
 const plugins = [
   resolve({ extensions, preferBuiltins: true, mainFields }),
-  // Transform-only — `.shader`/`.glsl`/`.gsp` files become string/JSON modules.
+  // Transform-only — `.shader`/`.glsl`/`.shaderc` files become string/JSON modules.
   // Each package owns its own `precompile` npm script that drives the CLI to
-  // emit `.gsp` artifacts under `<pkg>/libs/`; rollup never runs precompile.
+  // emit `.shaderc` artifacts under `<pkg>/libs/`; rollup never runs precompile.
   shaderCompiler(),
   swc(
     defineRollupSwcOption({

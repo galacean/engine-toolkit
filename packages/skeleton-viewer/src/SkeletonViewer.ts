@@ -8,7 +8,6 @@ import {
   ModelMesh,
   PrimitiveMesh,
   Quaternion,
-  RenderQueueType,
   Script,
   Shader,
   SkinnedMeshRenderer,
@@ -47,8 +46,6 @@ export class SkeletonViewer extends Script {
     const engine = entity.engine;
     if (!materialMap.get(engine)) {
       const material = new Material(entity.engine, Shader.find("skeleton-viewer"));
-      material.renderState.rasterState.depthBias = -100000000;
-      material.renderState.renderQueueType = RenderQueueType.Transparent;
       materialMap.set(engine, material);
     }
 

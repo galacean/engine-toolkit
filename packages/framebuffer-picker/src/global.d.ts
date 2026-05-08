@@ -3,7 +3,7 @@ declare module "*.shader" {
   export default value;
 }
 
-declare module "*.gsp" {
+declare module "*.shaderc" {
   const value: object;
   export default value;
 }

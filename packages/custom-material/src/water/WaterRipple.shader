@@ -9,7 +9,7 @@ Shader "water-ripple" {
       vec2 u_foam_speed;
       vec2 u_distorsion_speed;
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec2 waterTexCoords;
@@ -30,7 +30,7 @@ Shader "water-ripple" {
         return v;
       }
 
-      #include "Common/Common.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
 
       sampler2D material_NormalTexture;
       sampler2D u_foamTex;

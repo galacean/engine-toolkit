@@ -4,10 +4,10 @@ Shader "box" {
       VertexShader = vert;
       FragmentShader = frag;
 
-      #include "Common/Common.glsl"
-      #include "Common/Transform.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
+      #include "ShaderLibrary/Common/Transform.glsl"
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       void vert(Attributes attr) {
         gl_Position = vec4(attr.POSITION, 1.0);

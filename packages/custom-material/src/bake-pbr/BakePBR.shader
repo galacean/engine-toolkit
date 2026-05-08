@@ -36,7 +36,7 @@ Shader "bake-pbr" {
       VertexShader = BakePBRVertex;
       FragmentShader = BakePBRFragment;
 
-      #include "PBR/ForwardPassPBR.glsl"
+      #include "ShaderLibrary/PBR/ForwardPassPBR.glsl"
 
       #ifdef LIGHTMAP_TEXTURE
         sampler2D u_lightMapTexture;

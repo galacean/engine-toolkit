@@ -9,7 +9,7 @@ Shader "water" {
       vec2 u_water_speed;
       vec2 u_distorsion_speed;
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec4 v_color;
@@ -32,7 +32,7 @@ Shader "water" {
         return v;
       }
 
-      #include "Common/Common.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
 
       sampler2D material_NormalTexture;
       sampler2D u_waterTex;

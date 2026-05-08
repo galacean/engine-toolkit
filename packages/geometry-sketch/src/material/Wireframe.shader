@@ -4,9 +4,9 @@ Shader "wireframeShader" {
       VertexShader = vert;
       FragmentShader = frag;
 
-      #include "Common/Common.glsl"
-      #include "Common/Transform.glsl"
-      #include "Skin/Skin.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
+      #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Skin/Skin.glsl"
 
       float u_lineScale;
       mat4 camera_VPMat;
@@ -15,7 +15,7 @@ Shader "wireframeShader" {
 
       #include "./GeometryTextureDefine.glsl"
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec3 v_baryCenter;

@@ -1,4 +1,4 @@
-import { BaseMaterial, Color, CullMode, Engine, Shader } from "@galacean/engine";
+import { BaseMaterial, Color, Engine, Shader } from "@galacean/engine";
 import shaderSource from "./PlainColor.shader";
 
 Shader.find("plain-color") || Shader.create(shaderSource);
@@ -34,7 +34,8 @@ export class PlainColorMaterial extends BaseMaterial {
 
     shaderData.setColor(PlainColorMaterial._baseColorProp, new Color(1, 1, 1, 1));
 
-    this.renderState.rasterState.cullMode = CullMode.Off;
+    // depth test on by default; gizmo overlays opt out by setting `depthEnabled` to 0.
+    shaderData.setInt("depthEnabled", 1);
   }
 
   override clone(): PlainColorMaterial {

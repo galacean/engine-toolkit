@@ -4,7 +4,7 @@ Shader "outline-postprocess-shader" {
       VertexShader = vert;
       FragmentShader = frag;
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec2 v_uv;
@@ -19,7 +19,7 @@ Shader "outline-postprocess-shader" {
         return v;
       }
 
-      #include "Common/Common.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
 
       vec3 material_OutlineColor;
       sampler2D material_OutlineTexture;

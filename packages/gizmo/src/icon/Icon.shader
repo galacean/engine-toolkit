@@ -4,15 +4,15 @@ Shader "icon" {
       VertexShader = vert;
       FragmentShader = frag;
 
-      #include "Common/Common.glsl"
-      #include "Common/Transform.glsl"
-      #include "Skin/Skin.glsl"
-      #include "Skin/BlendShape.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
+      #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Skin/Skin.glsl"
+      #include "ShaderLibrary/Skin/BlendShape.glsl"
 
       vec2 u_size;
       vec4 u_pixelViewport;
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec2 v_uv;

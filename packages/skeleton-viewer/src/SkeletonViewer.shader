@@ -1,13 +1,19 @@
 Shader "skeleton-viewer" {
   SubShader "Default" {
     Pass "Forward" {
+      DepthState = {
+        Enabled = false;
+      }
+
+      RenderQueueType = Transparent;
+
       VertexShader = vert;
       FragmentShader = frag;
 
       mat4 renderer_MVPMat;
       mat4 renderer_NormalMat;
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec3 v_normal;

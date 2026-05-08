@@ -1,16 +1,16 @@
 #ifndef FORWARD_PASS_PBR_INCLUDED
 #define FORWARD_PASS_PBR_INCLUDED
 
-#include "Common/Common.glsl"
-#include "Common/Fog.glsl"
+#include "ShaderLibrary/Common/Common.glsl"
+#include "ShaderLibrary/Common/Fog.glsl"
 
-#include "Common/Attributes.glsl"
-#include "PBR/VaryingsPBR.glsl"
+#include "ShaderLibrary/Common/Attributes.glsl"
+#include "ShaderLibrary/PBR/VaryingsPBR.glsl"
 #include "./SSSLightDirect.glsl"
-#include "PBR/LightIndirectPBR.glsl"
+#include "ShaderLibrary/PBR/LightIndirectPBR.glsl"
 
-#include "PBR/VertexPBR.glsl"
-#include "PBR/FragmentPBR.glsl"
+#include "ShaderLibrary/PBR/VertexPBR.glsl"
+#include "ShaderLibrary/PBR/FragmentPBR.glsl"
 
 Varyings PBRVertex(Attributes attributes) {
   Varyings varyings;

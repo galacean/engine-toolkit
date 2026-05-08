@@ -1,15 +1,43 @@
 Shader "plain-color" {
   SubShader "Default" {
     Pass "Forward" {
+      Bool blendEnabled;
+      Bool depthEnabled;
+      Bool depthWriteEnabled;
+      RenderQueueType renderQueueType;
+      BlendFactor sourceColorBlendFactor;
+      BlendFactor destinationColorBlendFactor;
+      BlendFactor sourceAlphaBlendFactor;
+      BlendFactor destinationAlphaBlendFactor;
+
+      DepthState = {
+        Enabled = depthEnabled;
+        WriteEnabled = depthWriteEnabled;
+      }
+
+      BlendState = {
+        Enabled = blendEnabled;
+        SourceColorBlendFactor = sourceColorBlendFactor;
+        DestinationColorBlendFactor = destinationColorBlendFactor;
+        SourceAlphaBlendFactor = sourceAlphaBlendFactor;
+        DestinationAlphaBlendFactor = destinationAlphaBlendFactor;
+      }
+
+      RasterState = {
+        CullMode = CullMode.Off;
+      }
+
+      RenderQueueType = renderQueueType;
+
       VertexShader = vert;
       FragmentShader = frag;
 
-      #include "Common/Common.glsl"
-      #include "Common/Transform.glsl"
-      #include "Skin/Skin.glsl"
-      #include "Skin/BlendShape.glsl"
+      #include "ShaderLibrary/Common/Common.glsl"
+      #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Skin/Skin.glsl"
+      #include "ShaderLibrary/Skin/BlendShape.glsl"
 
-      #include "Common/Attributes.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
 
       void vert(Attributes attr) {
         vec4 position = vec4(attr.POSITION, 1.0);
