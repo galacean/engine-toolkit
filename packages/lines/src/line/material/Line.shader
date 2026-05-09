@@ -1,6 +1,26 @@
 Shader "line" {
   SubShader "Default" {
     Pass "Forward" {
+      DepthState = {
+        WriteEnabled = false;
+      }
+
+      BlendState = {
+        Enabled = true;
+        SourceColorBlendFactor = BlendFactor.SourceAlpha;
+        DestinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+        SourceAlphaBlendFactor = BlendFactor.SourceAlpha;
+        DestinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+        ColorBlendOperation = BlendOperation.Add;
+        AlphaBlendOperation = BlendOperation.Add;
+      }
+
+      RasterState = {
+        CullMode = CullMode.Off;
+      }
+
+      RenderQueueType = Transparent;
+
       VertexShader = vert;
       FragmentShader = frag;
 

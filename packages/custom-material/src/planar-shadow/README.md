@@ -20,17 +20,17 @@ for (let i = 0, n = renderers.length; i < n; i++) {
 }
 ```
 
-##### OR with `ShaderLab`
+##### OR with `ShaderCompiler`
 
-- Init engine with `ShaderLab`
+- Init engine with `ShaderCompiler`
 
   ```ts
-  import { ShaderLab } from "@galacean/engine-shader-lab";
-  // Init engine with shaderLab
-  WebGLEngine.create({ canvas: "canvas", shaderLab });
+  import { ShaderCompiler } from "@galacean/engine-shader-compiler";
+  // Init engine with shaderCompiler
+  WebGLEngine.create({ canvas: "canvas", shaderCompiler: new ShaderCompiler() });
   ```
 
-- Create shader through `ShaderLab`
+- Create shader through ShaderLab DSL
 
   ```ts
   import { PlanarShadowShaderSource } from "@galacean/engine-toolkit";

@@ -95,7 +95,6 @@ export class Icon extends Script {
     meshRenderer.mesh = mesh;
     meshRenderer.priority = 1;
     const iconMaterial = new IconMaterial(engine);
-    iconMaterial.renderState.depthState.enabled = false;
     iconMaterial.isTransparent = true;
     meshRenderer.setMaterial(iconMaterial);
     this._material = iconMaterial;

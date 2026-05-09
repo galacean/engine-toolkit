@@ -45,7 +45,9 @@ export class IconMaterial extends BaseMaterial {
   constructor(engine: Engine) {
     super(engine, Shader.find("icon"));
     this.shaderData.setColor(IconMaterial._baseColorProp, new Color(1, 1, 1, 1));
-    this.renderState.rasterState.cullMode = CullMode.Off;
+    // RasterState (CullMode.Off) and DepthState (Enabled=false) are pinned in
+    // Icon.shader's ShaderLab DSL — gizmo icons are always double-sided
+    // overlays that ignore depth.
   }
 
   override clone(): IconMaterial {

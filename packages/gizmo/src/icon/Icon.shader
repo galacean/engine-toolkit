@@ -1,6 +1,14 @@
 Shader "icon" {
   SubShader "Default" {
     Pass "Forward" {
+      DepthState = {
+        Enabled = false;
+      }
+
+      RasterState = {
+        CullMode = CullMode.Off;
+      }
+
       VertexShader = vert;
       FragmentShader = frag;
 
