@@ -1,6 +1,33 @@
 Shader "PlanarShadowOnly" {
   SubShader "Default" {
     Pass "PlanarShadow" {
+      DepthState = {
+        WriteEnabled = false;
+      }
+
+      BlendState = {
+        Enabled = true;
+        SourceColorBlendFactor = BlendFactor.SourceAlpha;
+        DestinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+        SourceAlphaBlendFactor = BlendFactor.One;
+        DestinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+      }
+
+      // ReferenceValue not declared → defaults to 0 (RenderState field initializer).
+      StencilState = {
+        Enabled = true;
+        CompareFunctionFront = CompareFunction.Equal;
+        CompareFunctionBack = CompareFunction.Equal;
+        FailOperationFront = StencilOperation.Keep;
+        FailOperationBack = StencilOperation.Keep;
+        ZFailOperationFront = StencilOperation.Keep;
+        ZFailOperationBack = StencilOperation.Keep;
+        PassOperationFront = StencilOperation.IncrementWrap;
+        PassOperationBack = StencilOperation.IncrementWrap;
+      }
+
+      RenderQueueType = Transparent;
+
       VertexShader = vert;
       FragmentShader = frag;
 

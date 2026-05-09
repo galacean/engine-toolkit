@@ -1,14 +1,4 @@
-import {
-  BlendFactor,
-  Color,
-  CompareFunction,
-  Material,
-  RenderQueueType,
-  Shader,
-  ShaderProperty,
-  StencilOperation,
-  Vector3
-} from "@galacean/engine";
+import { Color, Material, Shader, ShaderProperty, Vector3 } from "@galacean/engine";
 
 import planarShadowOnlySource from "./PlanarShadowOnly.shader";
 
@@ -25,30 +15,8 @@ export class PlanarShadowShaderFactory {
   static replaceShader(material: Material) {
     material.shader = Shader.find("planarShadowShader");
 
-    const shadowRenderState = material.renderStates[1];
-    shadowRenderState.renderQueueType = RenderQueueType.Transparent;
-    shadowRenderState.depthState.writeEnabled = false;
-
-    const targetBlendState = shadowRenderState.blendState.targetBlendState;
-    targetBlendState.enabled = true;
-    targetBlendState.sourceColorBlendFactor = BlendFactor.SourceAlpha;
-    targetBlendState.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    targetBlendState.sourceAlphaBlendFactor = BlendFactor.One;
-    targetBlendState.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-
-    // set shadow pass stencilState
-    const stencilState = shadowRenderState.stencilState;
-    stencilState.enabled = true;
-    stencilState.referenceValue = 0;
-    stencilState.compareFunctionFront = CompareFunction.Equal;
-    stencilState.compareFunctionBack = CompareFunction.Equal;
-    stencilState.failOperationFront = StencilOperation.Keep;
-    stencilState.failOperationBack = StencilOperation.Keep;
-    stencilState.zFailOperationFront = StencilOperation.Keep;
-    stencilState.zFailOperationBack = StencilOperation.Keep;
-    stencilState.passOperationFront = StencilOperation.IncrementWrap;
-    stencilState.passOperationBack = StencilOperation.IncrementWrap;
-
+    // Render state for the shadow pass (queue / blend / depth / stencil) is
+    // pinned in PlanarShadowOnly.shader's ShaderLab DSL block.
     const shaderData = material.shaderData;
     shaderData.setFloat(PlanarShadowShaderFactory._shadowFalloffProp, 0);
     shaderData.setColor(PlanarShadowShaderFactory._shadowColorProp, new Color(1.0, 1.0, 1.0, 1.0));
