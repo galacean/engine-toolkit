@@ -1,6 +1,9 @@
 import { Material, Shader, Engine } from "@galacean/engine";
 
-import "./lineShader";
+import { LineSource } from "../../../libs";
+
+// @ts-ignore
+Shader.find("line") || Shader._createFromPrecompiled(LineSource);
 
 export class LineMaterial extends Material {
   constructor(engine: Engine) {

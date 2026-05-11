@@ -24,11 +24,12 @@ import {
   dependentComponents
 } from "@galacean/engine";
 
-import outlinePostprocessShaderSource from "./OutlinePostprocess.shader";
-import outlineReplaceShaderSource from "./OutlineReplace.shader";
+import { OutlinePostprocessSource, OutlineReplaceSource } from "../libs";
 
-Shader.find("outline-postprocess-shader") || Shader.create(outlinePostprocessShaderSource);
-Shader.find("outline-replace-shader") || Shader.create(outlineReplaceShaderSource);
+// @ts-ignore
+Shader.find("outline-postprocess-shader") || Shader._createFromPrecompiled(OutlinePostprocessSource);
+// @ts-ignore
+Shader.find("outline-replace-shader") || Shader._createFromPrecompiled(OutlineReplaceSource);
 
 /**
  * Show outline of entities.

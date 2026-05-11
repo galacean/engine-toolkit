@@ -1,7 +1,8 @@
 import { BaseMaterial, Engine, MathUtil, Shader, ShaderProperty } from "@galacean/engine";
-import shaderSource from "./Grid.shader";
+import { GridSource } from "../../libs";
 
-Shader.find("grid") || Shader.create(shaderSource);
+// @ts-ignore
+Shader.find("grid") || Shader._createFromPrecompiled(GridSource);
 
 /**
  * Grid Material.

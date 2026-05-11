@@ -19,9 +19,10 @@ import {
   Vector3
 } from "@galacean/engine";
 
-import colorShaderSource from "./FramebufferPickerColor.shader";
+import { FramebufferPickerColorSource } from "../libs";
 
-const pickShader = Shader.find("framebuffer-picker-color") || Shader.create(colorShaderSource);
+// @ts-ignore
+const pickShader = Shader.find("framebuffer-picker-color") || Shader._createFromPrecompiled(FramebufferPickerColorSource);
 pickShader.subShaders.forEach((subShader: SubShader) => {
   subShader.passes.forEach((pass) => {
     pass.setTag("spriteDisableBatching", true);

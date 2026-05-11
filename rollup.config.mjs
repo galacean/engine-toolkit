@@ -68,12 +68,29 @@ function toGlobalName(pkgName) {
 const extensions = [".js", ".jsx", ".ts", ".tsx"];
 const mainFields = ["module", "main"];
 
+function hasShaderSource(pkgLocation) {
+  const srcDir = path.join(pkgLocation, "src");
+  if (!fs.existsSync(srcDir)) return false;
+  return walk(srcDir).some((f) => f && f.endsWith(".shader"));
+}
+
+const shaderPlugins = pkgs
+  .filter((p) => hasShaderSource(p.location))
+  .map((p) =>
+    shaderCompiler({
+      filter: (id) => id.startsWith(p.location + path.sep) && /\.(shader|shaderc)$/.test(id),
+      precompile: {
+        input: path.join(p.location, "src"),
+        output: path.join(p.location, "libs"),
+        clean: true,
+        emitIndex: true
+      }
+    })
+  );
+
 const plugins = [
   resolve({ extensions, preferBuiltins: true, mainFields }),
-  // Transform-only — `.shader`/`.glsl`/`.shaderc` files become string/JSON modules.
-  // Each package owns its own `precompile` npm script that drives the CLI to
-  // emit `.shaderc` artifacts under `<pkg>/libs/`; rollup never runs precompile.
-  shaderCompiler(),
+  ...shaderPlugins,
   swc(
     defineRollupSwcOption({
       include: /\.[mc]?[jt]sx?$/,

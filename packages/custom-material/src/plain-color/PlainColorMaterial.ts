@@ -1,7 +1,8 @@
 import { BaseMaterial, Color, Engine, Shader } from "@galacean/engine";
-import shaderSource from "./PlainColor.shader";
+import { PlainColorSource } from "../../libs";
 
-Shader.find("plain-color") || Shader.create(shaderSource);
+// @ts-ignore
+Shader.find("plain-color") || Shader._createFromPrecompiled(PlainColorSource);
 
 /**
  * plain color Material. don't effected by light and fog.

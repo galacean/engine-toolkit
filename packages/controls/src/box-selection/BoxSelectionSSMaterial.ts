@@ -1,8 +1,9 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Vector2, Vector4 } from "@galacean/engine";
 
-import shaderSource from "./BoxSelection.shader";
+import { BoxSelectionSource } from "../../libs";
 
-Shader.find("box") || Shader.create(shaderSource);
+// @ts-ignore
+Shader.find("box") || Shader._createFromPrecompiled(BoxSelectionSource);
 
 export class BoxSelectionSSMaterial extends BaseMaterial {
   private static _borderWidth = ShaderProperty.getByName("u_width");

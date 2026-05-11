@@ -1,6 +1,9 @@
 import { Color, Material, Shader, ShaderProperty, Vector3 } from "@galacean/engine";
 
-import planarShadowOnlySource from "./PlanarShadowOnly.shader";
+import { PlanarShadowOnlySource } from "../../libs";
+
+// @ts-ignore
+Shader.find("PlanarShadowOnly") || Shader._createFromPrecompiled(PlanarShadowOnlySource);
 
 export class PlanarShadowShaderFactory {
   private static _lightDirProp = ShaderProperty.getByName("u_lightDir");
@@ -8,11 +11,18 @@ export class PlanarShadowShaderFactory {
   private static _shadowColorProp = ShaderProperty.getByName("u_planarShadowColor");
   private static _shadowFalloffProp = ShaderProperty.getByName("u_planarShadowFalloff");
 
+  private static _ensureCombinedShader(): void {
+    if (Shader.find("planarShadowShader")) return;
+    const planarShadowPass = Shader.find("PlanarShadowOnly").subShaders[0].passes[0];
+    Shader.create("planarShadowShader", [Shader.find("PBR").subShaders[0].passes[2], planarShadowPass]);
+  }
+
   /**
    * Replace material Shader and initialization.
    * @param material - Material to replace and initialization.
    */
   static replaceShader(material: Material) {
+    PlanarShadowShaderFactory._ensureCombinedShader();
     material.shader = Shader.find("planarShadowShader");
 
     // Render state for the shadow pass (queue / blend / depth / stencil) is
@@ -59,13 +69,4 @@ export class PlanarShadowShaderFactory {
   static setShadowFalloff(material: Material, value: number) {
     material.shaderData.setFloat(PlanarShadowShaderFactory._shadowFalloffProp, value);
   }
-}
-
-if (!Shader.find("planarShadowShader")) {
-  // The .shader file precompiles to a standalone Shader; we steal its single
-  // pass and combine it with PBR's shadow caster pass for the actual material
-  // shader.
-  Shader.create(planarShadowOnlySource);
-  const planarShadowPass = Shader.find("PlanarShadowOnly").subShaders[0].passes[0];
-  Shader.create("planarShadowShader", [Shader.find("PBR").subShaders[0].passes[2], planarShadowPass]);
 }

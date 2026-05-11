@@ -1,7 +1,8 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector3 } from "@galacean/engine";
-import shaderSource from "./WaterRipple.shader";
+import { WaterRippleSource } from "../../libs";
 
-Shader.find("water-ripple") || Shader.create(shaderSource);
+// @ts-ignore
+Shader.find("water-ripple") || Shader._createFromPrecompiled(WaterRippleSource);
 
 export class WaterRippleMaterial extends BaseMaterial {
   private static _foamColor = ShaderProperty.getByName("u_foamColor");

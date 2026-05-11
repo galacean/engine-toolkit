@@ -1,7 +1,8 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector4 } from "@galacean/engine";
-import shaderSource from "./WaterFall.shader";
+import { WaterFallSource } from "../../libs";
 
-Shader.find("water-fall") || Shader.create(shaderSource);
+// @ts-ignore
+Shader.find("water-fall") || Shader._createFromPrecompiled(WaterFallSource);
 
 export class WaterFallMaterial extends BaseMaterial {
   private static _waterSpeed = ShaderProperty.getByName("u_water_speed");

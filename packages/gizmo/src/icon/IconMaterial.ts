@@ -1,8 +1,9 @@
 import { BaseMaterial, Color, CullMode, Engine, Shader, Texture2D } from "@galacean/engine";
 
-import shaderSource from "./Icon.shader";
+import { IconSource } from "../../libs";
 
-Shader.find("icon") || Shader.create(shaderSource);
+// @ts-ignore
+Shader.find("icon") || Shader._createFromPrecompiled(IconSource);
 
 /**
  * Icon Material. don't effected by light and fog.

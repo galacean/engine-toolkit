@@ -14,9 +14,10 @@ import {
   Vector3
 } from "@galacean/engine";
 
-import shaderSource from "./SkeletonViewer.shader";
+import { SkeletonViewerSource } from "../libs";
 
-Shader.find("skeleton-viewer") || Shader.create(shaderSource);
+// @ts-ignore
+Shader.find("skeleton-viewer") || Shader._createFromPrecompiled(SkeletonViewerSource);
 
 /**
  * Skeleton visualization.
