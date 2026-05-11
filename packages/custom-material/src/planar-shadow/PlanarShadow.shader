@@ -2,7 +2,7 @@ Shader "PlanarShadow" {
 
   SubShader "Default" {
 
-    UsePass "pbr/Default/Forward"
+    UsePass "PBR/Default/Forward Pass"
 
     Pass "planarShadow" {
       VertexShader = vert;

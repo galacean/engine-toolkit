@@ -54,7 +54,7 @@ Shader "DigitalHuman/SSS.gs" {
   }
     
   SubShader "Default" {
-    UsePass "pbr/Default/ShadowCaster"
+    UsePass "Pipeline/ShadowCaster/Default/ShadowCaster"
 
     Pass "Forward Pass" {
       Tags { pipelineStage = "Forward"} 
