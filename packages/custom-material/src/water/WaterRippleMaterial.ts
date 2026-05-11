@@ -1,5 +1,5 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector3 } from "@galacean/engine";
-import { WaterRippleSource } from "../../libs";
+import { WaterRippleSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("water-ripple") || Shader._createFromPrecompiled(WaterRippleSource);

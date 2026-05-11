@@ -1,3 +1,3 @@
 export { FramebufferPicker } from "./FramebufferPicker";
 
-export * from "../libs";
+export * from "../compiledShaders";

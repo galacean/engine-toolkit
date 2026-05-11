@@ -19,7 +19,7 @@ import {
   Vector3
 } from "@galacean/engine";
 
-import { FramebufferPickerColorSource } from "../libs";
+import { FramebufferPickerColorSource } from "../compiledShaders";
 
 // @ts-ignore
 const pickShader = Shader.find("framebuffer-picker-color") || Shader._createFromPrecompiled(FramebufferPickerColorSource);

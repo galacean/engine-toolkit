@@ -81,7 +81,7 @@ const shaderPlugins = pkgs
       filter: (id) => id.startsWith(p.location + path.sep) && /\.(shader|shaderc)$/.test(id),
       precompile: {
         input: path.join(p.location, "src"),
-        output: path.join(p.location, "libs"),
+        output: path.join(p.location, "compiledShaders"),
         clean: true,
         emitIndex: true
       }

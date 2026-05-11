@@ -1,5 +1,5 @@
 import { Engine, PBRMaterial, Shader, ShaderProperty, Texture2D } from "@galacean/engine";
-import { BakePBRSource } from "../../libs";
+import { BakePBRSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("bake-pbr") || Shader._createFromPrecompiled(BakePBRSource);

@@ -1,6 +1,6 @@
 import { Color, Material, Shader, ShaderProperty, Vector3 } from "@galacean/engine";
 
-import { PlanarShadowOnlySource } from "../../libs";
+import { PlanarShadowOnlySource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("PlanarShadowOnly") || Shader._createFromPrecompiled(PlanarShadowOnlySource);

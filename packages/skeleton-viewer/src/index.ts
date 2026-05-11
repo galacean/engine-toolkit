@@ -1,3 +1,3 @@
 export { SkeletonViewer } from "./SkeletonViewer";
 
-export * from "../libs";
+export * from "../compiledShaders";

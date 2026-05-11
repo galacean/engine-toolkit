@@ -11,4 +11,4 @@ export { ControlHandlerType } from "./enums/ControlHandlerType";
 
 export type { IControlInput } from "./inputDevice/IControlInput";
 
-export * from "../libs";
+export * from "../compiledShaders";

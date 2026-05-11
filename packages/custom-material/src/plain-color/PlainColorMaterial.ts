@@ -1,5 +1,5 @@
 import { BaseMaterial, Color, Engine, Shader } from "@galacean/engine";
-import { PlainColorSource } from "../../libs";
+import { PlainColorSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("plain-color") || Shader._createFromPrecompiled(PlainColorSource);

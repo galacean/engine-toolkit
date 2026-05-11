@@ -1,6 +1,6 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Vector2, Vector4 } from "@galacean/engine";
 
-import { BoxSelectionSource } from "../../libs";
+import { BoxSelectionSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("box") || Shader._createFromPrecompiled(BoxSelectionSource);

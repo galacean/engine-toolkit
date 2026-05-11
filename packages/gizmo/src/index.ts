@@ -4,4 +4,4 @@ export { Group } from "./Group";
 export { State } from "./enums/GizmoState";
 export { AnchorType, CoordinateType } from "./enums/GroupState";
 
-export * from "../libs";
+export * from "../compiledShaders";

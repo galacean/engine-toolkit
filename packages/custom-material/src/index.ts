@@ -4,4 +4,4 @@ export * from "./water";
 export { BakePBRMaterial } from "./bake-pbr/BakePBRMaterial";
 export { PlainColorMaterial } from "./plain-color/PlainColorMaterial";
 
-export * from "../libs";
+export * from "../compiledShaders";

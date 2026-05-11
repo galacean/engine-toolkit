@@ -1,6 +1,6 @@
 import { BaseMaterial, Color, Engine, RenderFace, Shader } from "@galacean/engine";
 
-import { WireframeSource } from "../../libs";
+import { WireframeSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("wireframeShader") || Shader._createFromPrecompiled(WireframeSource);

@@ -14,7 +14,7 @@
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
-    "precompile": "shader-compiler-precompile src libs --clean --emit-index",
+    "precompile": "shader-compiler-precompile src compiledShaders --clean --emit-index",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
   "types": "types/src/index.d.ts",

@@ -1,6 +1,6 @@
 import { Shader, Engine } from "@galacean/engine";
 import { LineMaterial } from "./LineMaterial";
-import { DashSource } from "../../../libs";
+import { DashSource } from "../../../compiledShaders";
 
 // @ts-ignore
 Shader.find("dash") || Shader._createFromPrecompiled(DashSource);

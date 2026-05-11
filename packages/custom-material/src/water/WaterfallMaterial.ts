@@ -1,5 +1,5 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Texture2D, Vector2, Vector4 } from "@galacean/engine";
-import { WaterFallSource } from "../../libs";
+import { WaterFallSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("water-fall") || Shader._createFromPrecompiled(WaterFallSource);

@@ -1,6 +1,6 @@
 import { BaseMaterial, Color, CullMode, Engine, Shader, Texture2D } from "@galacean/engine";
 
-import { IconSource } from "../../libs";
+import { IconSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("icon") || Shader._createFromPrecompiled(IconSource);

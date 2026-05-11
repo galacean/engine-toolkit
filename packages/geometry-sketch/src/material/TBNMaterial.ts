@@ -1,6 +1,6 @@
 import { BaseMaterial, Color, Engine, Shader } from "@galacean/engine";
 
-import { TBNSource } from "../../libs";
+import { TBNSource } from "../../compiledShaders";
 
 // @ts-ignore
 Shader.find("tbnShader") || Shader._createFromPrecompiled(TBNSource);

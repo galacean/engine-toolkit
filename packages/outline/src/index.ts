@@ -1,3 +1,3 @@
 export { OutlineManager } from "./OutlineManager";
 
-export * from "../libs";
+export * from "../compiledShaders";

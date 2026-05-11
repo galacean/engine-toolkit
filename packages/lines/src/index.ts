@@ -2,4 +2,4 @@ export * from "./line/constants";
 export { DashLine } from "./line/DashLine";
 export { Line } from "./line/Line";
 
-export * from "../libs";
+export * from "../compiledShaders";

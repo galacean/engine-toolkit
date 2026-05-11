@@ -24,7 +24,7 @@ import {
   dependentComponents
 } from "@galacean/engine";
 
-import { OutlinePostprocessSource, OutlineReplaceSource } from "../libs";
+import { OutlinePostprocessSource, OutlineReplaceSource } from "../compiledShaders";
 
 // @ts-ignore
 Shader.find("outline-postprocess-shader") || Shader._createFromPrecompiled(OutlinePostprocessSource);
