@@ -1,6 +1,20 @@
 Shader "box" {
   SubShader "Default" {
     Pass "Forward" {
+      DepthState = {
+        Enabled = false;
+      }
+
+      BlendState = {
+        Enabled = true;
+        SourceColorBlendFactor = BlendFactor.SourceAlpha;
+        DestinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+        SourceAlphaBlendFactor = BlendFactor.One;
+        DestinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+      }
+
+      RenderQueueType = Transparent;
+
       VertexShader = vert;
       FragmentShader = frag;
 

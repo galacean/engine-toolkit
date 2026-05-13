@@ -1,6 +1,20 @@
 Shader "wireframeShader" {
   SubShader "Default" {
     Pass "Forward" {
+      BlendState = {
+        Enabled = true;
+        SourceColorBlendFactor = BlendFactor.SourceAlpha;
+        DestinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+        SourceAlphaBlendFactor = BlendFactor.One;
+        DestinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+      }
+
+      DepthState = {
+        WriteEnabled = false;
+      }
+
+      RenderQueueType = Transparent;
+
       VertexShader = vert;
       FragmentShader = frag;
 

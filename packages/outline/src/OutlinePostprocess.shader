@@ -1,6 +1,26 @@
 Shader "outline-postprocess-shader" {
   SubShader "Default" {
     Pass "Forward" {
+      // Fullscreen-quad postprocess that blends the sobel outline onto the
+      // existing framebuffer. The new ShaderLab pipeline does not surface
+      // `material.isTransparent = true` to the Pass when render state is
+      // undeclared — default opaque overwrites the scene with the `vec4(0)`
+      // returned for non-edge pixels.
+      DepthState = {
+        Enabled = false;
+        WriteEnabled = false;
+      }
+
+      BlendState = {
+        Enabled = true;
+        SourceColorBlendFactor = BlendFactor.SourceAlpha;
+        DestinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+        SourceAlphaBlendFactor = BlendFactor.One;
+        DestinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+      }
+
+      RenderQueueType = Transparent;
+
       VertexShader = vert;
       FragmentShader = frag;
 

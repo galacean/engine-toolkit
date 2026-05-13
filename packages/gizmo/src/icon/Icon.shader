@@ -9,6 +9,16 @@ Shader "icon" {
         CullMode = CullMode.Off;
       }
 
+      BlendState = {
+        Enabled = true;
+        SourceColorBlendFactor = BlendFactor.SourceAlpha;
+        DestinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
+        SourceAlphaBlendFactor = BlendFactor.One;
+        DestinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
+      }
+
+      RenderQueueType = Transparent;
+
       VertexShader = vert;
       FragmentShader = frag;
 
