@@ -14,7 +14,13 @@ export class PlanarShadowShaderFactory {
   private static _ensureCombinedShader(): void {
     if (Shader.find("planarShadowShader")) return;
     const planarShadowPass = Shader.find("PlanarShadowOnly").subShaders[0].passes[0];
-    Shader.create("planarShadowShader", [Shader.find("PBR").subShaders[0].passes[2], planarShadowPass]);
+    // Resolve PBR's forward pass by name so this survives any future reordering
+    // of PBR's pass list (UsePass entries / pipeline injections).
+    const pbrForwardPass = Shader.find("PBR").subShaders[0].passes.find((p) => p.name === "Forward Pass");
+    if (!pbrForwardPass) {
+      throw new Error('Planar shadow combined shader requires PBR "Forward Pass", but it was not found.');
+    }
+    Shader.create("planarShadowShader", [pbrForwardPass, planarShadowPass]);
   }
 
   /**
