@@ -1,5 +1,10 @@
 import { BaseMaterial, Engine, Shader, ShaderProperty, Vector2, Vector4 } from "@galacean/engine";
 
+import { BoxSelectionSource } from "../../compiledShaders";
+
+// @ts-ignore
+Shader.find("box") || Shader._createFromPrecompiled(BoxSelectionSource);
+
 export class BoxSelectionSSMaterial extends BaseMaterial {
   private static _borderWidth = ShaderProperty.getByName("u_width");
   private static _minPoint = ShaderProperty.getByName("u_min");
@@ -54,28 +59,3 @@ export class BoxSelectionSSMaterial extends BaseMaterial {
     this.shaderData.setFloat(BoxSelectionSSMaterial._borderWidth, value);
   }
 }
-
-Shader.create(
-  "box",
-  `
-#include <common>
-#include <common_vert>
-
-void main() {
-  gl_Position = vec4(POSITION, 1.0);
-}`,
-
-  `
-uniform vec2 u_min;
-uniform vec2 u_max;
-uniform vec4 u_boxColor;
-uniform vec4 u_borderColor;
-uniform float u_width;
-
-void main() {
-  float vColor = step(u_min.x + u_width, gl_FragCoord.x) * step(gl_FragCoord.x, u_max.x - u_width) * step(u_min.y + u_width, gl_FragCoord.y) * step(gl_FragCoord.y, u_max.y - u_width);
-  float vBorder = step(u_min.x, gl_FragCoord.x) * step(gl_FragCoord.x, u_max.x) * step(u_min.y, gl_FragCoord.y) * step(gl_FragCoord.y, u_max.y);
-  gl_FragColor = u_boxColor * vColor + (1. - vColor) * vBorder * u_borderColor;
-}
-`
-);

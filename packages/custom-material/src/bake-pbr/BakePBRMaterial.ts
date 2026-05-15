@@ -1,8 +1,8 @@
 import { Engine, PBRMaterial, Shader, ShaderProperty, Texture2D } from "@galacean/engine";
-import fragment from "./fragment";
-import vertex from "./vertex";
+import { BakePBRSource } from "../../compiledShaders";
 
-Shader.create("bake-pbr", vertex, fragment);
+// @ts-ignore
+Shader.find("bake-pbr") || Shader._createFromPrecompiled(BakePBRSource);
 
 /**
  * Bake PBR Material.

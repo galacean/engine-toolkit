@@ -24,10 +24,12 @@ import {
   dependentComponents
 } from "@galacean/engine";
 
-import outlineFs from "./outline.fs.glsl";
-import outlineVs from "./outline.vs.glsl";
-import replaceFs from "./replace.fs.glsl";
-import replaceVs from "./replace.vs.glsl";
+import { OutlinePostprocessSource, OutlineReplaceSource } from "../compiledShaders";
+
+// @ts-ignore
+Shader.find("outline-postprocess-shader") || Shader._createFromPrecompiled(OutlinePostprocessSource);
+// @ts-ignore
+Shader.find("outline-replace-shader") || Shader._createFromPrecompiled(OutlineReplaceSource);
 
 /**
  * Show outline of entities.
@@ -323,6 +325,3 @@ export class OutlineManager extends Script {
     }
   }
 }
-
-Shader.create("outline-postprocess-shader", outlineVs, outlineFs);
-Shader.create("outline-replace-shader", replaceVs, replaceFs);

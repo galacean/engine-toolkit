@@ -1,6 +1,6 @@
 #define FUNCTION_SPECULAR_LOBE specularLobehair
 
-#include "BRDF.glsl"
+#include "ShaderLibrary/PBR/BSDF.glsl"
 
 #include "./HairFunction.glsl"
 
@@ -29,4 +29,4 @@ void specularLobehair(Varyings varyings, SurfaceData surfaceData, BRDFData brdfD
     specularColor += attenuationIrradiance * hairSpecular;
 }
 
-#include "LightDirectPBR.glsl"
+#include "ShaderLibrary/PBR/LightDirectPBR.glsl"

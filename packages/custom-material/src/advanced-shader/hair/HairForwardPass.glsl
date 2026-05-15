@@ -1,16 +1,16 @@
 #ifndef FORWARD_PASS_PBR_INCLUDED
 #define FORWARD_PASS_PBR_INCLUDED
 
-#include "Common.glsl"
-#include "Fog.glsl"
+#include "ShaderLibrary/Common/Common.glsl"
+#include "ShaderLibrary/Common/Fog.glsl"
 
-#include "AttributesPBR.glsl"
-#include "VaryingsPBR.glsl"
+#include "ShaderLibrary/Common/Attributes.glsl"
+#include "ShaderLibrary/PBR/VaryingsPBR.glsl"
 #include "./HairLightDirect.glsl"
-#include "LightIndirectPBR.glsl"
+#include "ShaderLibrary/PBR/LightIndirectPBR.glsl"
 
-#include "VertexPBR.glsl"
-#include "FragmentPBR.glsl"
+#include "ShaderLibrary/PBR/VertexPBR.glsl"
+#include "ShaderLibrary/PBR/FragmentPBR.glsl"
 
 
 Varyings PBRVertex(Attributes attributes) {

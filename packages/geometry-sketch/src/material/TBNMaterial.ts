@@ -1,82 +1,9 @@
 import { BaseMaterial, Color, Engine, Shader } from "@galacean/engine";
-import { geometryTextureDefine, geometryTextureVert } from "./GeometryShader";
 
-Shader.create(
-  "tbnShader",
-  `
-#include <common>
-   uniform float u_lineScale;
-   uniform mat4 camera_VPMat;
-   uniform mat4 u_worldMatrix;
-   uniform mat4 u_worldNormal;
+import { TBNSource } from "../../compiledShaders";
 
-#ifdef RENDERER_HAS_SKIN
-#ifdef RENDERER_USE_JOINT_TEXTURE
-    uniform sampler2D renderer_JointSampler;
-    uniform float renderer_JointCount;
-
-    mat4 getJointMatrix(sampler2D smp, float index) {
-        float base = index / renderer_JointCount;
-        float hf = 0.5 / renderer_JointCount;
-        float v = base + hf;
-
-        vec4 m0 = texture2D(smp, vec2(0.125, v ));
-        vec4 m1 = texture2D(smp, vec2(0.375, v ));
-        vec4 m2 = texture2D(smp, vec2(0.625, v ));
-        vec4 m3 = texture2D(smp, vec2(0.875, v ));
-
-        return mat4(m0, m1, m2, m3);
-    }
-#else
-    uniform mat4 renderer_JointMatrix[ RENDERER_JOINTS_NUM ];
-#endif
-#endif
-
-${geometryTextureDefine}
-
-void main() {
-    int pointIndex = gl_VertexID / 2;
-    ${geometryTextureVert}
-
-    #include <begin_position_vert>
-    #include <begin_normal_vert>
-    #include <skinning_vert>
-
-    gl_Position = u_worldMatrix * position; 
-    
-#if defined(SHOW_NORMAL) && defined(RENDERER_HAS_NORMAL)
-    if (gl_VertexID % 2 == 1) {
-        vec3 normalW = normalize( mat3(u_worldNormal) * normal.xyz );
-        gl_Position.xyz += normalize(normalW) * u_lineScale;
-    }
-#endif
-
-#if defined(SHOW_TANGENT) && defined(RENDERER_HAS_TANGENT)
-    if (gl_VertexID % 2 == 1) {
-        vec3 tangentW = normalize( mat3(u_worldNormal) * tangent.xyz );
-        gl_Position.xyz += normalize(tangentW) * u_lineScale;
-    }
-#endif
-
-#if defined(SHOW_BITANGENT) && defined(RENDERER_HAS_TANGENT) && defined(RENDERER_HAS_NORMAL)
-    if (gl_VertexID % 2 == 1) {
-        vec3 normalW = normalize( mat3(u_worldNormal) * normal.xyz );
-        vec3 tangentW = normalize( mat3(u_worldNormal) * tangent.xyz );
-        vec3 bitangentW = cross( normalW, tangentW ) * tangent.w;
-        gl_Position.xyz += normalize(bitangentW) * u_lineScale;
-    }
-#endif
-    
-    gl_Position = camera_VPMat * gl_Position; 
-}
-`,
-  `
-uniform vec4 material_BaseColor;
-void main() {
-    gl_FragColor = material_BaseColor;
-}
-`
-);
+// @ts-ignore
+Shader.find("tbnShader") || Shader._createFromPrecompiled(TBNSource);
 
 /**
  * Material for normal shading

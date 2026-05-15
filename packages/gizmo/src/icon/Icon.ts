@@ -63,7 +63,7 @@ export class Icon extends Script {
       if (value instanceof Texture2D) {
         this._material.baseTexture = value;
       } else {
-        this.engine.resourceManager.load({ url: value, type: AssetType.Texture2D }).then((texture: Texture2D) => {
+        this.engine.resourceManager.load({ url: value, type: AssetType.Texture }).then((texture: Texture2D) => {
           this._material.baseTexture = texture;
         });
       }
@@ -95,7 +95,6 @@ export class Icon extends Script {
     meshRenderer.mesh = mesh;
     meshRenderer.priority = 1;
     const iconMaterial = new IconMaterial(engine);
-    iconMaterial.renderState.depthState.enabled = false;
     iconMaterial.isTransparent = true;
     meshRenderer.setMaterial(iconMaterial);
     this._material = iconMaterial;

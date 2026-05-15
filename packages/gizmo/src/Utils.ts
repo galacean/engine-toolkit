@@ -1,4 +1,4 @@
-import { Engine, PrimitiveMesh, ModelMesh, CullMode, Vector3 } from "@galacean/engine";
+import { Engine, PrimitiveMesh, ModelMesh, Vector3 } from "@galacean/engine";
 import { State } from "./enums/GizmoState";
 import { GizmoMesh } from "./GizmoMesh";
 import { PlainColorMaterial } from "@galacean/engine-toolkit-custom-material";
@@ -126,9 +126,7 @@ export class Utils {
     );
     Utils.yellowMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.8900054069935289, 0.0);
     Utils.rotatePlaneMaterial = this._createPlainColorMaterial(engine, State.rotate, 1.0, 0.8900054069935289, 0.0, 0.2);
-    Utils.rotatePlaneMaterial.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialRotate = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
-    Utils.invisibleMaterialRotate.renderState.rasterState.cullMode = CullMode.Off;
     Utils.invisibleMaterialCircle = this._createPlainColorMaterial(engine, State.rotate, 0, 0, 0, 0);
 
     // scale material
@@ -211,7 +209,7 @@ export class Utils {
   ): PlainColorMaterial {
     const material = new PlainColorMaterial(engine);
     material.isTransparent = true;
-    material.renderState.depthState.enabled = false;
+    material.shaderData.setInt("depthEnabled", 0);
     material.baseColor.set(r, g, b, a);
     material.name = name.toString();
     return material;

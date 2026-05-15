@@ -1,5 +1,10 @@
 import { BaseMaterial, Color, CullMode, Engine, Shader, Texture2D } from "@galacean/engine";
 
+import { IconSource } from "../../compiledShaders";
+
+// @ts-ignore
+Shader.find("icon") || Shader._createFromPrecompiled(IconSource);
+
 /**
  * Icon Material. don't effected by light and fog.
  */
@@ -41,7 +46,9 @@ export class IconMaterial extends BaseMaterial {
   constructor(engine: Engine) {
     super(engine, Shader.find("icon"));
     this.shaderData.setColor(IconMaterial._baseColorProp, new Color(1, 1, 1, 1));
-    this.renderState.rasterState.cullMode = CullMode.Off;
+    // RasterState (CullMode.Off) and DepthState (Enabled=false) are pinned in
+    // Icon.shader's ShaderLab DSL — gizmo icons are always double-sided
+    // overlays that ignore depth.
   }
 
   override clone(): IconMaterial {
@@ -50,56 +57,3 @@ export class IconMaterial extends BaseMaterial {
     return dest;
   }
 }
-
-Shader.create(
-  "icon",
-  `
-#include <common>
-#include <common_vert>
-#include <uv_share>
-#include <blendShape_input>
-
-uniform vec2 u_size;
-uniform vec4 u_pixelViewport;
-
-void main() {
-    #include <begin_position_vert>
-    #include <blendShape_vert>
-    #include <skinning_vert>
-
-    vec4 translation = renderer_MVPMat[3];
-    translation = translation / translation.w;
-    float xFactor = u_size.x / u_pixelViewport.z * 2.0;
-    float yFactor = u_size.y / u_pixelViewport.w * 2.0;
-    gl_Position = vec4(translation.x + xFactor * position.x, translation.y + yFactor * position.y, translation.z, 1);
-    v_uv = TEXCOORD_0;
-}
-`,
-
-  `
-#include <common>
-#include <uv_share>
-
-uniform vec4 material_BaseColor;
-#ifdef MATERIAL_HAS_BASETEXTURE
-    uniform sampler2D material_BaseTexture;
-#endif
-
-void main() {
-     vec4 baseColor = material_BaseColor;
-
-     #ifdef MATERIAL_HAS_BASETEXTURE
-        vec4 textureColor = texture2D(material_BaseTexture, v_uv);
-        baseColor.a *= textureColor.a;
-     #endif
-
-    #ifdef MATERIAL_IS_ALPHA_CUTOFF
-        if( baseColor.a < material_AlphaCutoff ) {
-            discard;
-        }
-    #endif
-
-    gl_FragColor = baseColor;
-}
-`
-);

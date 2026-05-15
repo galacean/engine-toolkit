@@ -8,12 +8,16 @@ import {
   ModelMesh,
   PrimitiveMesh,
   Quaternion,
-  RenderQueueType,
   Script,
   Shader,
   SkinnedMeshRenderer,
   Vector3
 } from "@galacean/engine";
+
+import { SkeletonViewerSource } from "../compiledShaders";
+
+// @ts-ignore
+Shader.find("skeleton-viewer") || Shader._createFromPrecompiled(SkeletonViewerSource);
 
 /**
  * Skeleton visualization.
@@ -43,8 +47,6 @@ export class SkeletonViewer extends Script {
     const engine = entity.engine;
     if (!materialMap.get(engine)) {
       const material = new Material(entity.engine, Shader.find("skeleton-viewer"));
-      material.renderState.rasterState.depthBias = -100000000;
-      material.renderState.renderQueueType = RenderQueueType.Transparent;
       materialMap.set(engine, material);
     }
 
@@ -168,7 +170,6 @@ export class SkeletonViewer extends Script {
       const bone = bones[i];
       const anchorPoint = bone.transform.worldPosition;
 
-      // 球
       const entity = bone.createChild();
       const renderer = entity.addComponent(MeshRenderer);
       renderer.receiveShadows = false;
@@ -181,7 +182,6 @@ export class SkeletonViewer extends Script {
 
       this._debugMesh.push(renderer);
 
-      // 连接体
       for (let j = 0; j < bone.children.length; j++) {
         const child = bone.children[j];
         const childPoint = child.transform.worldPosition;
@@ -224,33 +224,5 @@ export class SkeletonViewer extends Script {
     }
   }
 }
-
-Shader.create(
-  "skeleton-viewer",
-  `
-  attribute vec3 POSITION;
-  attribute vec3 NORMAL;
-
-  uniform mat4 renderer_MVPMat;
-  uniform mat4 renderer_NormalMat;
-
-  varying vec3 v_normal;
-
-  void main(){
-      gl_Position = renderer_MVPMat * vec4( POSITION , 1.0 );;
-      v_normal = normalize( mat3(renderer_NormalMat) * NORMAL );
-  }`,
-  `
-      uniform vec3 u_colorMin;
-      uniform vec3 u_colorMax;
-      varying vec3 v_normal;
-
-      void main(){
-        float ndl = dot(v_normal, vec3(0, 1, 0)) * 0.5 + 0.5;
-        vec3 diffuse = mix(u_colorMin, u_colorMax, ndl);
-        gl_FragColor = vec4(diffuse, 1.0);
-      }
-      `
-);
 
 const materialMap = new Map<Engine, Material>();

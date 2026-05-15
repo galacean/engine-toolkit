@@ -14,9 +14,10 @@
   "bugs": "https://github.com/galacean/engine-toolkit/issues",
   "scripts": {
     "b:types": "tsc",
+    "precompile": "shader-compiler-precompile src compiledShaders --clean --emit-index",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
-  "types": "types/index.d.ts",
+  "types": "types/src/index.d.ts",
   "main": "dist/commonjs/browser.js",
   "module": "dist/es/index.js",
   "files": [

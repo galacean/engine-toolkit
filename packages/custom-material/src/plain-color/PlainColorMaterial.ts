@@ -1,4 +1,8 @@
-import { BaseMaterial, Color, CullMode, Engine, Shader } from "@galacean/engine";
+import { BaseMaterial, Color, Engine, Shader } from "@galacean/engine";
+import { PlainColorSource } from "../../compiledShaders";
+
+// @ts-ignore
+Shader.find("plain-color") || Shader._createFromPrecompiled(PlainColorSource);
 
 /**
  * plain color Material. don't effected by light and fog.
@@ -31,7 +35,8 @@ export class PlainColorMaterial extends BaseMaterial {
 
     shaderData.setColor(PlainColorMaterial._baseColorProp, new Color(1, 1, 1, 1));
 
-    this.renderState.rasterState.cullMode = CullMode.Off;
+    // depth test on by default; gizmo overlays opt out by setting `depthEnabled` to 0.
+    shaderData.setInt("depthEnabled", 1);
   }
 
   override clone(): PlainColorMaterial {
@@ -40,37 +45,3 @@ export class PlainColorMaterial extends BaseMaterial {
     return dest;
   }
 }
-
-Shader.create(
-  "plain-color",
-  `
-#include <common>
-#include <common_vert>
-#include <blendShape_input>
-
-void main() {
-    #include <begin_position_vert>
-    #include <blendShape_vert>
-    #include <skinning_vert>
-    #include <position_vert>
-}
-`,
-
-  `
-#include <common>
-
-uniform vec4 material_BaseColor;
-
-void main() {
-    vec4 baseColor = material_BaseColor;
-
-    #ifdef MATERIAL_IS_ALPHA_CUTOFF
-        if( baseColor.a < material_AlphaCutoff ) {
-            discard;
-        }
-    #endif
-
-    gl_FragColor = baseColor;
-}
-`
-);

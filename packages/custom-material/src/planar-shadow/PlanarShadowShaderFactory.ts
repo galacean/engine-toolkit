@@ -1,15 +1,9 @@
-import {
-  BlendFactor,
-  Color,
-  CompareFunction,
-  Material,
-  RenderQueueType,
-  Shader,
-  ShaderPass,
-  ShaderProperty,
-  StencilOperation,
-  Vector3
-} from "@galacean/engine";
+import { Color, Material, Shader, ShaderProperty, Vector3 } from "@galacean/engine";
+
+import { PlanarShadowOnlySource } from "../../compiledShaders";
+
+// @ts-ignore
+Shader.find("PlanarShadowOnly") || Shader._createFromPrecompiled(PlanarShadowOnlySource);
 
 export class PlanarShadowShaderFactory {
   private static _lightDirProp = ShaderProperty.getByName("u_lightDir");
@@ -17,37 +11,28 @@ export class PlanarShadowShaderFactory {
   private static _shadowColorProp = ShaderProperty.getByName("u_planarShadowColor");
   private static _shadowFalloffProp = ShaderProperty.getByName("u_planarShadowFalloff");
 
+  private static _ensureCombinedShader(): void {
+    if (Shader.find("planarShadowShader")) return;
+    const planarShadowPass = Shader.find("PlanarShadowOnly").subShaders[0].passes[0];
+    // Resolve PBR's forward pass by name so this survives any future reordering
+    // of PBR's pass list (UsePass entries / pipeline injections).
+    const pbrForwardPass = Shader.find("PBR").subShaders[0].passes.find((p) => p.name === "Forward Pass");
+    if (!pbrForwardPass) {
+      throw new Error('Planar shadow combined shader requires PBR "Forward Pass", but it was not found.');
+    }
+    Shader.create("planarShadowShader", [pbrForwardPass, planarShadowPass]);
+  }
+
   /**
-   * Replace material Shader and initialization。
-   * @param material - Material to replace and initialization。
+   * Replace material Shader and initialization.
+   * @param material - Material to replace and initialization.
    */
   static replaceShader(material: Material) {
+    PlanarShadowShaderFactory._ensureCombinedShader();
     material.shader = Shader.find("planarShadowShader");
 
-    const shadowRenderState = material.renderStates[1];
-    shadowRenderState.renderQueueType = RenderQueueType.Transparent;
-    shadowRenderState.depthState.writeEnabled = false;
-
-    const targetBlendState = shadowRenderState.blendState.targetBlendState;
-    targetBlendState.enabled = true;
-    targetBlendState.sourceColorBlendFactor = BlendFactor.SourceAlpha;
-    targetBlendState.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    targetBlendState.sourceAlphaBlendFactor = BlendFactor.One;
-    targetBlendState.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-
-    // set shadow pass stencilState
-    const stencilState = shadowRenderState.stencilState;
-    stencilState.enabled = true;
-    stencilState.referenceValue = 0;
-    stencilState.compareFunctionFront = CompareFunction.Equal;
-    stencilState.compareFunctionBack = CompareFunction.Equal;
-    stencilState.failOperationFront = StencilOperation.Keep;
-    stencilState.failOperationBack = StencilOperation.Keep;
-    stencilState.zFailOperationFront = StencilOperation.Keep;
-    stencilState.zFailOperationBack = StencilOperation.Keep;
-    stencilState.passOperationFront = StencilOperation.IncrementWrap;
-    stencilState.passOperationBack = StencilOperation.IncrementWrap;
-
+    // Render state for the shadow pass (queue / blend / depth / stencil) is
+    // pinned in PlanarShadowOnly.shader's ShaderLab DSL block.
     const shaderData = material.shaderData;
     shaderData.setFloat(PlanarShadowShaderFactory._shadowFalloffProp, 0);
     shaderData.setColor(PlanarShadowShaderFactory._shadowColorProp, new Color(1.0, 1.0, 1.0, 1.0));
@@ -91,97 +76,3 @@ export class PlanarShadowShaderFactory {
     material.shaderData.setFloat(PlanarShadowShaderFactory._shadowFalloffProp, value);
   }
 }
-
-const planarShadow = new ShaderPass(
-  `
-    attribute vec4 POSITION;
-    varying vec4 color;
-
-    uniform vec3 u_lightDir;
-    uniform float u_planarHeight;
-    uniform vec4 u_planarShadowColor;
-    uniform float u_planarShadowFalloff;
-
-    uniform mat4 renderer_ModelMat;
-    uniform mat4 camera_VPMat;
-
-    #ifdef RENDERER_HAS_SKIN
-      attribute vec4 JOINTS_0;
-      attribute vec4 WEIGHTS_0;
-
-      #ifdef RENDERER_USE_JOINT_TEXTURE
-        uniform sampler2D renderer_JointSampler;
-        uniform float renderer_JointCount;
-        mat4 getJointMatrix(sampler2D smp, float index) {
-            float base = index / renderer_JointCount;
-            float hf = 0.5 / renderer_JointCount;
-            float v = base + hf;
-
-            vec4 m0 = texture2D(smp, vec2(0.125, v ));
-            vec4 m1 = texture2D(smp, vec2(0.375, v ));
-            vec4 m2 = texture2D(smp, vec2(0.625, v ));
-            vec4 m3 = texture2D(smp, vec2(0.875, v ));
-
-            return mat4(m0, m1, m2, m3);
-        }
-      #else
-          uniform mat4 renderer_JointMatrix[ RENDERER_JOINTS_NUM ];
-      #endif
-    #endif
-
-    vec3 ShadowProjectPos(vec4 vertPos) {
-      vec3 shadowPos;
-
-      // get the world space coordinates of the vertex
-      vec3 worldPos = (renderer_ModelMat * vertPos).xyz;
-      
-      // world space coordinates of the shadow (the part below the ground is unchanged)
-      shadowPos.y = min(worldPos.y , u_planarHeight);
-      shadowPos.xz = worldPos.xz - u_lightDir.xz * max(0.0, worldPos.y - u_planarHeight) / u_lightDir.y;
-
-      return shadowPos;
-    }
-
-    void main() {
-     vec4 position = vec4(POSITION.xyz, 1.0 );
-      #ifdef RENDERER_HAS_SKIN
-          #ifdef RENDERER_USE_JOINT_TEXTURE
-              mat4 skinMatrix =
-                  WEIGHTS_0.x * getJointMatrix(renderer_JointSampler, JOINTS_0.x ) +
-                  WEIGHTS_0.y * getJointMatrix(renderer_JointSampler, JOINTS_0.y ) +
-                  WEIGHTS_0.z * getJointMatrix(renderer_JointSampler, JOINTS_0.z ) +
-                  WEIGHTS_0.w * getJointMatrix(renderer_JointSampler, JOINTS_0.w );
-          #else
-              mat4 skinMatrix =
-                  WEIGHTS_0.x * renderer_JointMatrix[ int( JOINTS_0.x ) ] +
-                  WEIGHTS_0.y * renderer_JointMatrix[ int( JOINTS_0.y ) ] +
-                  WEIGHTS_0.z * renderer_JointMatrix[ int( JOINTS_0.z ) ] +
-                  WEIGHTS_0.w * renderer_JointMatrix[ int( JOINTS_0.w ) ];
-          #endif
-          position = skinMatrix * position;
-      #endif
-
-      // get the shadow's world space coordinates
-      vec3 shadowPos = ShadowProjectPos(position);
-
-      // convert to clip space
-      gl_Position = camera_VPMat * vec4(shadowPos, 1.0);
-
-      // get the world coordinates of the center point
-      vec3 center = vec3(renderer_ModelMat[3].x, u_planarHeight, renderer_ModelMat[3].z);
-      // calculate shadow falloff
-      float falloff = 0.5 - clamp(distance(shadowPos , center) * u_planarShadowFalloff, 0.0, 1.0);
-
-      // shadow color
-      color = u_planarShadowColor;
-      color.a *= falloff;
-    }
-    `,
-  `
-    varying vec4 color;
-    void main() {
-       gl_FragColor = color;
-    }
-    `
-);
-Shader.create("planarShadowShader", [Shader.find("pbr").subShaders[0].passes[0], planarShadow]);

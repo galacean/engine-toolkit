@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "b:types": "tsc",
+    "precompile": "shader-compiler-precompile src compiledShaders --clean --emit-index",
     "lint:fix": "tslint --fix --project ./tsconfig.json"
   },
   "publishConfig": {
@@ -16,9 +17,21 @@
     "url": "https://github.com/galacean/engine-toolkit"
   },
   "bugs": "https://github.com/galacean/engine-toolkit/issues",
-  "types": "types/index.d.ts",
+  "types": "types/src/index.d.ts",
   "main": "dist/commonjs/browser.js",
   "module": "dist/es/index.js",
+  "exports": {
+    ".": {
+      "module": "./dist/es/index.js",
+      "default": "./dist/commonjs/browser.js",
+      "types": "./types/src/index.d.ts"
+    },
+    "./sources": {
+      "module": "./dist/es/sources.module.js",
+      "default": "./dist/commonjs/sources.main.js",
+      "types": "./types/src/sources.d.ts"
+    }
+  },
   "files": [
     "dist/**/*",
     "types/**/*"

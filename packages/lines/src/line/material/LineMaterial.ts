@@ -1,25 +1,15 @@
-import { Material, Shader, Engine, CullMode, RenderQueueType, BlendFactor, BlendOperation } from "@galacean/engine";
+import { Material, Shader, Engine } from "@galacean/engine";
 
-import "./lineShader";
+import { LineSource } from "../../../compiledShaders";
+
+// @ts-ignore
+Shader.find("line") || Shader._createFromPrecompiled(LineSource);
 
 export class LineMaterial extends Material {
   constructor(engine: Engine) {
     super(engine, Shader.find("line"));
-    const {
-      depthState,
-      blendState: { targetBlendState },
-      rasterState
-    } = this.renderState;
-    rasterState.cullMode = CullMode.Off;
-    depthState.writeEnabled = false;
-    this.renderState.renderQueueType = RenderQueueType.Transparent;
-
-    targetBlendState.enabled = true;
-    targetBlendState.sourceColorBlendFactor = BlendFactor.SourceAlpha;
-    targetBlendState.destinationColorBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    targetBlendState.sourceAlphaBlendFactor = BlendFactor.SourceAlpha;
-    targetBlendState.destinationAlphaBlendFactor = BlendFactor.OneMinusSourceAlpha;
-    targetBlendState.colorBlendOperation = BlendOperation.Add;
-    targetBlendState.alphaBlendOperation = BlendOperation.Add;
+    // Render state (transparent + back-blend + no depth-write + no cull) is
+    // pinned in Line.shader / Dash.shader's ShaderLab DSL — fixed for all
+    // line / dash materials, so const blocks suffice.
   }
 }

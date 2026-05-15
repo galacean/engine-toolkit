@@ -3,7 +3,8 @@
   "version": "2.0.0-alpha.0",
   "license": "MIT",
   "scripts": {
-    "b:types": "tsc"
+    "b:types": "tsc",
+    "precompile": "shader-compiler-precompile src compiledShaders --clean --emit-index"
   },
   "publishConfig": {
     "access": "public",
@@ -15,7 +16,7 @@
     "url": "https://github.com/galacean/engine-toolkit"
   },
   "bugs": "https://github.com/galacean/engine-toolkit/issues",
-  "types": "types/index.d.ts",
+  "types": "types/src/index.d.ts",
   "module": "dist/es/index.js",
   "main": "dist/commonjs/browser.js",
   "files": [
