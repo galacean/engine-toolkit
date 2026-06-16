@@ -26,3 +26,5 @@ tsconfig.tsbuildinfo
 oasis-npm
 api
 miniprogram.js
+*storybook.log
+storybook-static
