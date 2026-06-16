@@ -199,9 +199,13 @@ function makeRollupConfig(pkg) {
       sourcemap: false,
       format: "cjs"
     },
+    // Externalize each peer/dep both at its package name and its `/dist/miniprogram` entry:
+    // @galacean/engine is redirected to the latter by miniProgramPlugin, while peers without a
+    // dedicated miniprogram build (e.g. @galacean/engine-xr) stay external at the package name
+    // instead of being bundled in.
     external: Object.keys(Object.assign(pkg.pkgJson.dependencies ?? {}, pkg.pkgJson.peerDependencies ?? {}))
       .concat("@galacean/engine-miniprogram-adapter")
-      .map((name) => `${name}/dist/miniprogram`),
+      .flatMap((name) => [name, `${name}/dist/miniprogram`]),
     plugins: [...plugins, ...miniProgramPlugin]
   });
 
