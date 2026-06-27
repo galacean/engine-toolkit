@@ -1,6 +1,6 @@
 # Galacean Engine Toolkit
 
-<a href="https://www.npmjs.com/package/oasis-engine-toolkit"><img src="https://img.shields.io/npm/v/oasis-engine-toolkit"/></a> ![npm-size](https://img.shields.io/bundlephobia/minzip/oasis-engine-toolkit) ![npm-download](https://img.shields.io/npm/dm/oasis-engine-toolkit) [![codecov](https://codecov.io/gh/oasis-engine/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/oasis-engine/engine-toolkit)
+<a href="https://www.npmjs.com/package/@galacean/engine-toolkit"><img src="https://img.shields.io/npm/v/@galacean/engine-toolkit"/></a> ![npm-size](https://img.shields.io/bundlephobia/minzip/@galacean/engine-toolkit) ![npm-download](https://img.shields.io/npm/dm/@galacean/engine-toolkit) [![codecov](https://codecov.io/gh/galacean/engine/branch/main/graph/badge.svg?token=KR2UBKE3OX)](https://codecov.io/gh/galacean/engine-toolkit)
 
 Some out-of-the-box utility features based on the [Galacean engine](https://github.com/galacean/engine/) `Script` and `Material`, welcome to enjoy!
 
