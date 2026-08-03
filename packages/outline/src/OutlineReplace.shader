@@ -6,10 +6,9 @@ Shader "outline-replace-shader" {
 
       #include "ShaderLibrary/Common/Common.glsl"
       #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
       #include "ShaderLibrary/Skin/Skin.glsl"
       #include "ShaderLibrary/Skin/BlendShape.glsl"
-
-      #include "ShaderLibrary/Common/Attributes.glsl"
 
       Varyings vert(Attributes attr) {
         Varyings v;

@@ -24,13 +24,12 @@ Shader "icon" {
 
       #include "ShaderLibrary/Common/Common.glsl"
       #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
       #include "ShaderLibrary/Skin/Skin.glsl"
       #include "ShaderLibrary/Skin/BlendShape.glsl"
 
       vec2 u_size;
       vec4 u_pixelViewport;
-
-      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec2 v_uv;

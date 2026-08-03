@@ -34,10 +34,9 @@ Shader "plain-color" {
 
       #include "ShaderLibrary/Common/Common.glsl"
       #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
       #include "ShaderLibrary/Skin/Skin.glsl"
       #include "ShaderLibrary/Skin/BlendShape.glsl"
-
-      #include "ShaderLibrary/Common/Attributes.glsl"
 
       void vert(Attributes attr) {
         vec4 position = vec4(attr.POSITION, 1.0);

@@ -20,6 +20,7 @@ Shader "wireframeShader" {
 
       #include "ShaderLibrary/Common/Common.glsl"
       #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
       #include "ShaderLibrary/Skin/Skin.glsl"
 
       float u_lineScale;
@@ -28,8 +29,6 @@ Shader "wireframeShader" {
       mat4 u_worldNormal;
 
       #include "./GeometryTextureDefine.glsl"
-
-      #include "ShaderLibrary/Common/Attributes.glsl"
 
       struct Varyings {
         vec3 v_baryCenter;

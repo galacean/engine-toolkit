@@ -6,6 +6,7 @@ Shader "tbnShader" {
 
       #include "ShaderLibrary/Common/Common.glsl"
       #include "ShaderLibrary/Common/Transform.glsl"
+      #include "ShaderLibrary/Common/Attributes.glsl"
       #include "ShaderLibrary/Skin/Skin.glsl"
 
       float u_lineScale;
@@ -14,8 +15,6 @@ Shader "tbnShader" {
       mat4 u_worldNormal;
 
       #include "./GeometryTextureDefine.glsl"
-
-      #include "ShaderLibrary/Common/Attributes.glsl"
 
       void vert(Attributes attr) {
         int pointIndex = gl_VertexID / 2;
